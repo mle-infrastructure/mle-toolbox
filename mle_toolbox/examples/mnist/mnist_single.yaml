@@ -1,0 +1,16 @@
+# Meta Arguments: What job? What train .py file? Base config? Where to store?
+meta_job_args:
+    project_name: examples
+    job_type: "single-experiment"
+    base_train_fname: "run_mnist_cnn.py"
+    base_train_config: "mnist_cnn_config_1.json"
+    experiment_dir: "experiments/"
+
+
+# Parameters specific to an individual job
+single_job_args:
+    job_name: "mnist"
+    num_logical_cores: 2
+    log_file: "l-mnist"
+    err_file: "e-mnist"
+    env_name: "mle-toolbox"

@@ -1,0 +1,18 @@
+{
+"net_config": {"dropout_prob": 0.1,
+               "hidden_fc_dim": 256},
+"log_config": {"time_to_track": ["epoch"],
+              "what_to_track": ["train_loss", "test_loss"],
+               "tboard_fname": "config_2",
+               "time_to_print": ["epoch"],
+               "what_to_print": ["train_loss", "test_loss"],
+               "print_every_k_updates": 1,
+               "overwrite_experiment_dir": 1},
+"train_config": {"seed_id": 0,
+                 "num_epochs": 1,
+                 "net_type": "MLP",
+                 "torch_num_threads": 3,
+                 "train_batch_size": 256,
+                 "test_batch_size": 256,
+                 "l_rate": 0.001}
+}

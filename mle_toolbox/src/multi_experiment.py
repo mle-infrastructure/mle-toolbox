@@ -1,0 +1,16 @@
+import logging
+from ..multi_runner import spawn_multiple_runs
+
+
+def run_multiple_experiments(meta_job_args: dict,
+                             single_job_args: dict,
+                             multi_experiment_args: dict):
+    """ Run an experiment over different configurations (+random seeds). """
+    # 1. Create multiple experiment instances and submit the jobs
+    spawn_multiple_runs(meta_job_args.base_train_fname,
+                        multi_experiment_args.config_fnames,
+                        single_job_args,
+                        meta_job_args.experiment_dir,
+                        num_seeds = multi_experiment_args.num_seeds,
+                        fold_args = multi_experiment_args.fold_args,
+                        logger_level = logging.INFO)
