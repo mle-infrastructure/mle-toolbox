@@ -230,6 +230,7 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
 
     # 4. Update protocol with info
     db.dadd(experiment_id, ("stored_in_gcloud", True))
+    db.dump()
 
     # 5. Delete the .zip file & the folder if desired
     if delete_after_upload:

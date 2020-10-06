@@ -8,6 +8,7 @@ from .utils.file_transfer import (get_gcloud_db, send_gcloud_db,
 from .utils.protocol_experiment import (protocol_new_experiment,
                                         protocol_summary,
                                         update_experiment_protocol_status,
+                                        update_experiment_protocol_gcs_stored,
                                         delete_protocol_from_input)
 
 from .src.prepare_experiment import (welcome_to_mle_toolbox,
