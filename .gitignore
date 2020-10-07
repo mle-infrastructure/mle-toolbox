@@ -1,3 +1,4 @@
+.vim-arsync
 .DS_Store
 __pycache__
 .sync-config.cson

@@ -4,7 +4,7 @@ from os.path import expanduser
 import mle_toolbox.cluster_config as cc
 
 
-__version__ == 0.2.0
+__version__ = "0.2.0"
 
 
 def welcome_to_mle_toolbox(verbose=False):
