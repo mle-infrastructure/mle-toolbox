@@ -13,8 +13,7 @@ def main(net_config, train_config, log_config):
     torch.set_num_threads(train_config.torch_num_threads)
 
     # Set the training seed as well as the device to train on
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Define the dataloaders (download the )
     train_loader = torch.utils.data.DataLoader(

@@ -9,7 +9,7 @@
                "print_every_k_updates": 1,
                "overwrite_experiment_dir": 1},
 "train_config": {"seed_id": 0,
-                 "num_epochs": 20,
+                 "num_epochs": 2,
                  "net_type": "CNN",
                  "torch_num_threads": 3,
                  "train_batch_size": 256,

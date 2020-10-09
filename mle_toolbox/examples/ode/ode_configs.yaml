@@ -1,6 +1,6 @@
 # Meta Arguments: What job? What train .py file? Base config? Where to store?
 meta_job_args:
-    project_name: examples
+    project_name: "examples"
     job_type: "multiple-experiments"
     base_train_fname: "ode/run_ode_int.py"
     base_train_config: "ode/ode_int_config_1.json"

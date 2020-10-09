@@ -2,39 +2,35 @@
 meta_job_args:
     project_name: "examples"
     job_type: "hyperparameter-search"
-    base_train_fname: "ppo/run_ppo.py"
-    base_train_config: "ppo/base_ppo_config.json"
+    base_train_fname: "mnist/run_mnist_cnn.py"
+    base_train_config: "mnist/mnist_cnn_config_1.json"
     experiment_dir: "experiments/"
 
 # Parameters specific to the hyperparameter search
 param_search_args:
-    search_type: "random"
+    search_type: "grid"
     hyperlog_fname: "ppo_hyper_log.pkl"
-    reload_log: False
-    verbose_logging: True
     maximize_objective: True
-    problem_type: "rl"
-    eval_score_type: "rew_median"
+    problem_type: "final"
+    eval_score_type: "test_loss"
     num_search_batches: 2
-    num_iter_per_batch: 5
-    num_evals_per_iter: 2
+    num_iter_per_batch: 2
+    num_evals_per_iter: 1
     params_to_search:
         categorical:
             opt_type:
                 - "Adam"
                 - "RMSprop"
-                - "SGD"
         real:
             l_rate:
                 begin: 1e-5
                 end: 1e-2
-                bins: 10
+                bins: 2
 
 # Parameters specific to an individual job
 single_job_args:
-    job_name: "ppo"
-    num_gpus: 0
-    num_logical_cores: 2
-    log_file: "log-ppo"
-    err_file: "error-ppo"
-    env_name: "multi-agent-cpu"
+    job_name: "cnn"
+    num_gpus: 1
+    num_logical_cores: 4
+    exclude_nodes:
+        - 14
