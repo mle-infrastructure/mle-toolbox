@@ -1,4 +1,4 @@
-![MLE_Toolbox_Banner](mle_toolbox/docs/mle_thumbnail.png)
+![MLE_Toolbox_Banner](docs/mle_thumbnail.png)
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/mle_toolbox/docs/how_to_toolbox.md) ![version](https://img.shields.io/badge/version-0.2.1-blue)
 
 Coming up with the right hypothesis to test is hard - testing them should be easy. Often times one needs to coordinate different types of experiments on separate remote resources.
@@ -8,8 +8,8 @@ The MLE-Toolbox is designed to facilitate your workflow providing a common inter
 Here are 3 steps to get started with running your distributed jobs:
 
 1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and to set up your credentials/configurations.
-2. Read the [documentation](mle_toolbox/docs/how_to_toolbox.md) explaining the pillars of the toolbox & how to compose the meta-configuration job `.yaml` files for your experiments.
-3. Check out the [examples :notebook:](#examples-getting-started-running-jobs) to get started with a toy [ODE integration](mle_toolbox/examples/ode), [MNIST-CNN training](mle_toolbox/examples/mnist) or an example of how to train a [PPO agent](mle_toolbox/examples/ppo).
+2. Read the [documentation](docs/how_to_toolbox.md) explaining the pillars of the toolbox & how to compose the meta-configuration job `.yaml` files for your experiments.
+3. Check out the [examples :notebook:](#examples-getting-started-running-jobs) to get started with a toy [ODE integration](examples/ode), [MNIST-CNN training](examples/mnist) or an example of how to train a [PPO agent](examples/ppo).
 
 
 ## Installing `mle_toolbox` & dependencies
@@ -32,7 +32,7 @@ This will install all required dependencies. Please note that the toolbox is tes
 
 ## Setting up your Remote Credentials & Configuration
 
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your remote resources, please edit the [`cluster_config.py`](mle_toolbox/docs/template_config.py) template. This consists of 4 optional steps:
+By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your remote resources, please edit the [`template_config.py`](template_config.py) template. This consists of 4 optional steps:
 
 1. Set whether or not you want to store all results and your database locally or remote in the Google Cloud Storage bucket.
 2. Add the Slurm credentials as well as cluster-specific details (headnode names, partitions, proxy server for internet) and default job arguments.
@@ -42,14 +42,14 @@ By default the toolbox will only run locally and without any GCS storage of your
 Afterwards, please move and rename the template to the `mle-toolbox/mle_toolbox` directory as `cluster_config.py`.
 
 ```
-mv mle_toolbox/docs/template_config.py mle_toolbox/cluster_config.py
+mv template_config.py mle_toolbox/cluster_config.py
 ```
 
 *Note*: If you only intend to use a single resource, then simply only update the configuration for that resource.
 
 ## The 4 Commands of the Toolbox
 
-You are now ready to dive deeper into the specifics of [job configuration](mle_toolbox/docs/how_to_toolbox.md) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
+You are now ready to dive deeper into the specifics of [job configuration](docs/how_to_toolbox.md) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
 
 1. **Start up an experiment**: `run-experiment <experiment_config>.yaml`
 2. **Monitor resource utilisation**: `monitor-cluster`
@@ -58,9 +58,9 @@ You are now ready to dive deeper into the specifics of [job configuration](mle_t
 
 ## Examples & Getting Your First Job Running
 
-* :notebook: [Euler ODE](mle_toolbox/examples/ode) - Integrate a simple ODE using forward Euler & get to know the toolbox.
-* :notebook: [MNIST CNN](mle_toolbox/examples/mnist) - Train a CNN on multiple random seeds & different training configurations.
-* :notebook: [Pendulum PPO](mle_toolbox/examples/ppo) - Search through the hyperparameter space of a PPO agent.
+* :notebook: [Euler ODE](examples/ode) - Integrate a simple ODE using forward Euler & get to know the toolbox.
+* :notebook: [MNIST CNN](examples/mnist) - Train a CNN on multiple random seeds & different training configurations.
+* :notebook: [Pendulum PPO](examples/ppo) - Search through the hyperparameter space of a PPO agent.
 
 The PPO examples depend on another package of mine: [drl-toolbox](https://github.com/RobertTLange/drl-toolbox). **Note**: This has not been open-sourced yet. Contact me if you want to run it!
 
