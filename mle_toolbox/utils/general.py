@@ -149,7 +149,8 @@ def load_pkl_object(filename):
     return obj
 
 
-def load_log(log_fname: str, mean_over_seeds: bool=True) -> DotDic:
+def load_log(log_fname: str, mean_over_seeds: bool=True,
+             mean_also_evals: bool=False) -> DotDic:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -208,6 +209,8 @@ def load_log(log_fname: str, mean_over_seeds: bool=True) -> DotDic:
             result_dict = mean_dict
         h5f.close()
     # Return as dot-callable dictionary
+    if mean_also_evals:
+        result_dict = mean_over_evals(result_dict)
     return DotDic(result_dict)
 
 

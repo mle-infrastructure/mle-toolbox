@@ -1,7 +1,7 @@
-# Machine Learning Experiment (MLE) Toolbox
-## Coordinate Local, Slurm, SunGridEngine and GCP Experiments
+![MLE_Toolbox_Banner](mle_toolbox/docs/mle_thumbnail.png)
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/mle_toolbox/docs/how_to_toolbox.md) ![version](https://img.shields.io/badge/version-0.2.1-blue)
 
-Coming up with the right hypothesis to test is hard - testing them should be easy. Often times one needs to coordinate different types of experiments on separate remote resources. 
+Coming up with the right hypothesis to test is hard - testing them should be easy. Often times one needs to coordinate different types of experiments on separate remote resources.
 The MLE-Toolbox is designed to facilitate your workflow providing a common interface, standardized logging, many common experiment types (multi-seed/-config runs, gridsearches and hyperparameter optimization pipelines) as well as an easy retrieval of results. You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters as well as [Google Cloud compute instances](https://cloud.google.com/compute/docs/instances?hl=en).
 
 
@@ -43,7 +43,7 @@ Afterwards, please move and rename the template to the `mle-toolbox/mle_toolbox`
 
 ```
 mv mle_toolbox/docs/template_config.py mle_toolbox/cluster_config.py
-``` 
+```
 
 *Note*: If you only intend to use a single resource, then simply only update the configuration for that resource.
 

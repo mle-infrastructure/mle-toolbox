@@ -6,6 +6,8 @@ from typing import List, Union
 from .general import mean_over_evals
 import re
 
+sns.set(context='poster', style='white', palette='Paired',
+        font='sans-serif', font_scale=1, color_codes=True, rc=None)
 
 digits = re.compile(r'(\d+)')
 def tokenize(filename):
@@ -30,6 +32,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       target_to_plot: str,
                       plot_title: str = "Temp Title",
                       xy_labels: list = [],
+                      variable_name: str = [],
                       every_nth_tick: int = 1,
                       plot_colorbar: bool = True,
                       text_in_cell: bool = True,
@@ -52,6 +55,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     # Construct the 2D array using helper function
     range_x = np.unique(temp_df[p_to_plot[0]])
     range_y = np.unique(temp_df[p_to_plot[1]])
+
     heat_array = get_heatmap_array(range_x, range_y, temp_df.to_numpy())
 
     if return_array:
@@ -59,7 +63,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     else:
         # Construct the plot
         fig, ax = plot_heatmap_array(range_x, range_y, heat_array, plot_title,
-                                     xy_labels, every_nth_tick, plot_colorbar,
+                                     xy_labels, variable_name, every_nth_tick, plot_colorbar,
                                      text_in_cell, max_heat, min_heat)
         return fig, ax
 
@@ -68,13 +72,14 @@ def get_heatmap_array(range_x: np.ndarray,
                       range_y: np.ndarray,
                       results_df: pd.core.frame.DataFrame):
     """ Construct the 2D array to plot the heat. """
-    bring_the_heat = np.zeros((len(range_x), len(range_y)))
-    for j, val_y in enumerate(range_y):
-        for i, val_x in enumerate(range_x):
+    bring_the_heat = np.zeros((len(range_y), len(range_x)))
+    for i, val_x in enumerate(range_x):
+        for j, val_y in enumerate(range_y):
             case_at_hand = np.where((results_df[:, 0] == val_x) & (results_df[:, 1] == val_y))
             results_temp = results_df[case_at_hand, 2]
             # Reverse index so that small in bottom left corner
             bring_the_heat[len(range_y)-1 - j, i] = results_temp
+    #print(bring_the_heat.shape)
     return bring_the_heat
 
 
@@ -83,23 +88,24 @@ def plot_heatmap_array(range_x: np.ndarray,
                        heat_array: np.ndarray,
                        title: str,
                        xy_labels: list,
+                       variable_name: str,
                        every_nth_tick: int,
                        plot_colorbar: bool = True,
                        text_in_cell: bool = True,
                        max_heat: Union[None, float] = None,
                        min_heat: Union[None, float] = None):
     """ Plot the 2D heatmap. """
-    fig, ax = plt.subplots(figsize=(8, 8))
-
+    fig, ax = plt.subplots(figsize=(10, 8))
+    cmap = "magma"
     if max_heat is None and min_heat is None:
-        im = ax.imshow(heat_array, cmap="Reds", vmax=np.max(heat_array),
+        im = ax.imshow(heat_array, cmap=cmap, vmax=np.max(heat_array),
                        vmin=np.min(heat_array))
     elif max_heat is not None and min_heat is None:
-        im = ax.imshow(heat_array, cmap="Reds", vmax=max_heat)
+        im = ax.imshow(heat_array, cmap=cmap, vmax=max_heat)
     elif max_heat is None and min_heat is not None:
-        im = ax.imshow(heat_array, cmap="Reds", vmin=min_heat)
+        im = ax.imshow(heat_array, cmap=cmap, vmin=min_heat)
     else:
-        im = ax.imshow(heat_array, cmap="Reds", vmin=min_heat, vmax=max_heat)
+        im = ax.imshow(heat_array, cmap=cmap, vmin=min_heat, vmax=max_heat)
 
     ax.set_yticks(np.arange(len(range_y)))
     ax.set_yticklabels([str(round(float(label), 1)) for label in range_y[::-1]])
@@ -120,15 +126,16 @@ def plot_heatmap_array(range_x: np.ndarray,
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
 
-    ax.set_title(title)
-    ax.set_xlabel(xy_labels[0])
-    ax.set_ylabel(xy_labels[1])
+    ax.set_title(title, fontsize=25)
+    ax.set_xlabel(xy_labels[0], fontsize=20)
+    ax.set_ylabel(xy_labels[1], fontsize=20)
 
     if plot_colorbar:
         fig.tight_layout()
         fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-        fig.colorbar(im, cax=cbar_ax)
+        cbar_ax = fig.add_axes([0.85, 0.25, 0.05, 0.5])
+        cbar = fig.colorbar(im, cax=cbar_ax)
+        #cbar.set_label(variable_name, rotation=270, fontsize=10)
 
     if text_in_cell:
         for y in range(heat_array.shape[0]):
@@ -144,21 +151,24 @@ def visualize_target_performance_bar():
     raise NotImplementedError
 
 
-def visualize_learning_curves(meta_log: dict,
+def visualize_learning_curves(main_log: dict,
                               iter_to_plot: str="num_episodes",
                               target_to_plot: str="ep_reward",
                               smooth_window: int=20,
                               plot_title: str = "Temp Title",
                               xy_labels: list = [r"# Train Iter",
                                                  r"Temp Y-Label"],
-                              base_label: str="T=",
+                              base_label: str="",
                               curve_labels: list = [],
                               every_nth_tick: int = 1,
-                              plot_std_bar: bool = False):
+                              plot_std_bar: bool = False,
+                              run_ids: list = None):
     """ Plot learning curves from meta_log. """
-    main_log = mean_over_evals(meta_log)
-    run_ids = list(main_log.keys())
-    run_ids.sort(key=tokenize)
+    # Plot all curves if not subselected
+    if run_ids is None:
+        run_ids = list(main_log.keys())
+        run_ids.sort(key=tokenize)
+    
     if len(curve_labels) == 0:
         curve_labels = run_ids
 
@@ -175,7 +185,7 @@ def visualize_learning_curves(meta_log: dict,
                  color=color_by[i], label=base_label + " {}".format(label))
 
         if plot_std_bar:
-            axs.fill_between(main_log[run_id]["num_episodes"]["mean"],
+            axs.fill_between(main_log[run_id][iter_to_plot]["mean"],
                              smooth_mean-smooth_std, smooth_mean+smooth_std, color=color_by[i], alpha=0.5)
 
     range_x = main_log[run_id][iter_to_plot]["mean"]
@@ -185,7 +195,7 @@ def visualize_learning_curves(meta_log: dict,
         if n % every_nth_tick != 0:
             label.set_visible(False)
 
-    axs.legend(ncol=3, fontsize=10)
+    axs.legend(fontsize=15)
 
     axs.spines['top'].set_visible(False)
     axs.spines['right'].set_visible(False)
