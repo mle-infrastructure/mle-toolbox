@@ -9,7 +9,7 @@ meta_job_args:
 # Parameters specific to the hyperparameter search
 param_search_args:
     search_type: "grid"
-    hyperlog_fname: "ppo_hyper_log.pkl"
+    hyperlog_fname: "mnist_hyper_log.pkl"
     maximize_objective: True
     problem_type: "final"
     eval_score_type: "test_loss"
