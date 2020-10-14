@@ -34,14 +34,14 @@ requires = [
 
 setup(
      name='mle_toolbox',
-     version='0.2.1',
+     version='0.2.2',
      author="Robert Tjarko Lange",
      author_email="robertlange0@gmail.com",
      description="Machine Learning Experiment Toolbox",
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/RobertTLange/mle-toolbox",
-     download_url="https://github.com/RobertTLange/mle-toolbox/archive/v_01.tar.gz",
+     download_url="https://github.com/RobertTLange/mle-toolbox/archive/v_02.tar.gz",
      classifiers=[
          "Programming Language :: Python :: 3",
          "License :: OSI Approved :: MIT License",
