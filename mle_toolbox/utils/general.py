@@ -1,25 +1,31 @@
 import torch
-import copy
 import argparse
 import commentjson
 import os
 import yaml
+import copy
 import json
+import toml
 import numpy as np
 import h5py
 import pickle
 import platform
 import re
-import mle_toolbox.cluster_config as cc
+
+
+def load_mle_toolbox_config():
+    """ Load cluster config from the .toml file. See docs for more info. """
+    return DotDic(toml.load(os.path.expanduser("~/mle_config.toml")))
 
 
 def determine_resource():
     """ Check if cluster (sge/slurm) is available or only local run. """
+    cc = load_mle_toolbox_config()
     hostname = platform.node()
-    on_sge_cluster = any(re.match(l, hostname) for l in cc.sge_node_reg_exp)
-    on_slurm_cluster = any(re.match(l, hostname) for l in cc.slurm_node_reg_exp)
-    on_sge_head = (hostname in cc.sge_head_names)
-    on_slurm_head = (hostname in cc.slurm_head_names)
+    on_sge_cluster = any(re.match(l, hostname) for l in cc.sge.info.node_reg_exp)
+    on_slurm_cluster = any(re.match(l, hostname) for l in cc.slurm.info.node_reg_exp)
+    on_sge_head = (hostname in cc.sge.info.head_names)
+    on_slurm_head = (hostname in cc.slurm.info.head_names)
     if on_sge_head or on_sge_cluster:
         return "sge-cluster"
     elif on_slurm_head or on_slurm_cluster:
@@ -36,13 +42,25 @@ def print_framed(str_to_print: str, line_width: int=85):
 
 
 class DotDic(dict):
-    """ Helper to load in parameters from json & easily call them """
+    """
+    a dictionary that supports dot notation
+    as well as dictionary access notation
+    usage: d = DotDict() or d = DotDict({'val1':'first'})
+    set attributes: d.val2 = 'second' or d['val2'] = 'second'
+    get attributes: d.val2 or d['val2']
+    """
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
     def __deepcopy__(self, memo=None):
         return DotDic(copy.deepcopy(dict(self), memo=memo))
+
+    def __init__(self, dct):
+        for key, value in dct.items():
+            if hasattr(value, 'keys'):
+                value = DotDic(value)
+            self[key] = value
 
 
 class NpEncoder(json.JSONEncoder):

@@ -3,7 +3,7 @@ import time
 import subprocess as sp
 from typing import Union
 from .local_job_submission import submit_subprocess, random_id
-import mle_toolbox.cluster_config as cc
+from ..utils import load_mle_toolbox_config
 
 # Base qsub template
 slurm_base_job_config = """#!/bin/bash
@@ -35,11 +35,14 @@ conda deactivate
 
 def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     """ Check the input job arguments & add default values if missing. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
+
     if job_arguments is None:
         job_arguments = {}
 
     # Add the default config values if they are missing from job_args
-    for k, v in cc.slurm_default_job_arguments.items():
+    for k, v in cc.slurm.default_job_arguments.items():
         if k not in job_arguments.keys():
             job_arguments[k] = v
 
@@ -87,6 +90,9 @@ def slurm_submit_remote_job(filename: str,
                             job_arguments: dict,
                             clean_up: bool=True):
     """ Create a qsub job & submit it based on provided file to execute. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
+
     # Create base string of job id
     base = "submit_{0}".format(random_id())
 
@@ -121,7 +127,7 @@ def slurm_submit_remote_job(filename: str,
     # Wait until the job is listed under the qstat scheduled jobs
     while True:
         try:
-            out = sp.check_output(["squeue", "-u", cc.slurm_user_name])
+            out = sp.check_output(["squeue", "-u", cc.slurm.credentials.user_name])
             job_info = out.split(b'\n')[1:]
             running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                                for i in range(len(job_info) - 1)]
@@ -142,10 +148,12 @@ def slurm_submit_remote_job(filename: str,
 
 def slurm_monitor_remote_job(job_id: Union[list, int]):
     """ Monitor the status of a job based on its id. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
     #fail_counter = 0
     while True:
         try:
-            out = sp.check_output(["squeue", "-u", cc.slurm_user_name])
+            out = sp.check_output(["squeue", "-u", cc.slurm.credentials.user_name])
             break
         except sp.CalledProcessError as e:
             stderr = e.stderr

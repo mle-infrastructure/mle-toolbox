@@ -30,7 +30,8 @@ requires = [
             'sshtunnel',
             'pickledb',
             'google-cloud-storage',
-                        'tabulate']
+                        'tabulate',
+            'toml']
 
 setup(
      name='mle_toolbox',
@@ -59,5 +60,3 @@ setup(
         ]
     }
  )
-
-

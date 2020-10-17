@@ -10,13 +10,13 @@ import sys, select
 from typing import Union
 from tabulate import tabulate
 
-from .general import load_config, determine_resource
-import mle_toolbox.cluster_config as cc
+from .general import load_config, determine_resource, load_mle_toolbox_config
 
 
 def load_experiment_db():
     """ Load database from config name & reconstruct experiment id. """
-    db = pickledb.load(cc.local_protocol_fname, False)
+    cc = load_mle_toolbox_config()
+    db = pickledb.load(cc.general.local_protocol_fname, False)
     # Get the most recent experiment id
     all_experiment_ids = list(db.getall())
 

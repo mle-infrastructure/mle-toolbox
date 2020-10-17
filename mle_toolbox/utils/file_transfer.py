@@ -9,9 +9,8 @@ import zipfile
 import shutil
 from datetime import datetime
 
-from .general import determine_resource
+from .general import determine_resource, load_mle_toolbox_config
 from .protocol_experiment import load_experiment_db
-import mle_toolbox.cluster_config as cc
 
 
 def get_file_scp(local_dir_name: str, file_path: str, server: str, user: str,
@@ -57,20 +56,23 @@ def get_file_jump_scp(local_dir_name: str, file_path: str,
 
 def setup_proxy_server():
     """ Set the port to tunnel for internet connection. """
+    cc = load_mle_toolbox_config()
     if determine_resource() == "slurm-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.slurm_gcloud_credentials_path)
-        if cc.slurm_http_proxy is not None:
-            os.environ["HTTP_PROXY"] = cc.slurm_http_proxy
-            os.environ["HTTPS_PROXY"] = cc.slurm_https_proxy
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.slurm_credentials_path)
+        if cc.slurm.info.http_proxy is not None:
+            os.environ["HTTP_PROXY"] = cc.slurm.http_proxy
+            os.environ["HTTPS_PROXY"] = cc.slurm.https_proxy
     elif determine_resource() == "sge-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.sge_gcloud_credentials_path)
-        if cc.sge_http_proxy is not None:
-            os.environ["HTTP_PROXY"] = cc.sge_http_proxy
-            os.environ["HTTPS_PROXY"] = cc.sge_https_proxy
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.sge_credentials_path)
+        if cc.sge.info.http_proxy is not None:
+            os.environ["HTTP_PROXY"] = cc.sge.http_proxy
+            os.environ["HTTPS_PROXY"] = cc.sge.https_proxy
 
 
 def get_gcloud_db(number_of_connect_tries: int=5):
     """ Pull latest experiment database from gcloud storage. """
+    # Load in cluster configuration
+    cc = load_mle_toolbox_config()
     # Set environment variable for gcloud credentials & proxy remote
     setup_proxy_server()
 
@@ -79,20 +81,20 @@ def get_gcloud_db(number_of_connect_tries: int=5):
     for i in range(number_of_connect_tries):
         try:
             # Connect to project and bucket
-            client = storage.Client(cc.gcloud_project_name)
-            bucket = client.get_bucket(cc.gcloud_bucket_name,
+            client = storage.Client(cc.gcp.project_name)
+            bucket = client.get_bucket(cc.gcp.bucket_name,
                                        timeout=20)
             # Download blob to db file
-            blob = bucket.blob(cc.gcloud_protocol_fname)
-            with open(expanduser(cc.local_protocol_fname), 'wb') as file_obj:
+            blob = bucket.blob(cc.gcp.protocol_fname)
+            with open(expanduser(cc.general.local_protocol_fname), 'wb') as file_obj:
                 blob.download_to_file(file_obj)
-            logger.info("Pulled from GCloud Storage - {}".format(cc.gcloud_protocol_fname))
+            logger.info("Pulled from GCloud Storage - {}".format(cc.gcp.protocol_fname))
             return 1
         except Exception as ex:
             if type(ex).__name__ == "NotFound":
-                logger.info("No DB found in GCloud Storage - {}".format(cc.gcloud_protocol_fname))
-                logger.info("New DB will be created - {}/{}".format(cc.gcloud_project_name,
-                                                                    cc.gcloud_bucket_name))
+                logger.info("No DB found in GCloud Storage - {}".format(cc.gcp.protocol_fname))
+                logger.info("New DB will be created - {}/{}".format(cc.gcp.project_name,
+                                                                    cc.gcp.bucket_name))
                 return 1
             else:
                 logger.info("Attempt {}/{} - Failed pulling from GCloud Storage - {}".format(i+1,
@@ -104,6 +106,8 @@ def get_gcloud_db(number_of_connect_tries: int=5):
 
 def send_gcloud_db(number_of_connect_tries: int=5):
     """ Send updated database back to gcloud storage. """
+    # Load in cluster configuration
+    cc = load_mle_toolbox_config()
     # Set environment variable for gcloud credentials & proxy remote
     setup_proxy_server()
 
@@ -112,11 +116,11 @@ def send_gcloud_db(number_of_connect_tries: int=5):
     for i in range(number_of_connect_tries):
         try:
             # Connect to project and bucket
-            client = storage.Client(cc.gcloud_project_name)
-            bucket = client.get_bucket(cc.gcloud_bucket_name, timeout=20)
-            blob = bucket.blob(cc.gcloud_protocol_fname)
-            blob.upload_from_filename(filename=expanduser(cc.local_protocol_fname))
-            logger.info("Send to GCloud Storage - {}".format(cc.gcloud_protocol_fname))
+            client = storage.Client(cc.gcp.project_name)
+            bucket = client.get_bucket(cc.gcp.bucket_name, timeout=20)
+            blob = bucket.blob(cc.gcp.protocol_fname)
+            blob.upload_from_filename(filename=expanduser(cc.general.local_protocol_fname))
+            logger.info("Send to GCloud Storage - {}".format(cc.gcp.protocol_fname))
             return 1
         except:
             logger.info("Attempt {}/{} - Failed sending to GCloud Storage".format(i+1,
@@ -128,6 +132,8 @@ def send_gcloud_db(number_of_connect_tries: int=5):
 def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
                                   number_of_connect_tries: int=5):
     """ Send entire dir (recursively) to Google Cloud Storage Bucket. """
+    # Load in cluster configuration
+    cc = load_mle_toolbox_config()
     # Set environment variable for gcloud credentials & proxy remote
     setup_proxy_server()
 
@@ -135,8 +141,8 @@ def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
         try:
-            client = storage.Client(cc.gcloud_project_name)
-            bucket = client.get_bucket(cc.gcloud_bucket_name, timeout=20)
+            client = storage.Client(cc.gcp.project_name)
+            bucket = client.get_bucket(cc.gcp.bucket_name, timeout=20)
         except:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries} - Failed sending to GCloud Storage")
 
@@ -161,6 +167,8 @@ def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
 def download_gcs_directory_to_local(gcs_path: str, local_path: str="",
                                     number_of_connect_tries: int=5):
     """ Download entire dir (recursively) from Google Cloud Storage Bucket. """
+    # Load in cluster configuration
+    cc = load_mle_toolbox_config()
     # Set environment variable for gcloud credentials & proxy remote
     setup_proxy_server()
     logger = logging.getLogger(__name__)
@@ -168,8 +176,8 @@ def download_gcs_directory_to_local(gcs_path: str, local_path: str="",
 
     for i in range(number_of_connect_tries):
         try:
-            client = storage.Client(cc.gcloud_project_name)
-            bucket = client.get_bucket(cc.gcloud_bucket_name, timeout=20)
+            client = storage.Client(cc.gcp.project_name)
+            bucket = client.get_bucket(cc.gcp.bucket_name, timeout=20)
         except:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries} - Failed sending to GCloud Storage")
 

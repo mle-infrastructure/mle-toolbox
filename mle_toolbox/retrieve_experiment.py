@@ -3,17 +3,18 @@ import argparse
 from datetime import datetime
 
 from .utils.protocol_experiment import protocol_summary, load_experiment_db
-from .utils import print_framed
+from .utils import print_framed, load_mle_toolbox_config
 from .utils.file_transfer import (get_file_scp, get_file_jump_scp,
                                   get_gcloud_db, send_gcloud_db,
                                   get_gcloud_zip_experiment)
-import mle_toolbox.cluster_config as cc
 
 
 def main():
     """ Copy over experiment results folder from cluster. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
     # Get most recent/up-to-date experiment DB from Google Cloud Storage
-    if cc.use_gcloud_protocol_sync:
+    if cc.general.use_gcloud_protocol_sync:
         accessed_remote_db = get_gcloud_db()
     else:
         accessed_remote_db = False
@@ -90,7 +91,11 @@ def main():
                 list_of_new_e_ids.append(e_id)
 
         for i, experiment_id in enumerate(list_of_new_e_ids):
-            if cmd_args.retrieve_local:
+            try:
+                stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
+            else:
+                stored_in_gcloud = False
+            if cmd_args.retrieve_local and not stored_in_gcloud:
                 retrieve_single_experiment(db, experiment_id,
                                            get_dir_or_fig,
                                            all_experiment_ids)
@@ -99,7 +104,7 @@ def main():
                                           all_experiment_ids)
             print_framed(f'COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}')
 
-    if cc.use_gcloud_protocol_sync and accessed_remote_db:
+    if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
         send_gcloud_db()
         print(time_t, "Updated retrieval protocol status & send to gcloud storage.")
 
@@ -139,14 +144,15 @@ def retrieve_single_experiment(db, experiment_id: str, get_dir_or_fig: str,
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource == "sge-cluster":
-        get_file_scp(experiment_id, file_path, cc.sge_server_name,
-                     cc.sge_user_name, cc.sge_password, port=22)
+        get_file_scp(experiment_id, file_path, cc.sge.info.server_name,
+                     cc.sge.credentials.user_name, cc.sge.credentialspassword,
+                     port=22)
     elif remote_resource == "slurm-cluster":
         ssh = get_file_jump_scp(experiment_id, file_path,
-                                cc.slurm_jump_server_name,
-                                cc.slurm_main_server_name,
-                                cc.slurm_user_name,
-                                cc.slurm_password, port=22)
+                                cc.slurm.info.jump_server_name,
+                                cc.slurm.info.main_server_name,
+                                cc.slurm.info.user_name,
+                                cc.slurm.info.password, port=22)
     else:
         raise ValueError("{} - Please provide valid remote resource. {}".format(experiment_id,
                                                                                 remote_resource))

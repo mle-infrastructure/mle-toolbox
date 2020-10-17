@@ -1,5 +1,5 @@
 ![MLE_Toolbox_Banner](docs/mle_thumbnail.png)
-[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/mle_toolbox/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 
 Coming up with the right hypothesis to test is hard - testing them should be easy. Often times one needs to coordinate different types of experiments on separate remote resources.
 The MLE-Toolbox is designed to facilitate your workflow providing a common interface, standardized logging, many common experiment types (multi-seed/-config runs, gridsearches and hyperparameter optimization pipelines) as well as an easy retrieval of results. You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters as well as [Google Cloud compute instances](https://cloud.google.com/compute/docs/instances?hl=en).
@@ -33,17 +33,17 @@ This will install all required dependencies. Please note that the toolbox is tes
 
 ## Setting up your Remote Credentials & Configuration
 
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your remote resources, please edit the [`template_config.py`](template_config.py) template. This consists of 4 optional steps:
+By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your remote resources, please edit the [`template_config.toml`](template_config.toml) template. This consists of 4 optional steps:
 
 1. Set whether or not you want to store all results and your database locally or remote in the Google Cloud Storage bucket.
 2. Add the Slurm credentials as well as cluster-specific details (headnode names, partitions, proxy server for internet) and default job arguments.
 3. Add the SGE credentials as well as cluster-specific details (headnode names, queues, proxy server for internet) and default job arguments.
 4. Add the path to your GCP credentials `.json` file as well as project and GCS bucket name to store your experiment data (as well as protocol database).
 
-Afterwards, please move and rename the template to the `mle-toolbox/mle_toolbox` directory as `cluster_config.py`.
+Afterwards, please move and rename the template to the home directory directory as `mle_config.toml`.
 
 ```
-mv template_config.py mle_toolbox/cluster_config.py
+mv template_config.toml ~/mle_config.toml
 ```
 
 *Note*: If you only intend to use a single resource, then simply only update the configuration for that resource.
@@ -68,6 +68,6 @@ The PPO examples depend on another package of mine: [drl-toolbox](https://github
 ## Development & Questions
 
 * If you find a bug or would like to see a feature implemented, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue :hugs:
-* You can run all unit/integration tests from `mle_toolbox/` with `pytest` (run locally & remote).
+* You can run all unit/integration tests from `mle-toolbox/` with `pytest` (run locally & remote).
 * [Details on how to submit jobs with qsub](http://bioinformatics.mdc-berlin.de/intro2Unixandmle/sun_grid_engine_for_beginners/how_to_submit_a_job_using_qsub.html)
 * [More notes on the SGE system](https://www.osc.edu/supercomputing/batch-processing-at-osc/monitoring-and-managing-your-job)
