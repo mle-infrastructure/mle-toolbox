@@ -6,11 +6,15 @@ import yaml
 import copy
 import json
 import toml
-import numpy as np
 import h5py
 import pickle
 import platform
 import re
+
+import torch
+import numpy as np
+import gym
+from jax import random as jrandom
 
 
 def load_mle_toolbox_config():
@@ -232,7 +236,7 @@ def load_log(log_fname: str, mean_over_seeds: bool=True,
     return DotDic(result_dict)
 
 
-def mean_over_evals(result_dict):
+def mean_over_evals(result_dict: dict):
     """ Mean all individual runs over their respective seeds. """
     all_keys = list(result_dict.keys())
     eval_runs, seeds = [], []
@@ -270,7 +274,7 @@ def mean_over_evals(result_dict):
     return new_results_dict
 
 
-def tolerant_mean(arrs):
+def tolerant_mean(arrs: list):
     """ Helper function for case where data to mean has different lengths. """
     lens = [len(i) for i in arrs]
     arr = np.ma.empty((np.max(lens),len(arrs)))
@@ -278,3 +282,26 @@ def tolerant_mean(arrs):
     for idx, l in enumerate(arrs):
         arr[:len(l),idx] = l
     return arr.mean(axis = -1), arr.std(axis=-1)
+
+
+def set_random_seeds(seed_id: str, return_key: bool=False,
+                     verbose: bool=False):
+    """ Set random seed (random, npy, torch, gym) for reproduction """
+    os.environ['PYTHONHASHSEED'] = str(seed_id)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed_id)
+    random.seed(seed_id)
+    np.random.seed(seed_id)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed_id)
+        torch.cuda.manual_seed(seed_id)
+    if hasattr(gym.spaces, 'prng'):
+        gym.spaces.prng.seed(seed_id)
+
+    if verbose:
+        print("-- Random seeds (random, numpy, torch) were set to {}".format(seed_id))
+
+    if return_key:
+        key = jrandom.PRNGKey(seed_id)
+        return key

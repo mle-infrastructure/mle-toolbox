@@ -73,13 +73,13 @@ def sge_generate_remote_job_template(job_arguments: dict):
 
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:
-        base_template += ('#$ -l hostname=' + '&'.join((f'!' + cc.sge.info.node_reg_exp
+        base_template += ('#$ -l hostname=' + '&'.join((f'!' + cc.sge.info.node_reg_exp[0]
                           + f'{x:02}' + cc.sge.info.node_extension
                           for x in job_arguments['exclude_nodes'])) + '\n')
 
     # Only run on specific nodes from the queue
     if "include_nodes" in job_arguments:
-        base_template += ('#$ -l hostname=' + '&'.join((f'!' + cc.sge.info.node_reg_exp
+        base_template += ('#$ -l hostname=' + '&'.join(( cc.sge.info.node_reg_exp[0]
                           + '{x:02}' + cc.sge.info.node_extension
                           for x in job_arguments['include_nodes'])) + '\n')
 

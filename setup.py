@@ -30,8 +30,13 @@ requires = [
             'sshtunnel',
             'pickledb',
             'google-cloud-storage',
-                        'tabulate',
-            'toml']
+            'tabulate',
+            'toml',
+            'torch',
+            'jax',
+            'jaxlib',
+            'gym'
+            ]
 
 setup(
      name='mle_toolbox',
@@ -44,7 +49,8 @@ setup(
      url="https://github.com/RobertTLange/mle-toolbox",
      download_url="https://github.com/RobertTLange/mle-toolbox/archive/v_02.tar.gz",
      classifiers=[
-         "Programming Language :: Python :: 3",
+         "Programming Language :: Python :: 3.6",
+         "Programming Language :: Python :: 3.7",
          "License :: OSI Approved :: MIT License",
          "Operating System :: OS Independent"],
      packages=find_packages(),

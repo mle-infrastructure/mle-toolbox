@@ -25,7 +25,7 @@ def main():
     welcome_to_mle_toolbox()
     cc = load_mle_toolbox_config()
 
-    # 0. Load in args for the Machine Learning Experiment + Determine resource
+    # 0. Load in args for Machine Learning Experiment + Determine resource
     def get_train_args():
         """ Get env name, config file path & device to train from cmd line """
         parser = argparse.ArgumentParser()
@@ -136,7 +136,7 @@ def main():
         # 7c. Send most recent/up-to-date experiment DB to Google Cloud Storage
         if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
-    print(85*"=")
+    print_framed("EXPERIMENT FINISHED")
 
 
 if __name__ == "__main__":

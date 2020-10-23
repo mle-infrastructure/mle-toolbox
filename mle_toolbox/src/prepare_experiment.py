@@ -1,3 +1,4 @@
+import sys
 import logging
 from datetime import datetime
 from os.path import expanduser
@@ -46,7 +47,7 @@ def prepare_logger(experiment_dir: str, debug_mode: bool=False):
     logging.getLogger("google").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
 
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
     formatter = logging.Formatter(fmt='%(asctime)s %(message)s',
                                   datefmt='%m/%d/%Y %I:%M:%S %p')

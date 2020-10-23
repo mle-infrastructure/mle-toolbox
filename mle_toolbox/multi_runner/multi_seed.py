@@ -25,7 +25,8 @@ def spawn_multiple_seeds_experiment(job_filename: str,
 
     # Generate a list of dictionaries with different random seed cmd input
     if num_seeds > 1:
-        random_seeds = np.random.choice(1000, num_seeds, replace=False).tolist()
+        random_seeds = np.random.choice(1000, num_seeds,
+                                        replace=False).tolist()
     else:
         random_seeds = [0]
     cmd_line_inputs = [{"seed_id": seed_id} for seed_id in random_seeds]
