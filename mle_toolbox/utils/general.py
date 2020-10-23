@@ -11,6 +11,7 @@ import pickle
 import platform
 import re
 
+import random
 import torch
 import numpy as np
 import gym

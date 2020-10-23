@@ -109,8 +109,8 @@ def main():
         print(time_t, "Updated retrieval protocol status & send to gcloud storage.")
 
 
-
-def retrieve_single_experiment(db, experiment_id: str, get_dir_or_fig: str,
+def retrieve_single_experiment(db, experiment_id: str,
+                               get_dir_or_fig: str,
                                all_experiment_ids: list):
     # Ensure the right prefix
     while True:

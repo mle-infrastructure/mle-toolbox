@@ -46,6 +46,8 @@ def prepare_logger(experiment_dir: str, debug_mode: bool=False):
     logging.getLogger("git").setLevel(logging.ERROR)
     logging.getLogger("google").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
+    logging.getLogger("scp").setLevel(logging.ERROR)
+    logging.getLogger("paramiko").setLevel(logging.ERROR)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
@@ -64,9 +66,6 @@ def check_job_config(job_config: dict):
         necessary_ingredients += ["multi_experiment_args"]
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         necessary_ingredients += ["param_search_args"]
-    elif job_config.meta_job_args["job_type"] == "population-based-training":
-        raise ValueError("Provide a valid job type")
-        # necessary_ingredients = ["pbt_args"]
 
     # Check if ingredients are in config keys
     for nec_ing in necessary_ingredients:

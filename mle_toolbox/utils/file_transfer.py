@@ -13,17 +13,23 @@ from .general import determine_resource, load_mle_toolbox_config
 from .protocol_experiment import load_experiment_db
 
 
-def get_file_scp(local_dir_name: str, file_path: str, server: str, user: str,
-                 password: str, port: int=22):
+def createSSHClient(server: str, user: str, password: str, port: int=22):
+    """ Create an ssh connection. """
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(server, port, user, password)
+    return client
+
+
+def get_file_scp(local_dir_name: str, file_path: str, server: str,
+                 user: str, password: str, port: int=22):
     """ Simple SSH connection & SCP retrieval. """
     # Generate dir to save received files in
     path_to_store = os.path.join(os.getcwd(), local_dir_name)
     if not os.path.exists(path_to_store):
         os.makedirs(path_to_store)
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(server, port, user, password)
+    client = createSSHClient(server, user, password, port)
     scp = SCPClient(client.get_transport())
     # Copy over the file
     scp.get(file_path, local_path=path_to_store, recursive=True)

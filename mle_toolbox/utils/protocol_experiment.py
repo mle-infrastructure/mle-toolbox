@@ -150,7 +150,7 @@ def protocol_new_experiment(job_config: dict, cmd_purpose: Union[None, str]=None
     return new_experiment_id
 
 
-def update_experiment_protocol_status(experiment_id: str, job_status: str):
+def update_protocol_status(experiment_id: str, job_status: str):
     """ Update the status of the experiment {running, completed, failed}. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_experiment_db()
