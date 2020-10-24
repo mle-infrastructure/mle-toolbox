@@ -2,11 +2,11 @@ import os
 import argparse
 from datetime import datetime
 
-from .utils.protocol_experiment import protocol_summary, load_experiment_db
+from .protocol.protocol_experiment import protocol_summary, load_experiment_db
 from .utils import print_framed, load_mle_toolbox_config
-from .utils.file_transfer import (get_file_scp, get_file_jump_scp,
-                                  get_gcloud_db, send_gcloud_db,
-                                  get_gcloud_zip_experiment)
+from .remote.ssh_transfer import get_file_scp, get_file_jump_scp
+from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
+                                     get_gcloud_zip_experiment)
 
 
 def main():
@@ -93,7 +93,7 @@ def main():
         for i, experiment_id in enumerate(list_of_new_e_ids):
             try:
                 stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
-            else:
+            except:
                 stored_in_gcloud = False
             if cmd_args.retrieve_local and not stored_in_gcloud:
                 retrieve_single_experiment(db, experiment_id,

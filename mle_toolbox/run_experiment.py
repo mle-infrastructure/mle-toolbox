@@ -7,19 +7,19 @@ import numpy as np
 from .utils import (load_mle_toolbox_config, load_yaml_config, DotDic,
                     determine_resource, print_framed)
 # Import of helpers for GCloud storage of results/protocol
-from .utils.file_transfer import (get_gcloud_db, send_gcloud_db,
-                                  send_gcloud_zip_experiment)
+from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
+                                     send_gcloud_zip_experiment)
 # Import of helpers for protocoling experiments
-from .utils.protocol_experiment import (protocol_new_experiment,
-                                        protocol_summary,
-                                        update_protocol_status,
-                                        delete_protocol_from_input)
+from .protocol.protocol_experiment import (protocol_new_experiment,
+                                           protocol_summary,
+                                           update_protocol_status,
+                                           delete_protocol_from_input)
 
 # Import of setup tools for experiments (log, config, etc.)
 from .src.prepare_experiment import (welcome_to_mle_toolbox,
                                      prepare_logger, check_job_config)
 # Import of local-to-remote helpers (verify, rsync, exec)
-from .src.local_2_remote import (ask_for_remote_resource,
+from .remote.ssh_execute import (ask_for_remote_resource,
                                  run_remote_experiment)
 # Import different experiment executers
 from .src import (run_single_experiment,
@@ -30,7 +30,6 @@ from .src import (run_single_experiment,
 
 def main():
     """ Main function of toolbox - Execute different types of experiments. """
-
     # 0. Load in args for ML Experiment + Determine resource
     def get_train_args():
         """ Get env name, config file path & device to train from cmd line """
@@ -100,7 +99,8 @@ def main():
         # 3b. Meta-Protocol the experiment - Print last 5 exp. - Delete from input
         protocol_summary(tail=5, verbose=True)
         delete_protocol_from_input()
-        new_experiment_id = protocol_new_experiment(job_config, cmd_args.purpose)
+        new_experiment_id = protocol_new_experiment(job_config,
+                                                    cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
         # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage

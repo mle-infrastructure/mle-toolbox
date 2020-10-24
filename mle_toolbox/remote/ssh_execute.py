@@ -7,7 +7,7 @@ from typing import Union
 import os
 from scp import SCPClient
 from ..utils import load_mle_toolbox_config
-from ..utils.file_transfer import createSSHClient
+from .ssh_transfer import createSSHClient
 
 
 def ask_for_remote_resource():

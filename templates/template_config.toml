@@ -6,7 +6,7 @@ title = "mle-toolbox-config"
 #------------------------------------------------------------------------------#
 [general]
 # Store a full log of every experiment run in .txt file
-development = true
+development = false
 
 # Set boolean for syncing protocol with GCloud & Storing all results in bucket
 use_gcloud_protocol_sync = false

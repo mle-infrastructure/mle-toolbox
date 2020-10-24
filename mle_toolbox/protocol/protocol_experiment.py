@@ -10,7 +10,8 @@ import sys, select
 from typing import Union
 from tabulate import tabulate
 
-from .general import load_config, determine_resource, load_mle_toolbox_config
+from ..utils.general import (load_config, determine_resource,
+                             load_mle_toolbox_config)
 
 
 def load_experiment_db():
@@ -35,7 +36,8 @@ def load_experiment_db():
     return db, all_experiment_ids, last_experiment_id
 
 
-def protocol_new_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
+def protocol_new_experiment(job_config: dict,
+                            cmd_purpose: Union[None, str]=None):
     """ Protocol the new experiment. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_experiment_db()
