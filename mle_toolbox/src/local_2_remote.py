@@ -1,6 +1,7 @@
 import paramiko
 import random
 import time
+import logging
 from datetime import datetime
 from typing import Union
 import os
@@ -12,8 +13,19 @@ from ..utils.file_transfer import createSSHClient
 def ask_for_remote_resource():
     """ Ask user if they want to exec on remote resource. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    resource_to_run = input(time_t + " Where to run the experiment? " +
-                            "[local/slurm-cluster/sge-cluster/gcp-cloud] ")
+    resource = input(time_t + " Where to run? [local/slurm/sge/gcp] ")
+    while resource_to_run not in ["local", "slurm", "sge", "gcp"]:
+        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+        resource = input(time_t + " Please repeat: [local/slurm/sge/gcp] ")
+
+    if resource == "local":
+        resource_to_run = "local"
+    elif resource == "slurm":
+        resource_to_run = "slurm-cluster"
+    elif resource == "sge":
+        resource_to_run = "sge-cluster"
+    elif resurce == "gcp":
+        resource_to_run = "gcp-cloud"
     return resource_to_run
 
 
@@ -25,26 +37,35 @@ def run_remote_experiment(remote_resource, exec_config,
     # TODO: Add port to use to mle config
     # TODO: Add a reconnect option if connection breaks
 
-    # 0. Load the toolbox config
+    # 0. Load the toolbox config & setup logger for local2remote
     cc = load_mle_toolbox_config()
+    logger = logging.getLogger(__name__)
+
     if remote_resource == "sge-cluster":
-        server = cc.sge.info.server_name
+        server = cc.sge.info.main_server_name
         user = cc.sge.credentials.user_name
         password = cc.sge.credentials.password
+        port = cc.sge.info.ssh_port
     else:
         raise NotImplementedError
 
     # 1. Rsync over the current working dir into remote_exec_dir
     sync_dir_2_remote(remote_exec_dir, server, user, password)
-    # 2. Generate bash qsub file
+    logger.info("Synced local experiment dir with remote dir")
+
+    # 2. Generate and execute bash qsub file
     random_str = generate_remote_meta_qsub(exec_config, remote_exec_dir,
                                            purpose, server, user, password)
-    # 3. Execute bash qsub file
     execute_remote_meta_qsub(server, user, password)
-    # 4. Monitor the experiment
+    logger.info(f"Generated & exec'd meta remote job on {remote_resource}.")
+
+    # 3. Monitor the experiment
     monitor_remote_meta_qsub(random_str, server, user, password)
-    # 5. Delete .qsub gen files
+    logger.info(f"Experiment on {remote_resource} finished.")
+
+    # 4. Delete .qsub gen files
     clean_up_remote_meta_qsub(random_str, server, user, password)
+    logger.info(f"Done cleaning up experiment debris.")
 
 
 def sync_dir_2_remote(remote_exec_dir: str, server: str, user: str,
@@ -68,7 +89,7 @@ qsub_cmd = """
 . ~/.bashrc && conda activate mle-toolbox
 chmod a+rx {exec_dir}
 cd {exec_dir}
-run-experiment {exec_config} {purpose_str}
+run-experiment {exec_config} {purpose_str} --no_welcome
 """
 
 def generate_remote_meta_qsub(exec_config: str,

@@ -144,15 +144,16 @@ def retrieve_single_experiment(db, experiment_id: str,
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource == "sge-cluster":
-        get_file_scp(experiment_id, file_path, cc.sge.info.server_name,
+        get_file_scp(experiment_id, file_path, cc.sge.info.main_server_name,
                      cc.sge.credentials.user_name, cc.sge.credentialspassword,
-                     port=22)
+                     cc.sge.info.ssh_port)
     elif remote_resource == "slurm-cluster":
         ssh = get_file_jump_scp(experiment_id, file_path,
                                 cc.slurm.info.jump_server_name,
                                 cc.slurm.info.main_server_name,
                                 cc.slurm.info.user_name,
-                                cc.slurm.info.password, port=22)
+                                cc.slurm.info.password,
+                                cc.sge.info.ssh_port)
     else:
         raise ValueError("{} - Please provide valid remote resource. {}".format(experiment_id,
                                                                                 remote_resource))

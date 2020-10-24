@@ -2,7 +2,6 @@
 import os
 import argparse
 import numpy as np
-from datetime import datetime
 
 # Import of general tools (loading, etc.)
 from .utils import (load_mle_toolbox_config, load_yaml_config, DotDic,
@@ -31,11 +30,8 @@ from .src import (run_single_experiment,
 
 def main():
     """ Main function of toolbox - Execute different types of experiments. """
-    # 0. Greet the user with a fancy welcome ASCII & Load cluster config
-    welcome_to_mle_toolbox()
-    cc = load_mle_toolbox_config()
 
-    # 1. Load in args for ML Experiment + Determine resource
+    # 0. Load in args for ML Experiment + Determine resource
     def get_train_args():
         """ Get env name, config file path & device to train from cmd line """
         parser = argparse.ArgumentParser()
@@ -50,13 +46,21 @@ def main():
                             help ='Run simulation in without protocol recording')
         parser.add_argument('-del', '--delete_after_upload', default=False, action='store_true',
                             help ='Delete results after upload to GCloud.')
+        parser.add_argument('-nw', '--no_welcome', default=False,
+                            action='store_true',
+                            help ='Do not print welcome message.')
         return parser.parse_args()
 
     cmd_args = get_train_args()
     job_config = load_yaml_config(cmd_args.config_fname)
     resource = determine_resource()
 
-    # 3. Set up logging config for experiment instance
+    # 1. Greet the user with a fancy welcome ASCII & Load cluster config
+    if not cmd_args.no_welcome:
+        welcome_to_mle_toolbox()
+    cc = load_mle_toolbox_config()
+
+    # 2. Set up logging config for experiment instance
     logger = prepare_logger(job_config.meta_job_args["experiment_dir"],
                             cmd_args.debug)
     logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
@@ -65,20 +69,20 @@ def main():
     if cmd_args.debug:
         job_config.meta_job_args["debug_mode"] = cmd_args.debug
 
-    # 3. If local - check if it should be run on remote resource
+    # 3. If local - check if experiment should be run on remote resource
     if resource not in ["sge-cluster", "slurm-cluster"]:
+        # Ask user on which resource to run on
         remote_resource = ask_for_remote_resource()
-        logger.info(f"Run on remote resource: {remote_resource}")
-        if remote_resource in ["slurm-cluster", "sge-cluster",
-                               "gcp-cloud"]:
-            time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-            print(time_t + f" Continue exec on remote {remote_resource} resource")
+        if remote_resource in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
+            logger.info(f"===> Start setup for running on {remote_resource}")
             run_remote_experiment(remote_resource,
                                   cmd_args.config_fname,
                                   job_config.meta_job_args["remote_exec_dir"],
                                   cmd_args.purpose)
             # After successful completion on remote resource - BREAK
             return
+        else:
+            logger.info(f"===> Continue running on {remote_resource}")
     else:
         logger.info(f"Run on resource: {resource}")
 
