@@ -68,6 +68,29 @@ class DotDic(dict):
             self[key] = value
 
 
+def set_random_seeds(seed_id: str, return_key: bool=False,
+                     verbose: bool=False):
+    """ Set random seed (random, npy, torch, gym) for reproduction """
+    os.environ['PYTHONHASHSEED'] = str(seed_id)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed_id)
+    random.seed(seed_id)
+    np.random.seed(seed_id)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed_id)
+        torch.cuda.manual_seed(seed_id)
+    if hasattr(gym.spaces, 'prng'):
+        gym.spaces.prng.seed(seed_id)
+
+    if verbose:
+        print("-- Random seeds (random, numpy, torch) were set to {}".format(seed_id))
+
+    if return_key:
+        key = jrandom.PRNGKey(seed_id)
+        return key
+
+
 class NpEncoder(json.JSONEncoder):
     """ Small Helper Encoder to convert np ints into int & dump """
     def default(self, obj):
@@ -283,26 +306,3 @@ def tolerant_mean(arrs: list):
     for idx, l in enumerate(arrs):
         arr[:len(l),idx] = l
     return arr.mean(axis = -1), arr.std(axis=-1)
-
-
-def set_random_seeds(seed_id: str, return_key: bool=False,
-                     verbose: bool=False):
-    """ Set random seed (random, npy, torch, gym) for reproduction """
-    os.environ['PYTHONHASHSEED'] = str(seed_id)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    torch.manual_seed(seed_id)
-    random.seed(seed_id)
-    np.random.seed(seed_id)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed_id)
-        torch.cuda.manual_seed(seed_id)
-    if hasattr(gym.spaces, 'prng'):
-        gym.spaces.prng.seed(seed_id)
-
-    if verbose:
-        print("-- Random seeds (random, numpy, torch) were set to {}".format(seed_id))
-
-    if return_key:
-        key = jrandom.PRNGKey(seed_id)
-        return key

@@ -10,10 +10,9 @@ from .utils import (load_mle_toolbox_config, load_yaml_config, DotDic,
 from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
                                      send_gcloud_zip_experiment)
 # Import of helpers for protocoling experiments
-from .protocol.protocol_experiment import (protocol_new_experiment,
-                                           protocol_summary,
-                                           update_protocol_status,
-                                           delete_protocol_from_input)
+from .protocol import (protocol_summary, update_protocol_status,
+                       delete_protocol_from_input)
+from .protocol.protocol_experiment import protocol_new_experiment
 
 # Import of setup tools for experiments (log, config, etc.)
 from .src.prepare_experiment import (welcome_to_mle_toolbox,
@@ -73,7 +72,7 @@ def main():
         # Ask user on which resource to run on
         remote_resource = ask_for_remote_resource()
         if remote_resource in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
-            logger.info(f"===> Start setup for running on {remote_resource}")
+            print_framed("TRANSFER TO REMOTE")
             run_remote_experiment(remote_resource,
                                   cmd_args.config_fname,
                                   job_config.meta_job_args["remote_exec_dir"],
@@ -81,7 +80,7 @@ def main():
             # After successful completion on remote resource - BREAK
             return
         else:
-            logger.info(f"===> Continue running on {remote_resource}")
+            print_framed("RUN ON LOCAL MACHINE")
     else:
         logger.info(f"Run on resource: {resource}")
 

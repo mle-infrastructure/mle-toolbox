@@ -7,6 +7,21 @@ from os.path import expanduser
 from ..utils.general import determine_resource, load_mle_toolbox_config
 
 
+def setup_proxy_server():
+    """ Set Gcloud creds & port to tunnel for internet connection. """
+    cc = load_mle_toolbox_config()
+    if determine_resource() == "slurm-cluster":
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.slurm_credentials_path)
+        if cc.slurm.info.http_proxy is not "":
+            os.environ["HTTP_PROXY"] = cc.slurm.http_proxy
+            os.environ["HTTPS_PROXY"] = cc.slurm.https_proxy
+    elif determine_resource() == "sge-cluster":
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.sge_credentials_path)
+        if cc.sge.info.http_proxy is not "":
+            os.environ["HTTP_PROXY"] = cc.sge.http_proxy
+            os.environ["HTTPS_PROXY"] = cc.sge.https_proxy
+
+
 def createSSHClient(server: str, user: str, password: str, port: int=22):
     """ Create an ssh connection. """
     client = paramiko.SSHClient()
@@ -52,18 +67,3 @@ def get_file_jump_scp(local_dir_name: str, file_path: str,
                        username=user, password=password)
         scp = SCPClient(client.get_transport())
         scp.get(file_path, local_path=path_to_store, recursive=True)
-
-
-def setup_proxy_server():
-    """ Set the port to tunnel for internet connection. """
-    cc = load_mle_toolbox_config()
-    if determine_resource() == "slurm-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.slurm_credentials_path)
-        if cc.slurm.info.http_proxy is not "":
-            os.environ["HTTP_PROXY"] = cc.slurm.http_proxy
-            os.environ["HTTPS_PROXY"] = cc.slurm.https_proxy
-    elif determine_resource() == "sge-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.sge_credentials_path)
-        if cc.sge.info.http_proxy is not "":
-            os.environ["HTTP_PROXY"] = cc.sge.http_proxy
-            os.environ["HTTPS_PROXY"] = cc.sge.https_proxy

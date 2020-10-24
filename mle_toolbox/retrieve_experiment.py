@@ -2,8 +2,8 @@ import os
 import argparse
 from datetime import datetime
 
-from .protocol.protocol_experiment import protocol_summary, load_experiment_db
 from .utils import print_framed, load_mle_toolbox_config
+from .protocol import protocol_summary, load_local_protocol_db
 from .remote.ssh_transfer import get_file_scp, get_file_jump_scp
 from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
                                      get_gcloud_zip_experiment)
@@ -24,7 +24,7 @@ def main():
     else:
         print(time_t, "Careful - you are using the local experiment protocol.")
     # Load in the experiment protocol DB
-    db, all_experiment_ids, _ = load_experiment_db()
+    db, all_experiment_ids, _ = load_local_protocol_db()
 
     # Get experiment id to retrieve from cmd
     def get_retrieve_args():

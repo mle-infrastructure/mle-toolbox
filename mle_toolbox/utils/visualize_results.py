@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import seaborn as sns
 from typing import List, Union
 from .general import mean_over_evals
@@ -32,13 +33,14 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       target_to_plot: str,
                       plot_title: str = "Temp Title",
                       xy_labels: list = [],
-                      variable_name: str = [],
+                      variable_name: str = "Var Label",
                       every_nth_tick: int = 1,
                       plot_colorbar: bool = True,
                       text_in_cell: bool = True,
                       max_heat: Union[None, float] = None,
                       min_heat: Union[None, float] = None,
-                      return_array: bool = False):
+                      return_array: bool = False,
+                      round_ticks: int = 1):
     """ Fix certain params & visualize grid target value over other two. """
     assert len(params_to_plot) == 2
     p_to_plot = params_to_plot + [target_to_plot]
@@ -63,8 +65,9 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     else:
         # Construct the plot
         fig, ax = plot_heatmap_array(range_x, range_y, heat_array, plot_title,
-                                     xy_labels, variable_name, every_nth_tick, plot_colorbar,
-                                     text_in_cell, max_heat, min_heat)
+                                     xy_labels, variable_name, every_nth_tick,
+                                     plot_colorbar, text_in_cell, max_heat,
+                                     min_heat, round_ticks)
         return fig, ax
 
 
@@ -93,7 +96,8 @@ def plot_heatmap_array(range_x: np.ndarray,
                        plot_colorbar: bool = True,
                        text_in_cell: bool = True,
                        max_heat: Union[None, float] = None,
-                       min_heat: Union[None, float] = None):
+                       min_heat: Union[None, float] = None,
+                       round_ticks: int=1):
     """ Plot the 2D heatmap. """
     fig, ax = plt.subplots(figsize=(10, 8))
     cmap = "magma"
@@ -108,7 +112,12 @@ def plot_heatmap_array(range_x: np.ndarray,
         im = ax.imshow(heat_array, cmap=cmap, vmin=min_heat, vmax=max_heat)
 
     ax.set_yticks(np.arange(len(range_y)))
-    ax.set_yticklabels([str(round(float(label), 1)) for label in range_y[::-1]])
+    if type(range_y[-1]) is not str:
+        yticklabels = [str(round(float(label), round_ticks))
+                       for label in range_y[::-1]]
+    else:
+        yticklabels = [str(label) for label in range_y[::-1]]
+    ax.set_yticklabels(yticklabels)
 
     for n, label in enumerate(ax.yaxis.get_ticklabels()):
         if n % every_nth_tick != 0:
@@ -116,7 +125,13 @@ def plot_heatmap_array(range_x: np.ndarray,
 
 
     ax.set_xticks(np.arange(len(range_x)))
-    ax.set_xticklabels([str(round(float(label), 1)) for label in range_x])
+    if type(range_x[-1]) is not str:
+        xticklabels = [str(round(float(label), round_ticks))
+                       for label in range_x]
+    else:
+        xticklabels = [str(label) for label in range_x]
+    ax.set_xticklabels(xticklabels)
+
     for n, label in enumerate(ax.xaxis.get_ticklabels()):
         if n % every_nth_tick != 0:
             label.set_visible(False)
@@ -130,12 +145,16 @@ def plot_heatmap_array(range_x: np.ndarray,
     ax.set_xlabel(xy_labels[0], fontsize=20)
     ax.set_ylabel(xy_labels[1], fontsize=20)
 
+
     if plot_colorbar:
+        # fig.subplots_adjust(right=0.8)
+        # cbar_ax = fig.add_axes([0.85, 0.25, 0.05, 0.5])
+        # cbar = fig.colorbar(im, cax=cbar_ax)
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="7%", pad=0.15)
+        cbar = fig.colorbar(im, cax=cax)
+        cbar.set_label(variable_name, rotation=270, labelpad=30)
         fig.tight_layout()
-        fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.85, 0.25, 0.05, 0.5])
-        cbar = fig.colorbar(im, cax=cbar_ax)
-        #cbar.set_label(variable_name, rotation=270, fontsize=10)
 
     if text_in_cell:
         for y in range(heat_array.shape[0]):
@@ -168,7 +187,7 @@ def visualize_learning_curves(main_log: dict,
     if run_ids is None:
         run_ids = list(main_log.keys())
         run_ids.sort(key=tokenize)
-    
+
     if len(curve_labels) == 0:
         curve_labels = run_ids
 

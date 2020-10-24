@@ -7,7 +7,7 @@ import shutil
 from datetime import datetime
 
 from ..utils.general import load_mle_toolbox_config
-from ..protocol.protocol_experiment import load_experiment_db
+from ..protocol import load_local_protocol_db
 from .ssh_transfer import setup_proxy_server
 
 
@@ -165,7 +165,7 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
     logger.setLevel(logging.INFO)
 
     # 1. Get experiment hash from the protocol db
-    db, all_experiment_ids, last_experiment_id = load_experiment_db()
+    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     hash_to_store = db.dget(experiment_id, "e-hash")
     local_hash_fname = hash_to_store + ".zip"
     gcloud_hash_fname = "experiments/" + local_hash_fname
