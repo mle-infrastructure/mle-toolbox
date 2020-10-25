@@ -25,6 +25,7 @@ class SSH_Manager(object):
     """ SSH client for file transfer & local 2 remote experiment exec. """
     def __init__(self, remote_resource: str):
         """ Set the credentials & resource details. """
+        setup_proxy_server()
         self.cc = load_mle_toolbox_config()
         self.remote_resource = remote_resource
 
@@ -56,13 +57,18 @@ class SSH_Manager(object):
 
     def connect(self, tunnel):
         """ Connect to the ssh client. """
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname=tunnel.local_bind_host,
-                       port=tunnel.local_bind_port,
-                       username=self.user, password=self.password,
-                       timeout=30)
+        while True:
+            try:
+                client = paramiko.SSHClient()
+                client.load_system_host_keys()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(hostname=tunnel.local_bind_host,
+                               port=tunnel.local_bind_port,
+                               username=self.user, password=self.password,
+                               timeout=100)
+                break
+            except:
+                continue
         return client
 
     def sync_dir(self, local_dir_name, remote_dir_name):

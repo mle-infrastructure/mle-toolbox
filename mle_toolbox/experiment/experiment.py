@@ -242,7 +242,6 @@ class Experiment(object):
 
     def clean_up(self):
         """ Remove error and log files at end of training. """
-
         # Clean up if not development!
         if not cc.general.development:
             for filename in glob.glob(self.job_arguments["err_file"] + "*"):

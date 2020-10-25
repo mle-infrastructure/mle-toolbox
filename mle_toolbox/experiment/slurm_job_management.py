@@ -104,7 +104,7 @@ def slurm_submit_remote_job(filename: str,
     open(base + '.sh', 'w').write(slurm_job_template.format(**job_arguments))
 
     # Submit the job via subprocess call
-    command = 'sbatch < ' + base + '.sh' # + ' &>/dev/null'
+    command = 'sbatch < ' + base + '.sh'
     proc = submit_subprocess(command)
 
     # Wait until system has processed submission

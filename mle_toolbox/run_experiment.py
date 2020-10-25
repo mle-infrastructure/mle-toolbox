@@ -76,7 +76,7 @@ def main():
             run_remote_experiment(remote_resource,
                                   cmd_args.config_fname,
                                   job_config.meta_job_args["remote_exec_dir"],
-                                  cmd_args.purpose)
+                                  " ".join(cmd_args.purpose))
             # After successful completion on remote resource - BREAK
             return
         else:

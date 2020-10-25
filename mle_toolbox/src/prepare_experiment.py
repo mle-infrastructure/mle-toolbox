@@ -46,8 +46,9 @@ def prepare_logger(experiment_dir: str, debug_mode: bool=False):
     logging.getLogger("git").setLevel(logging.ERROR)
     logging.getLogger("google").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
-    logging.getLogger("scp").setLevel(logging.ERROR)
-    logging.getLogger("paramiko").setLevel(logging.ERROR)
+    logging.getLogger("scp").setLevel(logging.CRITICAL)
+    logging.getLogger("paramiko").setLevel(logging.CRITICAL)
+    logging.getLogger("sshtunnel").setLevel(logging.CRITICAL)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
