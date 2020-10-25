@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from typing import Union
 import os
+import sys, select
 from .ssh_transfer import SSH_Manager
 from ..utils import load_mle_toolbox_config
 
@@ -37,10 +38,14 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
 
     # 1. Rsync over the current working dir into remote_exec_dir
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    sync = input(time_t + " Do you want to sync the remote dir? [Y/N] ")
-    while sync not in ["Y", "N"]:
-        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        sync = input(time_t + " Please repeat: [Y/N] ")
+    print(f"{time_t} Do you want to sync the remote dir? [Y/N]", end= ' '),
+    sys.stdout.flush()
+    i, o, e = select.select([sys.stdin], [], [], 30)
+    if (i):
+        sync = sys.stdin.readline().strip()
+    else:
+        sync = "N"
+
     if sync == "Y":
         ssh_manager.sync_dir(os.getcwd(), remote_exec_dir)
         logger.info("Synced local experiment dir with remote dir")

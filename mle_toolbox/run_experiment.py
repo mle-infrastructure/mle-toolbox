@@ -48,9 +48,12 @@ def main():
     # 3. If local - check if experiment should be run on remote resource
     if resource not in ["sge-cluster", "slurm-cluster"]:
         # Ask user on which resource to run on
-        remote_resource = ask_for_remote_resource()
+        if cmd_args.remote_resource is None:
+            remote_resource = ask_for_remote_resource()
+        else:
+            remote_resource = cmd_args.remote_resource
         if remote_resource in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
-            if cmd_args.reconnect_remote is not None:
+            if cmd_args.remote_reconnect is not None:
                 print_framed("RECONNECT TO REMOTE")
                 remote_connect_monitor_clean(remote_resource,
                                              cmd_args.reconnect_remote)

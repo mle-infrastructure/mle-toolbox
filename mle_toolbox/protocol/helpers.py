@@ -97,7 +97,7 @@ def delete_protocol_from_input():
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given as input or timeout
     while True:
-        i, o, e = select.select([sys.stdin], [], [], 15)
+        i, o, e = select.select([sys.stdin], [], [], 60)
         if (i):
             e_id = sys.stdin.readline().strip()
             if e_id == "N":

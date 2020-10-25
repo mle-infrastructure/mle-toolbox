@@ -21,9 +21,9 @@ def protocol_new_experiment(job_config: dict,
     # Add purpose of experiment - cmd args or timeout input after 30 secs
     if cmd_purpose is None:
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        print("{} Purpose of experiment?".format(time_t), end= ' '),
+        print(f"{time_t} Purpose of experiment?", end= ' '),
         sys.stdout.flush()
-        i, o, e = select.select([sys.stdin], [], [], 20)
+        i, o, e = select.select([sys.stdin], [], [], 60)
 
         if (i):
             purpose = sys.stdin.readline().strip()

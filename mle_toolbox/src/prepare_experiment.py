@@ -5,7 +5,7 @@ from datetime import datetime
 from os.path import expanduser
 
 
-__version__ = "0.2.0"
+__version__ = "0.2.2"
 
 
 def welcome_to_mle_toolbox(verbose=False):
@@ -49,8 +49,10 @@ def get_mle_args():
     parser.add_argument('-nw', '--no_welcome', default=False,
                         action='store_true',
                         help ='Do not print welcome message.')
-    parser.add_argument('-re', '--reconnect_remote', default=None,
+    parser.add_argument('-reconnect', '--remote_reconnect', default=None,
                         help ='Reconnect to experiment by str name.')
+    parser.add_argument('-resource', '--remote_resource', default=None,
+                        help ='Resource to run experiment on.')
     return parser.parse_args()
 
 
