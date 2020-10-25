@@ -32,7 +32,6 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
                           remote_exec_dir: str, purpose: Union[None, str]):
     """ Run the experiment on the remote resource. """
     # 0. Load the toolbox config, setup logger & ssh manager for local2remote
-    cc = load_mle_toolbox_config()
     logger = logging.getLogger(__name__)
     ssh_manager = SSH_Manager(remote_resource)
 
@@ -61,15 +60,28 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
     logger.info(f"Generated & executed {random_str} remote job" +
                 f" on {remote_resource}.")
 
-    # 3. Monitor the experiment
+    # 3. Monitor progress & clean up experiment (separate for reconnect!)
+    remote_connect_monitor_clean(remote_resource, random_str)
+
+
+def remote_connect_monitor_clean(remote_resource, random_str):
+    """ Reconnect & monitor running job. """
+    logger = logging.getLogger(__name__)
+    ssh_manager = SSH_Manager(remote_resource)
+    # Monitor the experiment
     monitor_remote_job(ssh_manager, random_str)
     logger.info(f"Experiment on {remote_resource} finished.")
 
-    # 4. Delete .qsub gen files
+    # Delete .qsub gen files
     ssh_manager.delete_file(random_str + ".txt")
     ssh_manager.delete_file(random_str + ".err")
+    if remote_resource == "slurm-cluster":
+        remote_exec_fname = 'sbash_cmd.sh'
+    elif remote_resource == "sge-cluster":
+        remote_exec_fname = 'qsub_cmd.qsub'
     ssh_manager.delete_file(remote_exec_fname)
     logger.info(f"Done cleaning up experiment debris.")
+    return
 
 
 qsub_cmd = """

@@ -1,5 +1,6 @@
 import sys
 import logging
+import argparse
 from datetime import datetime
 from os.path import expanduser
 
@@ -27,6 +28,30 @@ def welcome_to_mle_toolbox(verbose=False):
         print("    - single-experiment: Run a single configuration experiment.")
         print("    - multiple-experiments: Run multiple configs & random seeds.")
         print("    - hyperparameter-search: Run a hyperparameter search (Grid, Random, SMBO).")
+
+
+def get_mle_args():
+    """ Get config file path & other ingredients """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('config_fname', metavar='C', type=str,
+                        default="experiment_config.yaml",
+                        help ='Filename to load config yaml from')
+    parser.add_argument('-d', '--debug', default=False, action='store_true',
+                        help ='Run simulation in debug mode')
+    parser.add_argument('-p', '--purpose', default=None, nargs='+',
+                        help ='Purpose of the experiment to run')
+    parser.add_argument('-np', '--no_protocol', default=False,
+                        action='store_true',
+                        help ='Run simulation in without protocol recording')
+    parser.add_argument('-del', '--delete_after_upload', default=False,
+                        action='store_true',
+                        help ='Delete results after upload to GCloud.')
+    parser.add_argument('-nw', '--no_welcome', default=False,
+                        action='store_true',
+                        help ='Do not print welcome message.')
+    parser.add_argument('-re', '--reconnect_remote', default=None,
+                        help ='Reconnect to experiment by str name.')
+    return parser.parse_args()
 
 
 def prepare_logger(experiment_dir: str, debug_mode: bool=False):
