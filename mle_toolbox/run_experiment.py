@@ -97,7 +97,10 @@ def main():
 
         # 3b. Meta-Protocol the experiment - Print last 5 exp. - Delete from input
         protocol_summary(tail=5, verbose=True)
-        delete_protocol_from_input()
+
+        # Only ask to delete if no purpose given!
+        if cmd_args.purpose is None:
+            delete_protocol_from_input()
         new_experiment_id = protocol_new_experiment(job_config,
                                                     cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')

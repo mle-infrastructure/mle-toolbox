@@ -4,9 +4,27 @@ from datetime import datetime
 
 from .utils import print_framed, load_mle_toolbox_config
 from .protocol import protocol_summary, load_local_protocol_db
-from .remote.ssh_transfer import get_file_scp, get_file_jump_scp
+from .remote.ssh_transfer import SSH_Manager
 from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
                                      get_gcloud_zip_experiment)
+
+
+# Get experiment id to retrieve from cmd
+def get_retrieve_args():
+    """ Get inputs from cmd line """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e_id', '--experiment_id', type=str,
+                        default="no-id-given",
+                        help ='Filename to load config yaml from')
+    parser.add_argument('-all_new', '--retrieve_all_new', default=False, action='store_true',
+                        help ='Retrieve all new results.')
+    parser.add_argument('-fig_dir', '--figures_dir', default=False, action='store_true',
+                        help ='Retrieve only subdir containing figures.')
+    parser.add_argument('-exp_dir', '--experiment_dir', default=False, action='store_true',
+                        help ='Retrieve entire experiment dir.')
+    parser.add_argument('-local', '--retrieve_local', default=False, action='store_true',
+                        help ='Retrieve entire experiment dir from the remote directory.')
+    return parser.parse_args()
 
 
 def main():
@@ -26,23 +44,7 @@ def main():
     # Load in the experiment protocol DB
     db, all_experiment_ids, _ = load_local_protocol_db()
 
-    # Get experiment id to retrieve from cmd
-    def get_retrieve_args():
-        """ Get env name, config file path & device to train from cmd line """
-        parser = argparse.ArgumentParser()
-        parser.add_argument('-e_id', '--experiment_id', type=str,
-                            default="no-id-given",
-                            help ='Filename to load config yaml from')
-        parser.add_argument('-all_new', '--retrieve_all_new', default=False, action='store_true',
-                            help ='Retrieve all new results.')
-        parser.add_argument('-fig_dir', '--figures_dir', default=False, action='store_true',
-                            help ='Retrieve only subdir containing figures.')
-        parser.add_argument('-exp_dir', '--experiment_dir', default=False, action='store_true',
-                            help ='Retrieve entire experiment dir.')
-        parser.add_argument('-local', '--retrieve_local', default=False, action='store_true',
-                            help ='Retrieve entire experiment dir from the remote directory.')
-        return parser.parse_args()
-
+    # Get inputs from commandline
     cmd_args = get_retrieve_args()
     experiment_id = cmd_args.experiment_id
     # Either get entire result dir or only generated figures - ask for input
@@ -95,6 +97,7 @@ def main():
                 stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
             except:
                 stored_in_gcloud = False
+            # Pull either from remote machine or gcloud bucket
             if cmd_args.retrieve_local and not stored_in_gcloud:
                 retrieve_single_experiment(db, experiment_id,
                                            get_dir_or_fig,
@@ -122,7 +125,8 @@ def retrieve_single_experiment(db, experiment_id: str,
             experiment_id = input(time_t + " Which experiment do you want to retrieve?")
         else:
             break
-    # Try to retrieve
+
+    # Try to retrieve experiment path from protocol db
     while True:
         if get_dir_or_fig == "exp-dir":
             # Get path to experiment results dir & get cluster to retrieve from
@@ -143,17 +147,9 @@ def retrieve_single_experiment(db, experiment_id: str,
                                                                 file_path, remote_resource))
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
-    if remote_resource == "sge-cluster":
-        get_file_scp(experiment_id, file_path, cc.sge.info.main_server_name,
-                     cc.sge.credentials.user_name, cc.sge.credentialspassword,
-                     cc.sge.info.ssh_port)
-    elif remote_resource == "slurm-cluster":
-        ssh = get_file_jump_scp(experiment_id, file_path,
-                                cc.slurm.info.jump_server_name,
-                                cc.slurm.info.main_server_name,
-                                cc.slurm.info.user_name,
-                                cc.slurm.info.password,
-                                cc.sge.info.ssh_port)
+    if remote_resource in ["sge-cluster", "slurm-cluster"]:
+        ssh_manager = SSH_Manager(remote_resource)
+        ssh_manager.get_file(file_path, experiment_id)
     else:
         raise ValueError("{} - Please provide valid remote resource. {}".format(experiment_id,
                                                                                 remote_resource))

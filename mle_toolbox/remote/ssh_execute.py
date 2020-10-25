@@ -5,9 +5,8 @@ import logging
 from datetime import datetime
 from typing import Union
 import os
-from scp import SCPClient
+from .ssh_transfer import SSH_Manager
 from ..utils import load_mle_toolbox_config
-from .ssh_client import SSH_Manager
 
 
 def ask_for_remote_resource():
