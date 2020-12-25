@@ -3,11 +3,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
-from mle_toolbox.utils import get_configs_ready, DeepLogger
+from mle_toolbox.utils import get_configs_ready, DeepLogger, set_random_seeds
 
 
 def main(net_config, train_config, log_config):
     """ Train a network on MNIST dataset. """
+    # Set the random seeds for all random number generation
+    set_random_seeds(train_config.seed_id)
+
     # Start by setting number of cores available to torch processes
     torch.set_num_threads(train_config.torch_num_threads)
 
@@ -49,7 +52,8 @@ def main(net_config, train_config, log_config):
                     model=mnist_net, optimizer=optimizer,
                     criterion=nll_loss, device=device,
                     train_loader=train_loader,
-                    test_loader=test_loader, train_log=run_log)
+                    test_loader=test_loader, train_log=run_log,
+                    test_batches=train_config.test_batches)
     return
 
 
@@ -95,10 +99,11 @@ class MNIST_MLP(nn.Module):
 
 
 def train_mnist_cnn(num_epochs, model, optimizer, criterion, device,
-                    train_loader, test_loader, train_log):
+                    train_loader, test_loader, train_log, test_batches):
     """ Run the training loop over a set of epochs. """
+    update_counter = 0
+    train_losses = []
     for epoch in range(1, num_epochs + 1):
-        train_epoch_loss, test_epoch_loss = [], []
         model.train() # prep model for training
         for data, target in train_loader:
             optimizer.zero_grad()
@@ -107,28 +112,41 @@ def train_mnist_cnn(num_epochs, model, optimizer, criterion, device,
             loss = criterion(output, target)
             loss.backward()
             optimizer.step()
-            train_epoch_loss.append(loss.item())
 
-        # Evaluate the model performance at end of epoch
-        model.eval() # prep model for evaluation
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            loss = criterion(output, target)
-            test_epoch_loss.append(loss.item())
+            train_losses.append(loss.item())
+            update_counter += 1
 
-        # Log average epoch losses
-        train_loss = np.mean(train_epoch_loss)
-        test_loss = np.mean(test_epoch_loss)
-
-        time_tick = [epoch]
-        stats_tick = [train_loss, test_loss]
-        train_log.update_log(time_tick, stats_tick)
-        train_log.save_log()
-        train_log.save_network(model)
-
+            if update_counter % 50 == 0 or update_counter == 1:
+                test_loss = evaluate_network(update_counter, model,
+                                             test_loader, test_batches,
+                                             device, criterion)
+                time_tick = [update_counter]
+                stats_tick = [np.mean(train_losses), test_loss]
+                train_log.update_log(time_tick, stats_tick)
+                train_log.save_log()
+                train_log.save_network(model)
     return  model, train_log
 
+
+def evaluate_network(update_counter, model, test_loader, test_batches,
+                     device, criterion):
+    # Evaluate the model performance at end of epoch
+    model.eval() # prep model for evaluation
+    evals = 0
+    eval_loss = []
+    for data, target in test_loader:
+        data, target = data.to(device), target.to(device)
+        output = model(data)
+        loss = criterion(output, target)
+        eval_loss.append(loss.item())
+        evals += 1
+        if evals >= test_batches:
+            break
+    # Log average epoch losses
+    test_loss = np.mean(eval_loss)
+    # Put network back into training mode
+    model.train()
+    return test_loss
 
 if __name__ == "__main__":
     train_config, net_config, log_config = get_configs_ready(default_config_fname="mnist_cnn_config_1.json")

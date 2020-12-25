@@ -48,7 +48,8 @@ class HyperoptLogger(object):
         # Loop over list entries and log them individually
         for iter in range(len(params)):
             self.iter_id += 1
-            current_iter = {"params": params[iter], "target": target[iter],
+            current_iter = {"params": params[iter],
+                            "target": target[iter],
                             "time_elapsed": time_elapsed,
                             "run_id": run_ids[iter]}
             self.opt_log[self.iter_id] = current_iter

@@ -60,10 +60,14 @@ def main():
                 return
             else:
                 print_framed("TRANSFER TO REMOTE")
+                if cmd_args.purpose is not None:
+                    purpose = " ".join(cmd_args.purpose)
+                else:
+                    purpose = "Run on remote resource"
                 run_remote_experiment(remote_resource,
                                       cmd_args.config_fname,
                                       job_config.meta_job_args.remote_exec_dir,
-                                      " ".join(cmd_args.purpose))
+                                      purpose)
                 # After successful completion on remote resource - BREAK
                 return
     logger.info(f"Run on resource: {resource}")
@@ -80,7 +84,7 @@ def main():
             accessed_remote_db = False
 
         # 3b. Meta-protocol experiment - Print last ones - Delete from input
-        protocol_summary(tail=5, verbose=True)
+        protocol_summary(tail=10, verbose=True)
 
         # Only ask to delete if no purpose given!
         if cmd_args.purpose is None:

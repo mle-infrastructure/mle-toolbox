@@ -4,8 +4,13 @@ from .general import (load_mle_toolbox_config,
                       load_log, load_config, mean_over_evals,
                       set_random_seeds)
 from .experiment_logger import DeepLogger
-from .manipulate_files import merge_hdf5_files, hyper_log_to_df
-from .visualize_results import visualize_2D_grid, visualize_learning_curves
+from .manipulate_files import merge_hdf5_files, hyper_log_to_df, load_pkl_object
+from .visualize_results_2d import (visualize_2D_grid,
+                                   plot_heatmap_array,
+                                   moving_smooth_ts)
+from .visualize_results_1d import (visualize_learning_curves,
+                                   visualize_1D_bar,
+                                   visualize_1D_line)
 
 
 __all__ = [
@@ -23,5 +28,7 @@ __all__ = [
            'merge_hdf5_files',
            'hyper_log_to_df',
            'visualize_2D_grid',
-           'visualize_learning_curves'
+           'visualize_learning_curves',
+           'visualize_1D_line',
+           'visualize_1D_bar'
            ]
