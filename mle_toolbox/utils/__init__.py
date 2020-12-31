@@ -10,7 +10,9 @@ from .visualize_results_2d import (visualize_2D_grid,
                                    moving_smooth_ts)
 from .visualize_results_1d import (visualize_learning_curves,
                                    visualize_1D_bar,
-                                   visualize_1D_line)
+                                   visualize_1D_line,
+                                   plot_1D_bar,
+                                   plot_1D_line)
 
 
 __all__ = [
@@ -30,5 +32,7 @@ __all__ = [
            'visualize_2D_grid',
            'visualize_learning_curves',
            'visualize_1D_line',
-           'visualize_1D_bar'
+           'visualize_1D_bar',
+           'plot_1D_line',
+           'plot_1D_bar'
            ]

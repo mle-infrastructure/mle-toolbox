@@ -9,33 +9,75 @@ sns.set(context='poster', style='white', palette='Paired',
 
 
 def visualize_1D_bar(hyper_df: pd.core.frame.DataFrame,
-                     param_to_plot: str,
-                     target_to_plot: str,
+                     param_to_plot: str = "param",
+                     target_to_plot: str = "target",
                      plot_title: str = "Temp Title",
                      xy_labels: list = ["x", "y"],
                      every_nth_tick: int = 1,
                      ylims: Union[None, tuple] = None,
                      round_ticks: int = 1,
+                     fig = None, ax = None,
                      figsize: tuple=(9, 6),
-                     hline: Union[None, float] = None):
-    """ Plot a 1d Bar for a single variable and its y mapping. """
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
-    xlen = len(hyper_df[param_to_plot])
-    ax.bar(np.arange(xlen), hyper_df[target_to_plot])
+                     hline: Union[None, float] = None,
+                     fixed_params: Union[None, dict]=None):
+    """ Plot 1d Bar for single variable and y - select from df. """
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+    # Select the data to plot - max. fix 2 other vars
+    p_to_plot = [param_to_plot] + [target_to_plot]
+    if fixed_params is not None:
+        param_list = list(fixed_params.items())
+        fix_param1 = hyper_df[param_list[0][0]] == param_list[0][1]
+        fix_param2 = hyper_df[param_list[1][0]] == param_list[1][1]
+
+        # Subselect the desired params from the pd df
+        temp_df = hyper_df[fix_param1 & fix_param2][p_to_plot]
+    else:
+        temp_df = hyper_df[p_to_plot]
+
+    param_array = temp_df[param_to_plot]
+    target_array = temp_df[target_to_plot]
+
+    # Plot the data
+    plot_1D_bar(param_array, target_array,
+                fig, ax, plot_title, xy_labels,
+                every_nth_tick, ylims, round_ticks, hline)
+
+
+def plot_1D_bar(param_array, target_array, fig=None, ax=None,
+                plot_title: str = "Temp Title",
+                xy_labels: list = ["x", "y"],
+                every_nth_tick: int = 1,
+                ylims: Union[None, tuple] = None,
+                round_ticks: int = 1,
+                hline: Union[None, float] = None):
+    """ Do actual matplotlib plotting task from selected data. """
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+
+    # Plot the bar data
+    xlen = len(param_array)
+    ax.bar(np.arange(xlen), target_array)
+
+    # Handle xlabel ticks to set.
     ax.set_xticks(np.arange(0, xlen, every_nth_tick))
     xlabels = [str(round(i, round_ticks)) for j, i
-               in enumerate(hyper_df[param_to_plot])
+               in enumerate(param_array)
                if j%every_nth_tick == 0]
     ax.set_xticklabels(xlabels)
 
+    # Set axis labels, title and y limits
     ax.set_title(plot_title)
     ax.set_ylabel(xy_labels[1])
     ax.set_xlabel(xy_labels[0])
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
     if ylims is not None:
         ax.set_ylim(ylims)
 
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    # Add a horizontal line for some baseline level
     if hline is not None:
         ax.axhline(hline, ls="--", c="r", alpha=0.5)
     return fig, ax
@@ -74,6 +116,58 @@ def visualize_1D_line(hyper_df: pd.core.frame.DataFrame,
     if ylims is not None:
         ax.set_ylim(ylims)
 
+    if hline is not None:
+        ax.axhline(hline, ls="--", c="r", alpha=0.5)
+    return fig, ax
+
+
+def plot_1D_line(param_array, target_array, fig=None, ax=None,
+                 plot_title: str = "Temp Title",
+                 xy_labels: list = ["x", "y"],
+                 every_nth_tick: int = 1,
+                 ylims: Union[None, tuple] = None,
+                 round_ticks: int = 1,
+                 hline: Union[None, float] = None,
+                 labels: Union[list, None] = None):
+    """ Do actual matplotlib plotting task from selected data. """
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+
+    # Plot the bar data
+    if len(target_array.shape) < 2:
+        ax.plot(param_array, target_array)
+        ax.scatter(param_array, target_array, zorder=5)
+    else:
+        for i in range(target_array.shape[0]):
+            if labels is not None:
+                ax.plot(param_array, target_array[i], label=labels[i])
+            else:
+                ax.plot(param_array, target_array[i])
+            ax.scatter(param_array, target_array[i], zorder=5)
+
+    # Handle xlabel ticks to set.
+    xlabels = [str(round(i, round_ticks)) for j, i
+               in enumerate(param_array)
+               if j%every_nth_tick == 0]
+    xticks = [param_array[j] for j, i
+               in enumerate(param_array)
+               if j%every_nth_tick == 0]
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xlabels)
+
+    # Set axis labels, title and y limits
+    ax.set_title(plot_title)
+    ax.set_ylabel(xy_labels[1])
+    ax.set_xlabel(xy_labels[0])
+    if labels is not None:
+        ax.legend()
+    if ylims is not None:
+        ax.set_ylim(ylims)
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    # Add a horizontal line for some baseline level
     if hline is not None:
         ax.axhline(hline, ls="--", c="r", alpha=0.5)
     return fig, ax

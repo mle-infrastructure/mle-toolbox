@@ -28,9 +28,9 @@ def moving_smooth_ts(ts, window_size=20):
 
 
 def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
-                      fixed_params: Union[None, dict],
-                      params_to_plot: list,
-                      target_to_plot: str,
+                      fixed_params: Union[None, dict] = None,
+                      params_to_plot: list=[],
+                      target_to_plot: str="target",
                       plot_title: str = "Temp Title",
                       xy_labels: list = [],
                       variable_name: Union[None, str] = "Var Label",
@@ -45,6 +45,8 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       cmap="magma"):
     """ Fix certain params & visualize grid target value over other two. """
     assert len(params_to_plot) == 2, "You can only plot 2 variables!"
+
+    # Select the data to plot - max. fix 2 other vars
     p_to_plot = params_to_plot + [target_to_plot]
     if fixed_params is not None:
         param_list = list(fixed_params.items())
