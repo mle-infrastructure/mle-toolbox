@@ -1,3 +1,5 @@
+import os
+import sys
 import random
 import string
 import subprocess as sp
@@ -26,7 +28,14 @@ def submit_local_job(filename: str,
                      cmd_line_arguments: str,
                      job_arguments: dict):
     """ Create a local job & submit it based on provided file to execute. """
-    cmd = "python " + filename + cmd_line_arguments
+    cmd = f"python {filename} {cmd_line_arguments}"
+    env_name = job_arguments['env_name']
+    current_env = os.environ["CONDA_PREFIX"]
+    if current_env != env_name:
+        # activate the correct conda environment
+        cmd = f"source $(conda info --base)/etc/profile.d/conda.sh \
+                && conda activate {env_name} \
+                && {cmd}"
     proc = submit_subprocess(cmd)
     return proc
 
