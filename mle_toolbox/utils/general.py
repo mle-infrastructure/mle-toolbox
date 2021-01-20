@@ -205,7 +205,7 @@ def load_config(config_fname: str):
 
 def load_yaml_config(cmd_args: dict) -> dict:
     """ Load in a YAML config file & wrap as DotDic. """
-    with open(config_fname.config_fname) as file:
+    with open(cmd_args.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # Update job config with additional cmd args (if provided)
