@@ -10,32 +10,22 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 requires = [
-            'numpy==1.17.4',
-            'pandas==0.25.3',
-            'scipy==1.3.2',
-            'h5py==2.10.0',
-            'tensorboard',
-            'tensorboardX',
-            'matplotlib==3.1.2',
-            'seaborn==0.9.0',
+            'python>=3.6',
+            'numpy',
+            'pandas',
+            'h5py',
+            'matplotlib',
+            'seaborn',
             'commentjson',
             'pyyaml',
-            'scikit-optimize',
-            'torch',
-            'torchvision',
             'colorclass',
             'terminaltables',
             'gitpython',
             'scp',
-            'sshtunnel',
             'pickledb',
-            'google-cloud-storage',
             'tabulate',
             'toml',
-            'torch',
-            'jax',
-            'jaxlib',
-            'gym'
+            'paramiko'
             ]
 
 setup(
