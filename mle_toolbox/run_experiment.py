@@ -34,7 +34,7 @@ def main():
     if not cmd_args.no_welcome:
         welcome_to_mle_toolbox()
 
-    job_config = load_yaml_config(cmd_args.config_fname)
+    job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
     resource = determine_resource()
     if cmd_args.debug:

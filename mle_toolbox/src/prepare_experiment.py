@@ -53,6 +53,14 @@ def get_mle_args():
                         help ='Reconnect to experiment by str name.')
     parser.add_argument('-resource', '--remote_resource', default=None,
                         help ='Resource to run experiment on.')
+
+    # Allow CLI to change base train fname/config .json/experiment dir
+    parser.add_argument('-train_fname', '--base_train_fname', default=None,
+                        help ='Python script to run exp on.')
+    parser.add_argument('-train_config', '--base_train_config', default=None,
+                        help ='Base config file to load and modify.')
+    parser.add_argument('-exp_dir', '--experiment dir', default=None,
+                        help ='Experiment directory.')
     return parser.parse_args()
 
 

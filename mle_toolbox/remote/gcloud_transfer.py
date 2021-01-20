@@ -1,4 +1,5 @@
 import os
+import glob
 from google.cloud import storage
 from os.path import expanduser
 import logging
@@ -69,6 +70,29 @@ def send_gcloud_db(number_of_connect_tries: int=5):
                                                                                   number_of_connect_tries))
     # If after 5 pulls no successful connection established - return failure
     return 0
+
+
+def delete_gcs_directory(gcs_path: str,
+                         number_of_connect_tries: int=5):
+    """ Delete a directory in a GCS bucket. """
+    # Load in cluster configuration
+    cc = load_mle_toolbox_config()
+    # Set environment variable for gcloud credentials & proxy remote
+    setup_proxy_server()
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    for i in range(number_of_connect_tries):
+        try:
+            client = storage.Client(cc.gcp.project_name)
+            bucket = client.get_bucket(cc.gcp.bucket_name, timeout=20)
+        except:
+            logger.info(f"Attempt {i+1}/{number_of_connect_tries} - Failed sending to GCloud Storage")
+
+    # Delete all files in directory
+    blobs = bucket.list_blobs(prefix=gcs_path)
+    for blob in blobs:
+        blob.delete()
 
 
 def upload_local_directory_to_gcs(local_path: str, gcs_path: str,

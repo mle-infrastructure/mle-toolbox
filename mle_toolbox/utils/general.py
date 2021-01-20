@@ -175,11 +175,25 @@ def load_config(config_fname: str):
     return dict_config
 
 
-def load_yaml_config(config_fname: str) -> dict:
+def load_yaml_config(cmd_args: dict) -> dict:
     """ Load in a YAML config file & wrap as DotDic. """
-    with open(config_fname) as file:
+    with open(config_fname.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Update job config with additional cmd args (if provided)
+    config = overwrite_config_with_args(config, cmd_args)
     return DotDic(config)
+
+
+def overwrite_config_with_args(config, cmd_args):
+    """ Update entries if there was command line input. """
+    if cmd_args.base_train_fname is not None:
+        config["meta_job_args"]["base_train_fname"] = cmd_args.base_train_fname
+    if cmd_args.base_train_config is not None:
+        config["meta_job_args"]["base_train_config"] = cmd_args.base_train_config
+    if cmd_args.experiment_dir is not None:
+        config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
+    return config
 
 
 def save_pkl_object(obj, filename):
@@ -195,7 +209,7 @@ def load_pkl_object(filename):
     return obj
 
 
-def load_log(log_fname: str, mean_over_seeds: bool=True,
+def load_log(log_fname: str, mean_over_seeds: bool=False,
              mean_also_evals: bool=False) -> DotDic:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
