@@ -11,6 +11,7 @@ development = false
 # Set boolean for syncing protocol with GCloud & Storing all results in bucket
 use_gcloud_protocol_sync = false
 use_gcloud_results_storage = false
+local_protocol_fname = "~/local_mle_protocol.db"
 
 #------------------------------------------------------------------------------#
 # 2. Configuration for Slurm Cluster
@@ -96,4 +97,3 @@ gcloud_bucket_name = "<gcloud_bucket_name>"
 
 # Filename to retrieve from gcloud bucket & where to store
 gcloud_protocol_fname = "gcloud_mle_protocol.db"
-local_protocol_fname = "~/local_mle_protocol.db"
