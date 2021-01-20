@@ -1,8 +1,8 @@
+import os
 import sys
 import logging
 import argparse
 from datetime import datetime
-from os.path import expanduser
 
 
 __version__ = "0.2.2"
@@ -72,7 +72,7 @@ def prepare_logger(experiment_dir: str, debug_mode: bool=False):
             logger.removeHandler(handler)
 
     file_path = (os.path.join(experiment_dir, "exp_debug.log")
-                 if debug_mode else expanduser("~/full_debug.log"))
+                 if debug_mode else os.path.expanduser("~/full_debug.log"))
     logging.basicConfig(filename=file_path,
                         filemode='a',
                         format='%(asctime)s %(name)s %(levelname)s %(message)s',
