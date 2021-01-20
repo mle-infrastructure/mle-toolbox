@@ -22,7 +22,7 @@ use_gcloud_results_storage = false
     password = '<slurm-password>'
 
     # Slurm cluster information - Job scheduling, monitoring & retrieval
-    [slurm.cluster_info]
+    [slurm.info]
     # Headnode name & partitions to monitor/run jobs on
     head_names = ['<headnode1>']
     node_reg_exp = ['<nodes-to-monitor1>']
@@ -55,7 +55,7 @@ use_gcloud_results_storage = false
     password = 'sge-password'
 
     # SGE cluster information - Job scheduling, monitoring & retrieval
-    [sge.cluster_info]
+    [sge.info]
     # Headnode name & queues to monitor/run jobs on
     head_names = ['<headnode1>']
     node_reg_exp = ['<nodes-to-monitor2>']
