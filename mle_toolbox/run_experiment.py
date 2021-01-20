@@ -5,9 +5,6 @@ import numpy as np
 # Import of general tools (loading, etc.)
 from .utils import (load_mle_toolbox_config, load_yaml_config, DotDic,
                     determine_resource, print_framed)
-# Import of helpers for GCloud storage of results/protocol
-from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
-                                     send_gcloud_zip_experiment)
 # Import of helpers for protocoling experiments
 from .protocol import (protocol_summary, update_protocol_status,
                        delete_protocol_from_input)
@@ -36,8 +33,20 @@ def main():
     job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
     resource = determine_resource()
+    print("DEBUG ressource", resource)
     if cmd_args.debug:
         job_config.meta_job_args["debug_mode"] = cmd_args.debug
+
+    if cc.general.use_gcloud_protocol_sync:
+        try:
+            # Import of helpers for GCloud storage of results/protocol
+            from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
+                                                 send_gcloud_zip_experiment)
+        except ImportError as err:
+            raise ImportError("You need to install `google-cloud-storage` to "
+                              "synchronize protocols with GCloud. Or set "
+                              "`use_glcoud_protocol_sync = False` in your "
+                              "config file.")
 
     # 2. Set up logging config for experiment instance
     logger = prepare_logger(job_config.meta_job_args.experiment_dir,
