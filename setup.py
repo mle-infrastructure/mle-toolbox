@@ -10,7 +10,6 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 requires = [
-            'python>=3.6',
             'numpy',
             'pandas',
             'h5py',
@@ -47,6 +46,7 @@ setup(
      include_package_data=True,
      zip_safe=False,
      platforms='any',
+     python_requires=">=3.6",
      install_requires=requires,
      entry_points={
         'console_scripts': [
