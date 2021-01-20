@@ -69,12 +69,13 @@ local_protocol_fname = "~/local_mle_protocol.db"
     # Cluster-specific info for results retrieval & internet tunneling
     main_server_name = '<main-server-ip>'
     jump_server_name = '<jump-host-ip>'
+    ssh_port = 22
     # Add proxy server for internet connection if needed!
     http_proxy = "http://<sge_headnode>:3128/"
     https_proxy = "http://<sge_headnode>:3128/"
 
     # Default SGE job arguments (if not differently supplied)
-    [sge.default_job_args]
+    [sge.default_job_arguments]
     num_logical_cores = 2
     queue = '<sge-queue-name>'
     job_name = 'temp'
@@ -85,6 +86,7 @@ local_protocol_fname = "~/local_mle_protocol.db"
 
 #------------------------------------------------------------------------------#
 # 4. GCP Config - Credentials, Project + Buffer for Meta-Experiment Protocol
+# OPTIONAL: Only required if you want to sync protocol with GCS
 #------------------------------------------------------------------------------#
 [gcp]
 # Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
