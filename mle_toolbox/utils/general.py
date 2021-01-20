@@ -1,4 +1,3 @@
-import torch
 import argparse
 import commentjson
 import os
@@ -10,12 +9,29 @@ import h5py
 import pickle
 import platform
 import re
-
-import random
-import torch
 import numpy as np
-import gym
-from jax import random as jrandom
+import random
+
+try:
+    import torch
+    __torch_installed = True
+except ImportError:
+    __torch_installed = False
+    pass
+
+try:
+    import gym
+    __gym_installed = True
+except ImportError:
+    __gym_installed = False
+    pass
+
+try:
+    import jax
+    __jax_installed = True
+except ImportError:
+    __jax_installed = False
+    pass
 
 
 def load_mle_toolbox_config():
@@ -71,22 +87,31 @@ class DotDic(dict):
 def set_random_seeds(seed_id: str, return_key: bool=False,
                      verbose: bool=False):
     """ Set random seed (random, npy, torch, gym) for reproduction """
+
     os.environ['PYTHONHASHSEED'] = str(seed_id)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    torch.manual_seed(seed_id)
     random.seed(seed_id)
     np.random.seed(seed_id)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed_id)
-        torch.cuda.manual_seed(seed_id)
-    if hasattr(gym.spaces, 'prng'):
-        gym.spaces.prng.seed(seed_id)
+    seeds_set = ['random', 'numpy']
+    if __torch_installed:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.manual_seed(seed_id)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed_id)
+            torch.cuda.manual_seed(seed_id)
+        seeds_set.append('torch')
+
+    if __gym_installed:
+        if hasattr(gym.spaces, 'prng'):
+            gym.spaces.prng.seed(seed_id)
+        seeds_set.append('gym')
 
     if verbose:
-        print("-- Random seeds (random, numpy, torch) were set to {}".format(seed_id))
+        print(f"-- Random seeds ({', '.join(seeds_set)}) were set to {seed_id}")
 
     if return_key:
+        if not __jax_installed:
+            raise ValueError("You need to install jax to return a PRNG key.")
         key = jrandom.PRNGKey(seed_id)
         return key
 
@@ -143,7 +168,10 @@ def get_configs_ready(default_seed: int=0,
 
     # Add device to train on if not already set in the config file
     if train_config.device_name is None:
-        train_config.device_name = "cuda" if torch.cuda.is_available() else "cpu"
+        device_name = "cpu"
+        if __torch_installed and torch.cuda.is_available():
+            device_name = "cuda"
+        train_config.device_name = device_name
 
     if log_config.tboard_fname is None and log_config.use_tboard:
         tboard_temp = os.path.split(cmd_args.config_fname)[1]

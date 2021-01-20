@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import pandas as pd
 
@@ -246,6 +245,7 @@ class DeepLogger(object):
 
     def save_network(self, network):
         """ Save current state of the network as a checkpoint - torch! """
+        import torch
         # Update the saved weights in a single file!
         torch.save(network.state_dict(), self.final_network_save_fname)
 
