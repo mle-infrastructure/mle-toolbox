@@ -7,7 +7,6 @@ import shutil
 import time
 import datetime
 import h5py
-from tensorboardX import SummaryWriter
 from typing import Union, List
 
 
@@ -145,6 +144,12 @@ class DeepLogger(object):
 
         # Initialize tensorboard logger/summary writer
         if tboard_fname is not None and use_tboard:
+            try:
+                from tensorboardX import SummaryWriter
+            except ModuleNotFoundError as err:
+                raise ModuleNotFoundError(f"{err}. You need to install "
+                                          "`tensorboardX` if you want that "
+                                          "DeepLogger logs to tensorboard.")
             self.writer = SummaryWriter(self.experiment_dir + "tboards/" +
                                         tboard_fname + "_" + fname_ext)
         else:
