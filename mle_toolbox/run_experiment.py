@@ -33,7 +33,6 @@ def main():
     job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
     resource = determine_resource()
-    print("DEBUG ressource", resource)
     if cmd_args.debug:
         job_config.meta_job_args["debug_mode"] = cmd_args.debug
 
