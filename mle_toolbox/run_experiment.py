@@ -23,7 +23,6 @@ from .remote.ssh_execute import (ask_for_remote_resource,
 # Import different experiment executers
 from .src import (run_single_experiment,
                   run_multiple_experiments,
-                  run_hyperparameter_search,
                   run_post_processing)
 
 
@@ -117,6 +116,8 @@ def main():
 
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
+        # Import only if needed since this has a optional dependency on scikit-optimize
+        from .src import run_hyperparameter_search
         run_hyperparameter_search(DotDic(job_config.meta_job_args),
                                   DotDic(job_config.single_job_args),
                                   DotDic(job_config.param_search_args))

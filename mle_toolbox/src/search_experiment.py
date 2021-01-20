@@ -1,14 +1,18 @@
 import os
-from ..hyperopt import (HyperoptLogger,
-                        RandomHyperoptimisation,
-                        GridHyperoptimisation,
-                        SMBOHyperoptimisation)
 
 
 def run_hyperparameter_search(meta_job_args: dict,
                               single_job_args: dict,
                               param_search_args: dict):
     """ Run a hyperparameter search experiment. """
+
+    # Import only if used, this will raise an informative error when
+    # scikit-optimize is not installed.
+    from ..hyperopt import (HyperoptLogger,
+                            RandomHyperoptimisation,
+                            GridHyperoptimisation,
+                            SMBOHyperoptimisation)
+
     # 1. Setup the hyperlogger for the experiment
     hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
                                   param_search_args.hyperlog_fname)
