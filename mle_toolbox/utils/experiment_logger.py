@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import pandas as pd
 
@@ -8,7 +7,6 @@ import shutil
 import time
 import datetime
 import h5py
-from tensorboardX import SummaryWriter
 from typing import Union, List
 
 
@@ -146,6 +144,12 @@ class DeepLogger(object):
 
         # Initialize tensorboard logger/summary writer
         if tboard_fname is not None and use_tboard:
+            try:
+                from tensorboardX import SummaryWriter
+            except ModuleNotFoundError as err:
+                raise ModuleNotFoundError(f"{err}. You need to install "
+                                          "`tensorboardX` if you want that "
+                                          "DeepLogger logs to tensorboard.")
             self.writer = SummaryWriter(self.experiment_dir + "tboards/" +
                                         tboard_fname + "_" + fname_ext)
         else:
@@ -246,6 +250,7 @@ class DeepLogger(object):
 
     def save_network(self, network):
         """ Save current state of the network as a checkpoint - torch! """
+        import torch
         # Update the saved weights in a single file!
         torch.save(network.state_dict(), self.final_network_save_fname)
 
