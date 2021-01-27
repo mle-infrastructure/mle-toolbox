@@ -26,10 +26,13 @@ __all__ = [
            'load_config',
            'mean_over_evals',
            'set_random_seeds',
+           'get_closest_sub_df',
            'DeepLogger',
            'merge_hdf5_files',
            'hyper_log_to_df',
            'visualize_2D_grid',
+           'plot_heatmap_array',
+           'moving_smooth_ts'
            'visualize_learning_curves',
            'visualize_1D_line',
            'visualize_1D_bar',

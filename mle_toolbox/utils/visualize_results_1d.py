@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Union
+from .visualize_results_2d import moving_smooth_ts
 
 sns.set(context='poster', style='white', palette='Paired',
         font='sans-serif', font_scale=1.05, color_codes=True, rc=None)
@@ -195,7 +196,8 @@ def visualize_learning_curves(main_log: dict,
         curve_labels = run_ids
 
     fig, axs = plt.subplots(1, 1, figsize=(8, 5))
-    color_by = sns.light_palette("navy", len(run_ids), reverse=False)
+    color_by = sns.light_palette("navy", len(run_ids),
+                                 reverse=False)
 
     for i in range(len(run_ids)):
         label = curve_labels[i]
