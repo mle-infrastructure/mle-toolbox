@@ -1,4 +1,4 @@
-# Integrate an ODE
+# Classify MNIST digits
 
 - Run an individual single experiment:
 ```
