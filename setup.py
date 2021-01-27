@@ -13,8 +13,6 @@ requires = [
             'numpy',
             'pandas',
             'h5py',
-            'matplotlib',
-            'seaborn',
             'commentjson',
             'pyyaml',
             'colorclass',
