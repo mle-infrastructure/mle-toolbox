@@ -11,6 +11,8 @@ import platform
 import re
 import numpy as np
 import random
+from typing import Union
+import pandas as pd
 
 try:
     import torch
@@ -64,6 +66,7 @@ def print_framed(str_to_print: str, line_width: int=85):
 
 class DotDic(dict):
     """
+    TODO: Replace with dotmap - https://github.com/drgrib/dotmap
     a dictionary that supports dot notation
     as well as dictionary access notation
     usage: d = DotDict() or d = DotDict({'val1':'first'})
@@ -348,3 +351,11 @@ def tolerant_mean(arrs: list):
     for idx, l in enumerate(arrs):
         arr[:len(l),idx] = l
     return arr.mean(axis = -1), arr.std(axis=-1)
+
+
+def get_closest_sub_df(df: pd.core.frame.DataFrame,
+                       param_name: str, param_value: Union[int, float]):
+    """ Return df with fixed param closest to param_value in df. """
+    all_values = df[param_name].unique()
+    min_id = np.argmin(np.abs(all_values - param_value))
+    return df[df[param_name] == all_values[min_id]]
