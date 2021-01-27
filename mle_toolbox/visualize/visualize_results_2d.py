@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import seaborn as sns
 from typing import List, Union
-from .general import mean_over_evals
+from mle_toolbox.utils.general import mean_over_evals
 import re
 
 sns.set(context='poster', style='white', palette='Paired',

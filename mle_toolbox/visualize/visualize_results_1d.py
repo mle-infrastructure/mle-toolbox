@@ -174,18 +174,18 @@ def plot_1D_line(param_array, target_array, fig=None, ax=None,
     return fig, ax
 
 
-def visualize_learning_curves(main_log: dict,
-                              iter_to_plot: str="num_episodes",
-                              target_to_plot: str="ep_reward",
-                              smooth_window: int=20,
-                              plot_title: str = "Temp Title",
-                              xy_labels: list = [r"# Train Iter",
-                                                 r"Temp Y-Label"],
-                              base_label: str="",
-                              curve_labels: list = [],
-                              every_nth_tick: int = 1,
-                              plot_std_bar: bool = False,
-                              run_ids: list = None):
+def visualize_1D_lcurves(main_log: dict,
+                        iter_to_plot: str="num_episodes",
+                        target_to_plot: str="ep_reward",
+                        smooth_window: int=20,
+                        plot_title: str = "Temp Title",
+                        xy_labels: list = [r"# Train Iter",
+                                         r"Temp Y-Label"],
+                        base_label: str="",
+                        curve_labels: list = [],
+                        every_nth_tick: int = 1,
+                        plot_std_bar: bool = False,
+                        run_ids: list = None):
     """ Plot learning curves from meta_log. """
     # Plot all curves if not subselected
     if run_ids is None:
@@ -203,10 +203,12 @@ def visualize_learning_curves(main_log: dict,
         label = curve_labels[i]
         run_id = run_ids[i]
         # Smooth the curve to plot
-        smooth_mean, _ = moving_smooth_ts(main_log[run_id][target_to_plot]["mean"], smooth_window)
-        smooth_std, _ = moving_smooth_ts(main_log[run_id][target_to_plot]["std"], smooth_window)
+        smooth_mean, _ = moving_smooth_ts(
+            main_log[run_id][target_to_plot]["mean"], smooth_window)
+        smooth_std, _ = moving_smooth_ts(
+            main_log[run_id][target_to_plot]["std"], smooth_window)
         axs.plot(main_log[run_id][iter_to_plot]["mean"], smooth_mean,
-                 color=color_by[i], label=base_label + " {}".format(label))
+                 color=color_by[i], label=base_label.format(label))
 
         if plot_std_bar:
             axs.fill_between(main_log[run_id][iter_to_plot]["mean"],
