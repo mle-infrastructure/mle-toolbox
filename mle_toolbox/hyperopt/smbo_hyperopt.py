@@ -53,11 +53,14 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
     def clean_up_after_batch_iteration(self, batch_proposals, perf_measures):
         """ Perform post-iteration clean-up by updating surrogate model. """
         x, y = [], []
+        # First key of all metrics is used to update the surrogate!
+        to_model = perf_measures.keys()[0]
+        # TODO: Do multi-objective SMBO?!
         for i, prop in enumerate(batch_proposals):
             x.append(list(prop.values()))
             # skopt assumes we want to minimize surrogate model
             # Make performance negative if we maximize
-            effective_perf = (-1*perf_measures[i] if self.hyper_log.max_target
-                              else perf_measures[i])
+            effective_perf = (-1*perf_measures[to_model][i] if self.hyper_log.max_target
+                              else perf_measures[to_model][i])
             y.append(effective_perf)
         self.hyper_optimizer.tell(x, y)

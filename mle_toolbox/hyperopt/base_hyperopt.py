@@ -4,7 +4,7 @@ import shutil
 import json
 import copy
 import numpy as np
-from typing import Union
+from typing import Union, List
 import logging
 
 from .hyperopt_logger import HyperoptLogger
@@ -36,7 +36,7 @@ class BaseHyperOptimisation(object):
                  experiment_dir: str,
                  params_to_search: dict,
                  problem_type: str,
-                 eval_score_type: str):
+                 eval_metrics: Union[str, List[str]]):
         # Set up the random hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.config_fname = config_fname              # Fname base config file
@@ -61,10 +61,11 @@ class BaseHyperOptimisation(object):
         self.params_to_search = params_to_search
         self.current_iter = len(hyper_log)            # get prev its
 
-        # Problem - set up eval: {"rl", "final"}
+        # Problem - set up eval: {"best", "final"}
         self.problem_type = problem_type
-        self.eval_score_type = eval_score_type        # Eval metric in log
-
+        self.eval_metrics = eval_metrics
+        if type(self.eval_metrics) == str:
+            self.eval_metrics = [self.eval_metrics]
         # NOTE: Need to generate self.param_range in specific hyperopt instance
 
     def run_search(self,
@@ -109,21 +110,21 @@ class BaseHyperOptimisation(object):
             # Attempt merging of hyperlogs - until successful!
             while True:
                 try:
-                    hyperp_eval_logs = self.get_hyperparm_logs(self.hyper_log.all_run_ids + run_ids)
+                    meta_eval_log = self.get_meta_eval_log(self.hyper_log.all_run_ids + run_ids)
                     break
                 except:
                     time.sleep(1)
                     continue
 
-            perf_measures = self.evaluate_hyperparams(hyperp_eval_logs, run_ids)
+            perf_measures = self.evaluate_hyperparams(meta_eval_log, run_ids)
             time_elapsed = time.time() - start_t
 
             self.logger.info(f"MERGE - {self.current_iter}/{num_search_batches} batch of" \
                              f" hyperparameters - {eval_to_print} seeds/folds")
 
             # Update & save the Hyperparam Optimisation Log
-            self.hyper_log.update_log(batch_proposals, perf_measures,
-                                      time_elapsed, run_ids)
+            self.hyper_log.update_log(batch_proposals, meta_eval_log,
+                                      perf_measures, time_elapsed, run_ids)
             self.hyper_log.save_log()
             self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
             print_framed(f"COMPLETED BATCH {self.current_iter}/{num_search_batches}")
@@ -188,7 +189,7 @@ class BaseHyperOptimisation(object):
         for f in batch_fnames:
             os.remove(f)
 
-    def get_hyperparm_logs(self, all_run_ids):
+    def get_meta_eval_log(self, all_run_ids):
         """ Scavenge the experiment dictonaries & load in logs. """
         all_folders = [x[0] for x in os.walk(self.experiment_dir)][1:]
         # Get rid of timestring in beginning & collect all folders/hdf5 files
@@ -214,28 +215,24 @@ class BaseHyperOptimisation(object):
 
         merge_hdf5_files(meta_log_fname, log_paths,
                          file_ids=all_run_ids)
-        # Load in hyper-results log with values are meaned over seeds
-        hyperp_eval_logs = load_log(meta_log_fname, mean_seeds=True)
-        return hyperp_eval_logs
+        # Load in meta-results log with values meaned over seeds
+        meta_eval_logs = load_log(meta_log_fname)
+        return meta_eval_logs
 
     def evaluate_hyperparams(self, eval_logs, run_ids):
         """ Run the search for a number of iterations """
-        if self.problem_type == "rl":
-            # Get the integral under the reward curve
-            perf_scores = evaluate_rl_agent(eval_logs,
-                                            rew_type=self.eval_score_type,
-                                            run_ids=run_ids,
-                                            baseline_log=None)
-        elif self.problem_type == "final":
+        if self.problem_type == "final":
             # Get final training loss as performance score
             perf_scores = evaluate_final_score(eval_logs,
-                                               measure_key=self.eval_score_type,
+                                               measure_keys=self.eval_metrics,
                                                run_ids=run_ids)
         elif self.problem_type == "best":
             # Get final training loss as performance score
             perf_scores = evaluate_best_score(eval_logs,
-                                              measure_key=self.eval_score_type,
+                                              measure_keys=self.eval_metrics,
                                               run_ids=run_ids)
+        else:
+            raise ValueError
         return perf_scores
 
     def store_best_performance(self, best_save_fname, config,
@@ -251,55 +248,45 @@ class BaseHyperOptimisation(object):
         train_log.save_log(temp_log_fname=best_save_fname + ".hdf5")
 
         # STORE the final checkpoint of the agent for this training run
-        # Make sure to define model as nn.Sequential within network class inst
+        # Make sure to define model as nn.Sequential within network class
         # As is done in the BodyBuilder class - makes reloading easier!
+        import torch
         try: torch.save(network.model.state_dict(),
                         best_save_fname + ".ckpth")
         except: torch.save(network.state_dict(),
                            best_save_fname + ".ckpth")
 
 
-def evaluate_rl_agent(eval_logs, rew_type="rew_mean", run_ids=None,
-                      baseline_log=None):
-    """
-    IN: algo of interest df, type of reward (mean/median), baseline df
-    OUT: Integral over reward array subtracted w baseline
-    """
-    int_out = []
-    for i in range(len(run_ids)):
-        if baseline_log is None:
-            int_temp = eval_logs[run_ids[i]][rew_type]["mean"].sum()
-        else:
-            int_temp = (eval_logs[run_ids[i]][rew_type]["mean"]
-                        - baseline_log[rew_type]["mean"]).sum()
-        int_out.append(int_temp)
-    return int_out
-
-
-def evaluate_final_score(eval_logs, measure_key="train_loss",
+def evaluate_final_score(eval_logs, measure_keys=["train_loss"],
                          run_ids=None):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation
-    OUT: List of final scores at end of training
+    OUT: dict of final scores at end of training for all metrics
     """
-    int_out = []
-    for i in range(len(run_ids)):
-        int_temp = eval_logs[run_ids[i]][measure_key]["mean"][-1]
-        int_out.append(int_temp)
-    return int_out
+    perf_per_metric = {}
+    for metric in measure_keys:
+        int_out = {}
+        for run in run_ids:
+            int_out[run] = eval_logs[run]["stats"][metric]["mean"][-1]
+        perf_per_metric[metric] = int_out
+    return perf_per_metric
 
 
-def evaluate_best_score(eval_logs, measure_key="train_loss",
+def evaluate_best_score(eval_logs, measure_keys=["train_loss"],
                         run_ids=None, max_objective=True):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation
-    OUT: List of best scores during course of training
+    OUT: dict of best scores during course of training for all metrics
     """
-    int_out = []
-    for i in range(len(run_ids)):
-        if max_objective:
-            int_temp = np.max(eval_logs[run_ids[i]][measure_key]["mean"])
-        else:
-            int_temp = np.min(eval_logs[run_ids[i]][measure_key]["mean"])
-        int_out.append(int_temp)
-    return int_out
+    perf_per_metric = {}
+    for metric in measure_keys:
+        int_out = {}
+        for run in run_ids:
+            if max_objective:
+                int_out[run] = np.max(
+                    eval_logs[run_ids[i]]["stats"][metric]["mean"])
+            else:
+                int_out[run] = np.min(
+                    eval_logs[run_ids[i]]["stats"][metric]["mean"])
+        perf_per_metric[metric] = int_out
+    return perf_per_metric

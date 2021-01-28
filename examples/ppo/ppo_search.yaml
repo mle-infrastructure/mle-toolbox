@@ -13,8 +13,8 @@ param_search_args:
     reload_log: False
     verbose_logging: True
     maximize_objective: True
-    problem_type: "rl"
-    eval_score_type: "rew_median"
+    problem_type: "final"
+    eval_metrics: "rew_median"
     num_search_batches: 2
     num_iter_per_batch: 5
     num_evals_per_iter: 2

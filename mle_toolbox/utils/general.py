@@ -57,11 +57,12 @@ def determine_resource():
         return hostname
 
 
-def print_framed(str_to_print: str, line_width: int=85):
+def print_framed(str_to_print: str, line_width: int=85,
+                 frame_str: str = "="):
     """ Add === x === around your string to print. """
     left = np.ceil((line_width-len(str_to_print))/2).astype("int") - 2
     right = np.floor((line_width-len(str_to_print))/2).astype("int") - 2
-    print(left*"=" + "  " + str_to_print + "  " + right*"=")
+    print(left*frame_str + "  " + str_to_print + "  " + right*frame_str)
 
 
 class DotDic(dict):
@@ -321,12 +322,14 @@ def mean_over_seeds(result_dict: dict):
                     mean_tol, std_tol = tolerant_mean(new_results_dict[eval][ds][o_name])
                     mean_dict[o_name]["mean"] = mean_tol
                     mean_dict[o_name]["std"] = std_tol
-            # Append over all the meta data
+            # Append over all the meta data (strings, seeds nothing to mean)
             elif ds == "meta":
                 for i, o_name in enumerate(data_items[ds]):
                     mean_dict[o_name]["collected"] = np.array(new_results_dict[eval][ds][o_name]).squeeze()
                 # Add seeds as clean array of integers to dict
                 mean_dict["seeds"]["collected"] = evals_and_seeds[eval]
+            else:
+                raise ValueError
             mean_sources[ds] = mean_dict
         new_results_dict[eval] = mean_sources
     return DotDic(new_results_dict)

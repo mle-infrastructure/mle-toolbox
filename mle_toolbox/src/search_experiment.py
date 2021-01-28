@@ -31,7 +31,7 @@ def run_hyperparameter_search(meta_job_args: dict,
                                             meta_job_args.experiment_dir,
                                             param_search_args.params_to_search,
                                             param_search_args.problem_type,
-                                            param_search_args.eval_score_type)
+                                            param_search_args.eval_metrics)
 
     elif param_search_args.search_type == "grid":
         hyper_opt = GridHyperoptimisation(hyper_log, single_job_args,
@@ -40,7 +40,7 @@ def run_hyperparameter_search(meta_job_args: dict,
                                           meta_job_args.experiment_dir,
                                           param_search_args.params_to_search,
                                           param_search_args.problem_type,
-                                          param_search_args.eval_score_type)
+                                          param_search_args.eval_metrics)
 
     elif param_search_args.search_type == "smbo":
         hyper_opt = SMBOHyperoptimisation(hyper_log, single_job_args,
@@ -49,7 +49,7 @@ def run_hyperparameter_search(meta_job_args: dict,
                                           meta_job_args.experiment_dir,
                                           param_search_args.params_to_search,
                                           param_search_args.problem_type,
-                                          param_search_args.eval_score_type,
+                                          param_search_args.eval_metrics,
                                           param_search_args.smbo_config)
 
     else:

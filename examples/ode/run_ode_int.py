@@ -22,7 +22,7 @@ def main(train_config, net_config, log_config):
         # Update & save the newest log
         if (i % train_config.log_every_steps) == 0:
             time_tick = [i+1]
-            stats_tick = [x_t[-1]]
+            stats_tick = [x_t[-1], np.random.normal()]
             log.update_log(time_tick, stats_tick)
             log.save_log()
     return

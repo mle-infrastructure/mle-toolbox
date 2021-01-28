@@ -2,7 +2,7 @@ import time
 import pprint
 import numpy as np
 import logging
-from ..utils.general import load_pkl_object, save_pkl_object
+from ..utils.general import load_pkl_object, save_pkl_object, print_framed
 
 
 class HyperoptLogger(object):
@@ -22,36 +22,38 @@ class HyperoptLogger(object):
         if reload:
             self.reload_log()
             self.logger.info("Reloaded Log with {} Evaluations".format(self.iter_id))
-            self.logger.info("Best evaluation so far: Iter {} | Params {}".format(self.best_iter_id,
-                                                                                  self.best_params))
+            self.logger.info("Best evaluation so far: Iter {} | Params {}".format(
+                self.best_iter_id, self.best_params))
         else:
             self.opt_log = {}               # List of dict of evals
             self.iter_id = 0                # How many iterations already eval
             self.all_run_ids = []           # All run ids of evals
             self.all_evaluated_params = []  # All evaluated parameters
-            self.best_iter_id, self.best_params = 0, {}  # Best eval so far
-
         self.batch_id = 0                   # Batch evaluation tracker
 
-    def update_log(self, params, target, time_elapsed, run_ids):
+    def update_log(self, params, meta_eval_log, target, time_elapsed, run_ids):
         """ Update the log dictionary with the most recent result dictionary """
         # Update the batch evaluation counter
         self.batch_id += 1
 
         # Need to account for batch case - log list of dictionaries!
         if not isinstance(params, list):
-            params, target = list(params), list(target)
-
-        # Get best performance in current batch - useful for saving best log/net
-        self.best_iter_in_batch = np.argmax(target)
+            params = list(params)
+        meta_keys_to_track = ["log_dir", "network_ckpt", "seeds"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):
             self.iter_id += 1
             current_iter = {"params": params[iter],
-                            "target": target[iter],
                             "time_elapsed": time_elapsed,
                             "run_id": run_ids[iter]}
+            # Add all of the individual tracked metrics
+            for k, v in target.items():
+                current_iter[k] = v[run_ids[iter]]
+            # Add the meta data from the meta_eval_log
+            for k in meta_keys_to_track:
+                current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
+            # Add collected info from eval to the log
             self.opt_log[self.iter_id] = current_iter
 
             # Store all evaluated parameters!
@@ -60,14 +62,18 @@ class HyperoptLogger(object):
         # Keep track of all results/runs sofar!
         self.all_run_ids += run_ids
         # Update best performance tracker
-        iter_id, target, params = self.get_best_performance()
+        best_per_metric = self.get_best_performances(target.keys())
 
         # Print currently best evaluation
         if self.verbose:
-            self.logger.info("BATCH - {} | Total: {} | Best: {:.2f} (Iter {}) | Current: {:.2f}".format(
-            self.batch_id, self.iter_id, target, iter_id,
-            self.opt_log[self.iter_id]["target"]))
-            self.logger.info("BEST PARAMS - {}".format(params))
+            self.logger.info("BATCH ITERATION - {} | Total evaluations: {} ".format(
+                            self.batch_id, self.iter_id))
+            for i, m in enumerate(best_per_metric.keys()):
+                print_framed(m, frame_str="-")
+                self.logger.info(r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {}".format(
+                        m, best_per_metric[m]["score"],
+                        best_per_metric[m]["run_id"]+1))
+                self.logger.info("PARAMS: {}".format(best_per_metric[m]["params"]))
 
     def save_log(self):
         """ Save current state of hyperparameter optimization as .pkl file """
@@ -83,7 +89,6 @@ class HyperoptLogger(object):
                 self.all_evaluated_params.append(eval_iter["params"])
                 self.all_run_ids.append(eval_iter["run_id"])
             self.iter_id = len(self.opt_log)
-            self.get_best_performance()
         except:
             self.opt_log = {}
             self.iter_id = 0
@@ -91,24 +96,24 @@ class HyperoptLogger(object):
             self.all_run_ids = []
             self.best_iter_id, self.best_params = 0, {}
 
-    def get_best_performance(self):
+    def get_best_performances(self, eval_metrics):
         """ Get best performing hyperparam configuration up to current iter """
-        # Define Boolean to indicate if we found a better param config lately
-        self.updated_best_performance = 0
-
-        # In first iteration we have to disregard any baseline & construct 1st
-        for iter_id, iter_values in self.opt_log.items():
-            if self.max_target and iter_values["target"] > self.best_target:
-                self.best_iter_id = iter_id
-                self.best_target = iter_values["target"]
-                self.best_params = iter_values["params"]
-                self.updated_best_performance = 1
-            elif not self.max_target and iter_values["target"] < self.best_target:
-                self.best_iter_id = iter_id
-                self.best_target = iter_values["target"]
-                self.best_params = iter_values["params"]
-                self.updated_best_performance = 1
-        return self.best_iter_id, self.best_target, self.best_params
+        # Loop over all iterations and get best score for each metric
+        best_performances = {}
+        for metric in eval_metrics:
+            all_scores = []
+            for iter_id, iter_values in self.opt_log.items():
+                all_scores.append(iter_values[metric])
+            if self.max_target:
+                best_id = np.argmax(all_scores)
+            else:
+                best_id = np.argmin(all_scores)
+            best_score = self.opt_log[best_id][metric]
+            best_params = self.opt_log[best_id]["params"]
+            best_performances[metric] = {"run_id": best_id,
+                                         "score": best_score,
+                                         "params": best_params}
+        return best_performances
 
     def __len__(self):
         return len(self.opt_log)

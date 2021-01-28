@@ -15,7 +15,7 @@ param_search_args:
     verbose_logging: True
     maximize_objective: True
     problem_type: "final"
-    eval_score_type: "integral"
+    eval_metrics: "integral"
     num_search_batches: 3
     num_iter_per_batch: 5
     num_evals_per_iter: 2
