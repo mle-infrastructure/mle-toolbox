@@ -13,16 +13,16 @@ requires = [
             'numpy',
             'pandas',
             'h5py',
-            'commentjson',
+            'toml',
             'pyyaml',
-            'colorclass',
-            'terminaltables',
+            'commentjson',
+            'pickledb',
             'gitpython',
             'scp',
-            'pickledb',
+            'paramiko',
             'tabulate',
-            'toml',
-            'paramiko'
+            'colorclass',
+            'terminaltables',
             ]
 
 setup(

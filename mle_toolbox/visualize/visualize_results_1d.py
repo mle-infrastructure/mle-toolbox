@@ -185,8 +185,9 @@ def visualize_1D_lcurves(main_log: dict,
                         curve_labels: list = [],
                         every_nth_tick: int = 1,
                         plot_std_bar: bool = False,
-                        run_ids: list = None):
-    """ Plot learning curves from meta_log. """
+                        run_ids: Union[None, list] = None,
+                        rgb_tuples: Union[List[tuple], None] = None):
+    """ Plot learning curves from meta_log. Select data and customize plot. """
     # Plot all curves if not subselected
     if run_ids is None:
         run_ids = list(main_log.keys())
@@ -196,13 +197,17 @@ def visualize_1D_lcurves(main_log: dict,
         curve_labels = run_ids
 
     fig, axs = plt.subplots(1, 1, figsize=(8, 5))
-    color_by = sns.light_palette("navy", len(run_ids),
-                                 reverse=False)
+    if rgb_tuples is None:
+        # Default colormap is blue to red diverging seaborn palette
+        color_by = sns.diverging_palette(240, 10, sep=1, n=len(run_ids))
+        #color_by = sns.light_palette("navy", len(run_ids), reverse=False)
+    else:
+        color_by = rgb_tuples
 
     for i in range(len(run_ids)):
         label = curve_labels[i]
         run_id = run_ids[i]
-        # Smooth the curve to plot
+        # Smooth the curve to plot for a specified window (1 = no smoothing)
         smooth_mean, _ = moving_smooth_ts(
             main_log[run_id][target_to_plot]["mean"], smooth_window)
         smooth_std, _ = moving_smooth_ts(
@@ -212,8 +217,8 @@ def visualize_1D_lcurves(main_log: dict,
 
         if plot_std_bar:
             axs.fill_between(main_log[run_id][iter_to_plot]["mean"],
-                             smooth_mean-smooth_std, smooth_mean+smooth_std, color=color_by[i], alpha=0.5)
-
+                             smooth_mean-smooth_std, smooth_mean+smooth_std,
+                             color=color_by[i], alpha=0.5)
 
     range_x = main_log[run_id][iter_to_plot]["mean"]
     axs.set_xticks(range_x)

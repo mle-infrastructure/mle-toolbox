@@ -26,8 +26,7 @@ class DeepLogger(object):
         print_every_k_updates (int): after how many log updates - verbose
         fname_ext (str): seed or fold id to distinguish logs with
         save_every_k_ckpt (int): save every other checkpoint
-
-    Methods:
+        overwrite_experiment_dir (bool): delete old log file/tboard dir
     """
 
     def __init__(self,

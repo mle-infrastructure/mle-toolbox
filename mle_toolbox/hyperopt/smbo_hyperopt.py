@@ -17,6 +17,12 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
                  problem_type: str,
                  eval_score_type: str,
                  smbo_config: dict):
+        try:
+            import skopt
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(f"{err}. You need to install `scikit-optimize` "
+                                      "to use the `mle_toolbox.hyperopt` module.")
+
         BaseHyperOptimisation.__init__(self, hyper_log, job_arguments,
                                        config_fname, job_fname,
                                        experiment_dir, params_to_search,
