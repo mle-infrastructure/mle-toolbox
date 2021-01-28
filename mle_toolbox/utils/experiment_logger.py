@@ -225,15 +225,15 @@ class DeepLogger(object):
             h5f.create_dataset(name=self.seed_id + "/meta/network_ckpt",
                                data=[self.final_network_save_fname.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
-                               dtype='S10')
+                               dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/log_dir",
                                data=[self.log_save_fname.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
-                               dtype='S10')
-            h5f.create_dataset(name=self.seed_id + "/meta/log_dir",
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/seed_id",
                                data=[self.seed_id.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
-                               dtype='S10')
+                               dtype='S200')
 
         # Store all time_to_track variables
         for o_name in self.time_to_track:

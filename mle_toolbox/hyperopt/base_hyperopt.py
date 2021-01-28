@@ -11,7 +11,7 @@ from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
 from ..utils.manipulate_files import merge_hdf5_files
 from ..utils.general import (DotDic, NpEncoder, load_config,
-                             load_log, mean_over_evals, print_framed)
+                             load_log, mean_over_seeds, print_framed)
 
 
 class BaseHyperOptimisation(object):
@@ -214,10 +214,8 @@ class BaseHyperOptimisation(object):
 
         merge_hdf5_files(meta_log_fname, log_paths,
                          file_ids=all_run_ids)
-        # Load in hyperresults log
-        result_dict = load_log(meta_log_fname, mean_over_seeds=False)
-        # Mean each different run over the seeds
-        hyperp_eval_logs = mean_over_evals(result_dict)
+        # Load in hyper-results log with values are meaned over seeds
+        hyperp_eval_logs = load_log(meta_log_fname, mean_seeds=True)
         return hyperp_eval_logs
 
     def evaluate_hyperparams(self, eval_logs, run_ids):
