@@ -24,7 +24,7 @@ class DeepLogger(object):
         tboard_fname (str): base name of tensorboard
         use_tboard (bool): whether to log to tensorboard
         print_every_k_updates (int): after how many log updates - verbose
-        fname_ext (str): seed or fold id to distinguish logs with
+        seed_id (str): seed or fold id to distinguish logs with
         save_every_k_ckpt (int): save every other checkpoint
         overwrite_experiment_dir (bool): delete old log file/tboard dir
     """
@@ -39,7 +39,7 @@ class DeepLogger(object):
                  tboard_fname: Union[str, None] = None,
                  use_tboard: bool=False,
                  print_every_k_updates: Union[int, None] = None,
-                 fname_ext: Union[str, None] = None,
+                 seed_id: Union[str, None] = None,
                  save_every_k_ckpt: Union[int, None] = None,
                  overwrite_experiment_dir: bool = False):
         # Initialize counters of log
@@ -52,7 +52,7 @@ class DeepLogger(object):
         self.save_every_k_ckpt = save_every_k_ckpt
 
         # Set up the logging directories - save the timestamped config file
-        self.setup_experiment_dir(experiment_dir, config_fname, fname_ext,
+        self.setup_experiment_dir(experiment_dir, config_fname, seed_id,
                                   use_tboard, tboard_fname,
                                   overwrite_experiment_dir)
 
@@ -73,7 +73,7 @@ class DeepLogger(object):
     def setup_experiment_dir(self,
                              base_exp_dir: str,
                              config_fname: Union[str, None],
-                             fname_ext: Union[str, None],
+                             seed_id: Union[str, None],
                              use_tboard: bool=False,
                              tboard_fname: Union[str, None]=None,
                              overwrite_experiment_dir: bool = False):
@@ -110,26 +110,26 @@ class DeepLogger(object):
         if not os.path.exists(config_copy):
             shutil.copy(config_fname, config_copy)
 
-        if fname_ext is None:
+        if seed_id is None:
             exp_time_base_ext = exp_time_base
         else:
-            exp_time_base_ext = exp_time_base + "_" + fname_ext
+            exp_time_base_ext = exp_time_base + "_" + seed_id
 
         # Set where to log to (Stats - .hdf5, Network - .ckpth)
         self.log_save_fname = (self.experiment_dir + "logs/" +
-                               timestr + base_str + "_" + fname_ext
+                               timestr + base_str + "_" + seed_id
                                + ".hdf5")
 
         # Create separate filenames for checkpoints & final trained network
         if self.save_every_k_ckpt is not None:
             self.final_network_save_fname = (self.experiment_dir + "networks/final/" +
-                                             timestr + base_str + "_" + fname_ext
+                                             timestr + base_str + "_" + seed_id
                                               + ".pt")
             self.ckpt_network_save_fname = (self.experiment_dir + "networks/ckpt/" +
-                                             timestr + base_str + "_" + fname_ext)
+                                             timestr + base_str + "_" + seed_id)
         else:
             self.final_network_save_fname = (self.experiment_dir + "networks/" +
-                                             timestr + base_str + "_" + fname_ext
+                                             timestr + base_str + "_" + seed_id
                                               + ".pt")
 
         # Delete old log file and tboard dir if overwrite allowed
@@ -139,7 +139,7 @@ class DeepLogger(object):
             if use_tboard:
                 if os.path.exists(self.experiment_dir + "tboards/"):
                     shutil.rmtree(self.experiment_dir + "tboards/")
-        self.fname_ext = fname_ext
+        self.seed_id = seed_id
 
         # Initialize tensorboard logger/summary writer
         if tboard_fname is not None and use_tboard:
@@ -150,7 +150,7 @@ class DeepLogger(object):
                                           "`tensorboardX` if you want that "
                                           "DeepLogger logs to tensorboard.")
             self.writer = SummaryWriter(self.experiment_dir + "tboards/" +
-                                        tboard_fname + "_" + fname_ext)
+                                        tboard_fname + "_" + seed_id)
         else:
             self.writer = None
 
@@ -220,23 +220,40 @@ class DeepLogger(object):
         h5f = h5py.File(self.log_save_fname, 'a')
 
         # Create "datasets" to store in the hdf5 file [time, stats]
+        # Store all relevant meta data (log filename, checkpoint filename)
+        if self.log_save_counter == 0:
+            h5f.create_dataset(name=self.seed_id + "/meta/network_ckpt",
+                               data=[self.final_network_save_fname.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S10')
+            h5f.create_dataset(name=self.seed_id + "/meta/log_dir",
+                               data=[self.log_save_fname.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S10')
+            h5f.create_dataset(name=self.seed_id + "/meta/log_dir",
+                               data=[self.seed_id.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S10')
+
+        # Store all time_to_track variables
         for o_name in self.time_to_track:
             if self.log_save_counter >= 1:
-                if h5f.get(self.fname_ext + "/" + o_name):
-                    del h5f[self.fname_ext + "/" + o_name]
-            h5f.create_dataset(name=self.fname_ext + "/" + o_name,
+                if h5f.get(self.seed_id + "/time/" + o_name):
+                    del h5f[self.seed_id + "/time/" + o_name]
+            h5f.create_dataset(name=self.seed_id + "/time/" + o_name,
                                data=self.clock_to_track[o_name],
                                compression='gzip', compression_opts=4,
                                dtype='float32')
 
+        # Store all what_to_track variables
         for o_name in self.what_to_track:
             if self.log_save_counter >= 1:
-                if h5f.get(self.fname_ext + "/" + o_name):
-                    del h5f[self.fname_ext + "/" + o_name]
+                if h5f.get(self.seed_id + "/stats/" + o_name):
+                    del h5f[self.seed_id + "/stats/" + o_name]
             data_to_store = self.stats_to_track[o_name].to_numpy()
             if type(data_to_store[0]) == np.ndarray:
                 data_to_store = np.stack(data_to_store)
-            h5f.create_dataset(name=self.fname_ext + "/" + o_name,
+            h5f.create_dataset(name=self.seed_id + "/stats/" + o_name,
                                data=data_to_store,
                                compression='gzip', compression_opts=4,
                                dtype='float32')
@@ -249,7 +266,12 @@ class DeepLogger(object):
 
     def save_network(self, network):
         """ Save current state of the network as a checkpoint - torch! """
-        import torch
+        try:
+            import torch
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(f"{err}. You need to install "
+                                      "`torch` if you want to save a network "
+                                      "checkpoint.")
         # Update the saved weights in a single file!
         torch.save(network.state_dict(), self.final_network_save_fname)
 

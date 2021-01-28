@@ -212,7 +212,8 @@ class BaseHyperOptimisation(object):
         meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
         assert len(log_paths) == len(all_run_ids)
 
-        merge_hdf5_files(meta_log_fname, log_paths, file_ids=all_run_ids)
+        merge_hdf5_files(meta_log_fname, log_paths,
+                         file_ids=all_run_ids)
         # Load in hyperresults log
         result_dict = load_log(meta_log_fname, mean_over_seeds=False)
         # Mean each different run over the seeds

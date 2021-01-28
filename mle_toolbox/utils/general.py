@@ -151,12 +151,6 @@ def get_configs_ready(default_seed: int=0,
         parser.add_argument('-seed', '--seed_id', action="store",
                             default=default_seed, type=int,
                             help='Seed id on which to train')
-
-        # Special command line inputs for cross-validation
-        parser.add_argument('-fold_id', '--cv_fold_id', action="store",
-                            help='Fold id on which to train')
-        parser.add_argument('-fold_path', '--cv_fold_path', action="store",
-                            help='Paths to sample fold ids in .npy')
         return parser.parse_args()
 
     cmd_args = get_cmd_args()
@@ -183,14 +177,7 @@ def get_configs_ready(default_seed: int=0,
 
     # Set seed for run of your choice - has to be done via command line
     train_config.seed_id = cmd_args.seed_id
-    log_config.fname_ext = "seed-" + str(cmd_args.seed_id)
-
-    # Set the cross-validation fold id & path for ids (if applicable)
-    if cmd_args.cv_fold_id is not None:
-        train_config.fold_id = cmd_args.cv_fold_id
-        train_config.fold_path = cmd_args.cv_fold_path
-        log_config.fname_ext = "fold-" + str(cmd_args.cv_fold_id)
-
+    log_config.seed_id = "seed_" + str(cmd_args.seed_id)
     return train_config, net_config, log_config
 
 
@@ -309,7 +296,7 @@ def mean_over_evals(result_dict: dict):
     """ Mean all individual runs over their respective seeds. """
     all_keys = list(result_dict.keys())
     eval_runs, seeds = [], []
-    split_by = "_seed-" if "seed" in all_keys[0] else "_fold-"
+    split_by = "_seed_"
     for i in range(len(all_keys)):
         split = all_keys[i].split(split_by)
         eval_runs.append(split[0])
