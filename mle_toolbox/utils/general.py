@@ -45,8 +45,10 @@ def determine_resource():
     """ Check if cluster (sge/slurm) is available or only local run. """
     cc = load_mle_toolbox_config()
     hostname = platform.node()
-    on_sge_cluster = any(re.match(l, hostname) for l in cc.sge.info.node_reg_exp)
-    on_slurm_cluster = any(re.match(l, hostname) for l in cc.slurm.info.node_reg_exp)
+    on_sge_cluster = any(re.match(l, hostname) for
+                         l in cc.sge.info.node_reg_exp)
+    on_slurm_cluster = any(re.match(l, hostname) for
+                           l in cc.slurm.info.node_reg_exp)
     on_sge_head = (hostname in cc.sge.info.head_names)
     on_slurm_head = (hostname in cc.slurm.info.head_names)
     if on_sge_head or on_sge_cluster:

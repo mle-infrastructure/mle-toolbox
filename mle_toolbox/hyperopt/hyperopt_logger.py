@@ -55,7 +55,6 @@ class HyperoptLogger(object):
             for k in meta_keys_to_track:
                 current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
             # Add collected log path (after merging seeds)
-            current_iter["run_id"] + ".hdf5")
             current_iter["log_fname"] = os.path.join(
                 current_iter["experiment_dir"][0].decode("utf-8"),
                 "logs", current_iter["run_id"] + ".hdf5")
@@ -73,13 +72,13 @@ class HyperoptLogger(object):
 
         # Print currently best evaluation
         if self.verbose:
-            self.logger.info("BATCH ITERATION - {} | Total evaluations: {} ".format(
-                            self.batch_id, self.iter_id))
             for i, m in enumerate(best_per_metric.keys()):
                 print_framed(m, frame_str="-")
-                self.logger.info(r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {}".format(
+                self.logger.info(
+            r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {} | TOTAL: {}".format(
                         m, best_per_metric[m]["score"],
-                        best_per_metric[m]["run_id"]+1))
+                        best_per_metric[m]["run_id"]+1,
+                        self.iter_id))
                 self.logger.info("PARAMS: {}".format(best_per_metric[m]["params"]))
 
     def save_log(self):

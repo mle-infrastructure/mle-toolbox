@@ -14,7 +14,7 @@ from .protocol.protocol_experiment import protocol_new_experiment
 from .src.prepare_experiment import (welcome_to_mle_toolbox, get_mle_args,
                                      prepare_logger, check_job_config)
 # Import of local-to-remote helpers (verify, rsync, exec)
-from .remote.ssh_execute import (ask_for_remote_resource,
+from .remote.ssh_execute import (ask_for_resource_to_run,
                                  remote_connect_monitor_clean,
                                  run_remote_experiment)
 # Import different experiment executers
@@ -29,6 +29,8 @@ def main():
     cmd_args = get_mle_args()
     if not cmd_args.no_welcome:
         welcome_to_mle_toolbox()
+    else:
+        print_framed("EXPERIMENT STARTED")
 
     job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
@@ -55,14 +57,14 @@ def main():
     # 3. If local - check if experiment should be run on remote resource
     if resource not in ["sge-cluster", "slurm-cluster"]:
         # Ask user on which resource to run on
-        if cmd_args.remote_resource is None:
-            remote_resource = ask_for_remote_resource()
+        if cmd_args.resource_to_run is None:
+            resource_to_run = ask_for_resource_to_run()
         else:
-            remote_resource = cmd_args.remote_resource
-        if remote_resource in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
+            resource_to_run = cmd_args.resource_to_run
+        if resource_to_run in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
             if cmd_args.remote_reconnect is not None:
                 print_framed("RECONNECT TO REMOTE")
-                remote_connect_monitor_clean(remote_resource,
+                remote_connect_monitor_clean(resource_to_run,
                                              cmd_args.reconnect_remote)
                 return
             else:
@@ -71,7 +73,7 @@ def main():
                     purpose = " ".join(cmd_args.purpose)
                 else:
                     purpose = "Run on remote resource"
-                run_remote_experiment(remote_resource,
+                run_remote_experiment(resource_to_run,
                                       cmd_args.config_fname,
                                       job_config.meta_job_args.remote_exec_dir,
                                       purpose)

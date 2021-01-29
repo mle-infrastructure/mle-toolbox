@@ -10,7 +10,7 @@ from .ssh_transfer import SSH_Manager
 from ..utils import load_mle_toolbox_config
 
 
-def ask_for_remote_resource():
+def ask_for_resource_to_run():
     """ Ask user if they want to exec on remote resource. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     resource = input(time_t + " Where to run? [local/slurm/sge/gcp] ")

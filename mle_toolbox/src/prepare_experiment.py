@@ -51,8 +51,9 @@ def get_mle_args():
                         help ='Do not print welcome message.')
     parser.add_argument('-reconnect', '--remote_reconnect', default=None,
                         help ='Reconnect to experiment by str name.')
-    parser.add_argument('-resource', '--remote_resource', default=None,
-                        help ='Resource to run experiment on.')
+    parser.add_argument('-resource', '--resource_to_run', default=None,
+                        help ='Resource to run experiment on '
+                        '{local, sge-cluster, slurm-cluster, gcp-cloud}.')
 
     # Allow CLI to change base train fname/config .json/experiment dir
     parser.add_argument('-train_fname', '--base_train_fname', default=None,
