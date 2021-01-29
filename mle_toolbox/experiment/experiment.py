@@ -39,7 +39,7 @@ class Experiment(object):
         experiment_dir (str): sets path for logging & unique storage of results.
 
         cmd_line_input (dict): provides standardized cmd input to .py file in job submission.
-            Includes -config, -exp_dir, -seed, -fold_id, -fold_path.
+            Includes -config, -exp_dir, -seed.
 
         extra_cmd_line_input (dict): provides additional cmd input .py file in job submission.
             Dictionary should be structured so that input are passed as -<key> <value>.
@@ -224,12 +224,6 @@ class Experiment(object):
                 cmd_line_args += " -seed " + str(cmd_line_input["seed_id"])
                 # Update the job argument details with the seed-job-id
                 self.job_arguments["job_name"] += "-" + str(cmd_line_input["seed_id"])
-            if "fold_id" in cmd_line_input.keys():
-                cmd_line_args += " -fold_id " + str(cmd_line_input["fold_id"])
-                # Update the job argument details with the seed-job-id
-                self.job_arguments["job_name"] += "-" + str(cmd_line_input["fold_id"])
-            if "fold_path" in cmd_line_input.keys():
-                cmd_line_args += " -fold_path " + str(cmd_line_input["fold_path"])
         return cmd_line_args
 
     def generate_extra_cmd_line_args(self, cmd_line_args: str,

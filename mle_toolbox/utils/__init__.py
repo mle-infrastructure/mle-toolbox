@@ -1,6 +1,6 @@
 from .general import (load_mle_toolbox_config,
                       determine_resource, print_framed,
-                      load_yaml_config, get_configs_ready, DotDic,
+                      load_yaml_config, get_configs_ready,
                       load_log, load_config, mean_over_seeds,
                       set_random_seeds, get_closest_sub_df)
 from .experiment_logger import DeepLogger
@@ -13,7 +13,6 @@ __all__ = [
            'print_framed',
            'get_configs_ready',
            'load_yaml_config',
-           'DotDic',
            'load_log',
            'load_config',
            'mean_over_seeds',

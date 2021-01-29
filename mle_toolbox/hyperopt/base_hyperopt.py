@@ -10,8 +10,7 @@ import logging
 from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
 from ..utils.manipulate_files import merge_hdf5_files
-from ..utils.general import (DotDic, NpEncoder, load_config,
-                             load_log, mean_over_seeds, print_framed)
+from ..utils.general import load_config, load_log, mean_over_seeds, print_framed
 
 
 class BaseHyperOptimisation(object):
@@ -71,18 +70,15 @@ class BaseHyperOptimisation(object):
     def run_search(self,
                    num_search_batches: int,
                    num_iter_per_batch: int,
-                   num_evals_per_iter: Union[None, int] = None,
-                   fold_args: Union[None, dict] = None):
+                   num_evals_per_iter: Union[None, int] = None):
         """ Run the search for a number of batch iterations. """
         # Log the beginning of multiple config experiments
-        eval_to_print = (num_evals_per_iter if fold_args is None
-                         else fold_args["num_folds"])
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.info("Hyperoptimisation Run - Range of Parameters:")
         self.logger.info(f"Total No. Search Batches: {num_search_batches} |" \
                          f" Batchsize: {num_iter_per_batch} |" \
-                         f" Evaluations: {eval_to_print}")
+                         f" Evaluations: {num_evals_per_iter}")
 
         # Only run the batch loop for the remaining iterations
         self.current_iter = int(self.current_iter/num_iter_per_batch)
@@ -97,15 +93,14 @@ class BaseHyperOptimisation(object):
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
             self.logger.info(f"START - {self.current_iter}/{num_search_batches} batch of" \
-                             f" hyperparameters - {eval_to_print} seeds/folds")
+                             f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Training w. prev. specified hyperparams & evaluate, get time taken
             batch_results_dirs = self.train_hyperparams(batch_fnames,
-                                                        num_evals_per_iter,
-                                                        fold_args)
+                                                        num_evals_per_iter)
 
             self.logger.info(f"DONE - {self.current_iter}/{num_search_batches} batch of" \
-                             f" hyperparameters - {eval_to_print} seeds/folds")
+                             f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Attempt merging of hyperlogs - until successful!
             while True:
@@ -120,7 +115,7 @@ class BaseHyperOptimisation(object):
             time_elapsed = time.time() - start_t
 
             self.logger.info(f"MERGE - {self.current_iter}/{num_search_batches} batch of" \
-                             f" hyperparameters - {eval_to_print} seeds/folds")
+                             f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Update & save the Hyperparam Optimisation Log
             self.hyper_log.update_log(batch_proposals, meta_eval_log,
@@ -173,8 +168,7 @@ class BaseHyperOptimisation(object):
         return config_fnames_batch, all_run_ids
 
     def train_hyperparams(self, batch_fnames: list,
-                          num_evals_per_iter: Union[None, int] = None,
-                          fold_args: Union[None, dict] = None):
+                          num_evals_per_iter: Union[None, int] = None):
         """ Train the network for a batch of hyperparam configs """
         # Spawn the batch of synchronous evaluations
         spawn_multiple_runs(job_filename=self.job_fname,
@@ -182,7 +176,6 @@ class BaseHyperOptimisation(object):
                             job_arguments=self.job_arguments,
                             experiment_dir=self.experiment_dir,
                             num_seeds=num_evals_per_iter,
-                            fold_args=fold_args,
                             logger_level=logging.WARNING)
 
         # Clean up config files (redundant see experiment sub-folder)

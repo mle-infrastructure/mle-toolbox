@@ -24,7 +24,7 @@ class DeepLogger(object):
         tboard_fname (str): base name of tensorboard
         use_tboard (bool): whether to log to tensorboard
         print_every_k_updates (int): after how many log updates - verbose
-        seed_id (str): seed or fold id to distinguish logs with
+        seed_id (str): seed id to distinguish logs with
         save_every_k_ckpt (int): save every other checkpoint
         overwrite_experiment_dir (bool): delete old log file/tboard dir
     """

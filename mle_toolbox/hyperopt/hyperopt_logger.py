@@ -116,7 +116,6 @@ class HyperoptLogger(object):
                 best_id = np.argmin(all_scores) + 1
             best_score = self.opt_log[best_id][metric]
             best_params = self.opt_log[best_id]["params"]
-            print(all_scores, best_id, best_score, best_params)
             best_performances[metric] = {"run_id": best_id,
                                          "score": best_score,
                                          "params": best_params}

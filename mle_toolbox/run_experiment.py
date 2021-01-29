@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 # Import of general tools (loading, etc.)
-from .utils import (load_mle_toolbox_config, load_yaml_config, DotDic,
+from .utils import (load_mle_toolbox_config, load_yaml_config,
                     determine_resource, print_framed)
 # Import of helpers for protocoling experiments
 from .protocol import (protocol_summary, update_protocol_status,
@@ -35,8 +35,7 @@ def main():
     job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
     resource = determine_resource()
-    if cmd_args.debug:
-        job_config.meta_job_args["debug_mode"] = cmd_args.debug
+    job_config.meta_job_args.debug_mode = cmd_args.debug
 
     if cc.general.use_gcloud_protocol_sync:
         try:
@@ -115,28 +114,28 @@ def main():
 
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["job_type"] == "single-experiment":
-        run_single_experiment(DotDic(job_config.meta_job_args),
-                              DotDic(job_config.single_job_args))
+        run_single_experiment(job_config.meta_job_args,
+                              job_config.single_job_args)
 
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
-        run_multiple_experiments(DotDic(job_config.meta_job_args),
-                                 DotDic(job_config.single_job_args),
-                                 DotDic(job_config.multi_experiment_args))
+        run_multiple_experiments(job_config.meta_job_args,
+                                 job_config.single_job_args,
+                                 job_config.multi_experiment_args)
 
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         # Import only if needed since this has a optional dependency on scikit-optimize
         from .src import run_hyperparameter_search
-        run_hyperparameter_search(DotDic(job_config.meta_job_args),
-                                  DotDic(job_config.single_job_args),
-                                  DotDic(job_config.param_search_args))
+        run_hyperparameter_search(job_config.meta_job_args,
+                                  job_config.single_job_args,
+                                  job_config.param_search_args)
 
     # 7. Perform post-processing of results if arguments are provided
-    if job_config.post_process_args is not None:
+    if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
-        run_post_processing(DotDic(job_config.post_process_args),
+        run_post_processing(job_config.post_process_args,
                             job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 

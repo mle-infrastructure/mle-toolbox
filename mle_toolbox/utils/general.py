@@ -13,6 +13,8 @@ import numpy as np
 import random
 from typing import Union
 import pandas as pd
+from dotmap import DotMap
+
 
 try:
     import torch
@@ -38,7 +40,8 @@ except ImportError:
 
 def load_mle_toolbox_config():
     """ Load cluster config from the .toml file. See docs for more info. """
-    return DotDic(toml.load(os.path.expanduser("~/mle_config.toml")))
+    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                  _dynamic=False)
 
 
 def determine_resource():
@@ -65,29 +68,6 @@ def print_framed(str_to_print: str, line_width: int=85,
     left = np.ceil((line_width-len(str_to_print))/2).astype("int") - 2
     right = np.floor((line_width-len(str_to_print))/2).astype("int") - 2
     print(left*frame_str + "  " + str_to_print + "  " + right*frame_str)
-
-
-class DotDic(dict):
-    """
-    TODO: Replace with dotmap - https://github.com/drgrib/dotmap
-    a dictionary that supports dot notation
-    as well as dictionary access notation
-    usage: d = DotDict() or d = DotDict({'val1':'first'})
-    set attributes: d.val2 = 'second' or d['val2'] = 'second'
-    get attributes: d.val2 or d['val2']
-    """
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __deepcopy__(self, memo=None):
-        return DotDic(copy.deepcopy(dict(self), memo=memo))
-
-    def __init__(self, dct):
-        for key, value in dct.items():
-            if hasattr(value, 'keys'):
-                value = DotDic(value)
-            self[key] = value
 
 
 def set_random_seeds(seed_id: str, return_key: bool=False,
@@ -162,21 +142,23 @@ def get_configs_ready(default_seed: int=0,
     config.log_config.config_fname = cmd_args.config_fname
     config.log_config.experiment_dir = cmd_args.experiment_dir
 
-    net_config = DotDic(config["net_config"])
-    train_config = DotDic(config["train_config"])
-    log_config = DotDic(config["log_config"])
+    net_config = DotMap(config["net_config"], _dynamic=False)
+    train_config = DotMap(config["train_config"], _dynamic=False)
+    log_config = DotMap(config["log_config"], _dynamic=False)
 
     # Add device to train on if not already set in the config file
-    if train_config.device_name is None:
+    if "device_name" in train_config.keys():
         device_name = "cpu"
         if __torch_installed and torch.cuda.is_available():
             device_name = "cuda"
         train_config.device_name = device_name
 
-    if log_config.tboard_fname is None and log_config.use_tboard:
-        tboard_temp = os.path.split(cmd_args.config_fname)[1]
-        tboard_base = os.path.splitext(tboard_temp)[0]
-        log_config.tboard_fname = tboard_base
+    if "tboard_fname" not in log_config.keys():
+        if "use_tboard" in log_config.keys():
+            if log_config.use_tboard:
+                tboard_temp = os.path.split(cmd_args.config_fname)[1]
+                tboard_base = os.path.splitext(tboard_temp)[0]
+                log_config.tboard_fname = tboard_base
 
     # Set seed for run of your choice - has to be done via command line
     train_config.seed_id = cmd_args.seed_id
@@ -187,23 +169,18 @@ def get_configs_ready(default_seed: int=0,
 def load_config(config_fname: str):
     """ Load in a config JSON file and return as a dictionary """
     json_config = commentjson.loads(open(config_fname, 'r').read())
-    dict_config = DotDic(json_config)
-
-    # Make inner dictionaries indexable like a class
-    for key, value in dict_config.items():
-        if isinstance(value, dict):
-            dict_config[key] = DotDic(value)
+    dict_config = DotMap(json_config, _dynamic=False)
     return dict_config
 
 
 def load_yaml_config(cmd_args: dict) -> dict:
-    """ Load in a YAML config file & wrap as DotDic. """
+    """ Load in a YAML config file & wrap as DotMap. """
     with open(cmd_args.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # Update job config with additional cmd args (if provided)
     config = overwrite_config_with_args(config, cmd_args)
-    return DotDic(config)
+    return DotMap(config, _dynamic=False)
 
 
 def overwrite_config_with_args(config, cmd_args):
@@ -230,7 +207,7 @@ def load_pkl_object(filename):
     return obj
 
 
-def load_log(log_fname: str, mean_seeds: bool=True) -> DotDic:
+def load_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -263,10 +240,10 @@ def load_log(log_fname: str, mean_seeds: bool=True) -> DotDic:
     # Return as dot-callable dictionary
     if mean_over_seeds:
         result_dict = mean_over_seeds(result_dict)
-    return DotDic(result_dict)
+    return DotMap(result_dict, _dynamic=False)
 
 
-def mean_over_seeds(result_dict: dict):
+def mean_over_seeds(result_dict: DotMap) -> DotMap:
     """ Mean all individual runs over their respective seeds.
         IN: {'b_1_eval_0_seed_0': {'meta': {}, 'stats': {}, 'time': {}},
              'b_1_eval_0_seed_1': {'meta': {}, 'stats': {}, 'time': {}},
@@ -334,7 +311,7 @@ def mean_over_seeds(result_dict: dict):
                 raise ValueError
             mean_sources[ds] = mean_dict
         new_results_dict[eval] = mean_sources
-    return DotDic(new_results_dict)
+    return DotMap(new_results_dict, _dynamic=False)
 
 
 def tolerant_mean(arrs: list):

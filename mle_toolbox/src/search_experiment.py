@@ -59,5 +59,4 @@ def run_hyperparameter_search(meta_job_args: dict,
     # 4. Run the jobs
     hyper_opt.run_search(param_search_args.num_search_batches,
                          param_search_args.num_iter_per_batch,
-                         param_search_args.num_evals_per_iter,
-                         param_search_args.fold_args)
+                         param_search_args.num_evals_per_iter)

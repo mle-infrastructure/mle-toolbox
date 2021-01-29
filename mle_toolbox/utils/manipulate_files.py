@@ -6,7 +6,6 @@ import yaml
 import copy
 import numpy as np
 import pandas as pd
-from .general import DotDic
 
 
 def load_pkl_object(filename: str):

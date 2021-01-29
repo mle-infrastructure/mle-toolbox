@@ -33,6 +33,7 @@ def welcome_to_mle_toolbox(verbose=False):
 def get_mle_args():
     """ Get config file path & other ingredients """
     parser = argparse.ArgumentParser()
+    # Basic run-experiment options
     parser.add_argument('config_fname', metavar='C', type=str,
                         default="experiment_config.yaml",
                         help ='Filename to load config yaml from')
@@ -49,11 +50,13 @@ def get_mle_args():
     parser.add_argument('-nw', '--no_welcome', default=False,
                         action='store_true',
                         help ='Do not print welcome message.')
-    parser.add_argument('-reconnect', '--remote_reconnect', default=None,
-                        help ='Reconnect to experiment by str name.')
+
+    # Which resource to run on and whether to reconnect to running remote job
     parser.add_argument('-resource', '--resource_to_run', default=None,
                         help ='Resource to run experiment on '
                         '{local, sge-cluster, slurm-cluster, gcp-cloud}.')
+    parser.add_argument('-reconnect', '--remote_reconnect', default=None,
+                        help ='Reconnect to experiment by str name.')
 
     # Allow CLI to change base train fname/config .json/experiment dir
     parser.add_argument('-train_fname', '--base_train_fname', default=None,
