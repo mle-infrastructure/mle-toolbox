@@ -1,5 +1,5 @@
+import os
 import time
-import pprint
 import numpy as np
 import logging
 from ..utils.general import load_pkl_object, save_pkl_object, print_framed
@@ -39,21 +39,28 @@ class HyperoptLogger(object):
         # Need to account for batch case - log list of dictionaries!
         if not isinstance(params, list):
             params = list(params)
-        meta_keys_to_track = ["log_dir", "network_ckpt", "seeds"]
+        meta_keys_to_track = ["log_paths", "experiment_dir",
+                              "network_ckpt", "seeds"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):
             self.iter_id += 1
             current_iter = {"params": params[iter],
                             "time_elapsed": time_elapsed,
-                            "run_id": run_ids[iter]}
+                            "run_id": run_ids[iter],}
             # Add all of the individual tracked metrics
             for k, v in target.items():
                 current_iter[k] = v[run_ids[iter]]
             # Add the meta data from the meta_eval_log
             for k in meta_keys_to_track:
                 current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
-            # Add collected info from eval to the log
+            # Add collected log path (after merging seeds)
+            current_iter["run_id"] + ".hdf5")
+            current_iter["log_fname"] = os.path.join(
+                current_iter["experiment_dir"][0].decode("utf-8"),
+                "logs", current_iter["run_id"] + ".hdf5")
+
+            # Merge collected info from eval to the log
             self.opt_log[self.iter_id] = current_iter
 
             # Store all evaluated parameters!

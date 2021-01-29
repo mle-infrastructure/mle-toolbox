@@ -235,27 +235,6 @@ class BaseHyperOptimisation(object):
             raise ValueError
         return perf_scores
 
-    def store_best_performance(self, best_save_fname, config,
-                               train_log, network):
-        """ Store the best log, agent & config until know """
-        # STORE the parameter configuration for the best agent
-        with open(best_save_fname + ".json", "w") as fp:
-            json.dump(config, fp, cls=NpEncoder)
-
-        # STORE the log of the training run as an hdf5 file
-        if os.path.exists(best_save_fname + ".hdf5"):
-            os.remove(best_save_fname + ".hdf5")
-        train_log.save_log(temp_log_fname=best_save_fname + ".hdf5")
-
-        # STORE the final checkpoint of the agent for this training run
-        # Make sure to define model as nn.Sequential within network class
-        # As is done in the BodyBuilder class - makes reloading easier!
-        import torch
-        try: torch.save(network.model.state_dict(),
-                        best_save_fname + ".ckpth")
-        except: torch.save(network.state_dict(),
-                           best_save_fname + ".ckpth")
-
 
 def evaluate_final_score(eval_logs, measure_keys=["train_loss"],
                          run_ids=None):

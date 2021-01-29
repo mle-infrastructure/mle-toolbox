@@ -81,6 +81,7 @@ class DeepLogger(object):
         # Get timestamp of experiment & create new directories
         timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
         base_str = os.path.split(config_fname)[1].split(".")[0]
+        self.base_str = base_str
         self.experiment_dir = os.path.join(base_exp_dir, timestr + base_str + "/")
 
         # Create a new empty directory for the experiment
@@ -226,8 +227,16 @@ class DeepLogger(object):
                                data=[self.final_network_save_fname.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/log_dir",
+            h5f.create_dataset(name=self.seed_id + "/meta/log_paths",
                                data=[self.log_save_fname.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/experiment_dir",
+                               data=[self.experiment_dir.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
+                               data=[self.base_str.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/seed_id",
