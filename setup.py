@@ -12,6 +12,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 requires = [
             'numpy',
             'pandas',
+            'dotmap',
             'h5py',
             'toml',
             'pyyaml',

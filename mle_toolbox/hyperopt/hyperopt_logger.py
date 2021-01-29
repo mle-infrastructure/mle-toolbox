@@ -56,7 +56,7 @@ class HyperoptLogger(object):
                 current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
             # Add collected log path (after merging seeds)
             current_iter["log_fname"] = os.path.join(
-                current_iter["experiment_dir"][0].decode("utf-8"),
+                current_iter["experiment_dir"][0],
                 "logs", current_iter["run_id"] + ".hdf5")
 
             # Merge collected info from eval to the log
