@@ -77,7 +77,7 @@ class HyperoptLogger(object):
                 self.logger.info(
             r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {} | TOTAL: {}".format(
                         m, best_per_metric[m]["score"],
-                        best_per_metric[m]["run_id"]+1,
+                        best_per_metric[m]["run_id"],
                         self.iter_id))
                 self.logger.info("PARAMS: {}".format(best_per_metric[m]["params"]))
 
@@ -111,11 +111,12 @@ class HyperoptLogger(object):
             for iter_id, iter_values in self.opt_log.items():
                 all_scores.append(iter_values[metric])
             if self.max_target:
-                best_id = np.argmax(all_scores)
+                best_id = np.argmax(all_scores) + 1
             else:
-                best_id = np.argmin(all_scores)
+                best_id = np.argmin(all_scores) + 1
             best_score = self.opt_log[best_id][metric]
             best_params = self.opt_log[best_id]["params"]
+            print(all_scores, best_id, best_score, best_params)
             best_performances[metric] = {"run_id": best_id,
                                          "score": best_score,
                                          "params": best_params}
