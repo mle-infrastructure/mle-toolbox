@@ -104,7 +104,7 @@ def protocol_new_experiment(job_config: dict,
     db.dadd(new_experiment_id, ("e-hash", experiment_hash))
 
     # Add path to generated figures if postprocessing is done in the end
-    if job_config.post_process_args is not None:
+    if "post_process_args" in job_config.keys():
         figure_path = job_config.post_process_args["extra_cmd_line_input"]["figures_dir"]
         db.dadd(new_experiment_id, ("figures_dir", figure_path))
 
