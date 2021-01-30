@@ -54,10 +54,16 @@ class HyperoptLogger(object):
             # Add the meta data from the meta_eval_log
             for k in meta_keys_to_track:
                 current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
+
+            # Take first exp dir if there are duplicates in list
+            if len(current_iter["experiment_dir"]) == 0:
+                exp_dir = current_iter["experiment_dir"]
+            else:
+                exp_dir = current_iter["experiment_dir"][0]
+
             # Add collected log path (after merging seeds)
             current_iter["log_fname"] = os.path.join(
-                current_iter["experiment_dir"][0],
-                "logs", current_iter["run_id"] + ".hdf5")
+                exp_dir, "logs", current_iter["run_id"] + ".hdf5")
 
             # Merge collected info from eval to the log
             self.opt_log[self.iter_id] = current_iter
