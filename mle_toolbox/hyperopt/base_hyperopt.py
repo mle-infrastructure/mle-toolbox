@@ -6,6 +6,7 @@ import copy
 import numpy as np
 from typing import Union, List
 import logging
+from pprint import pformat
 
 from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
@@ -76,6 +77,8 @@ class BaseHyperOptimisation(object):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.info("Hyperoptimisation Run - Range of Parameters:")
+        for line in pformat(self.params_to_search.toDict()).split('\n'):
+            self.logger.info(line)
         self.logger.info(f"Total No. Search Batches: {num_search_batches} |" \
                          f" Batchsize: {num_iter_per_batch} |" \
                          f" Evaluations: {num_evals_per_iter}")
