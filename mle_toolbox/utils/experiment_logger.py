@@ -159,7 +159,8 @@ class DeepLogger(object):
                    clock_tick: list,
                    stats_tick: list,
                    network=None,
-                   plot_to_tboard=None):
+                   plot_to_tboard=None,
+                   save=False):
         """ Update with the newest tick of performance stats, net weights """
         # Transform clock_tick, stats_tick lists into pd arrays
         c_tick = pd.DataFrame(columns=self.time_to_track)
@@ -178,15 +179,19 @@ class DeepLogger(object):
         if self.writer is not None:
             self.update_tboard(clock_tick, stats_tick, network, plot_to_tboard)
 
-        # Save the most recent network checkpoint
-        if network is not None:
-            self.save_network(network)
 
         # Print the most current results
         if self.verbose and self.print_every_k_updates is not None:
             if self.log_update_counter % self.print_every_k_updates == 0:
                 print(pd.concat([c_tick[self.time_to_print],
                                  s_tick[self.what_to_print]], axis=1))
+
+        # Save the log if boolean says so
+        if save:
+            self.save_log()
+            # Save the most recent network checkpoint
+            if network is not None:
+                self.save_network(network)
 
     def update_tboard(self,
                       clock_tick: list,

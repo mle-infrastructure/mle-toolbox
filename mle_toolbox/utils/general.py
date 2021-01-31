@@ -304,8 +304,14 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
             # Append over all the meta data (strings, seeds nothing to mean)
             elif ds == "meta":
                 for i, o_name in enumerate(data_items[ds]):
-                    mean_dict[o_name]["collected"] = np.array(
+                    temp = np.array(
                     new_results_dict[eval][ds][o_name]).squeeze().astype('U200')
+                    # Get rid of duplicate experiment dir strings
+                    if o_name == "experiment_dir":
+                        mean_dict[o_name]["collected"] = str(np.unique(temp))
+                    else:
+                        mean_dict[o_name]["collected"] = temp
+
                 # Add seeds as clean array of integers to dict
                 mean_dict["seeds"]["collected"] = evals_and_seeds[eval]
             else:
