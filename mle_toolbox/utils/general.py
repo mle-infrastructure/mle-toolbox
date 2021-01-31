@@ -98,7 +98,7 @@ def set_random_seeds(seed_id: str, return_key: bool=False,
     if return_key:
         if not __jax_installed:
             raise ValueError("You need to install jax to return a PRNG key.")
-        key = jrandom.PRNGKey(seed_id)
+        key = jax.random.PRNGKey(seed_id)
         return key
 
 
