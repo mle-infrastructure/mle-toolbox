@@ -70,36 +70,36 @@ def print_framed(str_to_print: str, line_width: int=85,
     print(left*frame_str + "  " + str_to_print + "  " + right*frame_str)
 
 
-def set_random_seeds(seed_id: str, return_key: bool=False,
+def set_random_seeds(seed_id: int, return_key: bool=False,
                      verbose: bool=False):
     """ Set random seed (random, npy, torch, gym) for reproduction """
+    if seed_id is not None:
+        os.environ['PYTHONHASHSEED'] = str(seed_id)
+        random.seed(seed_id)
+        np.random.seed(seed_id)
+        seeds_set = ['random', 'numpy']
+        if __torch_installed:
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+            torch.manual_seed(seed_id)
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(seed_id)
+                torch.cuda.manual_seed(seed_id)
+            seeds_set.append('torch')
 
-    os.environ['PYTHONHASHSEED'] = str(seed_id)
-    random.seed(seed_id)
-    np.random.seed(seed_id)
-    seeds_set = ['random', 'numpy']
-    if __torch_installed:
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-        torch.manual_seed(seed_id)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(seed_id)
-            torch.cuda.manual_seed(seed_id)
-        seeds_set.append('torch')
+        if __gym_installed:
+            if hasattr(gym.spaces, 'prng'):
+                gym.spaces.prng.seed(seed_id)
+            seeds_set.append('gym')
 
-    if __gym_installed:
-        if hasattr(gym.spaces, 'prng'):
-            gym.spaces.prng.seed(seed_id)
-        seeds_set.append('gym')
+        if verbose:
+            print(f"-- Random seeds ({', '.join(seeds_set)}) were set to {seed_id}")
 
-    if verbose:
-        print(f"-- Random seeds ({', '.join(seeds_set)}) were set to {seed_id}")
-
-    if return_key:
-        if not __jax_installed:
-            raise ValueError("You need to install jax to return a PRNG key.")
-        key = jax.random.PRNGKey(seed_id)
-        return key
+        if return_key:
+            if not __jax_installed:
+                raise ValueError("You need to install jax to return a PRNG key.")
+            key = jax.random.PRNGKey(seed_id)
+            return key
 
 
 class NpEncoder(json.JSONEncoder):
@@ -132,8 +132,7 @@ def get_configs_ready(default_seed: int=0,
 
         # Command line input for the random seed to replicate experiment
         parser.add_argument('-seed', '--seed_id', action="store",
-                            default=default_seed, type=int,
-                            help='Seed id on which to train')
+                            default=None, help='Seed id on which to train')
         return parser.parse_args()
 
     cmd_args = get_cmd_args()
@@ -161,8 +160,9 @@ def get_configs_ready(default_seed: int=0,
                 log_config.tboard_fname = tboard_base
 
     # Set seed for run of your choice - has to be done via command line
-    train_config.seed_id = cmd_args.seed_id
-    log_config.seed_id = "seed_" + str(cmd_args.seed_id)
+    if cmd_args.seed_id is not None:
+        train_config.seed_id = int(cmd_args.seed_id)
+        log_config.seed_id = "seed_" + str(cmd_args.seed_id)
     return train_config, net_config, log_config
 
 
