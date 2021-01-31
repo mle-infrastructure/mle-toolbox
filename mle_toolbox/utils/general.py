@@ -70,7 +70,7 @@ def print_framed(str_to_print: str, line_width: int=85,
     print(left*frame_str + "  " + str_to_print + "  " + right*frame_str)
 
 
-def set_random_seeds(seed_id: int, return_key: bool=False,
+def set_random_seeds(seed_id: Union[int, None], return_key: bool=False,
                      verbose: bool=False):
     """ Set random seed (random, npy, torch, gym) for reproduction """
     if seed_id is not None:
@@ -100,6 +100,8 @@ def set_random_seeds(seed_id: int, return_key: bool=False,
                 raise ValueError("You need to install jax to return a PRNG key.")
             key = jax.random.PRNGKey(seed_id)
             return key
+    else:
+        print("Please provide seed_id that is not None. Using package default.")
 
 
 class NpEncoder(json.JSONEncoder):
@@ -115,27 +117,25 @@ class NpEncoder(json.JSONEncoder):
             return super(NpEncoder, self).default(obj)
 
 
-def get_configs_ready(default_seed: int=0,
+def get_configs_ready(default_seed: Union[None, int] = None,
                       default_config_fname: str="configs/base_config.json",
                       default_experiment_dir: str="experiments/"):
     """ Prepare the config files for the experiment run. """
-    def get_cmd_args():
-        """ Get env name, config file path & device to train from cmd line """
-        parser = argparse.ArgumentParser()
-        # Standard inputs for all training runs
-        parser.add_argument('-config', '--config_fname', action="store",
-                            default=default_config_fname, type=str,
-                            help='Filename from which to load config')
-        parser.add_argument('-exp_dir', '--experiment_dir', action="store",
-                            default=default_experiment_dir, type=str,
-                            help='Directory to store logs in.')
+    parser = argparse.ArgumentParser()
+    # Standard inputs for all training runs
+    parser.add_argument('-config', '--config_fname', action="store",
+                        default=default_config_fname, type=str,
+                        help='Filename from which to load config')
+    parser.add_argument('-exp_dir', '--experiment_dir', action="store",
+                        default=default_experiment_dir, type=str,
+                        help='Directory to store logs in.')
 
-        # Command line input for the random seed to replicate experiment
-        parser.add_argument('-seed', '--seed_id', action="store",
-                            default=None, help='Seed id on which to train')
-        return parser.parse_args()
+    # Command line input for the random seed to replicate experiment
+    parser.add_argument('-seed', '--seed_id', action="store",
+                        default=default_seed,
+                        help='Seed id on which to train')
+    cmd_args = parser.parse_args()
 
-    cmd_args = get_cmd_args()
     # Load config file + add config fname to clone + add experiment dir
     config = load_config(cmd_args.config_fname)
     config.log_config.config_fname = cmd_args.config_fname
@@ -163,6 +163,8 @@ def get_configs_ready(default_seed: int=0,
     if cmd_args.seed_id is not None:
         train_config.seed_id = int(cmd_args.seed_id)
         log_config.seed_id = "seed_" + str(cmd_args.seed_id)
+    else:
+        log_config.seed_id = "seed_not_set"
     return train_config, net_config, log_config
 
 
