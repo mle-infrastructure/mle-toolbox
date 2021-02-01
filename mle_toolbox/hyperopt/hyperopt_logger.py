@@ -2,15 +2,18 @@ import os
 import time
 import numpy as np
 import logging
+from typing import Union
 from ..utils.general import load_pkl_object, save_pkl_object, print_framed
 
 
 class HyperoptLogger(object):
     def __init__(self, hyperlog_fname: str, max_target: bool=True,
+                 eval_metrics: Union[str, list]=[],
                  verbose: bool=True, reload: bool=False):
         """ Mini-class to log the  """
         self.hyperlog_fname = hyperlog_fname    # Where to save the log to
         self.max_target = max_target  # Whether we want to max target (reward)
+        self.eval_metrics = eval_metrics  # Var names to compare across runs
         self.verbose = verbose
         if self.max_target: self.best_target = -np.inf
         else: self.best_target = np.inf
@@ -22,8 +25,7 @@ class HyperoptLogger(object):
         if reload:
             self.reload_log()
             self.logger.info("Reloaded Log with {} Evaluations".format(self.iter_id))
-            self.logger.info("Best evaluation so far: Iter {} | Params {}".format(
-                self.best_iter_id, self.best_params))
+            self.print_log_state()
         else:
             self.opt_log = {}               # List of dict of evals
             self.iter_id = 0                # How many iterations already eval
@@ -69,18 +71,24 @@ class HyperoptLogger(object):
         # Keep track of all results/runs sofar!
         self.all_run_ids += run_ids
         # Update best performance tracker
-        best_per_metric = self.get_best_performances(target.keys())
+        self.best_per_metric = self.get_best_performances(target.keys())
 
         # Print currently best evaluation
         if self.verbose:
-            for i, m in enumerate(best_per_metric.keys()):
+            self.print_log_state()
+
+    def print_log_state(self):
+        """ Log currently best param config for each metric. """
+        if self.iter_id > 0:
+            for i, m in enumerate(self.best_per_metric.keys()):
                 print_framed(m, frame_str="-")
                 self.logger.info(
             r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {} | TOTAL: {}".format(
-                        m, best_per_metric[m]["score"],
-                        best_per_metric[m]["run_id"],
+                        m, self.best_per_metric[m]["score"],
+                        self.best_per_metric[m]["run_id"],
                         self.iter_id))
-                self.logger.info("PARAMS: {}".format(best_per_metric[m]["params"]))
+                self.logger.info("PARAMS: {}".format(
+                    self.best_per_metric[m]["params"]))
 
     def save_log(self):
         """ Save current state of hyperparameter optimization as .pkl file """
@@ -101,7 +109,9 @@ class HyperoptLogger(object):
             self.iter_id = 0
             self.all_evaluated_params = []
             self.all_run_ids = []
-            self.best_iter_id, self.best_params = 0, {}
+
+        # Get best performing params for each eval metric
+        self.best_per_metric = self.get_best_performances(self.eval_metrics)
 
     def get_best_performances(self, eval_metrics):
         """ Get best performing hyperparam configuration up to current iter """
@@ -109,17 +119,22 @@ class HyperoptLogger(object):
         best_performances = {}
         for metric in eval_metrics:
             all_scores = []
-            for iter_id, iter_values in self.opt_log.items():
-                all_scores.append(iter_values[metric])
-            if self.max_target:
-                best_id = np.argmax(all_scores) + 1
+            if len(self.opt_log.items()) > 0:
+                for iter_id, iter_values in self.opt_log.items():
+                    all_scores.append(iter_values[metric])
+                if self.max_target:
+                    best_id = np.argmax(all_scores) + 1
+                else:
+                    best_id = np.argmin(all_scores) + 1
+                best_score = self.opt_log[best_id][metric]
+                best_params = self.opt_log[best_id]["params"]
+                best_performances[metric] = {"run_id": best_id,
+                                             "score": best_score,
+                                             "params": best_params}
             else:
-                best_id = np.argmin(all_scores) + 1
-            best_score = self.opt_log[best_id][metric]
-            best_params = self.opt_log[best_id]["params"]
-            best_performances[metric] = {"run_id": best_id,
-                                         "score": best_score,
-                                         "params": best_params}
+                best_performances[metric] = {"run_id": 0,
+                                             "score": 0,
+                                             "params": None}
         return best_performances
 
     def __len__(self):

@@ -18,6 +18,7 @@ def run_hyperparameter_search(meta_job_args: dict,
                                   param_search_args.hyperlog_fname)
     hyper_log = HyperoptLogger(hyperlog_fname,
                                param_search_args.maximize_objective,
+                               param_search_args.eval_metrics,
                                param_search_args.verbose_logging,
                                param_search_args.reload_log)
 
