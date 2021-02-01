@@ -3,6 +3,7 @@ import time
 import numpy as np
 import logging
 from typing import Union
+from pprint import pformat
 from ..utils.general import load_pkl_object, save_pkl_object, print_framed
 
 
@@ -83,12 +84,13 @@ class HyperoptLogger(object):
             for i, m in enumerate(self.best_per_metric.keys()):
                 print_framed(m, frame_str="-")
                 self.logger.info(
-            r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {} | TOTAL: {}".format(
+            r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {}/{} | PARAMS:".format(
                         m, self.best_per_metric[m]["score"],
                         self.best_per_metric[m]["run_id"],
                         self.iter_id))
-                self.logger.info("PARAMS: {}".format(
-                    self.best_per_metric[m]["params"]))
+                for line in pformat(self.best_per_metric[m]["params"]
+                                    ).split('\n'):
+                    self.logger.info(line)
 
     def save_log(self):
         """ Save current state of hyperparameter optimization as .pkl file """
