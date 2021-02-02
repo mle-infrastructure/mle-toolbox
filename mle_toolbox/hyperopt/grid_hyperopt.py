@@ -28,19 +28,21 @@ class GridHyperoptimisation(BaseHyperOptimisation):
         self.param_range = construct_hyperparam_range(self.params_to_search,
                                                       self.search_type)
         self.param_grid = self.generate_search_grid()
-        self.grid_eval_counter = len(hyper_log)
+        self.num_param_configs = len(self.param_grid)
+        self.eval_counter = len(hyper_log)
 
     def get_hyperparam_proposal(self, num_iter_per_batch: int):
         """ Get proposals to eval next (in batches) - Grid Search """
         param_batch = []
         # Sample a new configuration for each eval in the batch
-        while len(param_batch) < num_iter_per_batch:
+        while (len(param_batch) < num_iter_per_batch
+               and self.eval_counter < self.num_param_configs):
             # Get parameter batch from the grid
-            proposal_params = self.param_grid[self.grid_eval_counter]
+            proposal_params = self.param_grid[self.eval_counter]
             if not proposal_params in self.hyper_log.all_evaluated_params:
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)
-                self.grid_eval_counter += 1
+                self.eval_counter += 1
             else:
                 # Otherwise continue sampling proposals
                 continue

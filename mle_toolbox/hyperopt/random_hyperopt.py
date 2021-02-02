@@ -21,12 +21,15 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
         self.search_type = "random"
         self.param_range = construct_hyperparam_range(self.params_to_search,
                                                       self.search_type)
+        self.num_param_configs = len(self.param_range)
+        self.eval_counter = len(hyper_log)
 
     def get_hyperparam_proposal(self, num_iter_per_batch: int):
         """ Get proposals to eval next (in batches) - Random Sampling. """
         param_batch = []
         # Sample a new configuration for each eval in the batch
-        while len(param_batch) < num_iter_per_batch:
+        while (len(param_batch) < num_iter_per_batch
+               and self.eval_counter < self.num_param_configs):
             proposal_params = {}
             # Sample the parameters individually at random from the ranges
             for p_name, p_range in self.param_range.items():
@@ -34,6 +37,7 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
             if not proposal_params in self.hyper_log.all_evaluated_params:
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)
+                self.eval_counter += 1
             else:
                 # Otherwise continue sampling proposals
                 continue

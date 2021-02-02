@@ -17,7 +17,9 @@ def main(train_config, net_config, log_config):
                       train_config.dt).tolist()
 
     for i, t in enumerate(t_seq):
-        x_t.append(x_t[-1] + func(x_t[-1])*train_config.dt)
+        x_t.append(x_t[-1] + func(x_t[-1])*train_config.dt
+                   + (train_config.noise_mean + train_config.noise_std*
+                      np.random.normal())*train_config.dt)
 
         # Update & save the newest log
         if (i % train_config.log_every_steps) == 0:

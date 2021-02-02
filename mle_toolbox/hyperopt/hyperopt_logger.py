@@ -56,7 +56,7 @@ class HyperoptLogger(object):
                 current_iter[k] = v[run_ids[iter]]
             # Add the meta data from the meta_eval_log
             for k in meta_keys_to_track:
-                current_iter[k] = meta_eval_log[run_ids[iter]].meta[k].collected
+                current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
 
             # Add collected log path (after merging seeds)
             current_iter["log_fname"] = os.path.join(

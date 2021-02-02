@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Union
+import re
 from .visualize_results_2d import moving_smooth_ts
 
 
@@ -171,6 +172,15 @@ def plot_1D_line(param_array, target_array, fig=None, ax=None,
     return fig, ax
 
 
+def tokenize(filename):
+    """ Helper to sort the log files adequately. """
+    digits = re.compile(r'(\d+)')
+    return tuple(int(token) if match else token
+                 for token, match in
+                 ((fragment, digits.search(fragment))
+                  for fragment in digits.split(filename)))
+
+
 def visualize_1D_lcurves(main_log: dict,
                         iter_to_plot: str="num_episodes",
                         target_to_plot: str="ep_reward",
@@ -178,7 +188,7 @@ def visualize_1D_lcurves(main_log: dict,
                         plot_title: str = "Temp Title",
                         xy_labels: list = [r"# Train Iter",
                                          r"Temp Y-Label"],
-                        base_label: str="",
+                        base_label: str="{}",
                         curve_labels: list = [],
                         every_nth_tick: int = 1,
                         plot_std_bar: bool = False,

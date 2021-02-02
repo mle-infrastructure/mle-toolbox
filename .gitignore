@@ -1,3 +1,4 @@
+load_log_visualize.ipynb
 *.zip
 mle_config.toml
 .vim-arsync

@@ -107,9 +107,9 @@ class DeepLogger(object):
                 except: pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
-        config_copy = exp_time_base + ".json"
-        if not os.path.exists(config_copy):
-            shutil.copy(config_fname, config_copy)
+        self.config_copy = exp_time_base + ".json"
+        if not os.path.exists(self.config_copy):
+            shutil.copy(config_fname, self.config_copy)
 
         if seed_id is None:
             exp_time_base_ext = exp_time_base
@@ -240,12 +240,12 @@ class DeepLogger(object):
                                data=[self.experiment_dir.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
-                               data=[self.base_str.encode("ascii", "ignore")],
+            h5f.create_dataset(name=self.seed_id + "/meta/config_fname",
+                               data=[self.config_copy.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/seed_id",
-                               data=[self.seed_id.encode("ascii", "ignore")],
+            h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
+                               data=[self.base_str.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
 

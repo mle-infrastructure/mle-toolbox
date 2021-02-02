@@ -295,27 +295,28 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
         # Aggregate over the collected runs
         mean_sources = {key: {} for key in data_sources}
         for ds in data_sources:
-            mean_dict = {key: {} for key in data_items[ds]}
-            mean_dict["seeds"] = {}
             # Mean over time and stats data
             if ds in ["time", "stats"]:
+                mean_dict = {key: {} for key in data_items[ds]}
                 for i, o_name in enumerate(data_items[ds]):
                     mean_tol, std_tol = tolerant_mean(new_results_dict[eval][ds][o_name])
                     mean_dict[o_name]["mean"] = mean_tol
                     mean_dict[o_name]["std"] = std_tol
-            # Append over all the meta data (strings, seeds nothing to mean)
+            # Append over all meta data (strings, seeds nothing to mean)
             elif ds == "meta":
+                mean_dict = {}
                 for i, o_name in enumerate(data_items[ds]):
                     temp = np.array(
                     new_results_dict[eval][ds][o_name]).squeeze().astype('U200')
                     # Get rid of duplicate experiment dir strings
-                    if o_name == "experiment_dir":
-                        mean_dict[o_name]["collected"] = str(np.unique(temp))
+                    if o_name in ["experiment_dir", "eval_id"]:
+                        mean_dict[o_name] = str(np.unique(temp)[0])
                     else:
-                        mean_dict[o_name]["collected"] = temp
+                        mean_dict[o_name] = temp
 
                 # Add seeds as clean array of integers to dict
-                mean_dict["seeds"]["collected"] = evals_and_seeds[eval]
+                mean_dict["seeds"] = {}
+                mean_dict["seeds"] = evals_and_seeds[eval]
             else:
                 raise ValueError
             mean_sources[ds] = mean_dict
