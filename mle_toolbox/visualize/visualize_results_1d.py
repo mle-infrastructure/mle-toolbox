@@ -5,9 +5,6 @@ import seaborn as sns
 from typing import List, Union
 from .visualize_results_2d import moving_smooth_ts
 
-sns.set(context='poster', style='white', palette='Paired',
-        font='sans-serif', font_scale=1.05, color_codes=True, rc=None)
-
 
 def visualize_1D_bar(hyper_df: pd.core.frame.DataFrame,
                      param_to_plot: str = "param",
@@ -209,18 +206,18 @@ def visualize_1D_lcurves(main_log: dict,
         run_id = run_ids[i]
         # Smooth the curve to plot for a specified window (1 = no smoothing)
         smooth_mean, _ = moving_smooth_ts(
-            main_log[run_id][target_to_plot]["mean"], smooth_window)
+            main_log[run_id].stats[target_to_plot]["mean"], smooth_window)
         smooth_std, _ = moving_smooth_ts(
-            main_log[run_id][target_to_plot]["std"], smooth_window)
-        axs.plot(main_log[run_id][iter_to_plot]["mean"], smooth_mean,
+            main_log[run_id].stats[target_to_plot]["std"], smooth_window)
+        axs.plot(main_log[run_id].time[iter_to_plot]["mean"], smooth_mean,
                  color=color_by[i], label=base_label.format(label))
 
         if plot_std_bar:
-            axs.fill_between(main_log[run_id][iter_to_plot]["mean"],
+            axs.fill_between(main_log[run_id].time[iter_to_plot]["mean"],
                              smooth_mean-smooth_std, smooth_mean+smooth_std,
                              color=color_by[i], alpha=0.5)
 
-    range_x = main_log[run_id][iter_to_plot]["mean"]
+    range_x = main_log[run_id].time[iter_to_plot]["mean"]
     axs.set_xticks(range_x)
     axs.set_xticklabels([str(int(label)) for label in range_x])
     for n, label in enumerate(axs.xaxis.get_ticklabels()):

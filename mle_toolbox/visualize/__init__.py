@@ -5,10 +5,14 @@ except ModuleNotFoundError as err:
                               "to use the `mle_toolbox.visualize` module.")
 
 try:
-    import seaborn
+    import seaborn as sns
+    # Set overall plots appearance sns style
+    sns.set(context='poster', style='white', palette='Paired',
+            font='sans-serif', font_scale=1.05, color_codes=True, rc=None)
 except ModuleNotFoundError as err:
     raise ModuleNotFoundError(f"{err}. You need to install `seaborn` "
                               "to use the `mle_toolbox.visualize` module.")
+
 
 from .visualize_results_2d import (visualize_2D_grid,
                                    plot_heatmap_array,

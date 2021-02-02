@@ -2,21 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import seaborn as sns
 from typing import List, Union
-from mle_toolbox.utils.general import mean_over_evals
 import re
-
-sns.set(context='poster', style='white', palette='Paired',
-        font='sans-serif', font_scale=1.05, color_codes=True, rc=None)
-
-digits = re.compile(r'(\d+)')
-def tokenize(filename):
-    """ Helper to sort the log files adequately. """
-    return tuple(int(token) if match else token
-                 for token, match in
-                 ((fragment, digits.search(fragment))
-                  for fragment in digits.split(filename)))
 
 
 def moving_smooth_ts(ts, window_size=20):
