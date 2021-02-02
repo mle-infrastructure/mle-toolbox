@@ -1,3 +1,5 @@
+""" TEMPLATE FOR TRAINING SCRIPT FOR MLE-TOOLBOX W. LOGGING,
+    ETC. - HERE TORCH EXAMPLE BUT TOOLBOX IS UNIVERSAL. """
 import torch
 from mle_toolbox.utils import (set_random_seeds,
                                get_configs_ready,
@@ -8,7 +10,7 @@ def main(net_config, train_config, log_config):
     """ Train a network. """
     # Start by setting the random seeds for reproducibility
     set_random_seeds(train_config.seed_id)
-    
+
     # Set the training seed as well as the device to train on
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

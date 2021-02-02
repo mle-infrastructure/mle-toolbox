@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import List, Union
-import re
 
 
 def moving_smooth_ts(ts, window_size=20):
