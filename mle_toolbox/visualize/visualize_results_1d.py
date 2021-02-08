@@ -101,7 +101,7 @@ def visualize_1D_line(hyper_df: pd.core.frame.DataFrame,
     xlabels = [str(round(i, round_ticks)) for j, i
                in enumerate(hyper_df[param_to_plot])
                if j%every_nth_tick == 0]
-    xticks = [hyper_df[param_to_plot][j] for j, i
+    xticks = [hyper_df[param_to_plot].iloc[j] for j, i
                in enumerate(hyper_df[param_to_plot])
                if j%every_nth_tick == 0]
     ax.set_xticks(xticks)

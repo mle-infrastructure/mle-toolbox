@@ -11,7 +11,7 @@ import platform
 import re
 import numpy as np
 import random
-from typing import Union
+from typing import Union, List
 import pandas as pd
 from dotmap import DotMap
 
@@ -335,8 +335,27 @@ def tolerant_mean(arrs: list):
 
 
 def get_closest_sub_df(df: pd.core.frame.DataFrame,
-                       param_name: str, param_value: Union[int, float]):
-    """ Return df with fixed param closest to param_value in df. """
-    all_values = df[param_name].unique()
-    min_id = np.argmin(np.abs(all_values - param_value))
-    return df[df[param_name] == all_values[min_id]]
+                       param_name: Union[List[str], str],
+                       param_value: Union[List[float], int, float]):
+    """ Return df with fixed params closest to param_value in df. """
+    # Make sure to iterate over list of parameters + copy the df
+    if type(param_name) != list:
+        param_name = [param_name]
+    if type(param_value) != list:
+        param_value = [param_value]
+    sub_df = df.copy()
+
+    # Loop over parameters and construct the sub-df
+    for i, name in enumerate(param_name):
+        all_values = df[name].unique()
+        min_id = np.argmin(np.abs(all_values - param_value[i]))
+        sub_df = sub_df[sub_df[name] == all_values[min_id]]
+    return sub_df
+
+
+def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):
+    """ Subselect the meta log dict based on run id list. """
+    sub_log = DotMap()
+    for run_id in run_ids:
+        sub_log[run_id] = meta_log[run_id]
+    return sub_log
