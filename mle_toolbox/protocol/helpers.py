@@ -95,7 +95,7 @@ def delete_protocol_from_input():
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     print("{} Want to delete experiment? - state its id: [e_id/N]".format(time_t), end=' ')
     sys.stdout.flush()
-    # Loop over experiments to delete until "N" given as input or timeout
+    # Loop over experiments to delete until "N" given or timeout after 60 secs
     while True:
         i, o, e = select.select([sys.stdin], [], [], 60)
         if (i):
@@ -112,7 +112,12 @@ def delete_protocol_from_input():
         # Load in the experiment protocol DB
         db, all_experiment_ids, _ = load_local_protocol_db()
         # Delete the dictionary in DB corresponding to e-id
-        db.drem(e_id)
-        db.dump()
-        print("{} Another one? - state the next id: [e_id/N]".format(time_t), end=' ')
+        try:
+            db.drem(e_id)
+            db.dump()
+            print("{} Another one? - state the next id: [e_id/N]".format(
+                time_t), end=' ')
+        except:
+            print("{} The e_id is not in the protocol db. " \
+                  "Please try again: [e_id/N]".format(time_t), end=' ')
         sys.stdout.flush()
