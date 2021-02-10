@@ -43,7 +43,7 @@ class HyperoptLogger(object):
         if not isinstance(params, list):
             params = list(params)
         meta_keys_to_track = ["log_paths", "experiment_dir",
-                              "network_ckpt", "seeds"]
+                              "config_fname", "network_ckpt", "seeds"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):
