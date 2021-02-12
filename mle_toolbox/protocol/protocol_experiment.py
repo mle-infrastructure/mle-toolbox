@@ -5,11 +5,10 @@ from datetime import datetime
 import sys, select
 from typing import Union
 from ..utils.general import load_config, determine_resource
-from .helpers import load_local_protocol_db
+from .protocol_helpers import load_local_protocol_db
 
 
-def protocol_new_experiment(job_config: dict,
-                            cmd_purpose: Union[None, str]=None):
+def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
     """ Protocol the new experiment. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()

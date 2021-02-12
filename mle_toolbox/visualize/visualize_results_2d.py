@@ -25,6 +25,8 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       text_in_cell: bool = True,
                       max_heat: Union[None, float] = None,
                       min_heat: Union[None, float] = None,
+                      norm_cols: bool = False,
+                      norm_rows: bool = False,
                       return_array: bool = False,
                       round_ticks: int = 1,
                       figsize: tuple=(10, 8),
@@ -48,7 +50,8 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     range_x = np.unique(temp_df[p_to_plot[0]])
     range_y = np.unique(temp_df[p_to_plot[1]])
 
-    heat_array = get_heatmap_array(range_x, range_y, temp_df.to_numpy())
+    heat_array = get_heatmap_array(range_x, range_y, temp_df.to_numpy(),
+                                   norm_cols, norm_rows)
 
     if return_array:
         return heat_array
@@ -64,7 +67,9 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
 
 def get_heatmap_array(range_x: np.ndarray,
                       range_y: np.ndarray,
-                      results_df: pd.core.frame.DataFrame):
+                      results_df: np.ndarray,
+                      norm_cols: bool = False,
+                      norm_rows: bool = False):
     """ Construct the 2D array to plot the heat. """
     bring_the_heat = np.zeros((len(range_y), len(range_x)))
     for i, val_x in enumerate(range_x):
@@ -73,7 +78,12 @@ def get_heatmap_array(range_x: np.ndarray,
             results_temp = results_df[case_at_hand, 2]
             # Reverse index so that small in bottom left corner
             bring_the_heat[len(range_y)-1 - j, i] = results_temp
-    #print(bring_the_heat.shape)
+
+    # Normalize the rows and/or columns by the maximum
+    if norm_cols:
+        bring_the_heat /=  bring_the_heat.max(axis=0)
+    if norm_rows:
+        bring_the_heat /=  bring_the_heat.max(axis=1)[:,np.newaxis]
     return bring_the_heat
 
 

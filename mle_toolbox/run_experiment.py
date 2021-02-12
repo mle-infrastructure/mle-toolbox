@@ -7,8 +7,7 @@ from .utils import (load_mle_toolbox_config, load_yaml_config,
                     determine_resource, print_framed)
 # Import of helpers for protocoling experiments
 from .protocol import (protocol_summary, update_protocol_status,
-                       delete_protocol_from_input)
-from .protocol.protocol_experiment import protocol_new_experiment
+                       delete_protocol_from_input, protocol_experiment)
 
 # Import of setup tools for experiments (log, config, etc.)
 from .src.prepare_experiment import (welcome_to_mle_toolbox, get_mle_args,
@@ -97,8 +96,7 @@ def main():
         # Only ask to delete if no purpose given!
         if cmd_args.purpose is None:
             delete_protocol_from_input()
-        new_experiment_id = protocol_new_experiment(job_config,
-                                                    cmd_args.purpose)
+        new_experiment_id = protocol_experiment(job_config, cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
         # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage

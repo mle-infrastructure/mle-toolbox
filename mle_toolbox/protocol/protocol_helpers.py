@@ -61,8 +61,7 @@ def protocol_summary(tail: int=5, verbose: bool=True):
              "Purpose": purposes,
              "Experiment Dir": exp_paths,
              "Status": statuses,
-             "Seeds": num_seeds
-             }
+             "Seeds": num_seeds}
         df = pd.DataFrame(d)
         df["ID"] = [e.split("-")[-1] for e in df["ID"]]
         df["Date"] = df["Date"].map('{:.5}'.format)
