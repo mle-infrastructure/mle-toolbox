@@ -12,10 +12,12 @@ except ModuleNotFoundError as err:
 
 
 from .markdown_generator import MarkdownGenerator
+from .figure_generator import FigureGenerator
 from .report_experiment import generate_report
 
 
 __all__ = [
            "MarkdownGenerator",
-           "generate_report"
+           "FigureGenerator"
+           "generate_reports"
           ]
