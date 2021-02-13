@@ -1,6 +1,4 @@
 import numpy as np
-from skopt import Optimizer
-
 from .base_hyperopt import BaseHyperOptimisation
 from .hyperopt_logger import HyperoptLogger
 from .gen_hyperspace import construct_hyperparam_range
@@ -18,7 +16,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
                  eval_score_type: str,
                  smbo_config: dict):
         try:
-            import skopt
+            from skopt import Optimizer
         except ModuleNotFoundError as err:
             raise ModuleNotFoundError(f"{err}. You need to install `scikit-optimize` "
                                       "to use the `mle_toolbox.hyperopt` module.")
