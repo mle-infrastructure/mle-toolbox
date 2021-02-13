@@ -13,7 +13,7 @@ except ModuleNotFoundError as err:
 
 from .markdown_generator import MarkdownGenerator
 from .figure_generator import FigureGenerator
-from .report_experiment import generate_report
+from .report_experiment import generate_reports
 
 
 __all__ = [

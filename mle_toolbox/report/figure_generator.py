@@ -13,17 +13,17 @@ class FigureGenerator():
         self.meta_log_fname = meta_log_fname
         self.hyper_log_fname = hyper_log_fname
 
-        # Create a directory for the figures to be generated
-        self.figures_dir = os.path.join(experiment_dir, "figures")
-        if not os.path.exists(self.figures_dir):
-            try: os.makedirs(self.figures_dir)
-            except: pass
-
         # Load in both meta and hyper log
         self.meta_log = load_log(os.path.join(experiment_dir,
                                               self.meta_log_fname))
         self.hyper_log = hyper_log_to_df(os.path.join(experiment_dir,
                                                       self.hyper_log_fname))
+
+        # Create a directory for the figures to be generated
+        self.figures_dir = os.path.join(experiment_dir, "figures")
+        if not os.path.exists(self.figures_dir):
+            try: os.makedirs(self.figures_dir)
+            except: pass
 
         # Set default settings for all plots (resolution, etc.)
         self.dpi = dpi
@@ -45,7 +45,7 @@ class FigureGenerator():
         ax.legend(ncol=4, fontsize=8)
 
         # Save the figure to path name constructed from var name
-        figure_fname = os.path.join(self.figures_dir, stat_to_plot)
+        figure_fname = os.path.join(self.figures_dir, stat_to_plot) + ".png"
         fig.savefig(figure_fname, dpi=self.dpi)
         return figure_fname
 
@@ -61,3 +61,7 @@ class FigureGenerator():
             stats_fname = self.generate_1D_figure(time_vars[0], stats)
             figure_fnames.append(stats_fname)
         return figure_fnames
+
+    def generate_all_2D_figures(self):
+        """ TODO: Also generate 2D heatmap combination figures?! """
+        raise NotImplementedError
