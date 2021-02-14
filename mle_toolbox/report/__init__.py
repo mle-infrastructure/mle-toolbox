@@ -11,13 +11,17 @@ except ModuleNotFoundError as err:
                               "to use the `mle_toolbox.report` module.")
 
 
+from .generate_reports import (user_generate_reports,
+                               auto_generate_reports)
 from .markdown_generator import MarkdownGenerator
 from .figure_generator import FigureGenerator
 from .report_generator import ReportGenerator
 
 
 __all__ = [
+           "user_generate_reports",
+           "auto_generate_reports",
            "MarkdownGenerator",
-           "FigureGenerator"
-           "ReportGenerator"
+           "FigureGenerator",
+           "ReportGenerator",
           ]

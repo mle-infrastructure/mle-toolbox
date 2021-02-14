@@ -13,6 +13,7 @@ class ReportGenerator():
     """
     def __init__(self, e_id, db):
         # TODO: Make report generation depend on the type of experiment
+        # TODO: Add logging so that user gets verbose feedback
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db
@@ -57,7 +58,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
     """ Generate MD report from experiment meta data. """
     with MarkdownGenerator(filename=md_report_fname,
                            enable_write=False) as doc:
-        doc.addHeader(1, "Experiment Protocol: "
+        doc.addHeader(1, "Report: "
                       + report_data["project_name"] + " - " + e_id)
 
         # Meta-Data of the Experiment
@@ -73,7 +74,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addTable(dictionary_list=table)
 
         # Generated header for figures of the Experiment
-        doc.addHeader(2, "Generated Figures.")
+        doc.addHeader(2, "Generated 1D Figures.")
 
     markdown_text = open(md_report_fname).read()
     return markdown_text
@@ -84,7 +85,7 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
     with open(html_report_fname, 'w') as output_file:
         html_text = markdown2.markdown(markdown_text, extras=["tables"])
         # Add figure inclusion to HTML text
-        # By default: 2 Figures per row - 50% width
+        # By default: 2 Figures per row - 45% width
         for fig in figure_fnames:
             html_text += f'<img src="{fig}" width="45%" style="margin-right:20px">'
         output_file.write(html_text)
@@ -98,4 +99,5 @@ def generate_pdf(pdf_report_fname, html_text):
                                 'page-size': 'A4',
                                 'dpi': 400,
                                 'print-media-type': '',
-                                'disable-smart-shrinking': ''})
+                                'disable-smart-shrinking': '',
+                                'quiet': ''})

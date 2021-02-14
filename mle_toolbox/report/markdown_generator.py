@@ -14,7 +14,7 @@ HTML_SPACE = ""
 DEFAULT_FILE_LOCATION = "default_file"
 MAX_HEADER_LEVEL = 6
 MIN_HEADER_LEVEL = 1
-TOC_LINE_POSITION = 7
+TOC_LINE_POSITION = 2
 
 # This MarkdownGenerator class takes heavy inspiration from the package
 # python-markdown-generator: github.com/Nicceboy/python-markdown-generator

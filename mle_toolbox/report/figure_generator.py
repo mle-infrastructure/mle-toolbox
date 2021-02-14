@@ -45,7 +45,7 @@ class FigureGenerator():
         ax.legend(ncol=4, fontsize=8)
 
         # Save the figure to path name constructed from var name
-        figure_fname = os.path.join(self.figures_dir, stat_to_plot) + ".png"
+        figure_fname = os.path.join(self.figures_dir, stat_to_plot) + "_1d.png"
         fig.savefig(figure_fname, dpi=self.dpi)
         return figure_fname
 
