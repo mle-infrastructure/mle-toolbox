@@ -1,6 +1,7 @@
 import os
 from mle_toolbox.utils import load_log, hyper_log_to_df
-from mle_toolbox.visualize import visualize_1D_lcurves
+from mle_toolbox.visualize import (visualize_1D_lcurves,
+                                   visualize_2D_grid)
 
 
 class FigureGenerator():
@@ -62,6 +63,28 @@ class FigureGenerator():
             figure_fnames.append(stats_fname)
         return figure_fnames
 
-    def generate_all_2D_figures(self):
-        """ TODO: Also generate 2D heatmap combination figures?! """
-        raise NotImplementedError
+    def generate_all_2D_figures(self, search_variables, target_variables):
+        """ Generate heatmap for search experiment with 2 or more vars. """
+        # Loop over stats variable combinations and generate figures
+        figure_fnames = []
+        for target in target_variables:
+            stats_fname = self.generate_2D_figure(search_variables, target)
+            figure_fnames.append(stats_fname)
+        return figure_fnames
+
+    def generate_2D_figure(self, params_to_plot, target_to_plot):
+        """ Generate and save 2D heatmap figure. """
+        fixed_params = None
+        fig, ax = visualize_2D_grid(self.hyper_log, fixed_params,
+                                    params_to_plot, target_to_plot,
+                                    plot_title=target_to_plot,
+                                    xy_labels=params_to_plot,
+                                    variable_name=target_to_plot,
+                                    every_nth_tick=1, round_ticks=3,
+                                    text_in_cell=False, max_heat=None)
+        # Save the figure to path name constructed from var names
+        figure_fname = os.path.join(self.figures_dir,
+                                    "_".join([target_to_plot] +
+                                             params_to_plot)) + "_2d.png"
+        fig.savefig(figure_fname, dpi=self.dpi)
+        return figure_fname

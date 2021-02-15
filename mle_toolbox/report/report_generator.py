@@ -26,6 +26,7 @@ class ReportGenerator():
             except: pass
 
     def generate_reports(self):
+        """ Generate reports + generate included figures: .md, .html, .pdf. """
         # 1. Write the relevant data to the markdown report file
         self.md_report_fname = os.path.join(self.reports_dir,
                                             self.e_id + ".md")
@@ -33,9 +34,17 @@ class ReportGenerator():
                                                self.md_report_fname,
                                                self.report_data)
 
-        # 2. Generate all 1D figures to show in report
+        # 2. Generate all 1D (and 2D if search) figures to show in report
         self.fig_generator = FigureGenerator(self.experiment_dir)
-        self.figure_fnames = self.fig_generator.generate_all_1D_figures()
+        figure_fnames_1D = self.fig_generator.generate_all_1D_figures()
+
+        search_vars, search_targets = self.get_hypersearch_data()
+        if len(search_vars) > 1:
+            figure_fnames_2D = self.fig_generator.generate_all_2D_figures(
+                                        search_vars, search_targets)
+        else:
+            figure_fnames_2D = []
+        self.figure_fnames = figure_fnames_1D + figure_fnames_2D
 
         # 3. Add these figures to the html report file used to generate PDF
         self.html_report_fname = os.path.join(self.reports_dir,
@@ -44,13 +53,24 @@ class ReportGenerator():
                                        self.markdown_text,
                                        self.figure_fnames)
 
-        # TODO: Afterwards also add figures to the markdown text
+        # TODO: Afterwards also add figures to the markdown text to render
         # But in markdown syntax! HMTL addtextline seems to get scrambled
 
         # 4. Generate the PDF file.
         self.pdf_report_fname = os.path.join(self.reports_dir,
                                              self.e_id + ".pdf")
         generate_pdf(self.pdf_report_fname, self.html_text)
+
+    def get_hypersearch_data(self):
+        """ Get hypersearch variables + targets for 2D visualization loop. """
+        search_vars, search_targets = [], []
+        if "params_to_search" in self.report_data["job_spec_args"]:
+            params = self.report_data["job_spec_args"]["params_to_search"]
+            for type, var_dict in params.items():
+                for var_name in var_dict.keys():
+                    search_vars.append(var_name)
+            search_targets = self.report_data["job_spec_args"]["eval_metrics"]
+        return search_vars, search_targets
 
 
 def construct_markdown_table(data_dict, exclude_keys=[],
