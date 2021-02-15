@@ -1,9 +1,11 @@
 import os
+import logging
 import pdfkit
 import markdown2
 from dotmap import DotMap
 from .markdown_generator import MarkdownGenerator
 from .figure_generator import FigureGenerator
+from ..src.prepare_experiment import prepare_logger
 
 
 class ReportGenerator():
@@ -25,14 +27,20 @@ class ReportGenerator():
             try: os.makedirs(self.reports_dir)
             except: pass
 
+        # Setup logger for report generation
+        self.logger = prepare_logger(None, False)
+
     def generate_reports(self):
         """ Generate reports + generate included figures: .md, .html, .pdf. """
+        self.logger.info(f'Report - BASE REPORT DIRECTORY:')
+        self.logger.info(f'{self.experiment_dir}')
         # 1. Write the relevant data to the markdown report file
         self.md_report_fname = os.path.join(self.reports_dir,
                                             self.e_id + ".md")
         self.markdown_text = generate_markdown(self.e_id,
                                                self.md_report_fname,
                                                self.report_data)
+        self.logger.info(f'Report - GENERATED - .md: {self.e_id + ".md"}')
 
         # 2a. Generate all 1D figures to show in report
         self.fig_generator = FigureGenerator(self.experiment_dir)
@@ -46,6 +54,8 @@ class ReportGenerator():
         else:
             figure_fnames_2D = []
         self.figure_fnames = figure_fnames_1D + figure_fnames_2D
+        self.logger.info(f'Report - GENERATED - figures - total:'
+                         f' {len(self.figure_fnames)}')
 
         # 3. Add these figures to the html report file used to generate PDF
         self.html_report_fname = os.path.join(self.reports_dir,
@@ -53,7 +63,7 @@ class ReportGenerator():
         self.html_text = generate_html(self.html_report_fname,
                                        self.markdown_text,
                                        self.figure_fnames)
-
+        self.logger.info(f'Report - GENERATED - .html: {self.e_id + ".html"}')
         # TODO: Afterwards also add figures to the markdown text to render
         # Use markdown generator generateImageHrefNotation
         # But in markdown syntax! HMTL addtextline seems to get scrambled
@@ -62,6 +72,7 @@ class ReportGenerator():
         self.pdf_report_fname = os.path.join(self.reports_dir,
                                              self.e_id + ".pdf")
         generate_pdf(self.pdf_report_fname, self.html_text)
+        self.logger.info(f'Report - GENERATED - .pdf: {self.e_id + ".pdf"}')
 
     def get_hypersearch_data(self):
         """ Get hypersearch variables + targets for 2D visualization loop. """
