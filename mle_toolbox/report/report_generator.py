@@ -34,10 +34,11 @@ class ReportGenerator():
                                                self.md_report_fname,
                                                self.report_data)
 
-        # 2. Generate all 1D (and 2D if search) figures to show in report
+        # 2a. Generate all 1D figures to show in report
         self.fig_generator = FigureGenerator(self.experiment_dir)
         figure_fnames_1D = self.fig_generator.generate_all_1D_figures()
 
+        # 2b. If search experiment generate all 2D figures to show in report
         search_vars, search_targets = self.get_hypersearch_data()
         if len(search_vars) > 1:
             figure_fnames_2D = self.fig_generator.generate_all_2D_figures(
@@ -54,6 +55,7 @@ class ReportGenerator():
                                        self.figure_fnames)
 
         # TODO: Afterwards also add figures to the markdown text to render
+        # Use markdown generator generateImageHrefNotation
         # But in markdown syntax! HMTL addtextline seems to get scrambled
 
         # 4. Generate the PDF file.

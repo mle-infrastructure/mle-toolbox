@@ -16,14 +16,17 @@ def get_retrieve_args():
     parser.add_argument('-e_id', '--experiment_id', type=str,
                         default="no-id-given",
                         help ='Filename to load config yaml from')
-    parser.add_argument('-all_new', '--retrieve_all_new', default=False, action='store_true',
-                        help ='Retrieve all new results.')
-    parser.add_argument('-fig_dir', '--figures_dir', default=False, action='store_true',
+    parser.add_argument('-all_new', '--retrieve_all_new', default=False,
+                        action='store_true', help ='Retrieve all new results.')
+    parser.add_argument('-fig_dir', '--figures_dir', default=False,
+                        action='store_true',
                         help ='Retrieve only subdir containing figures.')
-    parser.add_argument('-exp_dir', '--experiment_dir', default=False, action='store_true',
+    parser.add_argument('-exp_dir', '--experiment_dir', default=False,
+                        action='store_true',
                         help ='Retrieve entire experiment dir.')
-    parser.add_argument('-local', '--retrieve_local', default=False, action='store_true',
-                        help ='Retrieve entire experiment dir from the remote directory.')
+    parser.add_argument('-local', '--retrieve_local', default=False,
+                        action='store_true',
+                        help ='Retrieve experiment dir from remote directory.')
     return parser.parse_args()
 
 
@@ -38,7 +41,8 @@ def main():
         accessed_remote_db = False
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     if accessed_remote_db:
-        print(time_t, "Successfully pulled latest experiment protocol from gcloud.")
+        print(time_t,
+              "Successfully pulled latest experiment protocol from gcloud.")
     else:
         print(time_t, "Careful - you are using the local experiment protocol.")
     # Load in the experiment protocol DB
@@ -53,7 +57,8 @@ def main():
     elif cmd_args.experiment_dir:
         get_dir_or_fig = "exp-dir"
     else:
-        get_dir_or_fig = input(time_t + " Retrieve entire result dir or only figures? [exp-dir/fig-dir]  ")
+        get_dir_or_fig = input(time_t + " Retrieve entire result dir or " +
+                               "only figures? [exp-dir/fig-dir]  ")
 
     # Retrieve results for a single experiment
     if not cmd_args.retrieve_all_new:
@@ -63,7 +68,8 @@ def main():
             if experiment_id == "no-id-given" and retrieval_counter == 0:
                 protocol_summary(tail=10)
                 time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-                experiment_id = input(time_t + " Which experiment do you want to retrieve? [E-ID/N]:  ")
+                experiment_id = input(time_t + " Which experiment do you " +
+                                      "want to retrieve? [E-ID/N]:  ")
                 if cmd_args.retrieve_local:
                     retrieve_single_experiment(db, experiment_id,
                                                get_dir_or_fig,
@@ -73,7 +79,8 @@ def main():
                                               all_experiment_ids)
                 retrieval_counter += 1
             else:
-                experiment_id = input(time_t + " Next experiment to retrieve [E-ID/N]:  ")
+                experiment_id = input(time_t + " Next experiment" +
+                                      "to retrieve [E-ID/N]:  ")
                 if experiment_id == "N":
                     break
                 if cmd_args.retrieve_local:
@@ -109,7 +116,8 @@ def main():
 
     if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
         send_gcloud_db()
-        print(time_t, "Updated retrieval protocol status & send to gcloud storage.")
+        print(time_t, "Updated retrieval protocol status & \
+              send to gcloud storage.")
 
 
 def retrieve_single_experiment(db, experiment_id: str,
@@ -122,7 +130,8 @@ def retrieve_single_experiment(db, experiment_id: str,
 
         if experiment_id not in all_experiment_ids:
             print(time_t, "The experiment you try to retrieve does not exist")
-            experiment_id = input(time_t + " Which experiment do you want to retrieve?")
+            experiment_id = input(time_t + " Which experiment do you " +
+                                  "want to retrieve?")
         else:
             break
 
@@ -139,20 +148,21 @@ def retrieve_single_experiment(db, experiment_id: str,
             file_path = os.path.join(dir_path, fig_name)
             break
         else:
-            get_dir_or_fig = input(time_t + " Please repeat your input: [exp-dir/fig-dir]  ")
+            get_dir_or_fig = input(time_t + " Please repeat your " +
+                                   "input: [exp-dir/fig-dir]  ")
 
     remote_resource = db.dget(experiment_id, "exec_resource")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     print(time_t, "{} - Started retrieving {} - from {}".format(experiment_id,
-                                                                file_path, remote_resource))
+                                                file_path, remote_resource))
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource in ["sge-cluster", "slurm-cluster"]:
         ssh_manager = SSH_Manager(remote_resource)
         ssh_manager.get_file(file_path, experiment_id)
     else:
-        raise ValueError("{} - Please provide valid remote resource. {}".format(experiment_id,
-                                                                                remote_resource))
+        raise ValueError("{} - Please provide valid remote resource. {}".format(
+                    experiment_id, remote_resource))
 
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Goodbye message if successful
