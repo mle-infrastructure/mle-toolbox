@@ -14,7 +14,6 @@ class ReportGenerator():
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
     def __init__(self, e_id, db):
-        # TODO: Add logging so that user gets verbose feedback
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db
