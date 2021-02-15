@@ -2,8 +2,10 @@
 - Minor update to the credential `.toml` template file
 
 **v0.2.3**
-- Major reduction of dependencies. Now for all more optional/specialized features (e.g. SMBO, visualization, JAX/torch idiosyncracies) there will be a an exception raised if the package isn't installed and you still want to use the toolbox feature.
+- Major reduction of dependencies. Now for all more optional/specialized features (e.g. SMBO, visualization, JAX/torch idiosyncracies) there will be an exception raised if the package isn't installed and you still want to use the toolbox feature.
 - Refactored `visualization` into its own subdirectory to clean up `utils`.
 - Change from own `DotDic` to `DotMap`, which appears more stable and better maintained. Be aware that now we can't rely on `None` outputs if key is not in dict. We shouldn't have done that in the first place due to being error prone.
 - Got rid of `cross_validation` support. This made everything less clean/minimal and can be handled within your specific setup.
-- Now we also store much more meta data in the `hyper_log.pkl` file output from the search. This includes potential checkpoint paths of networks, multiple target variables and the original log paths
+- Now we also store much more meta data in the `hyper_log.pkl` file output from the search. This includes potential checkpoint paths of networks, multiple target variables and the original log paths.
+- Added the `report-experiment` core functionality to generate `.md`, `.html` and `.pdf` reports of your experiments.
+- Added an example notebook that shows how to load/analyze and report the results from the simple ODE integration example.

@@ -1,5 +1,5 @@
-from .report_generator import ReportGenerator
-from ..protocol import load_local_protocol_db
+from .report import ReportGenerator
+from .protocol import load_local_protocol_db
 
 
 def user_generate_reports():
@@ -19,3 +19,4 @@ def auto_generate_reports(e_id):
     # Creater 'reporter' instance aka Karla Kolumna - and write
     reporter = ReportGenerator(e_id, db)
     reporter.generate_reports()
+    return reporter

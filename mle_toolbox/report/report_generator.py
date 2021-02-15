@@ -34,11 +34,11 @@ class ReportGenerator():
                                                self.md_report_fname,
                                                self.report_data)
 
-        # 2. Add these figures to the html report file used to generate PDF
+        # 2. Generate all 1D figures to show in report
         self.fig_generator = FigureGenerator(self.experiment_dir)
         self.figure_fnames = self.fig_generator.generate_all_1D_figures()
 
-        # 3. Generate all figures to show in report
+        # 3. Add these figures to the html report file used to generate PDF
         self.html_report_fname = os.path.join(self.reports_dir,
                                               self.e_id + ".html")
         self.html_text = generate_html(self.html_report_fname,
@@ -54,8 +54,36 @@ class ReportGenerator():
         generate_pdf(self.pdf_report_fname, self.html_text)
 
 
+def construct_markdown_table(data_dict, exclude_keys=[],
+                             table_entries_per_row=2):
+    """ Construct a markdown table from a dictionary with data. """
+    table, current_row, entry_counter = [], {}, 0
+    for k, value in data_dict.items():
+        # Only add to table row if not excluded in given list
+        if k not in exclude_keys:
+            current_row["Param C" + str(entry_counter+1)] = "`" + str(k) + "`"
+            if type(value) == list:
+                v = ', '.join(value)
+            else:
+                v = value
+            current_row["Value C" + str(entry_counter+1)] = "`" + str(v) + "`"
+            entry_counter += 1
+
+            # reset the row dictionary and append to table list
+            if (entry_counter % table_entries_per_row) == 0:
+                table.append(current_row)
+                current_row = {}
+                entry_counter = 0
+    return table
+
+
 def generate_markdown(e_id, md_report_fname, report_data):
     """ Generate MD report from experiment meta data. """
+    # Special treatment of dict keys/individual vars in report_data
+    job_keys = ["meta_job_args", "single_job_args", "job_spec_args"]
+    config_keys = ["train_config", "log_config", "net_config"]
+    single_keys = ["purpose", "project_name"]
+
     with MarkdownGenerator(filename=md_report_fname,
                            enable_write=False) as doc:
         doc.addHeader(1, "Report: "
@@ -65,13 +93,40 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addHeader(2, "Experiment Meta-Data.")
         doc.writeTextLine(f'{doc.addBoldedText("Purpose:")} ' + report_data["purpose"])
 
-        # Hyperparameters used in the Experiment
-        doc.addHeader(2, "Hyperparameters.")
-        table = [
-            {"Parameter": "col1row1", "Value": "col2row1"},
-            {"Parameter": "col1row2", "Value": "col2row2"}
-        ]
-        doc.addTable(dictionary_list=table)
+        doc.addHeader(3, "General Job Settings.")
+        hyper_table = construct_markdown_table(report_data,
+                                               (job_keys + config_keys +
+                                                single_keys))
+        doc.addTable(dictionary_list=hyper_table)
+
+        # Experiment Configs - Meta-Job, Single-Job, Job-Spec-Args
+        doc.addHeader(3, "Meta-Job-Arguments.")
+        meta_table = construct_markdown_table(report_data["meta_job_args"])
+        doc.addTable(dictionary_list=meta_table)
+
+        doc.addHeader(3, "Single-Job-Arguments.")
+        job_table = construct_markdown_table(report_data["single_job_args"],
+                                             table_entries_per_row=3)
+        doc.addTable(dictionary_list=job_table)
+
+        doc.addHeader(3, "Job-Specific-Arguments.")
+        specific_table = construct_markdown_table(report_data["job_spec_args"])
+        doc.addTable(dictionary_list=specific_table)
+
+
+        # Base Configuration Hyperparameters used in the Experiment
+        doc.addHeader(2, "Base Config Hyperparameters.")
+        doc.addHeader(3, "Train Configuration.")
+        train_table = construct_markdown_table(report_data["train_config"])
+        doc.addTable(dictionary_list=train_table)
+
+        doc.addHeader(3, "Network Configuration.")
+        net_table = construct_markdown_table(report_data["net_config"])
+        doc.addTable(dictionary_list=net_table)
+
+        doc.addHeader(3, "Logging Configuration.")
+        log_table = construct_markdown_table(report_data["log_config"])
+        doc.addTable(dictionary_list=log_table)
 
         # Generated header for figures of the Experiment
         doc.addHeader(2, "Generated 1D Figures.")
