@@ -14,7 +14,7 @@ def get_retrieve_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e_id', '--experiment_id', type=str,
                         default="no-id-given",
-                        help ='Filename to load config yaml from')
+                        help ='Experiment ID')
     parser.add_argument('-all_new', '--retrieve_all_new', default=False,
                         action='store_true', help ='Retrieve all new results.')
     parser.add_argument('-fig_dir', '--figures_dir', default=False,

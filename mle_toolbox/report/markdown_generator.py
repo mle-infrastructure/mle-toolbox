@@ -24,12 +24,9 @@ class MarkdownGenerator:
     """ Generating GitHub flavored Markdown. Init by using 'with' statement."""
     def __init__(self, document=None, filename=None,
                  syntax=None, root_object=True,
-        tmp_dir=None,
-        header_data_array=None,
-        header_index=None,
-        document_data_array=None,
-        enable_write=True,
-        enable_TOC=True):
+                 tmp_dir=None, header_data_array=None,
+                 header_index=None, document_data_array=None,
+                 enable_write=True, enable_TOC=True):
         """
         Constructor method for MarkdownGenerator
         :param document: existing opened document file, defaults to None
@@ -39,7 +36,6 @@ class MarkdownGenerator:
         :param tmp_dir: Path of temporal directory. NOTE: not in user, defaults to None
         """
         # Attribute for determining if object is first instance of Markdowngenerator
-        # It has has file open, which should be noted on exit.
         self.root_object = root_object
         self.document = document
         self.document_data_array = document_data_array if document_data_array else []

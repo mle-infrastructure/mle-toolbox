@@ -63,11 +63,12 @@ class ReportGenerator():
                                        self.markdown_text,
                                        self.figure_fnames)
         self.logger.info(f'Report - GENERATED - .html: {self.e_id + ".html"}')
-        # TODO: Afterwards also add figures to the markdown text to render
-        # Use markdown generator generateImageHrefNotation
-        # But in markdown syntax! HMTL addtextline seems to get scrambled
 
-        # 4. Generate the PDF file.
+        # 4. Also add figures to the markdown text to render
+        add_figures_to_markdown(self.md_report_fname, self.figure_fnames)
+        self.logger.info(f'Report - UPDATE - .md with figures.')
+
+        # 5. Generate the PDF file.
         self.pdf_report_fname = os.path.join(self.reports_dir,
                                              self.e_id + ".pdf")
         generate_pdf(self.pdf_report_fname, self.html_text)
@@ -141,8 +142,9 @@ def generate_markdown(e_id, md_report_fname, report_data):
     config_keys = ["train_config", "log_config", "net_config"]
     single_keys = ["purpose", "project_name"]
 
-    with MarkdownGenerator(filename=md_report_fname,
-                           enable_write=False) as doc:
+    md_generator = MarkdownGenerator(filename=md_report_fname,
+                                     enable_write=False)
+    with md_generator as doc:
         doc.addHeader(1, "Report: "
                       + report_data["project_name"] + " - " + e_id)
 
@@ -217,3 +219,12 @@ def generate_pdf(pdf_report_fname, html_text):
                                 'print-media-type': '',
                                 'disable-smart-shrinking': '',
                                 'quiet': ''})
+
+
+def add_figures_to_markdown(md_report_fname, figure_fnames):
+    """ Add figures to markdown after html report generation. """
+    with open(md_report_fname, "a+") as file_object:
+        for f_name in figure_fnames:
+            path, file = os.path.split(f_name)
+            file_object.write("\n")
+            file_object.write(f'<img src=../figures/{file} alt="drawing" width="450"/>')
