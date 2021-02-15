@@ -12,7 +12,6 @@ class ReportGenerator():
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
     def __init__(self, e_id, db):
-        # TODO: Make report generation depend on the type of experiment
         # TODO: Add logging so that user gets verbose feedback
         # Get the experiment data from the protocol db
         self.e_id = e_id
@@ -74,6 +73,32 @@ def construct_markdown_table(data_dict, exclude_keys=[],
                 table.append(current_row)
                 current_row = {}
                 entry_counter = 0
+
+    # Add final residual of row - if not already done at end of loop
+    if (entry_counter % table_entries_per_row) != 0:
+        table.append(current_row)
+    return table
+
+
+def construct_hypersearch_table(params_to_search):
+    """ Construct a markdown table for the hyperparameter search ranges. """
+    table, current_row, entry_counter = [], {}, 0
+    for type, var_dict in params_to_search.items():
+        for var_name, var_range in var_dict.items():
+            current_row["Var. Type"] = "`" + str(type) + "`"
+            current_row["Var. Name"] = "`" + str(var_name) + "`"
+            # Combine range into single string
+            try:
+                v_temp = []
+                for k_r, v_r in var_range.items():
+                    v_temp.append(str(k_r) + ": " + str(v_r))
+            except:
+                v_temp = var_range
+            v = ', '.join(v_temp)
+            current_row["Var. Range"] = "`" + str(v) + "`"
+            # Append new row of data (variable with range data)
+            table.append(current_row)
+            current_row = {}
     return table
 
 
@@ -110,9 +135,13 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addTable(dictionary_list=job_table)
 
         doc.addHeader(3, "Job-Specific-Arguments.")
-        specific_table = construct_markdown_table(report_data["job_spec_args"])
+        specific_table = construct_markdown_table(report_data["job_spec_args"],
+                                                  ["params_to_search"])
         doc.addTable(dictionary_list=specific_table)
-
+        if report_data["meta_job_args"]["job_type"] == "hyperparameter-search":
+            search_table = construct_hypersearch_table(
+                            report_data["job_spec_args"]["params_to_search"])
+            doc.addTable(dictionary_list=search_table)
 
         # Base Configuration Hyperparameters used in the Experiment
         doc.addHeader(2, "Base Config Hyperparameters.")
@@ -129,7 +158,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addTable(dictionary_list=log_table)
 
         # Generated header for figures of the Experiment
-        doc.addHeader(2, "Generated 1D Figures.")
+        doc.addHeader(2, "Generated Figures.")
 
     markdown_text = open(md_report_fname).read()
     return markdown_text
