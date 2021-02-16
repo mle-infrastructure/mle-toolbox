@@ -51,7 +51,8 @@ setup(
         'console_scripts': [
             'run-experiment=mle_toolbox.run_experiment:main',
             'retrieve-experiment=mle_toolbox.retrieve_experiment:main',
-            'monitor-cluster=mle_toolbox.monitor_cluster:main'
+            'monitor-cluster=mle_toolbox.monitor_cluster:main',
+            'report-experiment=mle_toolbox.report_experiment:main'
         ]
     }
  )

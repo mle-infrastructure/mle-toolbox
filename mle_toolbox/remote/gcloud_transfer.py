@@ -200,7 +200,8 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
     # 3. Upload the zip file to the GCS bucket
     upload_local_directory_to_gcs(local_path=local_hash_fname,
                                   gcs_path=gcloud_hash_fname)
-    logger.info(f"UPLOAD - {experiment_id}: {gcloud_hash_fname}")
+    logger.info(f"UPLOAD TO GCS BUCKET - {experiment_id}:")
+    logger.info(f"{gcloud_hash_fname}")
 
     # 4. Update protocol with info
     db.dadd(experiment_id, ("stored_in_gcloud", True))

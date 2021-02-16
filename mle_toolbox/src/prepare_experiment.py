@@ -3,6 +3,9 @@ import sys
 import logging
 import argparse
 from datetime import datetime
+from ..utils import load_mle_toolbox_config
+from ..protocol import protocol_summary, load_local_protocol_db
+from ..remote.gcloud_transfer import get_gcloud_db
 
 
 __version__ = "0.2.2"
@@ -111,3 +114,53 @@ def check_job_config(job_config: dict):
     for nec_ing in necessary_ingredients:
         if nec_ing not in job_config.keys():
             raise ValueError("Provide additional input: {}".format(nec_ing))
+
+
+def ask_for_experiment_id(repeated_question: bool=False):
+    """ Helper function asking user for experiment id from protocol log. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
+    # Get most recent/up-to-date experiment DB from Google Cloud Storage
+    if not repeated_question:
+        if cc.general.use_gcloud_protocol_sync:
+            accessed_remote_db = get_gcloud_db()
+        else:
+            accessed_remote_db = False
+        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+        if accessed_remote_db:
+            print(time_t,
+                  "Successfully pulled latest experiment protocol from gcloud.")
+        else:
+            print(time_t, "Careful - you are using local experiment protocol.")
+    else:
+        accessed_remote_db = False
+
+    # Load in the locally stored experiment protocol DB
+    db, all_experiment_ids, _ = load_local_protocol_db()
+
+    # Print the last 10 experiments
+    if not repeated_question:
+        protocol_summary(tail=10)
+
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+
+    if not repeated_question:
+        experiment_id = input(time_t + " Which experiment id do you " +
+                              "want to use? [E-ID/N]:  ")
+    else:
+        experiment_id = input(time_t + " Which experiment id do you " +
+                              "want to use next? [E-ID/N]:  ")
+
+    while True:
+        if experiment_id == "N":
+            break
+
+        if experiment_id[:5] != "e-id-":
+            experiment_id = "e-id-" + experiment_id
+
+        if experiment_id not in all_experiment_ids:
+            print(time_t, "The provided experiment id does not exist")
+            experiment_id = input(time_t + " Which experiment did you mean?")
+        else:
+            break
+    return experiment_id, db, all_experiment_ids, accessed_remote_db
