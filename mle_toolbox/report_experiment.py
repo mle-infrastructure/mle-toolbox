@@ -28,11 +28,11 @@ def main():
     reporter = auto_generate_reports(experiment_id)
 
 
-def auto_generate_reports(e_id):
+def auto_generate_reports(e_id, logger=None):
     """ Default auto-generation of reports for latest experiment. """
     # Load in experiment protocol db
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     # Create 'reporter' instance aka Karla Kolumna - and write
-    reporter = ReportGenerator(e_id, db)
+    reporter = ReportGenerator(e_id, db, logger)
     reporter.generate_reports()
     return reporter

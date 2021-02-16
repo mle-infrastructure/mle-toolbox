@@ -13,7 +13,7 @@ class ReportGenerator():
     Generate md/html/pdf report of experiment from db/results dir.
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
-    def __init__(self, e_id, db):
+    def __init__(self, e_id, db, logger=None):
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db
@@ -27,7 +27,10 @@ class ReportGenerator():
             except: pass
 
         # Setup logger for report generation
-        self.logger = prepare_logger(None, False)
+        if logger is None:
+            self.logger = prepare_logger(None, False)
+        else:
+            self.logger = logger
 
     def generate_reports(self):
         """ Generate reports + generate included figures: .md, .html, .pdf. """
@@ -50,9 +53,8 @@ class ReportGenerator():
         if len(search_vars) > 1:
             figure_fnames_2D = self.fig_generator.generate_all_2D_figures(
                                         search_vars, search_targets)
-        else:
-            figure_fnames_2D = []
-        self.figure_fnames = figure_fnames_1D + figure_fnames_2D
+        
+        self.figure_fnames = abs_figure_paths(self.fig_generator.figures_dir)
         self.logger.info(f'Report - GENERATED - figures - total:'
                          f' {len(self.figure_fnames)}')
 
@@ -66,7 +68,7 @@ class ReportGenerator():
 
         # 4. Also add figures to the markdown text to render
         add_figures_to_markdown(self.md_report_fname, self.figure_fnames)
-        self.logger.info(f'Report - UPDATE - .md with figures.')
+        self.logger.info(f'Report - UPDATED - .md with figures.')
 
         # 5. Generate the PDF file.
         self.pdf_report_fname = os.path.join(self.reports_dir,
@@ -227,4 +229,14 @@ def add_figures_to_markdown(md_report_fname, figure_fnames):
         for f_name in figure_fnames:
             path, file = os.path.split(f_name)
             file_object.write("\n")
-            file_object.write(f'<img src=../figures/{file} alt="drawing" width="450"/>')
+            file_object.write(f'<img src=../figures/{file} width="45%" style="margin-right:20px">')
+
+
+def abs_figure_paths(directory):
+    """ Return all absolute figure paths to include in report. """
+    abs_paths = []
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            if f.endswith(".png"):
+                abs_paths.append(os.path.abspath(os.path.join(dirpath, f)))
+    return abs_paths
