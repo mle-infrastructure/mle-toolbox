@@ -1,7 +1,7 @@
 **v0.2.2**
 - Minor update to the credential `.toml` template file
 
-**v0.2.3**
+**v0.2.4**
 - Major reduction of dependencies. Now for all more optional/specialized features (e.g. SMBO, visualization, JAX/torch idiosyncracies) there will be an exception raised if the package isn't installed and you still want to use the toolbox feature.
 - Refactored `visualization` into its own subdirectory to clean up `utils`.
 - Change from own `DotDic` to `DotMap`, which appears more stable and better maintained. Be aware that now we can't rely on `None` outputs if key is not in dict. We shouldn't have done that in the first place due to being error prone.
