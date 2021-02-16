@@ -35,7 +35,7 @@ setup(
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/RobertTLange/mle-toolbox",
-     download_url="https://github.com/RobertTLange/mle-toolbox/archive/v_02.tar.gz",
+     download_url="https://github.com/RobertTLange/mle-toolbox/archive/v0.2.3.tar.gz",
      classifiers=[
          "Programming Language :: Python :: 3.6",
          "Programming Language :: Python :: 3.7",
