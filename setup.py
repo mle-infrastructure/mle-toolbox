@@ -28,7 +28,7 @@ requires = [
 
 setup(
      name='mle_toolbox',
-     version='0.2.2',
+     version='0.2.3',
      author="Robert Tjarko Lange",
      author_email="robertlange0@gmail.com",
      description="Machine Learning Experiment Toolbox",
