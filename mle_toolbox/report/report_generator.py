@@ -53,7 +53,7 @@ class ReportGenerator():
         if len(search_vars) > 1:
             figure_fnames_2D = self.fig_generator.generate_all_2D_figures(
                                         search_vars, search_targets)
-        
+
         self.figure_fnames = abs_figure_paths(self.fig_generator.figures_dir)
         self.logger.info(f'Report - GENERATED - figures - total:'
                          f' {len(self.figure_fnames)}')

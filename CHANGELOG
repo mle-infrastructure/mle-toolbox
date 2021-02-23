@@ -12,4 +12,5 @@
 
 **v0.2.5**
 - Raw github links for figures in readme so they are rendered in PyPi.
-- Allow user to choose between `conda` and `venv` virtual environment setup.
+- Introduce mle-config variable `use_conda_virtual_env` to allow user to choose between `conda` and `venv` virtual environment setup.
+- Introduce mle-config variable `remote_env_name` to allow user to set name for the remote experiment execution environment.

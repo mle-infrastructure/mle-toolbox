@@ -8,10 +8,21 @@ title = "mle-toolbox-config"
 # Store a full log of every experiment run in .txt file
 development = false
 
-# Set boolean for syncing protocol with GCloud & Storing all results in bucket
-use_gcloud_protocol_sync = false
-use_gcloud_results_storage = false
-local_protocol_fname = "~/local_mle_protocol.db"
+# Local filename to store protocol DB in
+local_protocol_fname = '~/local_robs_mle_protocol.db'
+
+# Syncing of protocol with GCloud
+use_gcloud_protocol_sync = true
+
+# Storing of experiment results in bucket
+use_gcloud_results_storage = true
+
+# Whether to use conda or venv for experiment virtual environment
+use_conda_virtual_env = true
+
+# Set remote experiment submission environment name
+remote_env_name = 'mle-toolbox'
+
 
 #------------------------------------------------------------------------------#
 # 2. Configuration for Slurm Cluster

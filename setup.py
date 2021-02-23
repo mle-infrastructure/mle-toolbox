@@ -21,6 +21,7 @@ requires = [
             'gitpython',
             'scp',
             'paramiko',
+            'sshtunnel',
             'tabulate',
             'colorclass',
             'terminaltables',
