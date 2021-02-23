@@ -9,3 +9,7 @@
 - Now we also store much more meta data in the `hyper_log.pkl` file output from the search. This includes potential checkpoint paths of networks, multiple target variables and the original log paths.
 - Added the `report-experiment` core functionality to generate `.md`, `.html` and `.pdf` reports of your experiments.
 - Added an example notebook that shows how to load/analyze and report the results from the simple ODE integration example.
+
+**v0.2.5**
+- Raw github links for figures in readme so they are rendered in PyPi.
+- Allow user to choose between `conda` and `venv` virtual environment setup.
