@@ -6,7 +6,7 @@ meta_job_args:
     base_train_config: "ode/ode_int_config_1.json"
     experiment_dir: "experiments/"
     remote_exec_dir: "mle-toolbox/examples/"
-    report_generation: true
+    report_generation: false
 
 # Parameters specific to the hyperparameter search
 param_search_args:

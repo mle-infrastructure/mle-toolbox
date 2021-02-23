@@ -12,7 +12,6 @@ from ..utils import load_mle_toolbox_config
 # Import cluster credentials/settings - SGE or Slurm scheduling system
 cc = load_mle_toolbox_config()
 
-
 def ask_for_resource_to_run():
     """ Ask user if they want to exec on remote resource. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
@@ -93,14 +92,15 @@ def remote_connect_monitor_clean(remote_resource, random_str):
 
 
 qsub_pre = """
-#!/bin/sh
+#!/bin/bash
 #$ -q cognition-all.q
 #$ -cwd
 #$ -V
 #$ -N {random_str}
 #$ -e {random_str}.err
 #$ -o {random_str}.txt
-
+. ~/.bashrc
+. /etc/profile
 """
 
 qsub_post = """
@@ -109,9 +109,9 @@ cd {exec_dir}
 run-experiment {exec_config} {purpose_str} --no_welcome
 """
 # #$ -l hostname=cognition12.ml.tu-berlin.de
-
-enable_conda = ('source $(conda info --base)/etc/profile.d/conda.sh '
-                '&& conda activate {remote_env_name}')
+# Problem with source not found
+enable_conda = ('/bin/bash -c "source $(conda info --base)/etc/profile.d/conda.sh"'
+                ' && conda activate {remote_env_name}')
 enable_venv = '/bin/bash -c "source {}/{}/bin/activate"'
 
 
