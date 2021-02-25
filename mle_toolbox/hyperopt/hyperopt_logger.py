@@ -45,7 +45,8 @@ class HyperoptLogger(object):
 
         # Define list of vars from meta data to keep also in hyper df
         meta_keys_to_track = ["log_paths", "experiment_dir",
-                              "config_fname", "network_ckpt", "seeds"]
+                              "config_fname", "model_ckpt", "seeds",
+                              "model_type"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):

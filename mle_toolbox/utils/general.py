@@ -309,7 +309,8 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
                     temp = np.array(
                     new_results_dict[eval][ds][o_name]).squeeze().astype('U200')
                     # Get rid of duplicate experiment dir strings
-                    if o_name in ["experiment_dir", "eval_id", "config_fname"]:
+                    if o_name in ["experiment_dir", "eval_id", "config_fname",
+                                  "model_type"]:
                         mean_dict[o_name] = str(np.unique(temp)[0])
                     else:
                         mean_dict[o_name] = temp

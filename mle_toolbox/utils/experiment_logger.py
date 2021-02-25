@@ -3,7 +3,7 @@ import pandas as pd
 
 import os
 import shutil
-
+import pickle
 import time
 import datetime
 import h5py
@@ -25,6 +25,7 @@ class DeepLogger(object):
         use_tboard (bool): whether to log to tensorboard
         print_every_k_updates (int): after how many log updates - verbose
         seed_id (str): seed id to distinguish logs with
+        model_type (str): ["torch", "jax", "sklearn"] - tboard/storage
         save_every_k_ckpt (int): save every other checkpoint
         overwrite_experiment_dir (bool): delete old log file/tboard dir
     """
@@ -40,13 +41,17 @@ class DeepLogger(object):
                  use_tboard: bool=False,
                  print_every_k_updates: Union[int, None] = None,
                  seed_id: Union[str, None] = None,
+                 model_type: str = "default",
                  save_every_k_ckpt: Union[int, None] = None,
                  overwrite_experiment_dir: bool = False):
         # Initialize counters of log
         self.log_update_counter = 0
         self.log_save_counter = 0
-        self.network_save_counter = 0
+        self.model_save_counter = 0
         self.print_every_k_updates = print_every_k_updates
+
+        # Type of model to log/store
+        self.model_type = model_type
 
         # Store every k-th checkpoint
         self.save_every_k_ckpt = save_every_k_ckpt
@@ -93,17 +98,17 @@ class DeepLogger(object):
             try: os.makedirs(os.path.join(self.experiment_dir, "logs/"))
             except: pass
 
-        if not os.path.exists(os.path.join(self.experiment_dir, "networks/")):
-            try: os.makedirs(os.path.join(self.experiment_dir, "networks/"))
+        if not os.path.exists(os.path.join(self.experiment_dir, "models/")):
+            try: os.makedirs(os.path.join(self.experiment_dir, "models/"))
             except: pass
 
-        # Create separate sub-dictionaries for checkpoints & final trained network
+        # Create separate sub-dictionaries for checkpoints & final trained model
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "networks/final/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "networks/final/"))
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
                 except: pass
-            if not os.path.exists(os.path.join(self.experiment_dir, "networks/ckpt/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "networks/ckpt/"))
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/ckpt/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/ckpt/"))
                 except: pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
@@ -116,22 +121,26 @@ class DeepLogger(object):
         else:
             exp_time_base_ext = exp_time_base + "_" + seed_id
 
-        # Set where to log to (Stats - .hdf5, Network - .ckpth)
+        # Set where to log to (Stats - .hdf5, model - .ckpth)
         self.log_save_fname = (self.experiment_dir + "logs/" +
                                timestr + base_str + "_" + seed_id
                                + ".hdf5")
 
-        # Create separate filenames for checkpoints & final trained network
+        # Create separate filenames for checkpoints & final trained model
         if self.save_every_k_ckpt is not None:
-            self.final_network_save_fname = (self.experiment_dir + "networks/final/" +
-                                             timestr + base_str + "_" + seed_id
-                                              + ".pt")
-            self.ckpt_network_save_fname = (self.experiment_dir + "networks/ckpt/" +
+            self.final_model_save_fname = (self.experiment_dir + "models/final/" +
+                                             timestr + base_str + "_" + seed_id)
+            self.ckpt_model_save_fname = (self.experiment_dir + "models/ckpt/" +
                                              timestr + base_str + "_" + seed_id)
         else:
-            self.final_network_save_fname = (self.experiment_dir + "networks/" +
-                                             timestr + base_str + "_" + seed_id
-                                              + ".pt")
+            self.final_model_save_fname = (self.experiment_dir + "models/" +
+                                             timestr + base_str + "_" + seed_id)
+
+        # Different extensions to model checkpoints based on model type
+        if self.model_type == "torch":
+            self.final_model_save_fname += ".pt"
+        elif self.model_type in ["jax", "sklearn"]:
+            self.final_model_save_fname += ".pkl"
 
         # Delete old log file and tboard dir if overwrite allowed
         if overwrite_experiment_dir:
@@ -158,7 +167,7 @@ class DeepLogger(object):
     def update_log(self,
                    clock_tick: list,
                    stats_tick: list,
-                   network=None,
+                   model=None,
                    plot_to_tboard=None,
                    save=False):
         """ Update with the newest tick of performance stats, net weights """
@@ -177,8 +186,7 @@ class DeepLogger(object):
 
         # Update the tensorboard log with the newest event
         if self.writer is not None:
-            self.update_tboard(clock_tick, stats_tick, network, plot_to_tboard)
-
+            self.update_tboard(clock_tick, stats_tick, model, plot_to_tboard)
 
         # Print the most current results
         if self.verbose and self.print_every_k_updates is not None:
@@ -189,14 +197,14 @@ class DeepLogger(object):
         # Save the log if boolean says so
         if save:
             self.save_log()
-            # Save the most recent network checkpoint
-            if network is not None:
-                self.save_network(network)
+            # Save the most recent model checkpoint
+            if model is not None:
+                self.save_model(model)
 
     def update_tboard(self,
                       clock_tick: list,
                       stats_tick: list,
-                      network = None,
+                      model = None,
                       plot_to_tboard = None):
         """ Update the tensorboard with the newest events """
         # Add performance & step counters
@@ -204,9 +212,9 @@ class DeepLogger(object):
             self.writer.add_scalar('performance/' + performance_tick,
                                    np.mean(stats_tick[i]), clock_tick[0])
 
-        # Log the network params & gradients
-        if network is not None:
-            for name, param in network.named_parameters():
+        # Log the model params & gradients
+        if model is not None:
+            for name, param in model.named_parameters():
                 self.writer.add_histogram('weights/' + name,
                                           param.clone().cpu().data.numpy(),
                                           clock_tick[0])
@@ -228,8 +236,8 @@ class DeepLogger(object):
         # Create "datasets" to store in the hdf5 file [time, stats]
         # Store all relevant meta data (log filename, checkpoint filename)
         if self.log_save_counter == 0:
-            h5f.create_dataset(name=self.seed_id + "/meta/network_ckpt",
-                               data=[self.final_network_save_fname.encode("ascii", "ignore")],
+            h5f.create_dataset(name=self.seed_id + "/meta/model_ckpt",
+                               data=[self.final_model_save_fname.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/log_paths",
@@ -246,6 +254,10 @@ class DeepLogger(object):
                                dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
                                data=[self.base_str.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/model_type",
+                               data=[self.model_type.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
 
@@ -278,20 +290,45 @@ class DeepLogger(object):
         # Tick the log save counter
         self.log_save_counter += 1
 
-    def save_network(self, network):
-        """ Save current state of the network as a checkpoint - torch! """
+    def save_model(self, model):
+        """ Save current state of the model as a checkpoint - torch! """
+        # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
+        if self.model_type == "torch":
+            # Torch model case - save model state dict as .pt checkpoint
+            self.store_torch_model(final_path, model)
+        elif self.model_type in ["jax", "sklearn"]:
+            # JAX/sklearn save parameter dict/model as dictionary
+            self.store_pkl_model(final_path, model)
+        else:
+            raise ValueError("Provide valid model_type [torch, jax, sklearn].")
+
+        # CASE 2: SEPARATE STORAGE OF EVERY K-TH LOGGED MODEL STATE
+        if self.save_every_k_ckpt is not None:
+            if self.log_save_counter % self.save_every_k_ckpt == 0:
+                if self.model_type == "torch":
+                    ckpt_path = (self.ckpt_model_save_fname + "_" +
+                                 str(self.model_save_counter) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.ckpt_model_save_fname + "_" +
+                                 str(self.model_save_counter) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                self.model_save_counter += 1
+
+        # TODO: CASE 3: STORE TOP-K MODEL STATES BY SOME SCORE
+
+    def store_torch_model(self, path_to_store, model):
+        """ Store a torch checkpoint for a model. """
         try:
             import torch
         except ModuleNotFoundError as err:
             raise ModuleNotFoundError(f"{err}. You need to install "
-                                      "`torch` if you want to save a network "
+                                      "`torch` if you want to save a model "
                                       "checkpoint.")
         # Update the saved weights in a single file!
-        torch.save(network.state_dict(), self.final_network_save_fname)
+        torch.save(model.state_dict(), final_path)
 
-        if self.save_every_k_ckpt is not None:
-            if self.log_save_counter % self.save_every_k_ckpt == 0:
-                temp_network_fname = (self.ckpt_network_save_fname + "_" +
-                                      str(self.network_save_counter) + ".pt")
-                torch.save(network.state_dict(), temp_network_fname)
-                self.network_save_counter += 1
+    def store_pkl_model(self, path_to_store, model):
+        """ Store a pickle object for a JAX param dict/sklearn model. """
+        with open(final_path, 'wb') as fid:
+            cPickle.dump(model, fid)
