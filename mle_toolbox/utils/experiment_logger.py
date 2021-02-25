@@ -295,10 +295,10 @@ class DeepLogger(object):
         # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
         if self.model_type == "torch":
             # Torch model case - save model state dict as .pt checkpoint
-            self.store_torch_model(final_path, model)
+            self.store_torch_model(self.final_model_save_fname, model)
         elif self.model_type in ["jax", "sklearn"]:
             # JAX/sklearn save parameter dict/model as dictionary
-            self.store_pkl_model(final_path, model)
+            self.store_pkl_model(self.final_model_save_fname, model)
         else:
             raise ValueError("Provide valid model_type [torch, jax, sklearn].")
 
@@ -326,9 +326,9 @@ class DeepLogger(object):
                                       "`torch` if you want to save a model "
                                       "checkpoint.")
         # Update the saved weights in a single file!
-        torch.save(model.state_dict(), final_path)
+        torch.save(model.state_dict(), path_to_store)
 
     def store_pkl_model(self, path_to_store, model):
         """ Store a pickle object for a JAX param dict/sklearn model. """
-        with open(final_path, 'wb') as fid:
-            cPickle.dump(model, fid)
+        with open(path_to_store, 'wb') as fid:
+            pickle.dump(model, fid)
