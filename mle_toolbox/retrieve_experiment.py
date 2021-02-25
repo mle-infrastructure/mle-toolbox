@@ -26,6 +26,9 @@ def get_retrieve_args():
     parser.add_argument('-local', '--retrieve_local', default=False,
                         action='store_true',
                         help ='Retrieve experiment dir from remote directory.')
+    parser.add_argument('-dir_name', '--local_dir_name', default=None,
+                        action='store_true',
+                        help ='Name of new local results directory.')
     return parser.parse_args()
 
 
@@ -58,7 +61,8 @@ def main():
                                                all_experiment_ids)
                 else:
                     get_gcloud_zip_experiment(db, experiment_id,
-                                              all_experiment_ids)
+                                              all_experiment_ids,
+                                              local_dir_name.local_dir_name)
                 retrieval_counter += 1
             else:
                 experiment_id, _, _, _ = ask_for_experiment_id(True)
@@ -97,8 +101,8 @@ def main():
 
     if accessed_remote_db:
         send_gcloud_db()
-        print(time_t, "Updated retrieval protocol status & \
-              send to gcloud storage.")
+        print(time_t, "Updated retrieval protocol status & "
+              "send to gcloud storage.")
 
 
 def retrieve_single_experiment(db, experiment_id: str,

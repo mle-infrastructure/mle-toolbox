@@ -6,6 +6,7 @@ import logging
 import zipfile
 import shutil
 from datetime import datetime
+from typing import Union
 
 from ..utils.general import load_mle_toolbox_config
 from ..protocol import load_local_protocol_db
@@ -174,9 +175,12 @@ def zipdir(path: str, zip_fname: str):
     """ Zip a directory to upload afterwards to GCloud Storage. """
     # ziph is zipfile handle
     ziph = zipfile.ZipFile(zip_fname, 'w', zipfile.ZIP_DEFLATED)
+    # Get rid of redundant part of path
+    prefix_len = len(path)
     for root, dirs, files in os.walk(path):
         for file in files:
-            ziph.write(os.path.join(root, file))
+            ziph.write(os.path.join(root, file),
+                       os.path.join(root[prefix_len+1:], file))
     ziph.close()
 
 
@@ -215,7 +219,8 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
 
 
 def get_gcloud_zip_experiment(db, experiment_id: str,
-                              all_experiment_ids: list):
+                              all_experiment_ids: list,
+                              local_dir_name: Union[None, str]):
     """ Download zipped experiment from GCS. Unpack & clean up. """
     # Ensure the right prefix
     while True:
@@ -235,8 +240,12 @@ def get_gcloud_zip_experiment(db, experiment_id: str,
     download_gcs_directory_to_local(gcloud_hash_fname)
 
     # Unzip the retrieved file
-    with zipfile.ZipFile(local_hash_fname, 'r') as zip_ref:
-        zip_ref.extractall(experiment_id)
+    if local_dir_name is None:
+        with zipfile.ZipFile(local_hash_fname, 'r') as zip_ref:
+            zip_ref.extractall(experiment_id)
+    else:
+        with zipfile.ZipFile(local_hash_fname, 'r') as zip_ref:
+            zip_ref.extractall(local_dir_name)
 
     # Delete the zip file
     os.remove(local_hash_fname)
