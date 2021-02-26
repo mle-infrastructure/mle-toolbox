@@ -154,10 +154,12 @@ class DeepLogger(object):
         self.final_model_save_fname = (self.experiment_dir + "models/final/" +
                                        timestr + base_str + "_" + seed_id)
         if self.save_every_k_ckpt is not None:
+            self.every_k_ckpt_list = []
             self.every_k_model_save_fname = (self.experiment_dir + "models/every_k/" +
                                              timestr + base_str + "_" + seed_id
                                              + "_k_")
         if self.save_top_k_ckpt is not None:
+            self.top_k_ckpt_list = []
             self.top_k_model_save_fname = (self.experiment_dir + "models/top_k/" +
                                            timestr + base_str + "_" + seed_id
                                            + "_top_")
@@ -222,10 +224,10 @@ class DeepLogger(object):
 
         # Save the log if boolean says so
         if save:
-            self.save_log()
             # Save the most recent model checkpoint
             if model is not None:
                 self.save_model(model)
+            self.save_log()
 
     def update_tboard(self,
                       clock_tick: list,
@@ -240,13 +242,14 @@ class DeepLogger(object):
 
         # Log the model params & gradients
         if model is not None:
-            for name, param in model.named_parameters():
-                self.writer.add_histogram('weights/' + name,
-                                          param.clone().cpu().data.numpy(),
-                                          clock_tick[0])
-                self.writer.add_histogram('gradients/' + name,
-                                          param.grad.clone().cpu().data.numpy(),
-                                          clock_tick[0])
+            if self.model_type == "torch":
+                for name, param in model.named_parameters():
+                    self.writer.add_histogram('weights/' + name,
+                                              param.clone().cpu().data.numpy(),
+                                              clock_tick[0])
+                    self.writer.add_histogram('gradients/' + name,
+                                              param.grad.clone().cpu().data.numpy(),
+                                              clock_tick[0])
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
@@ -287,6 +290,18 @@ class DeepLogger(object):
                                compression='gzip', compression_opts=4,
                                dtype='S200')
 
+            if self.save_top_k_ckpt or self.save_every_k_ckpt:
+                h5f.create_dataset(
+                    name=self.seed_id + "/meta/ckpt_time_to_track",
+                    data=[self.ckpt_time_to_track.encode("ascii", "ignore")],
+                    compression='gzip', compression_opts=4, dtype='S200')
+
+            if self.save_top_k_ckpt:
+                h5f.create_dataset(
+                    name=self.seed_id + "/meta/top_k_metric_name",
+                    data=[self.top_k_metric_name.encode("ascii", "ignore")],
+                    compression='gzip', compression_opts=4, dtype='S200')
+
         # Store all time_to_track variables
         for o_name in self.time_to_track:
             if self.log_save_counter >= 1:
@@ -307,6 +322,43 @@ class DeepLogger(object):
                 data_to_store = np.stack(data_to_store)
             h5f.create_dataset(name=self.seed_id + "/stats/" + o_name,
                                data=data_to_store,
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+
+        # Store data on stored checkpoints - stored every k updates
+        if self.save_every_k_ckpt is not None:
+            if self.log_save_counter >= 1:
+                for o_name in ["every_k_storage_time", "every_k_ckpt_list"]:
+                    if h5f.get(self.seed_id + "/meta/" + o_name):
+                        del h5f[self.seed_id + "/meta/" + o_name]
+            h5f.create_dataset(name=self.seed_id + "/meta/every_k_storage_time",
+                               data=np.array(self.every_k_storage_time),
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+            h5f.create_dataset(name=self.seed_id + "/meta/every_k_ckpt_list",
+                               data=[t.encode("ascii", "ignore") for t
+                                     in self.every_k_ckpt_list],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+
+        #  Store data on stored checkpoints - stored top k ckpt
+        if self.save_top_k_ckpt is not None:
+            if self.log_save_counter >= 1:
+                for o_name in ["top_k_storage_time", "top_k_ckpt_list",
+                               "top_k_performance"]:
+                    if h5f.get(self.seed_id + "/meta/" + o_name):
+                        del h5f[self.seed_id + "/meta/" + o_name]
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_storage_time",
+                               data=np.array(self.top_k_storage_time),
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_ckpt_list",
+                               data=[t.encode("ascii", "ignore") for t
+                                     in self.top_k_ckpt_list],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_performance",
+                               data=np.array(self.top_k_performance),
                                compression='gzip', compression_opts=4,
                                dtype='float32')
 
@@ -341,38 +393,36 @@ class DeepLogger(object):
                     self.store_pkl_model(ckpt_path, model)
                 # Update model save count & time point of storage
                 self.model_save_counter += 1
-                self.every_k_storage_time.append(
-                    self.stats_to_track[self.ckpt_time_to_track].to_numpy()[-1]
-                )
+                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+                self.every_k_storage_time.append(time)
+                self.every_k_ckpt_list.append(ckpt_path)
 
         # CASE 3: STORE TOP-K MODEL STATES BY SOME SCORE
         if self.save_top_k_ckpt is not None:
             updated_top_k = False
             score = self.stats_to_track[self.top_k_metric_name].to_numpy()[-1]
+            time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
             # Fill up empty top k slots
             if len(self.top_k_performance) < self.save_top_k_ckpt:
-                self.top_k_performance.append(score)
-                self.top_k_storage_time.append(
-                    self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
-                    )
                 if self.model_type == "torch":
                     ckpt_path = (self.top_k_model_save_fname +
-                                 str(len(self.top_k_performance)-1) + ".pt")
+                                 str(len(self.top_k_performance)) + ".pt")
                     self.store_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname +
-                                 str(len(self.top_k_performance)-1) + ".pkl")
+                                 str(len(self.top_k_performance)) + ".pkl")
                     self.store_pkl_model(ckpt_path, model)
                 updated_top_k = True
+                self.top_k_performance.append(score)
+                self.top_k_storage_time.append(time)
+                self.top_k_ckpt_list.append(ckpt_path)
 
             # If minimize = replace worst performing model (max score)
             if (self.top_k_minimize_metric and
                 max(self.top_k_performance) > score and not updated_top_k):
                 id_to_replace = np.argmax(self.top_k_performance)
                 self.top_k_performance[id_to_replace] = score
-                self.top_k_storage_time[id_to_replace] = (
-                    self.clock_to_track[
-                        self.ckpt_time_to_track].to_numpy()[-1])
+                self.top_k_storage_time[id_to_replace] = time
                 if self.model_type == "torch":
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(id_to_replace) + ".pt")
