@@ -1,0 +1,23 @@
+{
+"train_config": {"batch_size": 128,
+                 "l_rate": 0.001,
+                 "training_steps": 1001,
+                 "eval_freq": 500,
+                 "seed_id": 0},
+"net_config": {},
+"log_config": {"time_to_track": ["step_counter"],
+               "what_to_track": ["val_loss"],
+               "model_type": "jax",
+               "tboard_fname": "vae",
+               "time_to_print": ["step_counter"],
+               "what_to_print": ["val_loss"],
+               "print_every_k_updates": 1,
+               "overwrite_experiment_dir": 1,
+               "model_type": "jax",
+               "save_every_k_ckpt": 2,
+               "save_top_k_ckpt": 2,
+               "top_k_metric_name": "val_loss",
+               "top_k_minimize_metric": 1,
+               "ckpt_time_to_track": "step_counter"
+               }
+}

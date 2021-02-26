@@ -8,8 +8,6 @@ from .utils import (load_mle_toolbox_config, load_yaml_config,
 # Import of helpers for protocoling experiments
 from .protocol import (protocol_summary, update_protocol_status,
                        delete_protocol_from_input, protocol_experiment)
-# Import of helpers for report generating after experiment finished
-from .report_experiment import auto_generate_reports
 
 # Import of setup tools for experiments (log, config, etc.)
 from .src.prepare_experiment import (welcome_to_mle_toolbox, get_mle_args,
@@ -141,6 +139,8 @@ def main():
 
     # 8. Generate .md, .html, .pdf report w. figures for e_id - inherit logger
     if "report_generation" in job_config.meta_job_args.keys():
+        # Import for report generating after experiment finished
+        from .report_experiment import auto_generate_reports
         if job_config.meta_job_args.report_generation:
             reporter = auto_generate_reports(new_experiment_id, logger)
             print_framed("REPORT GENERATION")

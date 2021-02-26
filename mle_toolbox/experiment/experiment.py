@@ -8,7 +8,8 @@ from typing import Union
 import subprocess as sp
 
 from .local_job_submission import (local_check_job_args,
-                                   submit_local_job)
+                                   submit_local_venv_job,
+                                   submit_local_conda_job)
 from .sge_job_management import (sge_check_job_args,
                                  sge_submit_remote_job,
                                  sge_monitor_remote_job)
@@ -135,9 +136,14 @@ class Experiment(object):
 
     def schedule_local(self):
         """ Schedules experiment locally on your machine. """
-        proc = submit_local_job(self.job_filename,
-                                self.cmd_line_args,
-                                self.job_arguments)
+        if cc.general.use_conda_virtual_env:
+            proc = submit_local_conda_job(self.job_filename,
+                                          self.cmd_line_args,
+                                          self.job_arguments)
+        else:
+            proc = submit_local_venv_job(self.job_filename,
+                                         self.cmd_line_args,
+                                         self.job_arguments)
         self.job_status = 1
         return proc
 

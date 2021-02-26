@@ -16,8 +16,6 @@ class HyperoptLogger(object):
         self.max_target = max_target  # Whether we want to max target (reward)
         self.eval_metrics = eval_metrics  # Var names to compare across runs
         self.verbose = verbose
-        if self.max_target: self.best_target = -np.inf
-        else: self.best_target = np.inf
 
         # Instantiate the meta-logger
         self.logger = logging.getLogger(__name__)
@@ -45,7 +43,8 @@ class HyperoptLogger(object):
 
         # Define list of vars from meta data to keep also in hyper df
         meta_keys_to_track = ["log_paths", "experiment_dir",
-                              "config_fname", "network_ckpt", "seeds"]
+                              "config_fname", "model_ckpt", "seeds",
+                              "model_type"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):
@@ -143,7 +142,3 @@ class HyperoptLogger(object):
 
     def __len__(self):
         return len(self.opt_log)
-
-
-if __name__ == "__main__":
-    hyper_log = HyperoptLogger("hyper_log.pkl")

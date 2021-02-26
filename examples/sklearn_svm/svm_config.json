@@ -1,0 +1,13 @@
+{
+"train_config": {"svm_gamma": 0.001,
+                 "seed_id": 0},
+"net_config": {},
+"log_config": {"time_to_track": ["step_counter"],
+               "what_to_track": ["train_acc", "test_acc"],
+               "model_type": "sklearn",
+               "tboard_fname": "svm",
+               "time_to_print": ["step_counter"],
+               "what_to_print": ["train_acc", "test_acc"],
+               "print_every_k_updates": 1,
+               "overwrite_experiment_dir": 1}
+}

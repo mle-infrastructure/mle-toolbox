@@ -2,6 +2,7 @@ import os
 import sys
 import random
 import string
+import shlex
 import subprocess as sp
 from typing import Union
 
@@ -24,9 +25,9 @@ def local_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def submit_local_job(filename: str,
-                     cmd_line_arguments: str,
-                     job_arguments: dict):
+def submit_local_conda_job(filename: str,
+                          cmd_line_arguments: str,
+                          job_arguments: dict):
     """ Create a local job & submit it based on provided file to execute. """
     cmd = f"python {filename} {cmd_line_arguments}"
     env_name = job_arguments['env_name']
@@ -36,6 +37,19 @@ def submit_local_job(filename: str,
         cmd = f"source $(conda info --base)/etc/profile.d/conda.sh \
                 && conda activate {env_name} \
                 && {cmd}"
+    proc = submit_subprocess(cmd)
+    return proc
+
+
+def submit_local_venv_job(filename: str,
+                           cmd_line_arguments: str,
+                           job_arguments: dict):
+    """ Create a local job & submit it based on provided file to execute. """
+    cmd = f"python {filename} {cmd_line_arguments}"
+    env_name = job_arguments['env_name']
+    command_template = '/bin/bash -c "source {}/{}/bin/activate && {}"'
+    cmd = shlex.split(command_template.format(os.environ['WORKON_HOME'],
+                                              env_name, cmd))
     proc = submit_subprocess(cmd)
     return proc
 

@@ -3,7 +3,7 @@ import pandas as pd
 
 import os
 import shutil
-
+import pickle
 import time
 import datetime
 import h5py
@@ -21,12 +21,20 @@ class DeepLogger(object):
         what_to_print (List[str]): columns of stats df to print out
         config_fname (str): file path of configuration of experiment
         experiment_dir (str): base experiment directory
-        tboard_fname (str): base name of tensorboard
-        use_tboard (bool): whether to log to tensorboard
-        print_every_k_updates (int): after how many log updates - verbose
         seed_id (str): seed id to distinguish logs with
-        save_every_k_ckpt (int): save every other checkpoint
         overwrite_experiment_dir (bool): delete old log file/tboard dir
+        ======= VERBOSITY/TBOARD LOGGING
+        print_every_k_updates (int): after how many log updates - verbose
+        use_tboard (bool): whether to log to tensorboard
+        tboard_fname (str): base name of tensorboard
+        ======= MODEL STORAGE
+        model_type (str): ["torch", "jax", "sklearn"] - tboard/storage
+        ckpt_time_to_track (str): Variable name/score key to save
+        save_every_k_ckpt (int): save every other checkpoint
+        save_top_k_ckpt (int): save top k performing checkpoints
+        top_k_metric_name (str): Variable name/score key to save
+        top_k_minimize_metric (str): Boolean for min/max score in top k logging
+
     """
 
     def __init__(self,
@@ -36,20 +44,37 @@ class DeepLogger(object):
                  what_to_print: List[str],
                  config_fname: str,
                  experiment_dir: str = "/",
-                 tboard_fname: Union[str, None] = None,
-                 use_tboard: bool=False,
-                 print_every_k_updates: Union[int, None] = None,
                  seed_id: Union[str, None] = None,
+                 overwrite_experiment_dir: bool = False,
+                 use_tboard: bool = False,
+                 tboard_fname: Union[str, None] = None,
+                 print_every_k_updates: Union[int, None] = None,
+                 model_type: str = "no-model-type-provided",
+                 ckpt_time_to_track: Union[str, None] = None,
                  save_every_k_ckpt: Union[int, None] = None,
-                 overwrite_experiment_dir: bool = False):
+                 save_top_k_ckpt: Union[int, None] = None,
+                 top_k_metric_name: Union[str, None] = None,
+                 top_k_minimize_metric: Union[bool, None] = None):
         # Initialize counters of log
         self.log_update_counter = 0
         self.log_save_counter = 0
-        self.network_save_counter = 0
+        self.model_save_counter = 0
         self.print_every_k_updates = print_every_k_updates
 
-        # Store every k-th checkpoint
+        # MODEL LOGGING SETUP: Type of model/every k-th ckpt/top k ckpt
+        self.model_type = model_type
+        self.ckpt_time_to_track = ckpt_time_to_track
         self.save_every_k_ckpt = save_every_k_ckpt
+        self.save_top_k_ckpt = save_top_k_ckpt
+        self.top_k_metric_name = top_k_metric_name
+        self.top_k_minimize_metric = top_k_minimize_metric
+
+        # Initialize lists for top k scores and to track storage times
+        if self.save_every_k_ckpt is not None:
+            self.every_k_storage_time = []
+        if self.save_top_k_ckpt is not None:
+            self.top_k_performance = []
+            self.top_k_storage_time = []
 
         # Set up the logging directories - save the timestamped config file
         self.setup_experiment_dir(experiment_dir, config_fname, seed_id,
@@ -93,17 +118,21 @@ class DeepLogger(object):
             try: os.makedirs(os.path.join(self.experiment_dir, "logs/"))
             except: pass
 
-        if not os.path.exists(os.path.join(self.experiment_dir, "networks/")):
-            try: os.makedirs(os.path.join(self.experiment_dir, "networks/"))
+        if not os.path.exists(os.path.join(self.experiment_dir, "models/")):
+            try: os.makedirs(os.path.join(self.experiment_dir, "models/"))
             except: pass
 
-        # Create separate sub-dictionaries for checkpoints & final trained network
+        # Create separate sub-dictionaries for checkpoints & final trained model
+        if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
+            try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
+            except: pass
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "networks/final/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "networks/final/"))
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/every_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/every_k/"))
                 except: pass
-            if not os.path.exists(os.path.join(self.experiment_dir, "networks/ckpt/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "networks/ckpt/"))
+        if self.save_top_k_ckpt is not None:
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/top_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/top_k/"))
                 except: pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
@@ -116,22 +145,30 @@ class DeepLogger(object):
         else:
             exp_time_base_ext = exp_time_base + "_" + seed_id
 
-        # Set where to log to (Stats - .hdf5, Network - .ckpth)
+        # Set where to log to (Stats - .hdf5, model - .ckpth)
         self.log_save_fname = (self.experiment_dir + "logs/" +
                                timestr + base_str + "_" + seed_id
                                + ".hdf5")
 
-        # Create separate filenames for checkpoints & final trained network
+        # Create separate filenames for checkpoints & final trained model
+        self.final_model_save_fname = (self.experiment_dir + "models/final/" +
+                                       timestr + base_str + "_" + seed_id)
         if self.save_every_k_ckpt is not None:
-            self.final_network_save_fname = (self.experiment_dir + "networks/final/" +
+            self.every_k_ckpt_list = []
+            self.every_k_model_save_fname = (self.experiment_dir + "models/every_k/" +
                                              timestr + base_str + "_" + seed_id
-                                              + ".pt")
-            self.ckpt_network_save_fname = (self.experiment_dir + "networks/ckpt/" +
-                                             timestr + base_str + "_" + seed_id)
-        else:
-            self.final_network_save_fname = (self.experiment_dir + "networks/" +
-                                             timestr + base_str + "_" + seed_id
-                                              + ".pt")
+                                             + "_k_")
+        if self.save_top_k_ckpt is not None:
+            self.top_k_ckpt_list = []
+            self.top_k_model_save_fname = (self.experiment_dir + "models/top_k/" +
+                                           timestr + base_str + "_" + seed_id
+                                           + "_top_")
+
+        # Different extensions to model checkpoints based on model type
+        if self.model_type == "torch":
+            self.final_model_save_fname += ".pt"
+        elif self.model_type in ["jax", "sklearn"]:
+            self.final_model_save_fname += ".pkl"
 
         # Delete old log file and tboard dir if overwrite allowed
         if overwrite_experiment_dir:
@@ -158,7 +195,7 @@ class DeepLogger(object):
     def update_log(self,
                    clock_tick: list,
                    stats_tick: list,
-                   network=None,
+                   model=None,
                    plot_to_tboard=None,
                    save=False):
         """ Update with the newest tick of performance stats, net weights """
@@ -177,8 +214,7 @@ class DeepLogger(object):
 
         # Update the tensorboard log with the newest event
         if self.writer is not None:
-            self.update_tboard(clock_tick, stats_tick, network, plot_to_tboard)
-
+            self.update_tboard(clock_tick, stats_tick, model, plot_to_tboard)
 
         # Print the most current results
         if self.verbose and self.print_every_k_updates is not None:
@@ -188,15 +224,15 @@ class DeepLogger(object):
 
         # Save the log if boolean says so
         if save:
+            # Save the most recent model checkpoint
+            if model is not None:
+                self.save_model(model)
             self.save_log()
-            # Save the most recent network checkpoint
-            if network is not None:
-                self.save_network(network)
 
     def update_tboard(self,
                       clock_tick: list,
                       stats_tick: list,
-                      network = None,
+                      model = None,
                       plot_to_tboard = None):
         """ Update the tensorboard with the newest events """
         # Add performance & step counters
@@ -204,15 +240,16 @@ class DeepLogger(object):
             self.writer.add_scalar('performance/' + performance_tick,
                                    np.mean(stats_tick[i]), clock_tick[0])
 
-        # Log the network params & gradients
-        if network is not None:
-            for name, param in network.named_parameters():
-                self.writer.add_histogram('weights/' + name,
-                                          param.clone().cpu().data.numpy(),
-                                          clock_tick[0])
-                self.writer.add_histogram('gradients/' + name,
-                                          param.grad.clone().cpu().data.numpy(),
-                                          clock_tick[0])
+        # Log the model params & gradients
+        if model is not None:
+            if self.model_type == "torch":
+                for name, param in model.named_parameters():
+                    self.writer.add_histogram('weights/' + name,
+                                              param.clone().cpu().data.numpy(),
+                                              clock_tick[0])
+                    self.writer.add_histogram('gradients/' + name,
+                                              param.grad.clone().cpu().data.numpy(),
+                                              clock_tick[0])
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
@@ -228,8 +265,8 @@ class DeepLogger(object):
         # Create "datasets" to store in the hdf5 file [time, stats]
         # Store all relevant meta data (log filename, checkpoint filename)
         if self.log_save_counter == 0:
-            h5f.create_dataset(name=self.seed_id + "/meta/network_ckpt",
-                               data=[self.final_network_save_fname.encode("ascii", "ignore")],
+            h5f.create_dataset(name=self.seed_id + "/meta/model_ckpt",
+                               data=[self.final_model_save_fname.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/log_paths",
@@ -248,6 +285,22 @@ class DeepLogger(object):
                                data=[self.base_str.encode("ascii", "ignore")],
                                compression='gzip', compression_opts=4,
                                dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/model_type",
+                               data=[self.model_type.encode("ascii", "ignore")],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+
+            if self.save_top_k_ckpt or self.save_every_k_ckpt:
+                h5f.create_dataset(
+                    name=self.seed_id + "/meta/ckpt_time_to_track",
+                    data=[self.ckpt_time_to_track.encode("ascii", "ignore")],
+                    compression='gzip', compression_opts=4, dtype='S200')
+
+            if self.save_top_k_ckpt:
+                h5f.create_dataset(
+                    name=self.seed_id + "/meta/top_k_metric_name",
+                    data=[self.top_k_metric_name.encode("ascii", "ignore")],
+                    compression='gzip', compression_opts=4, dtype='S200')
 
         # Store all time_to_track variables
         for o_name in self.time_to_track:
@@ -272,26 +325,144 @@ class DeepLogger(object):
                                compression='gzip', compression_opts=4,
                                dtype='float32')
 
+        # Store data on stored checkpoints - stored every k updates
+        if self.save_every_k_ckpt is not None:
+            if self.log_save_counter >= 1:
+                for o_name in ["every_k_storage_time", "every_k_ckpt_list"]:
+                    if h5f.get(self.seed_id + "/meta/" + o_name):
+                        del h5f[self.seed_id + "/meta/" + o_name]
+            h5f.create_dataset(name=self.seed_id + "/meta/every_k_storage_time",
+                               data=np.array(self.every_k_storage_time),
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+            h5f.create_dataset(name=self.seed_id + "/meta/every_k_ckpt_list",
+                               data=[t.encode("ascii", "ignore") for t
+                                     in self.every_k_ckpt_list],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+
+        #  Store data on stored checkpoints - stored top k ckpt
+        if self.save_top_k_ckpt is not None:
+            if self.log_save_counter >= 1:
+                for o_name in ["top_k_storage_time", "top_k_ckpt_list",
+                               "top_k_performance"]:
+                    if h5f.get(self.seed_id + "/meta/" + o_name):
+                        del h5f[self.seed_id + "/meta/" + o_name]
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_storage_time",
+                               data=np.array(self.top_k_storage_time),
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_ckpt_list",
+                               data=[t.encode("ascii", "ignore") for t
+                                     in self.top_k_ckpt_list],
+                               compression='gzip', compression_opts=4,
+                               dtype='S200')
+            h5f.create_dataset(name=self.seed_id + "/meta/top_k_performance",
+                               data=np.array(self.top_k_performance),
+                               compression='gzip', compression_opts=4,
+                               dtype='float32')
+
         h5f.flush()
         h5f.close()
 
         # Tick the log save counter
         self.log_save_counter += 1
 
-    def save_network(self, network):
-        """ Save current state of the network as a checkpoint - torch! """
+    def save_model(self, model):
+        """ Save current state of the model as a checkpoint - torch! """
+        # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
+        if self.model_type == "torch":
+            # Torch model case - save model state dict as .pt checkpoint
+            self.store_torch_model(self.final_model_save_fname, model)
+        elif self.model_type in ["jax", "sklearn"]:
+            # JAX/sklearn save parameter dict/model as dictionary
+            self.store_pkl_model(self.final_model_save_fname, model)
+        else:
+            raise ValueError("Provide valid model_type [torch, jax, sklearn].")
+
+        # CASE 2: SEPARATE STORAGE OF EVERY K-TH LOGGED MODEL STATE
+        if self.save_every_k_ckpt is not None:
+            if self.log_save_counter % self.save_every_k_ckpt == 0:
+                if self.model_type == "torch":
+                    ckpt_path = (self.every_k_model_save_fname +
+                                 str(self.model_save_counter) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.every_k_model_save_fname +
+                                 str(self.model_save_counter) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                # Update model save count & time point of storage
+                self.model_save_counter += 1
+                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+                self.every_k_storage_time.append(time)
+                self.every_k_ckpt_list.append(ckpt_path)
+
+        # CASE 3: STORE TOP-K MODEL STATES BY SOME SCORE
+        if self.save_top_k_ckpt is not None:
+            updated_top_k = False
+            score = self.stats_to_track[self.top_k_metric_name].to_numpy()[-1]
+            time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+            # Fill up empty top k slots
+            if len(self.top_k_performance) < self.save_top_k_ckpt:
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(len(self.top_k_performance)) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(len(self.top_k_performance)) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
+                self.top_k_performance.append(score)
+                self.top_k_storage_time.append(time)
+                self.top_k_ckpt_list.append(ckpt_path)
+
+            # If minimize = replace worst performing model (max score)
+            if (self.top_k_minimize_metric and
+                max(self.top_k_performance) > score and not updated_top_k):
+                id_to_replace = np.argmax(self.top_k_performance)
+                self.top_k_performance[id_to_replace] = score
+                self.top_k_storage_time[id_to_replace] = time
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(id_to_replace) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(id_to_replace) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
+
+            # If minimize = replace worst performing model (max score)
+            if (not self.top_k_minimize_metric and
+                min(self.top_k_performance) > score and not updated_top_k):
+                id_to_replace = np.argmin(self.top_k_performance)
+                self.top_k_performance[id_to_replace] = score
+                self.top_k_storage_time[id_to_replace] = (
+                    self.clock_to_track[
+                        self.ckpt_time_to_track].to_numpy()[-1])
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
+                                 str(id_to_replace) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
+                                 str(id_to_replace) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
+
+    def store_torch_model(self, path_to_store, model):
+        """ Store a torch checkpoint for a model. """
         try:
             import torch
         except ModuleNotFoundError as err:
             raise ModuleNotFoundError(f"{err}. You need to install "
-                                      "`torch` if you want to save a network "
+                                      "`torch` if you want to save a model "
                                       "checkpoint.")
         # Update the saved weights in a single file!
-        torch.save(network.state_dict(), self.final_network_save_fname)
+        torch.save(model.state_dict(), path_to_store)
 
-        if self.save_every_k_ckpt is not None:
-            if self.log_save_counter % self.save_every_k_ckpt == 0:
-                temp_network_fname = (self.ckpt_network_save_fname + "_" +
-                                      str(self.network_save_counter) + ".pt")
-                torch.save(network.state_dict(), temp_network_fname)
-                self.network_save_counter += 1
+    def store_pkl_model(self, path_to_store, model):
+        """ Store a pickle object for a JAX param dict/sklearn model. """
+        with open(path_to_store, 'wb') as fid:
+            pickle.dump(model, fid)

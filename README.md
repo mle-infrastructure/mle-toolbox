@@ -1,9 +1,9 @@
-![MLE_Toolbox_Banner](docs/mle_thumbnail.png)
+![MLE_Toolbox_Banner](https://raw.githubusercontent.com/RobertTLange/mle-toolbox/main/docs/mle_thumbnail.png?token=AE3OJBU6WEYQPRCMIKLWMM3AGTKHI)
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 
 Coming up with the right hypothesis to test is hard - testing them should be easy. Often times one needs to coordinate different types of experiments on separate remote resources. The MLE-Toolbox is designed to facilitate your workflow providing a common interface, standardized logging, many common experiment types (multi-seed/-config runs, gridsearches and hyperparameter optimization pipelines) as well as an easy retrieval of results. You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters as well as [Google Cloud compute instances](https://cloud.google.com/compute/docs/instances?hl=en).
 
-![MLE_demo](docs/mle-video.gif)
+![MLE_demo](https://raw.githubusercontent.com/RobertTLange/mle-toolbox/main/docs/mle-video.gif?token=AE3OJBWW7WT6WZF5RRTGGOLAGTKLE)
 
 Here are 4 steps to get started with running your distributed jobs:
 
