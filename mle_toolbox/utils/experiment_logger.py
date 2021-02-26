@@ -21,13 +21,20 @@ class DeepLogger(object):
         what_to_print (List[str]): columns of stats df to print out
         config_fname (str): file path of configuration of experiment
         experiment_dir (str): base experiment directory
-        tboard_fname (str): base name of tensorboard
-        use_tboard (bool): whether to log to tensorboard
-        print_every_k_updates (int): after how many log updates - verbose
         seed_id (str): seed id to distinguish logs with
-        model_type (str): ["torch", "jax", "sklearn"] - tboard/storage
-        save_every_k_ckpt (int): save every other checkpoint
         overwrite_experiment_dir (bool): delete old log file/tboard dir
+        ======= VERBOSITY/TBOARD LOGGING
+        print_every_k_updates (int): after how many log updates - verbose
+        use_tboard (bool): whether to log to tensorboard
+        tboard_fname (str): base name of tensorboard
+        ======= MODEL STORAGE
+        model_type (str): ["torch", "jax", "sklearn"] - tboard/storage
+        ckpt_time_to_track (str): Variable name/score key to save
+        save_every_k_ckpt (int): save every other checkpoint
+        save_top_k_ckpt (int): save top k performing checkpoints
+        top_k_metric_name (str): Variable name/score key to save
+        top_k_minimize_metric (str): Boolean for min/max score in top k logging
+
     """
 
     def __init__(self,
@@ -37,24 +44,37 @@ class DeepLogger(object):
                  what_to_print: List[str],
                  config_fname: str,
                  experiment_dir: str = "/",
-                 tboard_fname: Union[str, None] = None,
-                 use_tboard: bool=False,
-                 print_every_k_updates: Union[int, None] = None,
                  seed_id: Union[str, None] = None,
-                 model_type: str = "default",
+                 overwrite_experiment_dir: bool = False,
+                 use_tboard: bool = False,
+                 tboard_fname: Union[str, None] = None,
+                 print_every_k_updates: Union[int, None] = None,
+                 model_type: str = "no-model-type-provided",
+                 ckpt_time_to_track: Union[str, None] = None,
                  save_every_k_ckpt: Union[int, None] = None,
-                 overwrite_experiment_dir: bool = False):
+                 save_top_k_ckpt: Union[int, None] = None,
+                 top_k_metric_name: Union[str, None] = None,
+                 top_k_minimize_metric: Union[bool, None] = None):
         # Initialize counters of log
         self.log_update_counter = 0
         self.log_save_counter = 0
         self.model_save_counter = 0
         self.print_every_k_updates = print_every_k_updates
 
-        # Type of model to log/store
+        # MODEL LOGGING SETUP: Type of model/every k-th ckpt/top k ckpt
         self.model_type = model_type
-
-        # Store every k-th checkpoint
+        self.ckpt_time_to_track = ckpt_time_to_track
         self.save_every_k_ckpt = save_every_k_ckpt
+        self.save_top_k_ckpt = save_top_k_ckpt
+        self.top_k_metric_name = top_k_metric_name
+        self.top_k_minimize_metric = top_k_minimize_metric
+
+        # Initialize lists for top k scores and to track storage times
+        if self.save_every_k_ckpt is not None:
+            self.every_k_storage_time = []
+        if self.save_top_k_ckpt is not None:
+            self.top_k_performance = []
+            self.top_k_storage_time = []
 
         # Set up the logging directories - save the timestamped config file
         self.setup_experiment_dir(experiment_dir, config_fname, seed_id,
@@ -103,12 +123,16 @@ class DeepLogger(object):
             except: pass
 
         # Create separate sub-dictionaries for checkpoints & final trained model
+        if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
+            try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
+            except: pass
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/every_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/every_k/"))
                 except: pass
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/ckpt/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "models/ckpt/"))
+        if self.save_top_k_ckpt is not None:
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/top_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir, "models/top_k/"))
                 except: pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
@@ -127,14 +151,16 @@ class DeepLogger(object):
                                + ".hdf5")
 
         # Create separate filenames for checkpoints & final trained model
+        self.final_model_save_fname = (self.experiment_dir + "models/final/" +
+                                       timestr + base_str + "_" + seed_id)
         if self.save_every_k_ckpt is not None:
-            self.final_model_save_fname = (self.experiment_dir + "models/final/" +
-                                             timestr + base_str + "_" + seed_id)
-            self.ckpt_model_save_fname = (self.experiment_dir + "models/ckpt/" +
-                                             timestr + base_str + "_" + seed_id)
-        else:
-            self.final_model_save_fname = (self.experiment_dir + "models/" +
-                                             timestr + base_str + "_" + seed_id)
+            self.every_k_model_save_fname = (self.experiment_dir + "models/every_k/" +
+                                             timestr + base_str + "_" + seed_id
+                                             + "_k_")
+        if self.save_top_k_ckpt is not None:
+            self.top_k_model_save_fname = (self.experiment_dir + "models/top_k/" +
+                                           timestr + base_str + "_" + seed_id
+                                           + "_top_")
 
         # Different extensions to model checkpoints based on model type
         if self.model_type == "torch":
@@ -306,16 +332,74 @@ class DeepLogger(object):
         if self.save_every_k_ckpt is not None:
             if self.log_save_counter % self.save_every_k_ckpt == 0:
                 if self.model_type == "torch":
-                    ckpt_path = (self.ckpt_model_save_fname + "_" +
+                    ckpt_path = (self.every_k_model_save_fname +
                                  str(self.model_save_counter) + ".pt")
                     self.store_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
-                    ckpt_path = (self.ckpt_model_save_fname + "_" +
+                    ckpt_path = (self.every_k_model_save_fname +
                                  str(self.model_save_counter) + ".pkl")
                     self.store_pkl_model(ckpt_path, model)
+                # Update model save count & time point of storage
                 self.model_save_counter += 1
+                self.every_k_storage_time.append(
+                    self.stats_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+                )
 
-        # TODO: CASE 3: STORE TOP-K MODEL STATES BY SOME SCORE
+        # CASE 3: STORE TOP-K MODEL STATES BY SOME SCORE
+        if self.save_top_k_ckpt is not None:
+            updated_top_k = False
+            score = self.stats_to_track[self.top_k_metric_name].to_numpy()[-1]
+            # Fill up empty top k slots
+            if len(self.top_k_performance) < self.save_top_k_ckpt:
+                self.top_k_performance.append(score)
+                self.top_k_storage_time.append(
+                    self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+                    )
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(len(self.top_k_performance)-1) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(len(self.top_k_performance)-1) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
+
+            # If minimize = replace worst performing model (max score)
+            if (self.top_k_minimize_metric and
+                max(self.top_k_performance) > score and not updated_top_k):
+                id_to_replace = np.argmax(self.top_k_performance)
+                self.top_k_performance[id_to_replace] = score
+                self.top_k_storage_time[id_to_replace] = (
+                    self.clock_to_track[
+                        self.ckpt_time_to_track].to_numpy()[-1])
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(id_to_replace) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname +
+                                 str(id_to_replace) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
+
+            # If minimize = replace worst performing model (max score)
+            if (not self.top_k_minimize_metric and
+                min(self.top_k_performance) > score and not updated_top_k):
+                id_to_replace = np.argmin(self.top_k_performance)
+                self.top_k_performance[id_to_replace] = score
+                self.top_k_storage_time[id_to_replace] = (
+                    self.clock_to_track[
+                        self.ckpt_time_to_track].to_numpy()[-1])
+                if self.model_type == "torch":
+                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
+                                 str(id_to_replace) + ".pt")
+                    self.store_torch_model(ckpt_path, model)
+                elif self.model_type in ["jax", "sklearn"]:
+                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
+                                 str(id_to_replace) + ".pkl")
+                    self.store_pkl_model(ckpt_path, model)
+                updated_top_k = True
 
     def store_torch_model(self, path_to_store, model):
         """ Store a torch checkpoint for a model. """

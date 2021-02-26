@@ -38,6 +38,6 @@ def main(net_config, train_config, log_config):
 
 if __name__ == "__main__":
     train_config, net_config, log_config = get_configs_ready(
-        default_config_fname="svm/svm_config.json")
+        default_config_fname="sklearn_svm/svm_config.json")
 
     main(net_config, train_config, log_config)
