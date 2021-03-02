@@ -44,7 +44,7 @@ class HyperoptLogger(object):
         # Define list of vars from meta data to keep also in hyper df
         meta_keys_to_track = ["log_paths", "experiment_dir",
                               "config_fname", "model_ckpt", "seeds",
-                              "model_type"]
+                              "model_type", "fig_storage_paths"]
 
         # Loop over list entries and log them individually
         for iter in range(len(params)):
@@ -57,7 +57,10 @@ class HyperoptLogger(object):
                 current_iter[k] = v[run_ids[iter]]
             # Add the meta data from the meta_eval_log
             for k in meta_keys_to_track:
-                current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
+                try:
+                    current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
+                except:
+                    continue
 
             # Add collected log path (after merging seeds)
             current_iter["log_fname"] = os.path.join(

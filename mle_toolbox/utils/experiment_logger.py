@@ -34,9 +34,7 @@ class DeepLogger(object):
         save_top_k_ckpt (int): save top k performing checkpoints
         top_k_metric_name (str): Variable name/score key to save
         top_k_minimize_metric (str): Boolean for min/max score in top k logging
-
     """
-
     def __init__(self,
                  time_to_track: List[str],
                  what_to_track: List[str],
@@ -55,10 +53,12 @@ class DeepLogger(object):
                  save_top_k_ckpt: Union[int, None] = None,
                  top_k_metric_name: Union[str, None] = None,
                  top_k_minimize_metric: Union[bool, None] = None):
-        # Initialize counters of log
+        # Initialize counters of log - log, model, figures
         self.log_update_counter = 0
         self.log_save_counter = 0
         self.model_save_counter = 0
+        self.fig_save_counter = 0
+        self.fig_storage_paths = []
         self.print_every_k_updates = print_every_k_updates
 
         # MODEL LOGGING SETUP: Type of model/every k-th ckpt/top k ckpt
@@ -91,6 +91,9 @@ class DeepLogger(object):
         self.time_to_print = time_to_print
         self.what_to_print = what_to_print
         self.verbose = len(self.what_to_print) > 0
+
+        # Keep the seed id around
+        self.seed_id = seed_id
 
         # Start stop-watch/clock of experiment
         self.start_time = time.time()
@@ -177,7 +180,6 @@ class DeepLogger(object):
             if use_tboard:
                 if os.path.exists(self.experiment_dir + "tboards/"):
                     shutil.rmtree(self.experiment_dir + "tboards/")
-        self.seed_id = seed_id
 
         # Initialize tensorboard logger/summary writer
         if tboard_fname is not None and use_tboard:
@@ -466,3 +468,33 @@ class DeepLogger(object):
         """ Store a pickle object for a JAX param dict/sklearn model. """
         with open(path_to_store, 'wb') as fid:
             pickle.dump(model, fid)
+
+    def save_plot(self, fig, fname_ext=".png"):
+        """ Store a figure in a experiment_id/figures directory. """
+        # Create new directory to store figures - if it doesn't exist yet
+        figures_dir = os.path.join(self.experiment_dir, "figures/")
+        if not os.path.exists(figures_dir):
+            try: os.makedirs(figures_dir)
+            except: pass
+
+        # Tick up counter, save figure, store new path to figure
+        self.fig_save_counter += 1
+        figure_fname = os.path.join(figures_dir,
+                                    "fig_" + str(self.fig_save_counter) +
+                                    "seed_" + str(self.seed_id)
+                                    + fname_ext)
+        fig.savefig(figure_fname, dpi=300)
+        self.fig_storage_paths.append(figure_fname)
+
+        # Store figure paths if any where created
+        h5f = h5py.File(self.log_save_fname, 'a')
+        if self.fig_save_counter > 1:
+            if h5f.get(self.seed_id + "/meta/fig_storage_paths"):
+                del h5f[self.seed_id + "/meta/fig_storage_paths"]
+        h5f.create_dataset(name=self.seed_id + "/meta/fig_storage_paths",
+                           data=[t.encode("ascii", "ignore") for t
+                                 in self.fig_storage_paths],
+                           compression='gzip', compression_opts=4,
+                           dtype='S200')
+        h5f.flush()
+        h5f.close()

@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from mle_toolbox.utils import get_configs_ready, DeepLogger
 
 
@@ -27,7 +28,25 @@ def main(train_config, net_config, log_config):
             stats_tick = [x_t[-1], np.random.normal()]
             log.update_log(time_tick, stats_tick)
             log.save_log()
+
+    # Generate a sample plot and store it
+    fig = sample_plot()
+    log.save_plot(fig, "_sin_curve.png")
     return
+
+
+def sample_plot():
+    # Data for plotting
+    t = np.arange(0.0, 2.0, 0.01)
+    s = 1 + np.sin(2 * np.pi * t)
+
+    fig, ax = plt.subplots()
+    ax.plot(t, s)
+
+    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
+           title='About as simple as it gets, folks')
+    ax.grid()
+    return fig
 
 
 if __name__ == "__main__":

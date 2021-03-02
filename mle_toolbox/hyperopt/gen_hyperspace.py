@@ -14,7 +14,7 @@ def construct_hyperparam_range(params_to_search: dict,
         if "real" in params_to_search.keys():
             for k, v in params_to_search["real"].items():
                 param_range[k] = np.linspace(float(v["begin"]), float(v["end"]),
-                                             float(v["bins"])).tolist()
+                                             int(v["bins"])).tolist()
         if "integer" in params_to_search.keys():
             for k, v in params_to_search["integer"].items():
                 param_range[k] = np.arange(int(v["begin"]), int(v["end"]),
