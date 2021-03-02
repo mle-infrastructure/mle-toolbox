@@ -360,3 +360,22 @@ def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):
     for run_id in run_ids:
         sub_log[run_id] = meta_log[run_id]
     return sub_log
+
+
+def reload_model_from_ckpt(ckpt_path, model_type, model=None):
+    """ Helper to reload stored checkpoint & return trained model. """
+    if model_type == "torch":
+        try:
+            import torch
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(f"{err}. You need to install "
+                                      "`torch` if you want to save a model "
+                                      "checkpoint.")
+        if model is None:
+            raise ValueError("Please provide a torch model instance.")
+        checkpoint = torch.load(ckpt_path, map_location='cpu')
+        model.load_state_dict(checkpoint)
+    elif model_type in ["jax", "sklearn"]:
+        with open(ckpt_path, 'rb') as fid:
+            model = pickle.load(fid)
+    return model
