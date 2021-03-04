@@ -18,6 +18,7 @@
                "save_top_k_ckpt": 2,
                "top_k_metric_name": "val_loss",
                "top_k_minimize_metric": 1,
-               "ckpt_time_to_track": "step_counter"
+               "ckpt_time_to_track": "step_counter",
+               "use_tboard": 1
                }
 }

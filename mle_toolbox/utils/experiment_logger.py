@@ -184,10 +184,10 @@ class DeepLogger(object):
         # Initialize tensorboard logger/summary writer
         if tboard_fname is not None and use_tboard:
             try:
-                from tensorboardX import SummaryWriter
+                from torch.utils.tensorboard import SummaryWriter
             except ModuleNotFoundError as err:
                 raise ModuleNotFoundError(f"{err}. You need to install "
-                                          "`tensorboardX` if you want that "
+                                          "`torch` if you want that "
                                           "DeepLogger logs to tensorboard.")
             self.writer = SummaryWriter(self.experiment_dir + "tboards/" +
                                         tboard_fname + "_" + seed_id)
@@ -250,8 +250,21 @@ class DeepLogger(object):
                                               param.clone().cpu().data.numpy(),
                                               clock_tick[0])
                     self.writer.add_histogram('gradients/' + name,
-                                              param.grad.clone().cpu().data.numpy(),
-                                              clock_tick[0])
+                                        param.grad.clone().cpu().data.numpy(),
+                                        clock_tick[0])
+            elif self.model_type == "jax":
+                # Try to add parameters from nested dict first - then simple
+                # Gradients would have to be parsed separately...
+                for l in model.keys():
+                    try:
+                        for w in model[l].keys():
+                            self.writer.add_histogram('weights/' + l + '/' + w,
+                                                       np.array(model[l][w]),
+                                                       clock_tick[0])
+                    except:
+                        self.writer.add_histogram('weights/' + l,
+                                                  np.array(model[l]),
+                                                  clock_tick[0])
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
@@ -268,29 +281,23 @@ class DeepLogger(object):
         # Store all relevant meta data (log filename, checkpoint filename)
         if self.log_save_counter == 0:
             h5f.create_dataset(name=self.seed_id + "/meta/model_ckpt",
-                               data=[self.final_model_save_fname.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                data=[self.final_model_save_fname.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/log_paths",
-                               data=[self.log_save_fname.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                        data=[self.log_save_fname.encode("ascii", "ignore")],
+                        compression='gzip', compression_opts=4, dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/experiment_dir",
-                               data=[self.experiment_dir.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                        data=[self.experiment_dir.encode("ascii", "ignore")],
+                        compression='gzip', compression_opts=4, dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/config_fname",
-                               data=[self.config_copy.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                        data=[self.config_copy.encode("ascii", "ignore")],
+                        compression='gzip', compression_opts=4, dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
-                               data=[self.base_str.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                        data=[self.base_str.encode("ascii", "ignore")],
+                        compression='gzip', compression_opts=4, dtype='S200')
             h5f.create_dataset(name=self.seed_id + "/meta/model_type",
-                               data=[self.model_type.encode("ascii", "ignore")],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                        data=[self.model_type.encode("ascii", "ignore")],
+                        compression='gzip', compression_opts=4, dtype='S200')
 
             if self.save_top_k_ckpt or self.save_every_k_ckpt:
                 h5f.create_dataset(
