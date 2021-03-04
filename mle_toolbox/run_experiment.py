@@ -145,25 +145,25 @@ def main():
             reporter = auto_generate_reports(new_experiment_id, logger)
             print_framed("REPORT GENERATION")
 
-    # 9. Store experiment directory in GCS bucket under hash
-    if (not cmd_args.no_protocol and cc.general.use_gcloud_results_storage
-        and cc.general.use_gcloud_protocol_sync):
-        send_gcloud_zip_experiment(job_config.meta_job_args["experiment_dir"],
-                                   new_experiment_id,
-                                   cmd_args.delete_after_upload)
-
-    # 10. Update the experiment protocol & send back to GCS (if desired)
+    # 9. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
-        # 10a. Get most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
+        # 9a. Get most recent/up-to-date experiment DB to GCS
+        if cc.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
-        # 10b. Update the experiment protocol status
+        # 9b. Store experiment directory in GCS bucket under hash
+        if (cc.general.use_gcloud_results_storage
+            and cc.general.use_gcloud_protocol_sync):
+            send_gcloud_zip_experiment(
+                job_config.meta_job_args["experiment_dir"],
+                new_experiment_id, cmd_args.delete_after_upload)
+
+        # 9c. Update the experiment protocol status
         logger.info(f'Updated protocol - COMPLETED: {new_experiment_id}')
         update_protocol_status(new_experiment_id, job_status="completed")
 
-        # 10c. Send most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
+        # 9d. Send most recent/up-to-date experiment DB to GCS
+        if cc.general.use_gcloud_protocol_sync:
             send_gcloud_db()
     print_framed("EXPERIMENT FINISHED")
 

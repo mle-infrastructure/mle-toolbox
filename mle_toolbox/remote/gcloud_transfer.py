@@ -12,14 +12,14 @@ from ..utils.general import load_mle_toolbox_config
 from ..protocol import load_local_protocol_db
 from .ssh_transfer import setup_proxy_server
 
+# Load in cluster configuration
+cc = load_mle_toolbox_config()
+# Set environment variable for gcloud credentials & proxy remote
+setup_proxy_server()
+
 
 def get_gcloud_db(number_of_connect_tries: int=5):
     """ Pull latest experiment database from gcloud storage. """
-    # Load in cluster configuration
-    cc = load_mle_toolbox_config()
-    # Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
-
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -50,11 +50,6 @@ def get_gcloud_db(number_of_connect_tries: int=5):
 
 def send_gcloud_db(number_of_connect_tries: int=5):
     """ Send updated database back to gcloud storage. """
-    # Load in cluster configuration
-    cc = load_mle_toolbox_config()
-    # Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
-
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -76,11 +71,6 @@ def send_gcloud_db(number_of_connect_tries: int=5):
 def delete_gcs_directory(gcs_path: str,
                          number_of_connect_tries: int=5):
     """ Delete a directory in a GCS bucket. """
-    # Load in cluster configuration
-    cc = load_mle_toolbox_config()
-    # Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
-
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -99,11 +89,6 @@ def delete_gcs_directory(gcs_path: str,
 def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
                                   number_of_connect_tries: int=5):
     """ Send entire dir (recursively) to Google Cloud Storage Bucket. """
-    # Load in cluster configuration
-    cc = load_mle_toolbox_config()
-    # Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
-
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -134,10 +119,6 @@ def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
 def download_gcs_directory_to_local(gcs_path: str, local_path: str="",
                                     number_of_connect_tries: int=5):
     """ Download entire dir (recursively) from Google Cloud Storage Bucket. """
-    # Load in cluster configuration
-    cc = load_mle_toolbox_config()
-    # Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
@@ -149,8 +130,8 @@ def download_gcs_directory_to_local(gcs_path: str, local_path: str="",
             logger.info(f"Attempt {i+1}/{number_of_connect_tries} - Failed sending to GCloud Storage")
 
     blobs = bucket.list_blobs(prefix=gcs_path)  # Get list of files
-
     blobs = list(blobs)
+
     # Recursively download the folder structure
     if len(blobs) > 1:
         local_path = expanduser(local_path)
@@ -187,8 +168,6 @@ def zipdir(path: str, zip_fname: str):
 def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
                                delete_after_upload: bool=False):
     """ Zip & upload experiment dir to Gcloud storage. """
-    # 0. Set environment variable for gcloud credentials & proxy remote
-    setup_proxy_server()
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
@@ -220,7 +199,7 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
 
 def get_gcloud_zip_experiment(db, experiment_id: str,
                               all_experiment_ids: list,
-                              local_dir_name: Union[None, str]):
+                              local_dir_name: Union[None, str] = None):
     """ Download zipped experiment from GCS. Unpack & clean up. """
     # Ensure the right prefix
     while True:

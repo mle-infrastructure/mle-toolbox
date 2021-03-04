@@ -6,6 +6,7 @@ from .utils import print_framed
 from .remote.ssh_transfer import SSH_Manager
 from .remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
 from .src.prepare_experiment import ask_for_experiment_id
+from .protocol import load_local_protocol_db
 
 
 # Get experiment id to retrieve from cmd
@@ -78,6 +79,7 @@ def main():
                 retrieval_counter += 1
     else:
         list_of_new_e_ids = []
+        db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
         for e_id in all_experiment_ids:
             completed = (db.dget(e_id, "job_status") == "completed")
             not_retrieved_yet = not db.dget(e_id, "retrieve_results")
