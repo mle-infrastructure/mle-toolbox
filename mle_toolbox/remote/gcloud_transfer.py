@@ -236,3 +236,4 @@ def get_gcloud_zip_experiment(db, experiment_id: str,
     # Update protocol retrieval status of the experiment
     db.dadd(experiment_id, ("retrieved_results", True))
     db.dump()
+    return gcloud_hash_fname
