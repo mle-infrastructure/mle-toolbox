@@ -1,6 +1,5 @@
 from datetime import datetime
 from time import sleep
-
 from rich import box
 from rich.align import Align
 from rich.console import Console, RenderGroup
@@ -11,8 +10,23 @@ from rich.table import Table
 from rich.text import Text
 from rich.live import Live
 
-console = Console()
+import os
+from dotmap import DotMap
+import toml
 
+from mle_toolbox.utils import load_mle_toolbox_config
+from mle_toolbox.protocol import protocol_summary
+
+
+def load_mle_toolbox_config():
+    """ Load cluster config from the .toml file. See docs for more info. """
+    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                  _dynamic=False)
+
+resource = "sge"
+cc = load_mle_toolbox_config()
+
+console = Console()
 
 def make_layout() -> Layout:
     """Define the layout."""
@@ -25,9 +39,9 @@ def make_layout() -> Layout:
     )
     # Split center into 3 horizontal sections
     layout["main"].split(
-        Layout(name="left"),
-        Layout(name="center"),
-        Layout(name="right"),
+        Layout(name="left", ratio=0.5),
+        Layout(name="center", ratio=1),
+        Layout(name="right", ratio=0.5),
         direction="horizontal",
     )
     # Split center left into user info and node info
@@ -48,39 +62,53 @@ def make_layout() -> Layout:
 
 class Header:
     """Display header with clock."""
-    welcome_ascii = """__  _____    ______   ______            ____
-             /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
-            / /|_/ / /   / __/______/ / / __ \/ __ \/ / __ \/ __ \| |/_/
+    welcome_ascii = """            __  _____    ______   ______            ____
+           /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
+          / /|_/ / /   / __/______/ / / __ \/ __ \/ / __ \/ __ \| |/_/
          / /  / / /___/ /__/_____/ / / /_/ / /_/ / / /_/ / /_/ />  <
         /_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
     """.splitlines()
     def __rich__(self) -> Panel:
         grid = Table.grid(expand=True)
         grid.add_column(justify="left")
-        grid.add_column(justify="center")
+        grid.add_column(justify="left")
         grid.add_column(justify="right")
-        # grid.add_row(
-        #     "[b]Rich[/b] Layout application",
-        #     datetime.now().ctime().replace(":", "[blink]:[/]"),
-        #     "[b]Rich[/b] Layout application",
-        # )
-        # grid.add_row(
-        #     datetime.now().ctime().replace(":", "[blink]:[/]"),
-        #     "[b]Rich[/b] Layout application",
-        #     "[b]Rich[/b] Layout application",
-        # )
-        for r in Header.welcome_ascii:
-            grid.add_row("", r, "")
+        grid.add_row(
+            "General Settings:", Header.welcome_ascii[0],
+            datetime.now().ctime().replace(":", "[blink]:[/]"),
+        )
+        grid.add_row(
+            "\u2022 GCS Sync Protocol: \u2714" if
+            cc.general.use_gcloud_protocol_sync
+            else "\u2022 GCS Sync Protocol: \u2718",
+            Header.welcome_ascii[1],
+            "Author: @RobertTLange",
+        )
+        grid.add_row(
+            "\u2022 GCS Sync Results: \u2714" if
+            cc.general.use_gcloud_results_storage
+            else "\u2022 GCS Sync Results: \u2718",
+            Header.welcome_ascii[2],
+            f"Resource: {resource}",
+        )
+        grid.add_row(
+            f"\u2022 DB Path: {cc.general.local_protocol_fname}",
+            Header.welcome_ascii[3],
+            f"User: {cc[resource].credentials.user_name}",
+        )
+        grid.add_row(
+            f"\u2022 Env Name: {cc.general.remote_env_name}",
+            Header.welcome_ascii[4],
+            "Hi there! [not italic]:hugging_face:[/]",
+        )
         return Panel(grid, style="white on blue")
 
 
 def make_node_jobs() -> Align:
     """Some example content."""
     message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
     message.add_column(no_wrap=True)
     message.add_row(
-        "Fill with",
         "[b blue] Active Jobs on Different Cluster Nodes",
     )
     return Align.center(message)
@@ -89,33 +117,40 @@ def make_node_jobs() -> Align:
 def make_user_jobs() -> Align:
     """Some example content."""
     message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
     message.add_column(no_wrap=True)
     message.add_row(
-        "Fill with",
         "[b blue] Active Jobs for Different Cluster Users",
     )
     return Align.center(message)
 
-def make_protocol() -> Align:
+def make_protocol():
     """Some example content."""
-    message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
-    message.add_column(no_wrap=True)
-    message.add_row(
-        "Fill with",
-        "[b blue] Protocol Summary of recent experiments",
-    )
-    return Align.center(message)
+    df = protocol_summary(tail=30, verbose=False)
+    table = Table(show_header=True, show_footer=False,
+                    header_style="bold magenta")
+    table.add_column("ID", style="white", justify="left")
+    table.add_column("Date")
+    table.add_column("Project")
+    table.add_column("Purpose")
+    table.add_column("Status")
+    table.add_column("Seeds")
+    for index in reversed(df.index):
+        row = df.iloc[index]
+        table.add_row(
+            row["ID"], row["Date"],  row["Project"], row["Purpose"],
+            row["Status"], str(row["Seeds"])
+        )
+    table.row_styles = ["none", "dim"]
+    table.border_style = "bright_yellow"
+    table.box = box.SIMPLE_HEAD
+    return table
 
 
 def make_total_experiments() -> Align:
     """Some example content."""
     message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
     message.add_column(no_wrap=True)
     message.add_row(
-        "Fill with",
         "[b blue] Summary of statistics of all experiments",
     )
     return Align.center(message)
@@ -124,10 +159,8 @@ def make_total_experiments() -> Align:
 def make_last_experiment() -> Align:
     """Some example content."""
     message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
     message.add_column(no_wrap=True)
     message.add_row(
-        "Fill with",
         "[b blue] Configuration of most recent experiment",
     )
     return Align.center(message)
@@ -136,10 +169,8 @@ def make_last_experiment() -> Align:
 def make_est_completion() -> Align:
     """Some example content."""
     message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
     message.add_column(no_wrap=True)
     message.add_row(
-        "Fill with",
         "[b blue] Estimated completion of most recent experiment",
     )
     return Align.center(message)
@@ -147,14 +178,35 @@ def make_est_completion() -> Align:
 
 def make_help_commands() -> Align:
     """Some example content."""
-    message = Table.grid(padding=1)
-    message.add_column(style="green", justify="right")
-    message.add_column(no_wrap=True)
-    message.add_row(
-        "Fill with",
-        "[b blue] Overview of MLE-Toolbox commands",
+    table = Table(show_header=True, show_footer=False,
+                    header_style="bold magenta")
+    table.add_column("Command", style="white", justify="left")
+    table.add_column("Options", )
+    table.add_column("Function", )
+    table.add_row(
+        "run-experiment",
+        "[b blue]--no_protocol, --no_welcome, --resource_to_run, --purpose",
+        "[b red] Start up from .yaml config",
     )
-    return Align.center(message)
+    table.add_row(
+        "retrieve-experiment",
+        "[b blue]--experiment_id",
+        "[b red] Retrieve from remote GCS",
+    )
+    table.add_row(
+        "report-experiment",
+        "[b blue]-e_id, -fig_dir, -exp_dir",
+        "[b red] Generate .md, .html report",
+    )
+    table.add_row(
+        "monitor-cluster",
+        "[b blue]None",
+        "[b red] Monitor resource usage",
+    )
+    table.row_styles = ["none", "dim"]
+    table.border_style = "bright_yellow"
+    table.box = box.SIMPLE_HEAD
+    return table
 
 # "[u blue link=https://github.com/sponsors/willmcgugan]https://github.com/sponsors/willmcgugan",
 
@@ -210,7 +262,7 @@ if __name__ == "__main__":
     all_progress, job_progress, all_tasks, progress_table = make_util_plot()
     layout["f-box1"].update(progress_table)
     layout["f-box2"].update(Panel(make_help_commands(), border_style="white",
-                    title="[b white]Help: Core MLE-Toolbox Commands",))
+                    title="[b white]Help: Core MLE-Toolbox CLI Commands",))
 
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
