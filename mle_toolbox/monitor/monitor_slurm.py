@@ -4,7 +4,7 @@ import subprocess as sp
 import numpy as np
 from colorclass import Color
 from terminaltables import SingleTable
-from .utils import load_mle_toolbox_config
+from ..utils import load_mle_toolbox_config
 
 
 def monitor_slurm_cluster():
@@ -21,8 +21,8 @@ def monitor_slurm_cluster():
              for part in cc.slurm.info.partitions]
         ]
         time_t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        table_instance = SingleTable(table_data, 'SLURM Cluster: {} - {}'.format(time_t,
-                                                                                 cc.slurm.credentials.user_name))
+        table_instance = SingleTable(table_data, 'SLURM Cluster: {} - {}'.format(
+            time_t, cc.slurm.credentials.user_name))
         table_instance.inner_heading_row_border = False
         table_instance.inner_row_border = True
         table_instance.justify_columns = {0: 'center', 1: 'center', 2: 'center'}

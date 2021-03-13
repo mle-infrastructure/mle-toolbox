@@ -16,6 +16,7 @@ import toml
 
 from mle_toolbox.utils import load_mle_toolbox_config
 from mle_toolbox.protocol import protocol_summary
+from mle_toolbox.monitor import get_user_sge_data, get_host_sge_data
 
 
 def load_mle_toolbox_config():
@@ -39,7 +40,7 @@ def make_layout() -> Layout:
     )
     # Split center into 3 horizontal sections
     layout["main"].split(
-        Layout(name="left", ratio=0.5),
+        Layout(name="left", ratio=0.4),
         Layout(name="center", ratio=1),
         Layout(name="right", ratio=0.5),
         direction="horizontal",
@@ -104,30 +105,57 @@ class Header:
         return Panel(grid, style="white on blue")
 
 
-def make_node_jobs() -> Align:
-    """Some example content."""
-    message = Table.grid(padding=1)
-    message.add_column(no_wrap=True)
-    message.add_row(
-        "[b blue] Active Jobs on Different Cluster Nodes",
-    )
-    return Align.center(message)
-
-
 def make_user_jobs() -> Align:
     """Some example content."""
-    message = Table.grid(padding=1)
-    message.add_column(no_wrap=True)
-    message.add_row(
-        "[b blue] Active Jobs for Different Cluster Users",
-    )
-    return Align.center(message)
+    user_data = get_user_sge_data()
+    sum_all = str(sum([r[1] for r in user_data]))
+    sum_running = str(sum([r[2] for r in user_data]))
+    sum_login = str(sum([r[3] for r in user_data]))
+
+    table = Table(show_header=True, show_footer=False,
+                  header_style="bold red")
+    table.add_column("USER", Text.from_markup("[b]Total", justify="right"),
+                     style="white", justify="left")
+    table.add_column("ALL", sum_all)
+    table.add_column("RUN", sum_running)
+    table.add_column("LOGIN", sum_login)
+    for row in user_data:
+        table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
+    table.show_footer = True
+    table.row_styles = ["none", "dim"]
+    table.border_style = "red"
+    table.box = box.SIMPLE
+    return table
+
+
+def make_node_jobs() -> Align:
+    """Some example content."""
+    host_data = get_host_sge_data()
+    sum_all = str(sum([r[1] for r in host_data]))
+    sum_running = str(sum([r[2] for r in host_data]))
+    sum_login = str(sum([r[3] for r in host_data]))
+
+    table = Table(show_header=True, show_footer=False,
+                  header_style="bold red")
+    table.add_column("NODE", Text.from_markup("[b]Total", justify="right"),
+                     style="white", justify="left")
+    table.add_column("ALL", sum_all)
+    table.add_column("RUN", sum_running)
+    table.add_column("LOGIN", sum_login)
+    for row in host_data:
+        table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
+    table.show_footer = True
+    table.row_styles = ["none", "dim"]
+    table.border_style = "red"
+    table.box = box.SIMPLE
+    return table
+
 
 def make_protocol():
     """Some example content."""
-    df = protocol_summary(tail=30, verbose=False)
+    df = protocol_summary(tail=29, verbose=False)
     table = Table(show_header=True, show_footer=False,
-                    header_style="bold magenta")
+                    header_style="bold blue")
     table.add_column("ID", style="white", justify="left")
     table.add_column("Date")
     table.add_column("Project")
@@ -140,8 +168,8 @@ def make_protocol():
             row["ID"], row["Date"],  row["Project"], row["Purpose"],
             row["Status"], str(row["Seeds"])
         )
-    table.row_styles = ["none", "dim"]
-    table.border_style = "bright_yellow"
+    #table.row_styles = ["none", "dim"]
+    table.border_style = "blue"
     table.box = box.SIMPLE_HEAD
     return table
 
@@ -158,6 +186,9 @@ def make_total_experiments() -> Align:
 
 def make_last_experiment() -> Align:
     """Some example content."""
+    # Add total experiments (completed, running, aborted)
+    # Stored in GCS, Not yet retrieved from GCS/Local
+    # Run by resource: SGE, Slurm, Local, GCP
     message = Table.grid(padding=1)
     message.add_column(no_wrap=True)
     message.add_row(
@@ -190,12 +221,12 @@ def make_help_commands() -> Align:
     )
     table.add_row(
         "retrieve-experiment",
-        "[b blue]--experiment_id",
+        "[b blue]-e_id, -fig_dir, -exp_dir",
         "[b red] Retrieve from remote GCS",
     )
     table.add_row(
         "report-experiment",
-        "[b blue]-e_id, -fig_dir, -exp_dir",
+        "[b blue]--experiment_id",
         "[b red] Generate .md, .html report",
     )
     table.add_row(
@@ -204,7 +235,7 @@ def make_help_commands() -> Align:
         "[b red] Monitor resource usage",
     )
     table.row_styles = ["none", "dim"]
-    table.border_style = "bright_yellow"
+    table.border_style = "white"
     table.box = box.SIMPLE_HEAD
     return table
 
