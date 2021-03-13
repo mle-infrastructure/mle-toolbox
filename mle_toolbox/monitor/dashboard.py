@@ -12,7 +12,9 @@ from rich.live import Live
 
 import os
 from dotmap import DotMap
+import numpy as np
 import toml
+import termplotlib as tpl
 
 from mle_toolbox.utils import load_mle_toolbox_config
 from mle_toolbox.protocol import protocol_summary
@@ -54,8 +56,9 @@ def make_layout() -> Layout:
                           Layout(name="r-box3", size=11))
     # Split bottom into toolbox command info and cluster util termplots
     layout["footer"].split(
-        Layout(name="f-box1"),
-        Layout(name="f-box2"),
+        Layout(name="f-box1", ratio=0.5),
+        Layout(name="f-box2", ratio=0.5),
+        Layout(name="f-box3", ratio=1),
         direction="horizontal"
     )
     return layout
@@ -168,7 +171,7 @@ def make_protocol():
             row["ID"], row["Date"],  row["Project"], row["Purpose"],
             row["Status"], str(row["Seeds"])
         )
-    #table.row_styles = ["none", "dim"]
+    table.row_styles = ["none", "dim"]
     table.border_style = "blue"
     table.box = box.SIMPLE_HEAD
     return table
@@ -176,6 +179,10 @@ def make_protocol():
 
 def make_total_experiments() -> Align:
     """Some example content."""
+    # Add total experiments (completed, running, aborted)
+    # Stored in GCS, Not yet retrieved from GCS/Local
+    # Run by resource: SGE, Slurm, Local, GCP
+    # Reports generated
     message = Table.grid(padding=1)
     message.add_column(no_wrap=True)
     message.add_row(
@@ -186,9 +193,6 @@ def make_total_experiments() -> Align:
 
 def make_last_experiment() -> Align:
     """Some example content."""
-    # Add total experiments (completed, running, aborted)
-    # Stored in GCS, Not yet retrieved from GCS/Local
-    # Run by resource: SGE, Slurm, Local, GCP
     message = Table.grid(padding=1)
     message.add_column(no_wrap=True)
     message.add_row(
@@ -234,40 +238,36 @@ def make_help_commands() -> Align:
         "[b blue]None",
         "[b red] Monitor resource usage",
     )
-    table.row_styles = ["none", "dim"]
+    #table.row_styles = ["none", "dim"]
     table.border_style = "white"
     table.box = box.SIMPLE_HEAD
     return table
 
 # "[u blue link=https://github.com/sponsors/willmcgugan]https://github.com/sponsors/willmcgugan",
 
-def make_util_plot():
-    job_progress = Progress(
-        "{task.description}",
-        SpinnerColumn(),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-    )
-    job_progress.add_task("[cyan]CPU-1", total=100)
-    job_progress.add_task("[cyan]CPU-2", total=100)
-    job_progress.add_task("[cyan]CPU-3", total=100)
-    job_progress.add_task("[cyan]CPU-4", total=100)
-    job_progress.add_task("[cyan]CPU-5", total=100)
-    job_progress.add_task("[cyan]CPU-6", total=100)
+def make_cpu_util_plot():
+    x = np.linspace(0, 2 * np.pi, 10)
+    y = np.sin(x)
+    fig = tpl.figure()
+    fig.plot(x, y, xlabel="Time", width=40, height=10)
+    plot_str = fig.get_string()
+    message = Table.grid()
+    message.add_column(no_wrap=True)
+    message.add_row(plot_str,)
+    return Align.center(message)
 
-    total = sum(task.total for task in job_progress.tasks)
-    all_progress = Progress()
-    all_tasks = all_progress.add_task("MEMORY-1", total=int(total))
-    all_progress.add_task("MEMORY-2", total=int(total))
 
-    progress_table = Table.grid(expand=True)
-    progress_table.add_row(
-        Panel(all_progress, title="Total CPU Utilisation",
-              border_style="red", padding=(3, 3)),
-        Panel(job_progress, title="Total Memory Utilisation",
-              border_style="red", padding=(1, 2)),
-    )
-    return all_progress, job_progress, all_tasks, progress_table
+def make_memory_util_plot():
+    x = np.linspace(0, 2 * np.pi, 10)
+    y = np.cos(x)
+
+    fig = tpl.figure()
+    fig.plot(x, y, xlabel="Time", width=40, height=10)
+    plot_str = fig.get_string()
+    message = Table.grid()
+    message.add_column(no_wrap=True)
+    message.add_row(plot_str,)
+    return Align.center(message)
 
 
 if __name__ == "__main__":
@@ -290,18 +290,16 @@ if __name__ == "__main__":
     layout["r-box3"].update(Panel(make_est_completion(), border_style="green",
                     title="[b green]Estimated Time of Experiment Completion",))
     # Fill the footer with life!
-    all_progress, job_progress, all_tasks, progress_table = make_util_plot()
-    layout["f-box1"].update(progress_table)
-    layout["f-box2"].update(Panel(make_help_commands(), border_style="white",
+    layout["f-box1"].update(Panel(make_cpu_util_plot(),
+                                  title="Total CPU Utilisation",
+                                  border_style="red"),)
+    layout["f-box2"].update(Panel(make_memory_util_plot(),
+                                  title="Total Memory Utilisation",
+                                  border_style="red"))
+    layout["f-box3"].update(Panel(make_help_commands(), border_style="white",
                     title="[b white]Help: Core MLE-Toolbox CLI Commands",))
 
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
             sleep(0.1)
-            for job in job_progress.tasks:
-                if not job.finished:
-                    job_progress.advance(job.id)
-
-            completed = sum(task.completed for task in job_progress.tasks)
-            all_progress.update(all_tasks, completed=completed)
