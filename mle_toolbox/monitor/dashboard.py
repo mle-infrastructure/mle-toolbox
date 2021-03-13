@@ -236,21 +236,12 @@ def make_last_experiment() -> Align:
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
-    table.add_column("Total")
-    table.add_column("Run")
-    table.add_column("Done")
-    table.add_column("Aborted")
-    table.add_row(str(last_experiment_id), "1", "1", "1")
-    table.add_row(Text.from_markup("[b yellow]SGE"),
-                  Text.from_markup("[b yellow]Slurm"),
-                  Text.from_markup("[b yellow]GCP"),
-                  Text.from_markup("[b yellow]Local"),)
-    table.add_row("1", "1", "1", "1")
-    table.add_row(Text.from_markup("[b yellow]-"),
-                  Text.from_markup("[b yellow]Report"),
-                  Text.from_markup("[b yellow]GCS"),
-                  Text.from_markup("[b yellow]Retrieved"),)
-    table.add_row("-", "1", "1", "1")
+    table.add_column()
+    table.add_column()
+    table.add_row(Text.from_markup("[b yellow]Experiment Type"),
+                  Text.from_markup("Gridsearch"),)
+    table.add_row(Text.from_markup("[b yellow]Start Time"),
+                  Text.from_markup("Today"),)
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
@@ -262,21 +253,11 @@ def make_est_completion() -> Align:
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
-    table.add_column("Total")
-    table.add_column("Run")
-    table.add_column("Done")
-    table.add_column("Aborted")
-    table.add_row(str(last_experiment_id), "1", "1", "1")
-    table.add_row(Text.from_markup("[b yellow]SGE"),
-                  Text.from_markup("[b yellow]Slurm"),
-                  Text.from_markup("[b yellow]GCP"),
-                  Text.from_markup("[b yellow]Local"),)
-    table.add_row("1", "1", "1", "1")
-    table.add_row(Text.from_markup("[b yellow]-"),
-                  Text.from_markup("[b yellow]Report"),
-                  Text.from_markup("[b yellow]GCS"),
-                  Text.from_markup("[b yellow]Retrieved"),)
-    table.add_row("-", "1", "1", "1")
+    table.add_column()
+    table.add_column()
+    table.add_row(Text.from_markup("[b yellow]Start Time"), "")
+    table.add_row(Text.from_markup("[b yellow]Stop Time"), "")
+    table.add_row(Text.from_markup("[b yellow]Duration"), "")
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
