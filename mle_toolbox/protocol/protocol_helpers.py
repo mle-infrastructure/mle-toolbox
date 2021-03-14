@@ -23,7 +23,7 @@ def load_local_protocol_db():
         return [atoi(c) for c in re.split(r'(\d+)', text)]
 
     # Sort experiment ids & get the last one
-    if len(all_experiment_ids) >0:
+    if len(all_experiment_ids) > 0:
         all_experiment_ids.sort(key=natural_keys)
         last_experiment_id = int(all_experiment_ids[-1].split("-")[-1])
     else:

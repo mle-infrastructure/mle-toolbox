@@ -32,8 +32,13 @@ TODOS:
 - Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
 - Make sure that reloading works by starting a new experiment
-- Add support for slurm!
+- Add support for slurm, local!
 - Add documentation/function descriptions
+- Enhance protocol summary
+    - Make resource shorter: SGE, Slurm, GCP, Local
+    - Add more data: # jobs in experiment, CPUs per job, GPUs per job
+    - Move emoji column to left most
+- Link Author @RobertTLange to twitter account
 """
 
 
@@ -102,7 +107,8 @@ class Header:
             cc.general.use_gcloud_protocol_sync
             else "\u2022 GCS Sync Protocol: [red]:x:",
             Header.welcome_ascii[1],
-            "Author: @RobertTLange",
+            "Author: @RobertTLange :bird:",
+            #[u white link=https://twitter.com/RobertTLange]
         )
         grid.add_row(
             "\u2022 GCS Sync Results: [green]:heavy_check_mark:" if
@@ -135,9 +141,9 @@ def make_user_jobs() -> Align:
                   header_style="bold red")
     table.add_column("USER", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
-    table.add_column("ALL", sum_all)
-    table.add_column("RUN", sum_running)
-    table.add_column("LOGIN", sum_login)
+    table.add_column("ALL", sum_all, justify="center")
+    table.add_column("RUN", sum_running, justify="center")
+    table.add_column("LOGIN", sum_login, justify="center")
     for row in user_data:
         table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
     table.show_footer = True
@@ -158,9 +164,9 @@ def make_node_jobs() -> Align:
                   header_style="bold red")
     table.add_column("NODE", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
-    table.add_column("ALL", sum_all)
-    table.add_column("RUN", sum_running)
-    table.add_column("LOGIN", sum_login)
+    table.add_column("ALL", sum_all, justify="center")
+    table.add_column("RUN", sum_running, justify="center")
+    table.add_column("LOGIN", sum_login, justify="center")
     for row in host_data:
         table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
     table.show_footer = True
@@ -201,6 +207,37 @@ def make_protocol() -> Table:
     return Align.center(table)
 
 
+def get_total_experiments(db, all_experiment_ids):
+    """ Get data from db to show in 'total_experiments' panel. """
+    run, done, aborted, sge, slurm, gcp, local = 0, 0, 0, 0, 0, 0, 0
+    report_gen, gcs_stored, retrieved = 0, 0, 0
+    for e_id in all_experiment_ids:
+        status = db.dget(e_id, "job_status")
+        # Job status
+        run += status == "running"
+        done += status == "completed"
+        aborted += status not in ["running", "completed"]
+        # Execution resource data
+        resource = db.dget(e_id, "exec_resource")
+        sge += resource == "sge-cluster"
+        slurm += resource == "slurm-cluster"
+        gcp += resource == "gcp-cloud"
+        local += resource not in ["sge-cluster", "slurm-cluster", "gcp-cloud"]
+        # Additional data: Report generated, GCS stored, Results retrieved
+        try:
+            report_gen += db.dget(e_id, "report_generated")
+            gcs_stored += db.dget(e_id, "stored_in_gcloud")
+            retrieved += db.dget(e_id, "retrieved_results")
+        except:
+            pass
+    # Return results dictionary
+    results = {"run": str(run), "done": str(done), "aborted": str(aborted),
+               "sge": str(sge), "slurm": str(slurm), "gcp": str(gcp),
+               "local": str(local), "report_gen": str(report_gen),
+               "gcs_stored": str(gcs_stored),"retrieved": str(retrieved)}
+    return results
+
+
 def make_total_experiments() -> Align:
     """Some example content."""
     # Add total experiments (completed, running, aborted)
@@ -208,32 +245,45 @@ def make_total_experiments() -> Align:
     # Run by resource: SGE, Slurm, Local, GCP
     # Reports generated
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
+    total_data = get_total_experiments(db, all_experiment_ids)
+
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
     table.add_column("Total")
     table.add_column("Run")
     table.add_column("Done")
     table.add_column("Aborted")
-    table.add_row(str(last_experiment_id), "1", "1", "1")
+    table.add_row(str(len(all_experiment_ids)), total_data["run"],
+                  total_data["done"], total_data["aborted"])
     table.add_row(Text.from_markup("[b yellow]SGE"),
                   Text.from_markup("[b yellow]Slurm"),
                   Text.from_markup("[b yellow]GCP"),
                   Text.from_markup("[b yellow]Local"),)
-    table.add_row("1", "1", "1", "1")
+    table.add_row(total_data["sge"], total_data["slurm"],
+                  total_data["gcp"], total_data["local"])
     table.add_row(Text.from_markup("[b yellow]-"),
                   Text.from_markup("[b yellow]Report"),
                   Text.from_markup("[b yellow]GCS"),
                   Text.from_markup("[b yellow]Retrieved"),)
-    table.add_row("-", "1", "1", "1")
+    table.add_row("-", total_data["report_gen"],
+                  total_data["gcs_stored"], total_data["retrieved"])
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
     return Align.center(table)
 
 
+def get_last_experiment(db, last_experiment_id):
+    """ Get data from db to show in 'total_experiments' panel. """
+    # Return results dictionary
+    results = {}
+    return results
+
+
 def make_last_experiment() -> Align:
     """Some example content."""
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
+    last_data = get_last_experiment(db, last_experiment_id)
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
