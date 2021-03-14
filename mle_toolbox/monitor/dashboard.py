@@ -25,17 +25,16 @@ from mle_toolbox.monitor import get_user_sge_data, get_host_sge_data
 """
 TODOS:
 - Work with local_db data and fill right columns
-    - Total experiment stats
     - Last experiment config summary
     - Estimated time of completion [Need cancelation/Estimate in db]
-- Make qstat calls a lot more efficient
+- Make qstat calls a lot more efficient -> Faster at startup
 - Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
 - Make sure that reloading works by starting a new experiment
 - Add support for slurm, local!
 - Add documentation/function descriptions
+- Add report generated to db protocol + update when generated
 - Enhance protocol summary
-    - Make resource shorter: SGE, Slurm, GCP, Local
     - Add more data: # jobs in experiment, CPUs per job, GPUs per job
     - Move emoji column to left most
 - Link Author @RobertTLange to twitter account
@@ -108,6 +107,7 @@ class Header:
             else "\u2022 GCS Sync Protocol: [red]:x:",
             Header.welcome_ascii[1],
             "Author: @RobertTLange :bird:",
+            # TODO: Figure out why link won't work if we use text != url
             #[u white link=https://twitter.com/RobertTLange]
         )
         grid.add_row(
@@ -181,15 +181,24 @@ def make_protocol() -> Table:
     df = protocol_summary(tail=29, verbose=False)
     table = Table(show_header=True, show_footer=False,
                   header_style="bold blue")
-    table.add_column("ID", justify="left")
+    table.add_column()
+    table.add_column("ID")
     table.add_column("Date")
     table.add_column("Project")
     table.add_column("Purpose")
-    table.add_column("-")
     table.add_column("Seeds", justify="center")
     table.add_column("Resource")
     for index in reversed(df.index):
         row = df.iloc[index]
+        if row["Resource"] == "sge-cluster":
+            resource = "SGE"
+        elif row["Resource"] == "sge-cluster":
+            resource = "Slurm"
+        elif row["Resource"] == "gcp-cloud":
+            resource = "GCP"
+        else:
+            resource = "Local"
+
         if row["Status"] == "running":
             status = Spinner('dots', style="magenta")
         elif row["Status"] == "completed":
@@ -197,8 +206,8 @@ def make_protocol() -> Table:
         else:
             status = "[red]:x:"
         table.add_row(
-            row["ID"], row["Date"],  row["Project"], row["Purpose"],
-            status, str(row["Seeds"]), str(row["Resource"][:12]))
+            status, row["ID"], row["Date"],  row["Project"], row["Purpose"], str(row["Seeds"]), resource)
+    # TODO: Figure out why entire caption is made white/colored
     # table.caption = "Experiment Status - \
     #                 [green]:heavy_check_mark::[/green] Completed, \
     #                 [red]:x::[/red] Aborted, [magenta].[/magenta] Running"
@@ -274,40 +283,65 @@ def make_total_experiments() -> Align:
 
 
 def get_last_experiment(db, last_experiment_id):
-    """ Get data from db to show in 'total_experiments' panel. """
+    """ Get data from db to show in 'last_experiments' panel. """
     # Return results dictionary
-    results = {}
+    e_path = db.dget(last_experiment_id, "exp_retrieval_path")
+    meta_args = db.dget(last_experiment_id, "meta_job_args")
+    e_type = meta_args["job_type"]
+    e_dir = meta_args["experiment_dir"]
+    e_script = meta_args["base_train_fname"]
+    e_config = meta_args["base_train_config"]
+    results = {"e_dir": e_dir, "e_type": e_type,
+               "e_script": e_script, "e_config": e_config}
     return results
 
 
 def make_last_experiment() -> Align:
     """Some example content."""
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    last_data = get_last_experiment(db, last_experiment_id)
+    last_data = get_last_experiment(db, all_experiment_ids[-1])
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
     table.add_column()
-    table.add_row(Text.from_markup("[b yellow]Experiment Type"),
-                  Text.from_markup("Gridsearch"),)
-    table.add_row(Text.from_markup("[b yellow]Start Time"),
-                  Text.from_markup("Today"),)
+    table.add_row(Text.from_markup("[b yellow]ID"),
+                  str(last_experiment_id),)
+    table.add_row(Text.from_markup("[b yellow]E. Type"),
+                  last_data["e_type"],)
+    table.add_row(Text.from_markup("[b yellow]E. Dir."),
+                  last_data["e_dir"],)
+    table.add_row(Text.from_markup("[b yellow]E. Script"),
+                  last_data["e_script"],)
+    table.add_row(Text.from_markup("[b yellow]E. Config"),
+                  last_data["e_config"],)
+    table.add_row(Text.from_markup("[b yellow]E. Configs"),
+                  "[b yellow]E. Search",)
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
     return Align.center(table)
 
 
+def get_time_experiment(db, last_experiment_id):
+    """ Get data from db to show in 'time_experiment' panel. """
+    results = {}
+    return results
+
+
 def make_est_completion() -> Align:
     """Some example content."""
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
+    time_data = get_time_experiment(db, all_experiment_ids[-1])
     table = Table(show_header=True, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
     table.add_column()
+    table.add_row(Text.from_markup("[b yellow]Total Jobs"), "")
+    table.add_row(Text.from_markup("[b yellow]Total Batches"), "")
+    table.add_row(Text.from_markup("[b yellow]Time/Batch"), "")
     table.add_row(Text.from_markup("[b yellow]Start Time"), "")
-    table.add_row(Text.from_markup("[b yellow]Stop Time"), "")
-    table.add_row(Text.from_markup("[b yellow]Duration"), "")
+    table.add_row(Text.from_markup("[b yellow]Est. Stop Time"), "")
+    table.add_row(Text.from_markup("[b yellow]Est. Duration"), "")
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
