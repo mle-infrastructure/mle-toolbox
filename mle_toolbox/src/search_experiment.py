@@ -14,8 +14,12 @@ def run_hyperparameter_search(meta_job_args: dict,
                             SMBOHyperoptimisation)
 
     # 1. Setup the hyperlogger for the experiment
-    hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
-                                  param_search_args.hyperlog_fname)
+    if "hyperlog_fname" in param_search_args.keys():
+        hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
+                                      param_search_args.hyperlog_fname)
+    else:
+        hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
+                                      "hyper_log.pkl")
     hyper_log = HyperoptLogger(hyperlog_fname,
                                param_search_args.maximize_objective,
                                param_search_args.eval_metrics,
