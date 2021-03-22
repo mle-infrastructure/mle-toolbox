@@ -509,6 +509,10 @@ class DeepLogger(object):
     def save_to_extra_dir(self, obj, fname):
         """ Helper fct. to save object (dict/etc.) as .pkl in exp. subdir. """
         extra_dir = os.path.join(self.experiment_dir, "extra/")
+        # Create a new empty directory for the experiment
+        if not os.path.exists(extra_dir):
+            try: os.makedirs(extra_dir)
+            except: pass
         path_to_store = os.path.join(extra_dir, fname)
         with open(path_to_store, 'wb') as fid:
             pickle.dump(obj, fid)
