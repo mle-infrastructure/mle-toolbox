@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
-
 import os
 import shutil
-import pickle
 import time
 import datetime
 import h5py
 from typing import Union, List
+from .general import save_pkl_object
 
 
 class DeepLogger(object):
@@ -385,7 +384,7 @@ class DeepLogger(object):
             self.store_torch_model(self.final_model_save_fname, model)
         elif self.model_type in ["jax", "sklearn"]:
             # JAX/sklearn save parameter dict/model as dictionary
-            self.store_pkl_model(self.final_model_save_fname, model)
+            save_pkl_object(model, self.final_model_save_fname)
         else:
             raise ValueError("Provide valid model_type [torch, jax, sklearn].")
 
@@ -399,7 +398,7 @@ class DeepLogger(object):
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.every_k_model_save_fname +
                                  str(self.model_save_counter) + ".pkl")
-                    self.store_pkl_model(ckpt_path, model)
+                    save_pkl_object(model, ckpt_path)
                 # Update model save count & time point of storage
                 self.model_save_counter += 1
                 time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
@@ -420,7 +419,7 @@ class DeepLogger(object):
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(len(self.top_k_performance)) + ".pkl")
-                    self.store_pkl_model(ckpt_path, model)
+                    save_pkl_object(model, ckpt_path)
                 updated_top_k = True
                 self.top_k_performance.append(score)
                 self.top_k_storage_time.append(time)
@@ -439,7 +438,7 @@ class DeepLogger(object):
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(id_to_replace) + ".pkl")
-                    self.store_pkl_model(ckpt_path, model)
+                    save_pkl_object(model, ckpt_path)
                 updated_top_k = True
 
             # If minimize = replace worst performing model (max score)
@@ -457,7 +456,7 @@ class DeepLogger(object):
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname + "_top_" +
                                  str(id_to_replace) + ".pkl")
-                    self.store_pkl_model(ckpt_path, model)
+                    save_pkl_object(model, ckpt_path)
                 updated_top_k = True
 
     def store_torch_model(self, path_to_store, model):
@@ -470,11 +469,6 @@ class DeepLogger(object):
                                       "checkpoint.")
         # Update the saved weights in a single file!
         torch.save(model.state_dict(), path_to_store)
-
-    def store_pkl_model(self, path_to_store, model):
-        """ Store a pickle object for a JAX param dict/sklearn model. """
-        with open(path_to_store, 'wb') as fid:
-            pickle.dump(model, fid)
 
     def save_plot(self, fig, fname_ext=".png"):
         """ Store a figure in a experiment_id/figures directory. """
@@ -510,5 +504,8 @@ class DeepLogger(object):
         """ Helper fct. to save object (dict/etc.) as .pkl in exp. subdir. """
         extra_dir = os.path.join(self.experiment_dir, "extra/")
         path_to_store = os.path.join(extra_dir, fname)
-        with open(path_to_store, 'wb') as fid:
-            pickle.dump(obj, fid)
+        # Create a new empty directory for the experiment
+        if not os.path.exists(extra_dir):
+            try: os.makedirs(extra_dir)
+            except: pass
+        save_pkl_object(obj, path_to_store)

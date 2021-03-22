@@ -1,18 +1,8 @@
 import os
 from typing import List, Union
-import pickle
 import h5py
-import yaml
 import copy
 import numpy as np
-import pandas as pd
-
-
-def load_pkl_object(filename: str):
-    """ Helper to reload pickle objects """
-    with open(filename, 'rb') as input:
-        obj = pickle.load(input)
-    return obj
 
 
 def merge_hdf5_files(new_filename: str,
@@ -82,36 +72,3 @@ def write_data_to_file(file_to: h5py.File,
         file_from.copy(path, file_to[group_to_index])
 
     file_from.close()
-
-
-def reload_hyper_log(hyper_log_fpath: str):
-    """ Reload the previously stored .pkl log file """
-    opt_log = load_pkl_object(hyper_log_fpath)
-    all_evaluated_params = []
-    for key, eval_iter in opt_log.items():
-        all_evaluated_params.append(eval_iter["params"])
-    return opt_log
-
-
-def hyper_log_to_df(hyper_log_fpath: str):
-    """ Load & transform the dictionary log into a pandas df"""
-    # Load the log from the pkl file
-    hyper_log = reload_hyper_log(hyper_log_fpath)
-
-    hyper_list = []
-    list_of_run_dicts = [hyper_log[i] for i in hyper_log.keys()]
-
-    def merge_two_dicts(x: dict, y: dict):
-        """Given two dicts, merge them into new dict as shallow copy."""
-        z = x.copy()
-        z.update(y)
-        return z
-
-    for i in range(len(list_of_run_dicts)):
-        # Unpack the individual params dictionaries for better indexing
-        unravel_params = merge_two_dicts(list_of_run_dicts[i]["params"], list_of_run_dicts[i])
-        del unravel_params["params"]
-        hyper_list.append(unravel_params)
-    # Put list of dicts into pandas df
-    hyper_df = pd.DataFrame(hyper_list)
-    return hyper_df

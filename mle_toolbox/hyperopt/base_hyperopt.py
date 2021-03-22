@@ -10,8 +10,8 @@ from pprint import pformat
 
 from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
-from ..utils.manipulate_files import merge_hdf5_files
-from ..utils.general import load_config, load_log, mean_over_seeds, print_framed
+from ..utils import merge_hdf5_files
+from ..utils import load_config, load_log, mean_over_seeds, print_framed
 
 
 class BaseHyperOptimisation(object):
