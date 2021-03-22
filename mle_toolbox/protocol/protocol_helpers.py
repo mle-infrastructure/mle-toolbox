@@ -23,7 +23,7 @@ def load_local_protocol_db():
         return [atoi(c) for c in re.split(r'(\d+)', text)]
 
     # Sort experiment ids & get the last one
-    if len(all_experiment_ids) >0:
+    if len(all_experiment_ids) > 0:
         all_experiment_ids.sort(key=natural_keys)
         last_experiment_id = int(all_experiment_ids[-1].split("-")[-1])
     else:
@@ -42,6 +42,7 @@ def protocol_summary(tail: int=5, verbose: bool=True):
     if len(all_experiment_ids) > 0:
         purposes, project_names, exp_paths = [], [], []
         num_seeds, statuses, start_times = [], [], []
+        resource = []
         if tail is None:
             tail = len(all_experiment_ids)
         for e_id in all_experiment_ids[-tail:]:
@@ -50,6 +51,7 @@ def protocol_summary(tail: int=5, verbose: bool=True):
             exp_paths.append(db.dget(e_id, "exp_retrieval_path"))
             statuses.append(db.dget(e_id, "job_status"))
             start_times.append(db.dget(e_id, "start_time"))
+            resource.append(db.dget(e_id, "exec_resource"))
             try:
                 num_seeds.append(db.dget(e_id, "num_seeds"))
             except:
@@ -61,7 +63,8 @@ def protocol_summary(tail: int=5, verbose: bool=True):
              "Purpose": purposes,
              "Experiment Dir": exp_paths,
              "Status": statuses,
-             "Seeds": num_seeds}
+             "Seeds": num_seeds,
+             "Resource": resource}
         df = pd.DataFrame(d)
         df["ID"] = [e.split("-")[-1] for e in df["ID"]]
         df["Date"] = df["Date"].map('{:.5}'.format)

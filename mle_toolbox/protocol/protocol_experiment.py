@@ -113,6 +113,9 @@ def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
     # Set a boolean to indicate if results were stored in GCloud Storage
     db.dadd(new_experiment_id, ("stored_in_gcloud", False))
 
+    # Set a boolean to indicate if results were stored in GCloud Storage
+    db.dadd(new_experiment_id, ("report_generated", False))
+
     # Set the job status to running
     db.dadd(new_experiment_id, ("job_status", "running"))
     time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")

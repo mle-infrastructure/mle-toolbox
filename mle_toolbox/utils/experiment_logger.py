@@ -505,3 +505,10 @@ class DeepLogger(object):
                            dtype='S200')
         h5f.flush()
         h5f.close()
+
+    def save_to_extra_dir(self, obj, fname):
+        """ Helper fct. to save object (dict/etc.) as .pkl in exp. subdir. """
+        extra_dir = os.path.join(self.experiment_dir, "extra/")
+        path_to_store = os.path.join(extra_dir, fname)
+        with open(path_to_store, 'wb') as fid:
+            pickle.dump(obj, fid)
