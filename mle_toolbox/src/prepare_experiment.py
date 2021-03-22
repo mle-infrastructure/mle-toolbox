@@ -28,9 +28,9 @@ def welcome_to_mle_toolbox(verbose=False):
     print(time_t, f"Thx for using MLE-Toolbox {__version__} Locally, on SGE, Slurm or GCP")
     if verbose:
         print(time_t, "It implements the following experiment types:")
-        print("    - single-experiment: Run a single configuration experiment.")
-        print("    - multiple-experiments: Run multiple configs & random seeds.")
-        print("    - hyperparameter-search: Run a hyperparameter search (Grid, Random, SMBO).")
+        print("  - single-experiment: Run a single configuration experiment.")
+        print("  - multiple-experiments: Run multiple configs & random seeds.")
+        print("  - hyperparameter-search: Run a hyperparameter search.")
 
 
 def get_mle_args():

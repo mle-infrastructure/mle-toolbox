@@ -18,14 +18,7 @@ def load_mle_toolbox_config():
                   _dynamic=False)
 
 
-def load_json_config(config_fname: str):
-    """ Load in a config JSON file and return as a dictionary """
-    json_config = commentjson.loads(open(config_fname, 'r').read())
-    dict_config = DotMap(json_config, _dynamic=False)
-    return dict_config
-
-
-def load_yaml_config(cmd_args: dict) -> dict:
+def load_yaml_config(cmd_args: dict) -> DotMap:
     """ Load in a YAML config file & wrap as DotMap. """
     with open(cmd_args.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
@@ -33,6 +26,13 @@ def load_yaml_config(cmd_args: dict) -> dict:
     # Update job config with specific cmd args (if provided)
     config = overwrite_config_with_args(config, cmd_args)
     return DotMap(config, _dynamic=False)
+
+
+def load_json_config(config_fname: str) -> DotMap:
+    """ Load in a config JSON file and return as a dictionary """
+    json_config = commentjson.loads(open(config_fname, 'r').read())
+    dict_config = DotMap(json_config, _dynamic=False)
+    return dict_config
 
 
 def overwrite_config_with_args(config, cmd_args):
@@ -47,21 +47,21 @@ def overwrite_config_with_args(config, cmd_args):
 
 
 def save_pkl_object(obj, filename):
-    """ Helper to store pickle objects """
+    """ Helper to store pickle objects. """
     with open(filename, 'wb') as output:
         # Overwrites any existing file.
         pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
 
 
 def load_pkl_object(filename):
-    """ Helper to reload pickle objects """
+    """ Helper to reload pickle objects. """
     with open(filename, 'rb') as input:
         obj = pickle.load(input)
     return obj
 
 
-def determine_resource():
-    """ Check if cluster (sge/slurm) is available or only local run. """
+def determine_resource() -> str:
+    """ Check if cluster (sge/slurm) is available. """
     cc = load_mle_toolbox_config()
     hostname = platform.node()
     on_sge_cluster = any(re.match(l, hostname) for
@@ -78,7 +78,8 @@ def determine_resource():
         return hostname
 
 
-def print_framed(str_to_print: str, line_width: int=85,
+def print_framed(str_to_print: str,
+                 line_width: int=85,
                  frame_str: str = "="):
     """ Add === x === around your string to print. """
     left = np.ceil((line_width-len(str_to_print))/2).astype("int") - 2

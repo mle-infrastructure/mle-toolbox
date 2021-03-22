@@ -4,14 +4,14 @@ import shutil
 import json
 import copy
 import numpy as np
-from typing import Union, List
 import logging
+from typing import Union, List
 from pprint import pformat
 
 from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
-from ..utils import merge_hdf5_files, print_framed
-from ..utils import load_json_config, load_meta_log
+from ..utils import load_json_config, load_meta_log, print_framed
+from ..utils.manipulate_files import merge_hdf5_files
 
 
 class BaseHyperOptimisation(object):

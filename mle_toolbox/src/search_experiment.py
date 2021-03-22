@@ -5,7 +5,6 @@ def run_hyperparameter_search(meta_job_args: dict,
                               single_job_args: dict,
                               param_search_args: dict):
     """ Run a hyperparameter search experiment. """
-
     # Import only if used, this will raise an informative error when
     # scikit-optimize is not installed.
     from ..hyperopt import (HyperoptLogger,

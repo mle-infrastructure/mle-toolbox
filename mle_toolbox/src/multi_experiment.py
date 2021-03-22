@@ -11,6 +11,5 @@ def run_multiple_experiments(meta_job_args: dict,
                         multi_experiment_args.config_fnames,
                         single_job_args,
                         meta_job_args.experiment_dir,
-                        num_seeds = multi_experiment_args.num_seeds,
-                        fold_args = multi_experiment_args.fold_args,
-                        logger_level = logging.INFO)
+                        num_seeds=multi_experiment_args.num_seeds,
+                        logger_level=logging.INFO)

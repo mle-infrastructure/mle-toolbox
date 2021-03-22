@@ -131,7 +131,7 @@ def tolerant_mean(arrs: list):
 
 
 def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):
-    """ Subselect the meta log dict based on run id list. """
+    """ Subselect the meta log dict based on a list of run ids. """
     sub_log = DotMap()
     for run_id in run_ids:
         sub_log[run_id] = meta_log[run_id]

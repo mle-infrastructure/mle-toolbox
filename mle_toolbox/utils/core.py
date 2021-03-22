@@ -10,6 +10,7 @@ from .load_meta_log import load_meta_log
 from .load_hyper_log import load_hyper_log
 
 
+# Safely import such that no import errors are thrown - reduce dependencies
 try:
     import torch
     __torch_installed = True
