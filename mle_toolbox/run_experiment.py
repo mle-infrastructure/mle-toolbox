@@ -143,7 +143,8 @@ def main():
             # Import for report generating after experiment finished
             from .report_experiment import auto_generate_reports
             if job_config.meta_job_args.report_generation:
-                reporter = auto_generate_reports(new_experiment_id, logger)
+                reporter = auto_generate_reports(new_experiment_id, logger,
+                                                 pdf_gen=False)
                 print_framed("REPORT GENERATION")
 
     # 9. Update the experiment protocol & send back to GCS (if desired)

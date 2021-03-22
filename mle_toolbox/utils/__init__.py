@@ -5,7 +5,7 @@ from .experiment_logger import DeepLogger
 from .core import get_configs_ready, set_random_seeds, load_result_logs
 from .load_meta_log import load_meta_log, subselect_meta_log
 from .load_hyper_log import load_hyper_log, subselect_hyper_log
-from .load_model import reload_model_from_ckpt
+from .load_model import load_model_ckpt
 
 
 __all__ = [
@@ -23,5 +23,5 @@ __all__ = [
            'subselect_meta_log',
            'subselect_hyper_log',
            'load_hyper_log',
-           'reload_model_from_ckpt'
+           'load_model_ckpt'
            ]

@@ -1,9 +1,8 @@
 from .general import load_pkl_object
 
 
-def reload_model_from_ckpt(ckpt_path: str, model_type: str,
-                           model=None):
-    """ Helper to reload stored checkpoint & return trained model. """
+def load_model_ckpt(ckpt_path: str, model_type: str, model=None):
+    """ Helper to reload stored checkpoint/pkl & return trained model. """
     if model_type == "torch":
         try:
             import torch

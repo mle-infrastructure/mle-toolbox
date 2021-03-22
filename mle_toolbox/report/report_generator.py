@@ -13,7 +13,7 @@ class ReportGenerator():
     Generate md/html/pdf report of experiment from db/results dir.
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
-    def __init__(self, e_id, db, logger=None):
+    def __init__(self, e_id, db, logger=None, pdf_gen=False):
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db
@@ -31,6 +31,9 @@ class ReportGenerator():
             self.logger = prepare_logger(None, False)
         else:
             self.logger = logger
+
+        # Whether to also generate pdf report
+        self.pdf_gen = pdf_gen
 
     def generate_reports(self):
         """ Generate reports + generate included figures: .md, .html, .pdf. """
@@ -71,10 +74,11 @@ class ReportGenerator():
         self.logger.info(f'Report - UPDATED - .md with figures.')
 
         # 5. Generate the PDF file.
-        self.pdf_report_fname = os.path.join(self.reports_dir,
-                                             self.e_id + ".pdf")
-        generate_pdf(self.pdf_report_fname, self.html_text)
-        self.logger.info(f'Report - GENERATED - .pdf: {self.e_id + ".pdf"}')
+        if self.pdf_gen:
+            self.pdf_report_fname = os.path.join(self.reports_dir,
+                                                 self.e_id + ".pdf")
+            generate_pdf(self.pdf_report_fname, self.html_text)
+            self.logger.info(f'Report - GENERATED - .pdf: {self.e_id + ".pdf"}')
 
     def get_hypersearch_data(self):
         """ Get hypersearch variables + targets for 2D visualization loop. """
