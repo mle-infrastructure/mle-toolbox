@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import shutil
 import numpy as np
 
 # Import of general tools (loading, etc.)
@@ -103,7 +104,16 @@ def main():
         if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
-    # 6. Run an experiment
+    # 6. Copy over the experiment config .yaml file for easy re-running
+    if not os.path.exists(job_config.meta_job_args.experiment_dir):
+        try: os.makedirs(job_config.meta_job_args.experiment_dir)
+        except: pass
+    config_copy = os.path.join(job_config.meta_job_args.experiment_dir,
+                               "experiment_config.yaml")
+    if not os.path.exists(config_copy):
+        shutil.copy(cmd_args.config_fname, config_copy)
+
+    # 7. Run the experiment
     print_framed("RUN EXPERIMENT")
     experiment_types = ["single-experiment",
                         "multiple-experiments",
@@ -129,7 +139,7 @@ def main():
                                   job_config.single_job_args,
                                   job_config.param_search_args)
 
-    # 7. Perform post-processing of results if arguments are provided
+    # 8. Perform post-processing of results if arguments are provided
     if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
@@ -137,7 +147,7 @@ def main():
                             job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 
-    # 8. Generate .md, .html, .pdf report w. figures for e_id - inherit logger
+    # 9. Generate .md, and .html report w. figures for e_id - inherit logger
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
             # Import for report generating after experiment finished
@@ -147,7 +157,7 @@ def main():
                                                  pdf_gen=False)
                 print_framed("REPORT GENERATION")
 
-    # 9. Update the experiment protocol & send back to GCS (if desired)
+    # 10. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
         # 9a. Get most recent/up-to-date experiment DB to GCS
         if cc.general.use_gcloud_protocol_sync:

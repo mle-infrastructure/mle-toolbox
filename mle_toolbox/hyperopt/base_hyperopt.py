@@ -51,7 +51,7 @@ class BaseHyperOptimisation(object):
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
 
-        # Copy over base config
+        # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(self.experiment_dir,
                                    "search_base_config.json")
         if not os.path.exists(config_copy):
