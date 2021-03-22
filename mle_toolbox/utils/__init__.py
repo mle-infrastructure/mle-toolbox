@@ -1,12 +1,12 @@
-from .general import (load_mle_toolbox_config,
-                      determine_resource, print_framed,
-                      load_yaml_config, get_configs_ready,
-                      load_config, set_random_seeds,
-                      load_pkl_object)
-from .experiment_logger import DeepLogger
 from .manipulate_files import merge_hdf5_files
-from .load_meta_log import load_log, mean_over_seeds, subselect_meta_log
-from .load_hyper_log import hyper_log_to_df, get_closest_sub_df
+
+from .general import (load_mle_toolbox_config, load_yaml_config,
+                      load_json_config, load_pkl_object,
+                      determine_resource, print_framed)
+from .experiment_logger import DeepLogger
+from .core import get_configs_ready, set_random_seeds, load_result_logs
+from .load_meta_log import load_meta_log, subselect_meta_log
+from .load_hyper_log import load_hyper_log, subselect_hyper_log
 from .load_model import reload_model_from_ckpt
 
 
@@ -17,13 +17,12 @@ __all__ = [
            'get_configs_ready',
            'load_yaml_config',
            'load_log',
-           'load_config',
-           'mean_over_seeds',
+           'load_json_config',
            'set_random_seeds',
-           'get_closest_sub_df',
+           'subselect_hyper_log',
            'subselect_meta_log',
            'DeepLogger',
            'merge_hdf5_files',
-           'hyper_log_to_df',
+           'load_hyper_log',
            'reload_model_from_ckpt'
            ]

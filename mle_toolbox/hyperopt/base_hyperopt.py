@@ -10,8 +10,8 @@ from pprint import pformat
 
 from .hyperopt_logger import HyperoptLogger
 from ..multi_runner import spawn_multiple_runs
-from ..utils import merge_hdf5_files
-from ..utils import load_config, load_log, mean_over_seeds, print_framed
+from ..utils import merge_hdf5_files, print_framed
+from ..utils import load_json_config, load_meta_log
 
 
 class BaseHyperOptimisation(object):
@@ -40,7 +40,7 @@ class BaseHyperOptimisation(object):
         # Set up the random hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.config_fname = config_fname              # Fname base config file
-        self.base_config = load_config(config_fname)  # Base Train Config
+        self.base_config = load_json_config(config_fname)  # Base Train Config
         self.job_fname = job_fname                    # Python file to run job
         self.job_arguments = job_arguments            # SGE job info
         self.experiment_dir = experiment_dir          # Where to store all logs
@@ -211,8 +211,9 @@ class BaseHyperOptimisation(object):
 
         merge_hdf5_files(meta_log_fname, log_paths,
                          file_ids=all_run_ids)
+
         # Load in meta-results log with values meaned over seeds
-        meta_eval_logs = load_log(meta_log_fname)
+        meta_eval_logs = load_meta_log(meta_log_fname, mean_seeds=True)
         return meta_eval_logs
 
     def evaluate_hyperparams(self, eval_logs, run_ids):

@@ -4,7 +4,7 @@ from dotmap import DotMap
 from typing import Union, List
 
 
-def load_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
+def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -35,7 +35,7 @@ def load_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
     h5f.close()
 
     # Return as dot-callable dictionary
-    if mean_over_seeds:
+    if mean_seeds:
         result_dict = mean_over_seeds(result_dict)
     return DotMap(result_dict, _dynamic=False)
 

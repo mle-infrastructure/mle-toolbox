@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 import sys, select
 from typing import Union
-from ..utils.general import load_config, determine_resource
+from ..utils import load_json_config, determine_resource
 from .protocol_helpers import load_local_protocol_db
 
 
