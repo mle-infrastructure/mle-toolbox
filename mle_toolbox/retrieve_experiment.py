@@ -61,9 +61,14 @@ def main():
                                                get_dir_or_fig,
                                                all_experiment_ids)
                 else:
+                    if cmd_args.local_dir_name is None:
+                        local_dir_name = input(time_t +
+                                         " Local results directory name:  ")
+                    else:
+                        local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
                                               all_experiment_ids,
-                                              local_dir_name.local_dir_name)
+                                              local_dir_name)
                 retrieval_counter += 1
             else:
                 experiment_id, _, _, _ = ask_for_experiment_id(True)
@@ -74,8 +79,14 @@ def main():
                                                get_dir_or_fig,
                                                all_experiment_ids)
                 else:
+                    if cmd_args.local_dir_name is None:
+                        local_dir_name = input(time_t +
+                                         " Local results directory name:  ")
+                    else:
+                        local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
-                                              all_experiment_ids)
+                                              all_experiment_ids,
+                                              local_dir_name)
                 retrieval_counter += 1
     else:
         list_of_new_e_ids = []
@@ -97,6 +108,11 @@ def main():
                                            get_dir_or_fig,
                                            all_experiment_ids)
             else:
+                if cmd_args.local_dir_name is None:
+                    local_dir_name = input(time_t +
+                                           " Local results directory name:  ")
+                else:
+                    local_dir_name = cmd_args.local_dir_name
                 get_gcloud_zip_experiment(db, experiment_id,
                                           all_experiment_ids)
             print_framed(f'COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}')

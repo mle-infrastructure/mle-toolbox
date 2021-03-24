@@ -72,7 +72,7 @@ def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.param_search_args))
 
     # Add the base config - train, net, log
-    base_config = load_config(job_config.meta_job_args["base_train_config"])
+    base_config = load_json_config(job_config.meta_job_args["base_train_config"])
     db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
     db.dadd(new_experiment_id, ("net_config", base_config["net_config"]))
     db.dadd(new_experiment_id, ("log_config", base_config["log_config"]))

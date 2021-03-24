@@ -31,13 +31,14 @@ TODOS:
 - Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
 - Make sure that reloading works by starting a new experiment
-- Add support for slurm, local!
+- Add support for slurm, local, gcp!
 - Add documentation/function descriptions
 - Add report generated to db protocol + update when generated
 - Enhance protocol summary
     - Add more data: # jobs in experiment, CPUs per job, GPUs per job
     - Move emoji column to left most
 - Link Author @RobertTLange to twitter account
+- Replace `monitor-cluster` command
 """
 
 
