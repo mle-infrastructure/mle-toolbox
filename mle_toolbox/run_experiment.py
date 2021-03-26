@@ -2,12 +2,13 @@
 import os
 import shutil
 import numpy as np
+from datetime import datetime
 
 # Import of general tools (loading, etc.)
 from .utils import (load_mle_toolbox_config, load_yaml_config,
                     determine_resource, print_framed)
 # Import of helpers for protocoling experiments
-from .protocol import (protocol_summary, update_protocol_status,
+from .protocol import (protocol_summary, update_protocol_var,
                        delete_protocol_from_input, protocol_experiment)
 
 # Import of setup tools for experiments (log, config, etc.)
@@ -148,6 +149,7 @@ def main():
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 
     # 9. Generate .md, and .html report w. figures for e_id - inherit logger
+    report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
             # Import for report generating after experiment finished
@@ -155,6 +157,7 @@ def main():
             if job_config.meta_job_args.report_generation:
                 reporter = auto_generate_reports(new_experiment_id, logger,
                                                  pdf_gen=False)
+                report_generated = True
                 print_framed("REPORT GENERATION")
 
     # 10. Update the experiment protocol & send back to GCS (if desired)
@@ -172,7 +175,12 @@ def main():
 
         # 9c. Update the experiment protocol status
         logger.info(f'Updated protocol - COMPLETED: {new_experiment_id}')
-        update_protocol_status(new_experiment_id, job_status="completed")
+        time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        update_protocol_var(new_experiment_id,
+                            db_var_name=["job_status", "stop_time",
+                                         "report_generated"],
+                            db_var_value=["completed", time_t,
+                                          report_generated])
 
         # 9d. Send most recent/up-to-date experiment DB to GCS
         if cc.general.use_gcloud_protocol_sync:

@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import sys, select
 from tabulate import tabulate
+from typing import Union, List
 
 from ..utils.general import load_mle_toolbox_config
 
@@ -111,18 +112,25 @@ def protocol_summary(tail: int=5, verbose: bool=True):
         return None
 
 
-def update_protocol_status(experiment_id: str, job_status: str):
-    """ Update the status of the experiment {running, completed, failed}. """
+def update_protocol_var(experiment_id: str,
+                        db_var_name: Union[List[str], str],
+                        db_var_value: Union[list, str, dict]):
+    """ Update variable(s) stored in protocol db for an experiment. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    # Update the job status of the experiment
-    db.dadd(experiment_id, ("job_status", job_status))
-    time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-    db.dadd(experiment_id, ("stop_time", time_t))
+    # Update the variable(s) of the experiment
+    if type(db_var_name) == list:
+        for db_v_id in range(len(db_var_name)):
+            db.dadd(experiment_id, (db_var_name[db_v_id],
+                                    db_var_value[db_v_id]))
+    else:
+        db.dadd(experiment_id, (db_var_name, db_var_value))
     db.dump()
     return db
 
-
+    db.dadd(experiment_id, ("job_status", job_status))
+    time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    db.dadd(experiment_id, ("stop_time", time_t))
 def delete_protocol_from_input():
     """ Ask user if they want to delete previous experiment by id. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")

@@ -62,7 +62,7 @@ def make_layout() -> Layout:
     layout["main"].split(
         Layout(name="left", ratio=0.3),
         Layout(name="center", ratio=1),
-        Layout(name="right", ratio=0.35),
+        Layout(name="right", ratio=0.4),
         direction="horizontal",
     )
     # Split center left into user info and node info
