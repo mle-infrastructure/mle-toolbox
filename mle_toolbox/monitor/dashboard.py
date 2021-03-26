@@ -1,5 +1,5 @@
 from datetime import datetime
-from time import sleep
+import time
 from rich import box
 from rich.align import Align
 from rich.console import Console, RenderGroup
@@ -62,7 +62,7 @@ def make_layout() -> Layout:
     layout["main"].split(
         Layout(name="left", ratio=0.3),
         Layout(name="center", ratio=1),
-        Layout(name="right", ratio=0.4),
+        Layout(name="right", ratio=0.35),
         direction="horizontal",
     )
     # Split center left into user info and node info
@@ -253,10 +253,6 @@ def get_total_experiments(db, all_experiment_ids):
 
 def make_total_experiments() -> Align:
     """Some example content."""
-    # Add total experiments (completed, running, aborted)
-    # Stored in GCS, Not yet retrieved from GCS/Local
-    # Run by resource: SGE, Slurm, Local, GCP
-    # Reports generated
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     total_data = get_total_experiments(db, all_experiment_ids)
 
@@ -279,7 +275,7 @@ def make_total_experiments() -> Align:
     table.add_row(Text.from_markup("[b yellow]-"),
                   Text.from_markup("[b yellow]Report"),
                   Text.from_markup("[b yellow]GCS"),
-                  Text.from_markup("[b yellow]Retrieved"),)
+                  Text.from_markup("[b yellow]Sync"),)
     table.add_row("-", total_data["report_gen"],
                   total_data["gcs_stored"], total_data["retrieved"])
     #table.row_styles = ["none", "dim"]
@@ -293,6 +289,7 @@ def get_last_experiment(db, last_experiment_id):
     # Return results dictionary
     e_path = db.dget(last_experiment_id, "exp_retrieval_path")
     meta_args = db.dget(last_experiment_id, "meta_job_args")
+    job_spec_args = db.dget(last_experiment_id, "job_spec_args")
     e_type = meta_args["job_type"]
     e_dir = meta_args["experiment_dir"]
     e_script = meta_args["base_train_fname"]
@@ -300,7 +297,16 @@ def get_last_experiment(db, last_experiment_id):
     results = {"e_dir": e_dir,
                "e_type": e_type,
                "e_script": e_script,
-               "e_config": e_config}
+               "e_config": e_config,
+               "report_gen": meta_args["report_generation"]}
+
+    # Add additional data based on the experiment type
+    if e_type == "hyperparameter-search":
+        results["search_type"] = job_spec_args["search_type"]
+        results["eval_metrics"] = job_spec_args["eval_metrics"]
+        results["params_to_search"] = job_spec_args["params_to_search"]
+    elif e_type == "multiple-experiments":
+        results["config_fnames"] = job_spec_args["config_fnames"]
     return results
 
 
@@ -322,10 +328,43 @@ def make_last_experiment() -> Align:
                   last_data["e_script"],)
     table.add_row(Text.from_markup("[b yellow]Config"),
                   last_data["e_config"],)
-    table.add_row(Text.from_markup("[b yellow]Configs"),
-                  "-",)
-    table.add_row(Text.from_markup("[b yellow]Search"),
-                  "-",)
+    # table.add_row(Text.from_markup("[b yellow]Report"),
+    #               str(last_data["report_gen"]),)
+
+    if last_data["e_type"] == "hyperparameter-search":
+        table.add_row(Text.from_markup("[b yellow]Search"),
+                      last_data["search_type"],)
+        table.add_row(Text.from_markup("[b yellow]Metrics"),
+                      str(last_data["eval_metrics"]),)
+
+        p_counter = 0
+        for k in last_data["params_to_search"].keys():
+            for var in last_data["params_to_search"][k].keys():
+                if k == "categorical":
+                    row = [var] + last_data["params_to_search"][k][var]
+                elif k == "real":
+                    try:
+                        row = [var,
+                               last_data["params_to_search"][k][var]["begin"],
+                               last_data["params_to_search"][k][var]["end"],
+                               last_data["params_to_search"][k][var]["bins"]]
+                    except:
+                        row = [var,
+                               last_data["params_to_search"][k][var]["begin"],
+                               last_data["params_to_search"][k][var]["end"],
+                               last_data["params_to_search"][k][var]["prior"]]
+                elif k == "integer":
+                    row = [var,
+                           last_data["params_to_search"][k][var]["begin"],
+                           last_data["params_to_search"][k][var]["end"],
+                           last_data["params_to_search"][k][var]["spacing"]]
+                if p_counter == 0:
+                    table.add_row(Text.from_markup("[b yellow]Params"),
+                                  str(row),)
+                else:
+                    table.add_row("", str(row),)
+                p_counter += 1
+
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
@@ -356,6 +395,7 @@ def get_time_experiment(db, last_experiment_id):
         jobs_per_batch = "-"
 
     start_time = db.dget(last_experiment_id, "start_time")
+
     if "time_per_job" in single_job_args.keys():
         time_per_batch = single_job_args["time_per_job"]
         days, hours, minutes = time_per_batch.split(":")
@@ -365,14 +405,19 @@ def get_time_experiment(db, last_experiment_id):
         tot_days, tot_hours, tot_mins = (str(tot_days), str(tot_hours),
                                          str(tot_mins))
         if len(tot_days) < 2: tot_days = "0" + tot_days
-        if len(tot_hours) < 2: tot_days = "0" + tot_hours
-        if len(tot_mins) < 2: tot_days = "0" + tot_mins
+        if len(tot_hours) < 2: tot_hours = "0" + tot_hours
+        if len(tot_mins) < 2: tot_mins = "0" + tot_mins
         est_duration = tot_days + ":" + tot_hours + ":" + tot_mins
-        start_date = datetime.strptime(start_time, "%m/%d/%y %H:%M:%S")
-        end_date = start_date + dt.timedelta(days=int(tot_days),
-                                             hours=int(tot_hours),
-                                             minutes=int(tot_mins))
-        est_stop_time = end_date.strftime("%m/%d/%y %H:%M:%S")
+
+        # Check if last experiment has already terminated!
+        try:
+            stop_time = db.dget(last_experiment_id, "stop_time")
+        except:
+            start_date = datetime.strptime(start_time, "%m/%d/%y %H:%M:%S")
+            end_date = start_date + dt.timedelta(days=int(tot_days),
+                                                 hours=int(tot_hours),
+                                                 minutes=int(tot_mins))
+            stop_time = end_date.strftime("%m/%d/%y %H:%M:%S")
     else:
         time_per_batch = "-"
         est_stop_time = "-"
@@ -383,7 +428,7 @@ def get_time_experiment(db, last_experiment_id):
                "jobs_per_batch": jobs_per_batch,
                "time_per_batch": time_per_batch,
                "start_time": start_time,
-               "est_stop_time": est_stop_time,
+               "stop_time": stop_time,
                "est_duration": est_duration}
     return results
 
@@ -407,7 +452,7 @@ def make_est_completion() -> Align:
     table.add_row(Text.from_markup("[b yellow]Start Time"),
                   str(time_data["start_time"]))
     table.add_row(Text.from_markup("[b yellow]Est. Stop Time"),
-                  str(time_data["est_stop_time"]))
+                  str(time_data["stop_time"]))
     table.add_row(Text.from_markup("[b yellow]Est. Duration"),
                   str(time_data["est_duration"]))
     #table.row_styles = ["none", "dim"]
@@ -475,6 +520,39 @@ def make_memory_util_plot() -> Align:
     return Align.center(message)
 
 
+def update_dashboard(layout):
+    """ Helper function that fills dashboard with life!"""
+    # Fill the left-main with life!
+    layout["l-box1"].update(Panel(make_user_jobs(), border_style="red",
+                                title="Scheduled Jobs by User",))
+    layout["l-box2"].update(Panel(make_node_jobs(), border_style="red",
+                                title="Running Jobs by Node",))
+    # Fill the center-main with life!
+    layout["center"].update(Panel(make_protocol(),
+                                  border_style="bright_blue",
+                                 title="Experiment Protocol Summary",))
+    # Fill the right-main with life!
+    layout["r-box1"].update(Panel(make_total_experiments(),
+                                  border_style="yellow",
+                            title="Total Number of Experiment Runs",))
+    layout["r-box2"].update(Panel(make_last_experiment(),
+                                  border_style="yellow",
+                            title="Last Experiment Configuration",))
+    layout["r-box3"].update(Panel(make_est_completion(),
+                                  border_style="yellow",
+                    title="Est. Experiment Completion Time",))
+    # Fill the footer with life!
+    layout["f-box1"].update(Panel(make_cpu_util_plot(),
+                                  title="Total CPU Utilisation",
+                                  border_style="red"),)
+    layout["f-box2"].update(Panel(make_memory_util_plot(),
+                                  title="Total Memory Utilisation",
+                                  border_style="red"))
+    layout["f-box3"].update(Panel(make_help_commands(),
+                                  border_style="white",
+                title="[b white]Help: Core MLE-Toolbox CLI Commands",))
+    return layout
+
 if __name__ == "__main__":
     if cc.general.use_gcloud_protocol_sync:
         try:
@@ -490,35 +568,17 @@ if __name__ == "__main__":
     layout = make_layout()
     # Fill the header with life!
     layout["header"].update(Header())
-    # Fill the left-main with life!
-    layout["l-box1"].update(Panel(make_user_jobs(), border_style="red",
-                                title="Scheduled Jobs by User",))
-    layout["l-box2"].update(Panel(make_node_jobs(), border_style="red",
-                                title="Running Jobs by Node",))
-    # Fill the center-main with life!
-    layout["center"].update(Panel(make_protocol(), border_style="bright_blue",
-                        title="Experiment Protocol Summary",))
-    # Fill the right-main with life!
-    layout["r-box1"].update(Panel(make_total_experiments(), border_style="yellow",
-                            title="Total Number of Experiment Runs",))
-    layout["r-box2"].update(Panel(make_last_experiment(), border_style="yellow",
-                            title="Last Experiment Configuration",))
-    layout["r-box3"].update(Panel(make_est_completion(), border_style="yellow",
-                    title="Est. Experiment Completion Time",))
-    # Fill the footer with life!
-    layout["f-box1"].update(Panel(make_cpu_util_plot(),
-                                  title="Total CPU Utilisation",
-                                  border_style="red"),)
-    layout["f-box2"].update(Panel(make_memory_util_plot(),
-                                  title="Total Memory Utilisation",
-                                  border_style="red"))
-    layout["f-box3"].update(Panel(make_help_commands(), border_style="white",
-                    title="[b white]Help: Core MLE-Toolbox CLI Commands",))
+    layout = update_dashboard(layout)
 
+    # Start timer for GCS pulling of protocol db
+    start_t = time.time()
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
+            layout = update_dashboard(layout)
             # Every 10 minutes pull the newest DB from GCS
-            sleep(600)
-            if cc.general.use_gcloud_protocol_sync:
-                accessed_remote_db = get_gcloud_db()
+            if time.time() - start_t > 600:
+                if cc.general.use_gcloud_protocol_sync:
+                    accessed_remote_db = get_gcloud_db()
+                start_t = time.time()
+            time.sleep(1)
