@@ -24,9 +24,6 @@ from mle_toolbox.monitor import get_user_sge_data, get_host_sge_data
 
 """
 TODOS:
-- Work with local_db data and fill right columns
-    - Last experiment config summary
-    - Estimated time of completion [Need cancelation/Estimate in db]
 - Make qstat calls a lot more efficient -> Faster at startup
 - Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
@@ -63,18 +60,18 @@ def make_layout() -> Layout:
     )
     # Split center into 3 horizontal sections
     layout["main"].split(
-        Layout(name="left", ratio=0.375),
+        Layout(name="left", ratio=0.3),
         Layout(name="center", ratio=1),
-        Layout(name="right", ratio=0.4),
+        Layout(name="right", ratio=0.35),
         direction="horizontal",
     )
     # Split center left into user info and node info
     layout["left"].split(Layout(name="l-box1", size=10),
                          Layout(name="l-box2", size=25))
     # Split center right into total experiments, last experiments, ETA
-    layout["right"].split(Layout(name="r-box1", size=12),
-                          Layout(name="r-box2", size=12),
-                          Layout(name="r-box3", size=11))
+    layout["right"].split(Layout(name="r-box1", ratio=0.3),
+                          Layout(name="r-box2", ratio=0.4),
+                          Layout(name="r-box3", ratio=0.35))
     # Split bottom into toolbox command info and cluster util termplots
     layout["footer"].split(
         Layout(name="f-box1", ratio=0.5),
@@ -151,7 +148,7 @@ def make_user_jobs() -> Align:
     table.row_styles = ["none", "dim"]
     table.border_style = "red"
     table.box = box.SIMPLE
-    return table
+    return Align.center(table)
 
 
 def make_node_jobs() -> Align:
@@ -182,13 +179,17 @@ def make_protocol() -> Table:
     df = protocol_summary(tail=29, verbose=False)
     table = Table(show_header=True, show_footer=False,
                   header_style="bold blue")
-    table.add_column()
-    table.add_column("ID")
+    table.add_column(":construction:")
+    table.add_column("E-ID")
     table.add_column("Date")
     table.add_column("Project")
     table.add_column("Purpose")
-    table.add_column("Seeds", justify="center")
-    table.add_column("Resource")
+    table.add_column("Type")
+    table.add_column(":steam_locomotive:", justify="center")
+    table.add_column("CPU", justify="center")
+    table.add_column("GPU", justify="center")
+    table.add_column("Jobs", justify="center")
+    table.add_column(":seedling:", justify="center")
     for index in reversed(df.index):
         row = df.iloc[index]
         if row["Resource"] == "sge-cluster":
@@ -206,8 +207,10 @@ def make_protocol() -> Table:
             status = "[green]:heavy_check_mark:"
         else:
             status = "[red]:x:"
-        table.add_row(
-            status, row["ID"], row["Date"],  row["Project"], row["Purpose"], str(row["Seeds"]), resource)
+        table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
+                      row["Purpose"][:25], row["Type"],
+                      resource, str(row["CPUs"]),
+                      str(row["GPUs"]), str(row["Jobs"]), str(row["Seeds"]))
     # TODO: Figure out why entire caption is made white/colored
     # table.caption = "Experiment Status - \
     #                 [green]:heavy_check_mark::[/green] Completed, \
@@ -257,12 +260,14 @@ def make_total_experiments() -> Align:
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     total_data = get_total_experiments(db, all_experiment_ids)
 
-    table = Table(show_header=True, show_footer=False,
+    table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
-    table.add_column("Total")
-    table.add_column("Run")
-    table.add_column("Done")
-    table.add_column("Aborted")
+    table.add_column()
+    table.add_column()
+    table.add_column()
+    table.add_column()
+    table.add_row("[b yellow]Total", Spinner('dots', style="magenta"),
+                  "[green]:heavy_check_mark:", "[red]:x:")
     table.add_row(str(len(all_experiment_ids)), total_data["run"],
                   total_data["done"], total_data["aborted"])
     table.add_row(Text.from_markup("[b yellow]SGE"),
@@ -291,9 +296,11 @@ def get_last_experiment(db, last_experiment_id):
     e_type = meta_args["job_type"]
     e_dir = meta_args["experiment_dir"]
     e_script = meta_args["base_train_fname"]
-    e_config = meta_args["base_train_config"]
-    results = {"e_dir": e_dir, "e_type": e_type,
-               "e_script": e_script, "e_config": e_config}
+    e_config = os.path.split(meta_args["base_train_config"])[1]
+    results = {"e_dir": e_dir,
+               "e_type": e_type,
+               "e_script": e_script,
+               "e_config": e_config}
     return results
 
 
@@ -301,22 +308,24 @@ def make_last_experiment() -> Align:
     """Some example content."""
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     last_data = get_last_experiment(db, all_experiment_ids[-1])
-    table = Table(show_header=True, show_footer=False,
+    table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
     table.add_column()
-    table.add_row(Text.from_markup("[b yellow]ID"),
+    table.add_row(Text.from_markup("[b yellow]E-ID"),
                   str(last_experiment_id),)
-    table.add_row(Text.from_markup("[b yellow]E. Type"),
+    table.add_row(Text.from_markup("[b yellow]Type"),
                   last_data["e_type"],)
-    table.add_row(Text.from_markup("[b yellow]E. Dir."),
+    table.add_row(Text.from_markup("[b yellow]Dir."),
                   last_data["e_dir"],)
-    table.add_row(Text.from_markup("[b yellow]E. Script"),
+    table.add_row(Text.from_markup("[b yellow]Script"),
                   last_data["e_script"],)
-    table.add_row(Text.from_markup("[b yellow]E. Config"),
+    table.add_row(Text.from_markup("[b yellow]Config"),
                   last_data["e_config"],)
-    table.add_row(Text.from_markup("[b yellow]E. Configs"),
-                  "[b yellow]E. Search",)
+    table.add_row(Text.from_markup("[b yellow]Configs"),
+                  "-",)
+    table.add_row(Text.from_markup("[b yellow]Search"),
+                  "-",)
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD
@@ -325,7 +334,57 @@ def make_last_experiment() -> Align:
 
 def get_time_experiment(db, last_experiment_id):
     """ Get data from db to show in 'time_experiment' panel. """
-    results = {}
+    meta_args = db.dget(last_experiment_id, "meta_job_args")
+    job_spec_args = db.dget(last_experiment_id, "job_spec_args")
+    single_job_args = db.dget(last_experiment_id, "single_job_args")
+
+    if meta_args["job_type"] == "hyperparameter-search":
+        total_jobs = (job_spec_args["num_search_batches"]
+                      * job_spec_args["num_iter_per_batch"]
+                      * job_spec_args["num_evals_per_iter"])
+        total_batches = job_spec_args["num_search_batches"]
+        jobs_per_batch = (job_spec_args["num_iter_per_batch"]
+                          * job_spec_args["num_evals_per_iter"])
+    elif meta_args["job_type"] == "multiple-experiments":
+        total_jobs = (len(job_spec_args["config_fnames"])*
+                      job_spec_args["num_seeds"])
+        total_batches = 1
+        jobs_per_batch = "-"
+    else:
+        total_jobs = 1
+        total_batches = 1
+        jobs_per_batch = "-"
+
+    start_time = db.dget(last_experiment_id, "start_time")
+    if "time_per_job" in single_job_args.keys():
+        time_per_batch = single_job_args["time_per_job"]
+        days, hours, minutes = time_per_batch.split(":")
+        hours_add, tot_mins = divmod(total_batches * int(minutes), 60)
+        days_add, tot_hours = divmod(total_batches * int(hours)+hours_add, 24)
+        tot_days = total_batches * int(days) + days_add
+        tot_days, tot_hours, tot_mins = (str(tot_days), str(tot_hours),
+                                         str(tot_mins))
+        if len(tot_days) < 2: tot_days = "0" + tot_days
+        if len(tot_hours) < 2: tot_days = "0" + tot_hours
+        if len(tot_mins) < 2: tot_days = "0" + tot_mins
+        est_duration = tot_days + ":" + tot_hours + ":" + tot_mins
+        start_date = datetime.strptime(start_time, "%m/%d/%y %H:%M:%S")
+        end_date = start_date + dt.timedelta(days=int(tot_days),
+                                             hours=int(tot_hours),
+                                             minutes=int(tot_mins))
+        est_stop_time = end_date.strftime("%m/%d/%y %H:%M:%S")
+    else:
+        time_per_batch = "-"
+        est_stop_time = "-"
+        est_duration = "-"
+
+    results = {"total_jobs": total_jobs,
+               "total_batches": total_batches,
+               "jobs_per_batch": jobs_per_batch,
+               "time_per_batch": time_per_batch,
+               "start_time": start_time,
+               "est_stop_time": est_stop_time,
+               "est_duration": est_duration}
     return results
 
 
@@ -333,16 +392,24 @@ def make_est_completion() -> Align:
     """Some example content."""
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     time_data = get_time_experiment(db, all_experiment_ids[-1])
-    table = Table(show_header=True, show_footer=False,
+    table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
     table.add_column()
-    table.add_row(Text.from_markup("[b yellow]Total Jobs"), "")
-    table.add_row(Text.from_markup("[b yellow]Total Batches"), "")
-    table.add_row(Text.from_markup("[b yellow]Time/Batch"), "")
-    table.add_row(Text.from_markup("[b yellow]Start Time"), "")
-    table.add_row(Text.from_markup("[b yellow]Est. Stop Time"), "")
-    table.add_row(Text.from_markup("[b yellow]Est. Duration"), "")
+    table.add_row(Text.from_markup("[b yellow]Total Jobs"),
+                  str(time_data["total_jobs"]))
+    table.add_row(Text.from_markup("[b yellow]Total Batches"),
+                  str(time_data["total_batches"]))
+    table.add_row(Text.from_markup("[b yellow]Jobs/Batch"),
+                  str(time_data["jobs_per_batch"]))
+    table.add_row(Text.from_markup("[b yellow]Time/Batch"),
+                  str(time_data["time_per_batch"]))
+    table.add_row(Text.from_markup("[b yellow]Start Time"),
+                  str(time_data["start_time"]))
+    table.add_row(Text.from_markup("[b yellow]Est. Stop Time"),
+                  str(time_data["est_stop_time"]))
+    table.add_row(Text.from_markup("[b yellow]Est. Duration"),
+                  str(time_data["est_duration"]))
     #table.row_styles = ["none", "dim"]
     table.border_style = "yellow"
     table.box = box.SIMPLE_HEAD

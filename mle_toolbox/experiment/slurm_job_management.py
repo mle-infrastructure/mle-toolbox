@@ -54,7 +54,7 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
 
     # SGE gives logical cores while Slurm seems to give only threads?!
     if "num_logical_cores" in job_arguments.keys():
-        job_arguments["num_logical_cores"] = 2*job_arguments["num_logical_cores"]
+        job_arguments["num_logical_cores"] = job_arguments["num_logical_cores"]
     return job_arguments
 
 

@@ -21,4 +21,5 @@ single_job_args:
     log_file: "log-cnn"
     err_file: "error-cnn"
     env_name: "mle-toolbox"
-    time_per_job: "00:30:00"
+    # Days:Hours:Minutes
+    time_per_job: "00:00:30"

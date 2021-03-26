@@ -41,8 +41,8 @@ def protocol_summary(tail: int=5, verbose: bool=True):
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     if len(all_experiment_ids) > 0:
         purposes, project_names, exp_paths = [], [], []
-        num_seeds, statuses, start_times = [], [], []
-        resource = []
+        num_seeds, statuses, start_times, job_types = [], [], [], []
+        resource, num_cpus, num_gpus, total_jobs = [], [], [], []
         if tail is None:
             tail = len(all_experiment_ids)
         for e_id in all_experiment_ids[-tail:]:
@@ -56,6 +56,33 @@ def protocol_summary(tail: int=5, verbose: bool=True):
                 num_seeds.append(db.dget(e_id, "num_seeds"))
             except:
                 num_seeds.append("-")
+            job_args = db.dget(e_id, "single_job_args")
+            num_cpus.append(job_args["num_logical_cores"])
+            try:
+                num_gpus.append(job_args["num_gpus"])
+            except:
+                num_gpus.append(0)
+
+            # Get job type data
+            meta_args = db.dget(e_id, "meta_job_args")
+            if meta_args["job_type"] == "hyperparameter-search":
+                job_types.append("search")
+            elif meta_args["job_type"] == "multiple-experiments":
+                job_types.append("multi")
+            else:
+                job_types.append("other")
+
+            # Get number of jobs in experiement
+            job_spec_args = db.dget(e_id, "job_spec_args")
+            if meta_args["job_type"] == "hyperparameter-search":
+                total_jobs.append(job_spec_args["num_search_batches"]
+                                  * job_spec_args["num_iter_per_batch"]
+                                  * job_spec_args["num_evals_per_iter"])
+            elif meta_args["job_type"] == "multiple-experiments":
+                total_jobs.append(len(job_spec_args["config_fnames"])*
+                                  job_spec_args["num_seeds"])
+            else:
+                total_jobs.append(1)
 
         d = {"ID": all_experiment_ids[-tail:],
              "Date": start_times,
@@ -64,7 +91,11 @@ def protocol_summary(tail: int=5, verbose: bool=True):
              "Experiment Dir": exp_paths,
              "Status": statuses,
              "Seeds": num_seeds,
-             "Resource": resource}
+             "Resource": resource,
+             "CPUs": num_cpus,
+             "GPUs": num_gpus,
+             "Type": job_types,
+             "Jobs": total_jobs}
         df = pd.DataFrame(d)
         df["ID"] = [e.split("-")[-1] for e in df["ID"]]
         df["Date"] = df["Date"].map('{:.5}'.format)

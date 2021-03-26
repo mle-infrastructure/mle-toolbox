@@ -69,7 +69,7 @@ def sge_generate_remote_job_template(job_arguments: dict):
     # Add desired number of requested gpus
     if "num_gpus" in job_arguments:
         if job_arguments["num_gpus"] > 0:
-            base_template += "#$ -l cuda={num_gpus} \n"
+            base_template += '#$ -l cuda="{num_gpus}(RTX2080)" \n'
 
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:
