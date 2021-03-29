@@ -26,6 +26,7 @@ from .static_1d_plots import (visualize_1D_lcurves,
 
 # Dynamics animations of results
 from .dynamic_1d_anims import animate_1D_lines
+from .dynamic_2d_anims import animate_2D_grid
 
 
 __all__ = [
@@ -37,5 +38,6 @@ __all__ = [
            'visualize_1D_bar',
            'plot_1D_line',
            'plot_1D_bar',
-           'animate_1D_lines'
+           'animate_1D_lines',
+           'animate_2D_grid'
            ]

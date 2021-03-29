@@ -1,3 +1,4 @@
+*.gif
 *.zip
 mle_config.toml
 .vim-arsync
