@@ -9,7 +9,7 @@ Here are 4 steps to get started with running your distributed jobs:
 
 1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and to set up your credentials/configurations.
 2. Read the [documentation](docs/how_to_toolbox.md) explaining the pillars of the toolbox & how to compose the meta-configuration job `.yaml` files for your experiments.
-3. Check out the [examples :notebook:](#examples-getting-started-running-jobs) to get started with a toy [ODE integration](examples/ode), [MNIST-CNN training](examples/mnist) or an example of how to train a [PPO agent](examples/ppo).
+3. Check out the [examples :notebook:](#examples-getting-started-running-jobs) to get started with a toy [ODE integration](examples/ode), [MNIST-CNN training](examples/mnist) or an example of how to train a [VAE in JAX](examples/jax_vae).
 4. Start up your own experiments using the [template files](templates/).
 
 
@@ -55,15 +55,14 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 1. **Start up an experiment**: `run-experiment <experiment_config>.yaml`
 2. **Monitor resource utilisation**: `monitor-cluster`
 3. **Retrieve the experiment results**: `retrieve-experiment`
-4. **Create a one-page experiment report**: `report-experiment`
+4. **Create an experiment report with figures**: `report-experiment`
 
 ## Examples & Getting Your First Job Running
 
 * :notebook: [Euler ODE](examples/ode) - Integrate a simple ODE using forward Euler & get to know the toolbox.
 * :notebook: [MNIST CNN](examples/mnist) - Train a CNN on multiple random seeds & different training configurations.
-* :notebook: [Pendulum PPO](examples/ppo) - Search through the hyperparameter space of a PPO agent.
-
-The PPO examples depend on another package of mine: [drl-toolbox](https://github.com/RobertTLange/drl-toolbox). **Note**: This has not been open-sourced yet. Contact me if you want to run it!
+* :notebook: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
+* :notebook: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier on low-dimensional digits.
 
 ## Notes, Development & Questions
 

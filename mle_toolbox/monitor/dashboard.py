@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 import time
 from rich import box
 from rich.align import Align
@@ -30,12 +30,7 @@ TODOS:
 - Make sure that reloading works by starting a new experiment
 - Add support for slurm, local, gcp!
 - Add documentation/function descriptions
-- Add report generated to db protocol + update when generated
-- Enhance protocol summary
-    - Add more data: # jobs in experiment, CPUs per job, GPUs per job
-    - Move emoji column to left most
 - Link Author @RobertTLange to twitter account
-- Replace `monitor-cluster` command
 """
 
 
@@ -97,7 +92,7 @@ class Header:
         grid.add_column(justify="right")
         grid.add_row(
             "General Settings:", Header.welcome_ascii[0],
-            datetime.now().ctime().replace(":", "[blink]:[/]"),
+            dt.datetime.now().ctime().replace(":", "[blink]:[/]"),
         )
         grid.add_row(
             "\u2022 GCS Sync Protocol: [green]:heavy_check_mark:" if
@@ -186,9 +181,9 @@ def make_protocol() -> Table:
     table.add_column("Purpose")
     table.add_column("Type")
     table.add_column(":steam_locomotive:", justify="center")
-    table.add_column("CPU", justify="center")
-    table.add_column("GPU", justify="center")
-    table.add_column("Jobs", justify="center")
+    table.add_column("#Jobs", justify="center")
+    table.add_column("#CPU", justify="center")
+    table.add_column("#GPU", justify="center")
     table.add_column(":seedling:", justify="center")
     for index in reversed(df.index):
         row = df.iloc[index]
@@ -209,8 +204,8 @@ def make_protocol() -> Table:
             status = "[red]:x:"
         table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
                       row["Purpose"][:25], row["Type"],
-                      resource, str(row["CPUs"]),
-                      str(row["GPUs"]), str(row["Jobs"]), str(row["Seeds"]))
+                      resource, str(row["Jobs"]), str(row["CPUs"]),
+                      str(row["GPUs"]), str(row["Seeds"]))
     # TODO: Figure out why entire caption is made white/colored
     # table.caption = "Experiment Status - \
     #                 [green]:heavy_check_mark::[/green] Completed, \
@@ -413,11 +408,11 @@ def get_time_experiment(db, last_experiment_id):
         try:
             stop_time = db.dget(last_experiment_id, "stop_time")
         except:
-            start_date = datetime.strptime(start_time, "%m/%d/%y %H:%M:%S")
+            start_date = dt.datetime.strptime(start_time, "%m/%d/%Y %H:%M:%S")
             end_date = start_date + dt.timedelta(days=int(tot_days),
                                                  hours=int(tot_hours),
                                                  minutes=int(tot_mins))
-            stop_time = end_date.strftime("%m/%d/%y %H:%M:%S")
+            stop_time = end_date.strftime("%m/%d/%Y %H:%M:%S")
     else:
         time_per_batch = "-"
         est_stop_time = "-"
@@ -553,7 +548,8 @@ def update_dashboard(layout):
                 title="[b white]Help: Core MLE-Toolbox CLI Commands",))
     return layout
 
-if __name__ == "__main__":
+
+def monitor_sge_cluster():
     if cc.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol

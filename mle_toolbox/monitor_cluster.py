@@ -1,5 +1,5 @@
 from .utils import determine_resource
-from .monitor import monitor_sge_cluster, monitor_sge_cluster
+from .monitor import monitor_sge_cluster, monitor_slurm_cluster
 
 
 def main():
@@ -11,7 +11,3 @@ def main():
         monitor_slurm_cluster()
     else:
         print("You are running your job locally: {}".format(ressource))
-
-
-if __name__ == "__main__":
-    monitor_sge_cluster()
