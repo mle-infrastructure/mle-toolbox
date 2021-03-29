@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Union
 import re
-from .visualize_results_2d import moving_smooth_ts
+from .static_2d_plots import moving_smooth_ts
 
 
 def visualize_1D_bar(hyper_df: pd.core.frame.DataFrame,

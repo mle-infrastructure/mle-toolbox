@@ -14,14 +14,18 @@ except ModuleNotFoundError as err:
                               "to use the `mle_toolbox.visualize` module.")
 
 
-from .visualize_results_2d import (visualize_2D_grid,
-                                   plot_heatmap_array,
-                                   moving_smooth_ts)
-from .visualize_results_1d import (visualize_1D_lcurves,
-                                   visualize_1D_bar,
-                                   visualize_1D_line,
-                                   plot_1D_bar,
-                                   plot_1D_line)
+# Static plots of results
+from .static_2d_plots import (visualize_2D_grid,
+                              plot_heatmap_array,
+                              moving_smooth_ts)
+from .static_1d_plots import (visualize_1D_lcurves,
+                              visualize_1D_bar,
+                              visualize_1D_line,
+                              plot_1D_bar,
+                              plot_1D_line)
+
+# Dynamics animations of results
+from .dynamic_1d_anims import animate_1D_lines
 
 
 __all__ = [
@@ -32,5 +36,6 @@ __all__ = [
            'visualize_1D_line',
            'visualize_1D_bar',
            'plot_1D_line',
-           'plot_1D_bar'
+           'plot_1D_bar',
+           'animate_1D_lines'
            ]

@@ -5,7 +5,7 @@
 - Fix GCS retrieval unzipping so that there are no redundant sub-directories
 - Make logging even better (different model types and top-k checkpointing)
 - Add sklearn SVM classifier + Haiku VAE example with .pkl model saving
-- Add rich dashboard for `monitor-cluster` :heart:
+- Add rich dashboard for `monitor-cluster` :heart: (running on SGE grid)
 - Major clean-up of `utils`. Rename things properly e.g.`hyper_log_to_df` -> `load_hyper_log` and add top-k selection next to variable fixing in `subselect_hyper_log`
 
 
