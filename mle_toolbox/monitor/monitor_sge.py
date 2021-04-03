@@ -1,5 +1,6 @@
 import re
-import datetime, sys
+from datetime import datetime
+import sys
 import subprocess as sp
 import numpy as np
 from colorclass import Color
@@ -133,4 +134,5 @@ def get_utilisation_sge_data():
     return {"cores": sum(all_cores),
             "cores_util": sum(all_cores_util),
             "mem": sum(all_mem),
-            "mem_util": sum(all_mem_util)}
+            "mem_util": sum(all_mem_util),
+            "timestamp": datetime.now().strftime("%m/%d %H:%M")}

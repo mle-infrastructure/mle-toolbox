@@ -362,34 +362,39 @@ def make_help_commands() -> Align:
     return table
 
 
-def make_cpu_util_plot(cores, cores_util) -> Align:
+def make_cpu_util_plot(cpu_hist) -> Align:
     """ Plot curve displaying a CPU usage times series for the cluster. """
-    x = np.linspace(0, 2 * np.pi, 10)
-    y = np.sin(x)
+    x = np.arange(len(cpu_hist["rel_cpu_util"]))
+    y = np.array(cpu_hist["rel_cpu_util"])
+
     fig = tpl.figure()
-    fig.plot(x, y, xlabel="Time", width=40, height=10)
+    fig.plot(x, y, xlabel="Time", width=40, height=10,
+             ylim=[-0.1, 1.1], label="% Util.")
     plot_str = fig.get_string()
+    plot_str = plot_str[:-61] + "                   Time"
     message = Table.grid()
     message.add_column(no_wrap=True)
     message.add_row(plot_str,)
     return Align.center(message)
 
 
-def make_memory_util_plot(mem, mem_util) -> Align:
+def make_memory_util_plot(mem_hist) -> Align:
     """ Plot curve displaying a memory usage times series for the cluster. """
-    x = np.linspace(0, 2 * np.pi, 10)
-    y = np.cos(x)
+    x = np.arange(len(mem_hist["rel_mem_util"]))
+    y = np.array(mem_hist["rel_mem_util"])
 
     fig = tpl.figure()
-    fig.plot(x, y, xlabel="Time", width=40, height=10)
+    fig.plot(x, y, xlabel="Time", width=40, height=10,
+             ylim=[-0.1, 1.1], label="% Util.")
     plot_str = fig.get_string()
+    plot_str = plot_str[:-61] + "                   Time"
     message = Table.grid()
     message.add_column(no_wrap=True)
     message.add_row(plot_str,)
     return Align.center(message)
 
 
-def update_dashboard(layout, resource, mem_hist, cpu_hist):
+def update_dashboard(layout, resource, util_hist):
     """ Helper function that fills dashboard with life!"""
     # Get newest data depending on resourse!
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -400,6 +405,18 @@ def update_dashboard(layout, resource, mem_hist, cpu_hist):
     total_data = get_total_experiments(db, all_experiment_ids)
     last_data = get_last_experiment(db, all_experiment_ids[-1])
     time_data = get_time_experiment(db, all_experiment_ids[-1])
+
+    # Add utilisation data to storage dictionaries
+    util_hist["timestamps"].append(util_data["timestamp"])
+    util_hist["total_mem"] = util_data["mem"]
+    util_hist["rel_mem_util"].append(util_data["mem_util"]/util_data["mem"])
+    util_hist["total_cpu"] = util_data["cores"]
+    util_hist["rel_cpu_util"].append(util_data["cores_util"]/util_data["cores"])
+
+    # Limit memory to approx. last 27 hours
+    util_hist["timestamps"] = util_hist["timestamps"][:100000]
+    util_hist["rel_mem_util"] = util_hist["rel_mem_util"][:100000]
+    util_hist["rel_cpu_util"] = util_hist["rel_cpu_util"][:100000]
 
     # Fill the left-main with life!
     layout["l-box1"].update(Panel(make_user_jobs(user_data),
@@ -426,26 +443,26 @@ def update_dashboard(layout, resource, mem_hist, cpu_hist):
                     title="Est. Experiment Completion Time",))
 
     # Fill the footer with life!
-    layout["f-box1"].update(Panel(make_cpu_util_plot(util_data["cores"],
-                                                     util_data["cores_util"]),
-                    title=f"CPU Utilisation - Total: {int(util_data['cores'])}",
+    layout["f-box1"].update(Panel(make_cpu_util_plot(util_hist),
+                    title=(f"CPU - Total: {int(util_data['cores'])}T"
+                           + f" | Start: {util_hist['timestamps'][0]}"),
                     border_style="red"),)
-    layout["f-box2"].update(Panel(make_memory_util_plot(util_data["mem"],
-                                                        util_data["mem_util"]),
-                    title=f"Memory Utilisation - Total: {int(util_data['mem'])}",
+    layout["f-box2"].update(Panel(make_memory_util_plot(util_hist),
+                    title=(f"Mem - Total: {int(util_data['mem'])}G"
+                           + f" | Start: {util_hist['timestamps'][0]}"),
                     border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),
                                   border_style="white",
                 title="[b white]Help: Core MLE-Toolbox CLI Commands",))
-    return layout, mem_hist, cpu_hist
+    return layout, util_hist
 
 
 def cluster_dashboard():
     """ Initialize and update rich dashboard with cluster data. """
     # Get host resource [local, sge-cluster, slurm-cluster]
     resource = determine_resource()
-    mem_hist = {"utilization": []}
-    cpu_hist = {"utilization": []}
+    util_hist = {"rel_mem_util": [], "rel_cpu_util": [], "timestamps": []}
+
     if cc.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
@@ -460,16 +477,14 @@ def cluster_dashboard():
     layout = make_layout()
     # Fill the header with life!
     layout["header"].update(Header())
-    layout, mem_hist, cpu_hist = update_dashboard(layout, resource,
-                                                  mem_hist, cpu_hist)
+    layout, util_hist = update_dashboard(layout, resource, util_hist)
 
     # Start timer for GCS pulling of protocol db
     start_t = time.time()
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
-            layout, mem_hist, cpu_hist = update_dashboard(layout, resource,
-                                                          mem_hist, cpu_hist)
+            layout, util_hist = update_dashboard(layout, resource, util_hist)
             # Every 10 minutes pull the newest DB from GCS
             if time.time() - start_t > 600:
                 if cc.general.use_gcloud_protocol_sync:
