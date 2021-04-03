@@ -17,34 +17,30 @@ import numpy as np
 import toml
 import termplotlib as tpl
 
-from mle_toolbox.utils import load_mle_toolbox_config
+from mle_toolbox.utils import load_mle_toolbox_config, determine_resource
 from mle_toolbox.protocol import protocol_summary, load_local_protocol_db
-from mle_toolbox.monitor import get_user_sge_data, get_host_sge_data
-
+from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
+                                             get_host_sge_data,
+                                             get_utilisation_sge_data)
+from mle_toolbox.monitor.monitor_db import (get_total_experiments,
+                                            get_time_experiment,
+                                            get_last_experiment)
 
 """
 TODOS:
 - Make qstat calls a lot more efficient -> Faster at startup
-- Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
-- Add support for slurm, local, gcp!
+- Add support for slurm, local + gcp!
 - Add documentation/function descriptions
 - Link Author @RobertTLange to twitter account
 """
 
 
-def load_mle_toolbox_config():
-    """ Load cluster config from the .toml file. See docs for more info. """
-    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
-                  _dynamic=False)
-
-resource = "sge"
 cc = load_mle_toolbox_config()
-
 console = Console()
 
 def make_layout() -> Layout:
-    """Define the layout."""
+    """ Define the dashboard layout."""
     layout = Layout(name="root")
     # Split in three vertical sections: Welcome, core info, help + util plots
     layout.split(
@@ -122,9 +118,8 @@ class Header:
         return Panel(grid, style="white on blue")
 
 
-def make_user_jobs() -> Align:
+def make_user_jobs(user_data) -> Align:
     """Some example content."""
-    user_data = get_user_sge_data()
     sum_all = str(sum([r[1] for r in user_data]))
     sum_running = str(sum([r[2] for r in user_data]))
     sum_login = str(sum([r[3] for r in user_data]))
@@ -145,9 +140,8 @@ def make_user_jobs() -> Align:
     return Align.center(table)
 
 
-def make_node_jobs() -> Align:
+def make_node_jobs(host_data) -> Align:
     """Some example content."""
-    host_data = get_host_sge_data()
     sum_all = str(sum([r[1] for r in host_data]))
     sum_running = str(sum([r[2] for r in host_data]))
     sum_login = str(sum([r[3] for r in host_data]))
@@ -214,42 +208,8 @@ def make_protocol() -> Table:
     return Align.center(table)
 
 
-def get_total_experiments(db, all_experiment_ids):
-    """ Get data from db to show in 'total_experiments' panel. """
-    run, done, aborted, sge, slurm, gcp, local = 0, 0, 0, 0, 0, 0, 0
-    report_gen, gcs_stored, retrieved = 0, 0, 0
-    for e_id in all_experiment_ids:
-        status = db.dget(e_id, "job_status")
-        # Job status
-        run += status == "running"
-        done += status == "completed"
-        aborted += status not in ["running", "completed"]
-        # Execution resource data
-        resource = db.dget(e_id, "exec_resource")
-        sge += resource == "sge-cluster"
-        slurm += resource == "slurm-cluster"
-        gcp += resource == "gcp-cloud"
-        local += resource not in ["sge-cluster", "slurm-cluster", "gcp-cloud"]
-        # Additional data: Report generated, GCS stored, Results retrieved
-        try:
-            report_gen += db.dget(e_id, "report_generated")
-            gcs_stored += db.dget(e_id, "stored_in_gcloud")
-            retrieved += db.dget(e_id, "retrieved_results")
-        except:
-            pass
-    # Return results dictionary
-    results = {"run": str(run), "done": str(done), "aborted": str(aborted),
-               "sge": str(sge), "slurm": str(slurm), "gcp": str(gcp),
-               "local": str(local), "report_gen": str(report_gen),
-               "gcs_stored": str(gcs_stored),"retrieved": str(retrieved)}
-    return results
-
-
-def make_total_experiments() -> Align:
+def make_total_experiments(total_data) -> Align:
     """Some example content."""
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    total_data = get_total_experiments(db, all_experiment_ids)
-
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
@@ -258,7 +218,7 @@ def make_total_experiments() -> Align:
     table.add_column()
     table.add_row("[b yellow]Total", Spinner('dots', style="magenta"),
                   "[green]:heavy_check_mark:", "[red]:x:")
-    table.add_row(str(len(all_experiment_ids)), total_data["run"],
+    table.add_row(total_data["total"], total_data["run"],
                   total_data["done"], total_data["aborted"])
     table.add_row(Text.from_markup("[b yellow]SGE"),
                   Text.from_markup("[b yellow]Slurm"),
@@ -278,42 +238,14 @@ def make_total_experiments() -> Align:
     return Align.center(table)
 
 
-def get_last_experiment(db, last_experiment_id):
-    """ Get data from db to show in 'last_experiments' panel. """
-    # Return results dictionary
-    e_path = db.dget(last_experiment_id, "exp_retrieval_path")
-    meta_args = db.dget(last_experiment_id, "meta_job_args")
-    job_spec_args = db.dget(last_experiment_id, "job_spec_args")
-    e_type = meta_args["job_type"]
-    e_dir = meta_args["experiment_dir"]
-    e_script = meta_args["base_train_fname"]
-    e_config = os.path.split(meta_args["base_train_config"])[1]
-    results = {"e_dir": e_dir,
-               "e_type": e_type,
-               "e_script": e_script,
-               "e_config": e_config,
-               "report_gen": meta_args["report_generation"]}
-
-    # Add additional data based on the experiment type
-    if e_type == "hyperparameter-search":
-        results["search_type"] = job_spec_args["search_type"]
-        results["eval_metrics"] = job_spec_args["eval_metrics"]
-        results["params_to_search"] = job_spec_args["params_to_search"]
-    elif e_type == "multiple-experiments":
-        results["config_fnames"] = job_spec_args["config_fnames"]
-    return results
-
-
-def make_last_experiment() -> Align:
+def make_last_experiment(last_data) -> Align:
     """Some example content."""
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    last_data = get_last_experiment(db, all_experiment_ids[-1])
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
     table.add_column()
     table.add_row(Text.from_markup("[b yellow]E-ID"),
-                  str(last_experiment_id),)
+                  last_data["e_id"],)
     table.add_row(Text.from_markup("[b yellow]Type"),
                   last_data["e_type"],)
     table.add_row(Text.from_markup("[b yellow]Dir."),
@@ -365,72 +297,8 @@ def make_last_experiment() -> Align:
     return Align.center(table)
 
 
-def get_time_experiment(db, last_experiment_id):
-    """ Get data from db to show in 'time_experiment' panel. """
-    meta_args = db.dget(last_experiment_id, "meta_job_args")
-    job_spec_args = db.dget(last_experiment_id, "job_spec_args")
-    single_job_args = db.dget(last_experiment_id, "single_job_args")
-
-    if meta_args["job_type"] == "hyperparameter-search":
-        total_jobs = (job_spec_args["num_search_batches"]
-                      * job_spec_args["num_iter_per_batch"]
-                      * job_spec_args["num_evals_per_iter"])
-        total_batches = job_spec_args["num_search_batches"]
-        jobs_per_batch = (job_spec_args["num_iter_per_batch"]
-                          * job_spec_args["num_evals_per_iter"])
-    elif meta_args["job_type"] == "multiple-experiments":
-        total_jobs = (len(job_spec_args["config_fnames"])*
-                      job_spec_args["num_seeds"])
-        total_batches = 1
-        jobs_per_batch = "-"
-    else:
-        total_jobs = 1
-        total_batches = 1
-        jobs_per_batch = "-"
-
-    start_time = db.dget(last_experiment_id, "start_time")
-
-    if "time_per_job" in single_job_args.keys():
-        time_per_batch = single_job_args["time_per_job"]
-        days, hours, minutes = time_per_batch.split(":")
-        hours_add, tot_mins = divmod(total_batches * int(minutes), 60)
-        days_add, tot_hours = divmod(total_batches * int(hours)+hours_add, 24)
-        tot_days = total_batches * int(days) + days_add
-        tot_days, tot_hours, tot_mins = (str(tot_days), str(tot_hours),
-                                         str(tot_mins))
-        if len(tot_days) < 2: tot_days = "0" + tot_days
-        if len(tot_hours) < 2: tot_hours = "0" + tot_hours
-        if len(tot_mins) < 2: tot_mins = "0" + tot_mins
-        est_duration = tot_days + ":" + tot_hours + ":" + tot_mins
-
-        # Check if last experiment has already terminated!
-        try:
-            stop_time = db.dget(last_experiment_id, "stop_time")
-        except:
-            start_date = dt.datetime.strptime(start_time, "%m/%d/%Y %H:%M:%S")
-            end_date = start_date + dt.timedelta(days=int(tot_days),
-                                                 hours=int(tot_hours),
-                                                 minutes=int(tot_mins))
-            stop_time = end_date.strftime("%m/%d/%Y %H:%M:%S")
-    else:
-        time_per_batch = "-"
-        est_stop_time = "-"
-        est_duration = "-"
-
-    results = {"total_jobs": total_jobs,
-               "total_batches": total_batches,
-               "jobs_per_batch": jobs_per_batch,
-               "time_per_batch": time_per_batch,
-               "start_time": start_time,
-               "stop_time": stop_time,
-               "est_duration": est_duration}
-    return results
-
-
-def make_est_completion() -> Align:
+def make_est_completion(time_data) -> Align:
     """Some example content."""
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    time_data = get_time_experiment(db, all_experiment_ids[-1])
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
@@ -488,7 +356,7 @@ def make_help_commands() -> Align:
     return table
 
 
-def make_cpu_util_plot() -> Align:
+def make_cpu_util_plot(cores, cores_util) -> Align:
     """ Plot curve displaying a CPU usage times series for the cluster. """
     x = np.linspace(0, 2 * np.pi, 10)
     y = np.sin(x)
@@ -501,7 +369,7 @@ def make_cpu_util_plot() -> Align:
     return Align.center(message)
 
 
-def make_memory_util_plot() -> Align:
+def make_memory_util_plot(mem, mem_util) -> Align:
     """ Plot curve displaying a memory usage times series for the cluster. """
     x = np.linspace(0, 2 * np.pi, 10)
     y = np.cos(x)
@@ -515,13 +383,25 @@ def make_memory_util_plot() -> Align:
     return Align.center(message)
 
 
-def update_dashboard(layout):
+def update_dashboard(layout, resource):
     """ Helper function that fills dashboard with life!"""
+    # Get newest data depending on resourse!
+    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
+    if resource == "sge-cluster":
+        user_data = get_user_sge_data()
+        host_data = get_host_sge_data()
+        util_data = get_utilisation_sge_data()
+    total_data = get_total_experiments(db, all_experiment_ids)
+    last_data = get_last_experiment(db, all_experiment_ids[-1])
+    time_data = get_time_experiment(db, all_experiment_ids[-1])
+
     # Fill the left-main with life!
-    layout["l-box1"].update(Panel(make_user_jobs(), border_style="red",
-                                title="Scheduled Jobs by User",))
-    layout["l-box2"].update(Panel(make_node_jobs(), border_style="red",
-                                title="Running Jobs by Node",))
+    layout["l-box1"].update(Panel(make_user_jobs(user_data),
+                                  border_style="red",
+                                  title="Scheduled Jobs by User",))
+    layout["l-box2"].update(Panel(make_node_jobs(host_data),
+                                  border_style="red",
+                                  title="Running Jobs by Node",))
 
     # Fill the center-main with life!
     layout["center"].update(Panel(make_protocol(),
@@ -529,21 +409,23 @@ def update_dashboard(layout):
                                  title="Experiment Protocol Summary",))
 
     # Fill the right-main with life!
-    layout["r-box1"].update(Panel(make_total_experiments(),
+    layout["r-box1"].update(Panel(make_total_experiments(total_data),
                                   border_style="yellow",
                             title="Total Number of Experiment Runs",))
-    layout["r-box2"].update(Panel(make_last_experiment(),
+    layout["r-box2"].update(Panel(make_last_experiment(last_data),
                                   border_style="yellow",
                             title="Last Experiment Configuration",))
-    layout["r-box3"].update(Panel(make_est_completion(),
+    layout["r-box3"].update(Panel(make_est_completion(time_data),
                                   border_style="yellow",
                     title="Est. Experiment Completion Time",))
 
     # Fill the footer with life!
-    layout["f-box1"].update(Panel(make_cpu_util_plot(),
+    layout["f-box1"].update(Panel(make_cpu_util_plot(util_data["cores"],
+                                                     util_data["cores_util"]),
                                   title="Total CPU Utilisation",
                                   border_style="red"),)
-    layout["f-box2"].update(Panel(make_memory_util_plot(),
+    layout["f-box2"].update(Panel(make_memory_util_plot(util_data["mem"],
+                                                        util_data["mem_util"]),
                                   title="Total Memory Utilisation",
                                   border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),
@@ -552,7 +434,11 @@ def update_dashboard(layout):
     return layout
 
 
-def monitor_sge_cluster():
+def cluster_dashboard():
+    """ Initialize and update rich dashboard with cluster data. """
+    # Get host resource [local, sge-cluster, slurm-cluster]
+    resource = determine_resource()
+
     if cc.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
@@ -567,14 +453,14 @@ def monitor_sge_cluster():
     layout = make_layout()
     # Fill the header with life!
     layout["header"].update(Header())
-    layout = update_dashboard(layout)
+    layout = update_dashboard(layout, resource)
 
     # Start timer for GCS pulling of protocol db
     start_t = time.time()
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
-            layout = update_dashboard(layout)
+            layout = update_dashboard(layout, resource)
             # Every 10 minutes pull the newest DB from GCS
             if time.time() - start_t > 600:
                 if cc.general.use_gcloud_protocol_sync:

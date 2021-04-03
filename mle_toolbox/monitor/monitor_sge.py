@@ -130,4 +130,7 @@ def get_utilisation_sge_data():
         all_cores_util.append(float(core_util) * float(cores))
         all_mem.append(float(mem[:-1]))
         all_mem_util.append(float(mem_util[:-1]))
-    return sum(all_cores), sum(all_cores_util), sum(all_mem), sum(all_mem_util)
+    return {"cores": sum(all_cores),
+            "cores_util": sum(all_cores_util),
+            "mem": sum(all_mem),
+            "mem_util": sum(all_mem_util)}
