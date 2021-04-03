@@ -35,6 +35,12 @@ TODOS:
 - Link Author @RobertTLange to twitter account
 """
 
+def load_mle_toolbox_config():
+    """ Load cluster config from the .toml file. See docs for more info. """
+    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                  _dynamic=False)
+
+resource = "sge"
 
 cc = load_mle_toolbox_config()
 console = Console()
@@ -383,7 +389,7 @@ def make_memory_util_plot(mem, mem_util) -> Align:
     return Align.center(message)
 
 
-def update_dashboard(layout, resource):
+def update_dashboard(layout, resource, mem_hist, cpu_hist):
     """ Helper function that fills dashboard with life!"""
     # Get newest data depending on resourse!
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -422,23 +428,24 @@ def update_dashboard(layout, resource):
     # Fill the footer with life!
     layout["f-box1"].update(Panel(make_cpu_util_plot(util_data["cores"],
                                                      util_data["cores_util"]),
-                                  title="Total CPU Utilisation",
-                                  border_style="red"),)
+                    title=f"CPU Utilisation - Total: {int(util_data['cores'])}",
+                    border_style="red"),)
     layout["f-box2"].update(Panel(make_memory_util_plot(util_data["mem"],
                                                         util_data["mem_util"]),
-                                  title="Total Memory Utilisation",
-                                  border_style="red"))
+                    title=f"Memory Utilisation - Total: {int(util_data['mem'])}",
+                    border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),
                                   border_style="white",
                 title="[b white]Help: Core MLE-Toolbox CLI Commands",))
-    return layout
+    return layout, mem_hist, cpu_hist
 
 
 def cluster_dashboard():
     """ Initialize and update rich dashboard with cluster data. """
     # Get host resource [local, sge-cluster, slurm-cluster]
     resource = determine_resource()
-
+    mem_hist = {"utilization": []}
+    cpu_hist = {"utilization": []}
     if cc.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
@@ -453,14 +460,16 @@ def cluster_dashboard():
     layout = make_layout()
     # Fill the header with life!
     layout["header"].update(Header())
-    layout = update_dashboard(layout, resource)
+    layout, mem_hist, cpu_hist = update_dashboard(layout, resource,
+                                                  mem_hist, cpu_hist)
 
     # Start timer for GCS pulling of protocol db
     start_t = time.time()
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
-            layout = update_dashboard(layout, resource)
+            layout, mem_hist, cpu_hist = update_dashboard(layout, resource,
+                                                          mem_hist, cpu_hist)
             # Every 10 minutes pull the newest DB from GCS
             if time.time() - start_t > 600:
                 if cc.general.use_gcloud_protocol_sync:
