@@ -27,7 +27,6 @@ TODOS:
 - Make qstat calls a lot more efficient -> Faster at startup
 - Get all CPU slots occupied, memory used, GPU usage? -> ask Dom
 - Figure out how to store data in time series plots -> Moving average
-- Make sure that reloading works by starting a new experiment
 - Add support for slurm, local, gcp!
 - Add documentation/function descriptions
 - Link Author @RobertTLange to twitter account
@@ -488,9 +487,9 @@ def make_help_commands() -> Align:
     table.box = box.SIMPLE_HEAD
     return table
 
-# "[u blue link=https://github.com/sponsors/willmcgugan]https://github.com/sponsors/willmcgugan",
 
 def make_cpu_util_plot() -> Align:
+    """ Plot curve displaying a CPU usage times series for the cluster. """
     x = np.linspace(0, 2 * np.pi, 10)
     y = np.sin(x)
     fig = tpl.figure()
@@ -503,6 +502,7 @@ def make_cpu_util_plot() -> Align:
 
 
 def make_memory_util_plot() -> Align:
+    """ Plot curve displaying a memory usage times series for the cluster. """
     x = np.linspace(0, 2 * np.pi, 10)
     y = np.cos(x)
 
@@ -522,10 +522,12 @@ def update_dashboard(layout):
                                 title="Scheduled Jobs by User",))
     layout["l-box2"].update(Panel(make_node_jobs(), border_style="red",
                                 title="Running Jobs by Node",))
+
     # Fill the center-main with life!
     layout["center"].update(Panel(make_protocol(),
                                   border_style="bright_blue",
                                  title="Experiment Protocol Summary",))
+
     # Fill the right-main with life!
     layout["r-box1"].update(Panel(make_total_experiments(),
                                   border_style="yellow",
@@ -536,6 +538,7 @@ def update_dashboard(layout):
     layout["r-box3"].update(Panel(make_est_completion(),
                                   border_style="yellow",
                     title="Est. Experiment Completion Time",))
+
     # Fill the footer with life!
     layout["f-box1"].update(Panel(make_cpu_util_plot(),
                                   title="Total CPU Utilisation",

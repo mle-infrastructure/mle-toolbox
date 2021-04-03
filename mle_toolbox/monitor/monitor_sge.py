@@ -4,7 +4,7 @@ import subprocess as sp
 import numpy as np
 from colorclass import Color
 from terminaltables import SingleTable
-from ..utils import load_mle_toolbox_config
+from mle_toolbox.utils import load_mle_toolbox_config
 
 cc = load_mle_toolbox_config()
 
@@ -111,35 +111,23 @@ def get_host_sge_data():
     return host_data
 
 
-def monitor_sge_cluster():
-    """ Get the resource usage/availability on SunGridEngine cluster. """
-    cc = load_mle_toolbox_config()
-    while True:
-        #----------------------------------------------------------------------#
-        # Get all users & check if they have running jobs
-        #----------------------------------------------------------------------#
-        table_data = [
-            [Color('{autored}USER{/autored}'), Color('{autocyan}ALL{/autocyan}'),
-             Color('{autogreen}RUNNING{/autogreen}'), Color('{autoyellow}QLOGIN{/autoyellow}')]
-        ]
-        time_t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        table_instance = SingleTable(table_data, 'SGE Cluster: {}'.format(time_t))
-        table_instance.inner_heading_row_border = False
-        table_instance.inner_row_border = True
-        table_instance.justify_columns = {0: 'center', 1: 'center', 2: 'center'}
+def get_utilisation_sge_data():
+    """ Get memory and CPU utilisation for specific SGE queue. """
+    all_hosts = sp.check_output(['qconf', '-ss']).split(b'\n')
+    all_hosts = [u.decode() for u in all_hosts]
+    # Filter list of hosts by node 'stem'
+    all_hosts = list(filter(lambda k: cc.sge.info.node_reg_exp[0]
+                            in k, all_hosts))
 
-        user_data = get_user_sge_data()
-        for d in user_data:
-            table_instance.table_data.append(d)
-
-        #----------------------------------------------------------------------#
-        # Get all hosts & check if they have running jobs on them
-        #----------------------------------------------------------------------#
-        table_instance.table_data.append([Color('{autored}NODES{/autored}'),
-                                          "-----", "-----", "-----"])
-        host_data = get_host_sge_data()
-        for d in host_data:
-            table_instance.table_data.append(d)
-
-        sys.stdout.write("\r" + table_instance.table)
-        sys.stdout.flush()
+    all_cores, all_cores_util, all_mem, all_mem_util = [], [], [], []
+    # Loop over all hosts and collect the utilisation data from the
+    # cmd line qhost output
+    for host in all_hosts:
+        out = sp.check_output(['qhost', '-h', host]).split(b'\n')
+        out = [u.decode() for u in out][3].split()
+        cores, core_util, mem, mem_util = out[2], out[6], out[7], out[8]
+        all_cores.append(float(cores))
+        all_cores_util.append(float(core_util) * float(cores))
+        all_mem.append(float(mem[:-1]))
+        all_mem_util.append(float(mem_util[:-1]))
+    return sum(all_cores), sum(all_cores_util), sum(all_mem), sum(all_mem_util)
