@@ -101,9 +101,10 @@ def construct_markdown_table(data_dict, exclude_keys=[],
         if k not in exclude_keys:
             current_row["Param C" + str(entry_counter+1)] = "`" + str(k) + "`"
             if type(value) == list:
-                v = ', '.join(value)
+                v_temp = [str(x) for x in value]
+                v = ', '.join(v_temp)
             else:
-                v = value
+                v = str(value)
             current_row["Value C" + str(entry_counter+1)] = "`" + str(v) + "`"
             entry_counter += 1
 
