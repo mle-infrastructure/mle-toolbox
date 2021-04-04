@@ -1,8 +1,8 @@
 import argparse
 from datetime import datetime
-from .report import ReportGenerator
-from .src.prepare_experiment import ask_for_experiment_id
-from .protocol import load_local_protocol_db
+from ..report import ReportGenerator
+from ..launch.prepare_experiment import ask_for_experiment_id
+from ..protocol import load_local_protocol_db
 
 
 def get_retrieve_args():

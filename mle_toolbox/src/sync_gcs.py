@@ -1,8 +1,9 @@
 from ..utils import print_framed
 from ..protocol import load_local_protocol_db
-from .gcloud_transfer import (get_gcloud_db, send_gcloud_db,
-                              get_gcloud_zip_experiment,
-                              delete_gcs_directory)
+from ..remote.gcloud_transfer import (get_gcloud_db,
+                                      send_gcloud_db,
+                                      get_gcloud_zip_experiment,
+                                      delete_gcs_directory)
 
 
 def main():

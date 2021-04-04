@@ -2,11 +2,11 @@ import os
 import argparse
 from datetime import datetime
 
-from .utils import print_framed
-from .remote.ssh_transfer import SSH_Manager
-from .remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
-from .src.prepare_experiment import ask_for_experiment_id
-from .protocol import load_local_protocol_db
+from ..utils import print_framed
+from ..remote.ssh_transfer import SSH_Manager
+from ..remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
+from ..launch.prepare_experiment import ask_for_experiment_id
+from ..protocol import load_local_protocol_db
 
 
 # Get experiment id to retrieve from cmd

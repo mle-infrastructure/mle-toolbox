@@ -135,4 +135,8 @@ def get_utilisation_sge_data():
             "cores_util": sum(all_cores_util),
             "mem": sum(all_mem),
             "mem_util": sum(all_mem_util),
-            "timestamp": datetime.now().strftime("%m/%d %H:%M")}
+            "timestamp": datetime.now().strftime("%m/%d %H:%M:%S")}
+
+
+if __name__ == "__main__":
+    print(get_utilisation_sge_data())

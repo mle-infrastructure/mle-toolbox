@@ -5,7 +5,7 @@ import markdown2
 from dotmap import DotMap
 from .markdown_generator import MarkdownGenerator
 from .figure_generator import FigureGenerator
-from ..src.prepare_experiment import prepare_logger
+from ..launch.prepare_experiment import prepare_logger
 
 
 class ReportGenerator():

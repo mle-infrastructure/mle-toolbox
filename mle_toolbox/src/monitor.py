@@ -1,5 +1,5 @@
-from .utils import determine_resource
-from .monitor import cluster_dashboard, monitor_slurm_cluster
+from ..utils import determine_resource
+from ..monitor import cluster_dashboard, monitor_slurm_cluster
 
 
 def main():
