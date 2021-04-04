@@ -33,7 +33,7 @@ def get_retrieve_args():
     return parser.parse_args()
 
 
-def main():
+def retrieve():
     """ Copy over experiment results folder from cluster. """
     # Get inputs from commandline
     cmd_args = get_retrieve_args()

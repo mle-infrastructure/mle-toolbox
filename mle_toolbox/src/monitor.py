@@ -2,7 +2,7 @@ from ..utils import determine_resource
 from ..monitor import cluster_dashboard, monitor_slurm_cluster
 
 
-def main():
+def monitor():
     """ Monitor the ressources & running jobs on your cluster. """
     resource = determine_resource()
     if resource == "sge-cluster":

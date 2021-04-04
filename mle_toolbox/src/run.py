@@ -31,7 +31,7 @@ from ..launch import (run_single_experiment,
                       run_post_processing)
 
 
-def main():
+def run():
     """ Main function of toolbox - Execute different types of experiments. """
     # 1. Load in args for MLE + setup the experiment
     cmd_args = get_mle_args()

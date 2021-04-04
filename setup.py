@@ -50,11 +50,11 @@ setup(
      install_requires=requires,
      entry_points={
         'console_scripts': [
-            'run-experiment=mle_toolbox.src.run:main',
-            'retrieve-experiment=mle_toolbox.src.retrieve:main',
-            'monitor-cluster=mle_toolbox.src.monitor:main',
-            'report-experiment=mle_toolbox.src.report:main',
-            'sync-gcs-storage=mle_toolbox.src.remote.sync_gcs:main'
+            'run-experiment=mle_toolbox.src.run:run',
+            'retrieve-experiment=mle_toolbox.src.retrieve:retrieve',
+            'monitor-cluster=mle_toolbox.src.monitor:monitor',
+            'report-experiment=mle_toolbox.src.report:report',
+            'sync-gcs-storage=mle_toolbox.src.remote.sync_gcs:sync_gcs'
         ]
     }
  )

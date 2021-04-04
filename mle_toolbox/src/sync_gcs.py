@@ -6,7 +6,7 @@ from ..remote.gcloud_transfer import (get_gcloud_db,
                                       delete_gcs_directory)
 
 
-def main():
+def sync_gcs():
     """ Download experiments in GCS bucket onto drive + delete remote files. """
     # Download the current state of the protocol db and load it in
     get_gcloud_db()

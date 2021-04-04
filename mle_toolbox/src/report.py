@@ -14,7 +14,7 @@ def get_retrieve_args():
     return parser.parse_args()
 
 
-def main():
+def report():
     """ Interface for user-defined generation of experiment report. """
     # 0. Get command line input for experiment id
     experiment_id = get_retrieve_args().experiment_id
