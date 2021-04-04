@@ -5,11 +5,16 @@ import numpy as np
 from datetime import datetime
 
 # Import of general tools (loading, etc.)
-from .utils import (load_mle_toolbox_config, load_yaml_config,
-                    determine_resource, print_framed)
+from .utils import (load_mle_toolbox_config,
+                    load_yaml_config,
+                    determine_resource,
+                    print_framed)
 # Import of helpers for protocoling experiments
-from .protocol import (protocol_summary, update_protocol_var,
-                       delete_protocol_from_input, protocol_experiment)
+from .protocol import (protocol_summary,
+                       update_protocol_var,
+                       delete_protocol_from_input,
+                       abort_protocol_from_input,
+                       protocol_experiment)
 
 # Import of setup tools for experiments (log, config, etc.)
 from .src.prepare_experiment import (welcome_to_mle_toolbox, get_mle_args,
@@ -33,6 +38,7 @@ def main():
     else:
         print_framed("EXPERIMENT STARTED")
 
+    # Load experiment yaml config, toolbox variables & determine exec resource
     job_config = load_yaml_config(cmd_args)
     cc = load_mle_toolbox_config()
     resource = determine_resource()
@@ -81,7 +87,7 @@ def main():
                 return
     logger.info(f"Run on resource: {resource}")
 
-    # 4. Check the job config to comply with the necessary ingredients
+    # 4. Check that job config to complies with/includes necessary ingredients
     check_job_config(job_config)
 
     # 5. Protocol experiment if desired (can also only be locally)!
@@ -98,6 +104,7 @@ def main():
         # Only ask to delete if no purpose given!
         if cmd_args.purpose is None:
             delete_protocol_from_input()
+            abort_protocol_from_input()
         new_experiment_id = protocol_experiment(job_config, cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
