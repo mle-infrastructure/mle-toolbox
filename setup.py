@@ -64,6 +64,7 @@ setup(
      entry_points={
         'console_scripts': [
             'mle=mle_toolbox.toolbox:main',
+            'mle-toolbox=mle_toolbox.toolbox:main',
         ]
     }
  )

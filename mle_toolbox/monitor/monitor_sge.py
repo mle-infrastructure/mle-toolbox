@@ -7,6 +7,7 @@ from colorclass import Color
 from terminaltables import SingleTable
 from mle_toolbox.utils import load_mle_toolbox_config
 
+
 cc = load_mle_toolbox_config()
 
 

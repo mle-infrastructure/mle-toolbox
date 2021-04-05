@@ -1,5 +1,3 @@
-import datetime as dt
-import time
 from rich import box
 from rich.align import Align
 from rich.console import Console, RenderGroup
@@ -11,14 +9,15 @@ from rich.text import Text
 from rich.live import Live
 from rich.spinner import Spinner
 
-import os
-from dotmap import DotMap
+import time
+import datetime as dt
 import numpy as np
-import toml
 import termplotlib as tpl
 
-from mle_toolbox.utils import load_mle_toolbox_config, determine_resource
-from mle_toolbox.protocol import protocol_summary, load_local_protocol_db
+from mle_toolbox.utils import (load_mle_toolbox_config,
+                               determine_resource)
+from mle_toolbox.protocol import (protocol_summary,
+                                  load_local_protocol_db)
 from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
                                              get_host_sge_data,
                                              get_utilisation_sge_data)
@@ -29,18 +28,10 @@ from mle_toolbox.monitor.monitor_db import (get_total_experiments,
 """
 TODOS:
 - Make qstat calls a lot more efficient -> Faster at startup
-- Figure out how to store data in time series plots -> Moving average
 - Add support for slurm, local + gcp!
 - Add documentation/function descriptions
 - Link Author @RobertTLange to twitter account
 """
-
-def load_mle_toolbox_config():
-    """ Load cluster config from the .toml file. See docs for more info. """
-    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
-                  _dynamic=False)
-
-resource = "sge"
 
 cc = load_mle_toolbox_config()
 console = Console()
@@ -104,6 +95,12 @@ class Header:
             # TODO: Figure out why link won't work if we use text != url
             #[u white link=https://twitter.com/RobertTLange]
         )
+        resource = determine_resource()
+        if resource == "sge-cluster":
+            res = "sge"
+        elif resource == "slurm-cluster":
+            res = "slurm"
+
         grid.add_row(
             "\u2022 GCS Sync Results: [green]:heavy_check_mark:" if
             cc.general.use_gcloud_results_storage
@@ -114,7 +111,7 @@ class Header:
         grid.add_row(
             f"\u2022 DB Path: {cc.general.local_protocol_fname}",
             Header.welcome_ascii[3],
-            f"User: {cc[resource].credentials.user_name}",
+            f"User: {cc[res].credentials.user_name}",
         )
         grid.add_row(
             f"\u2022 Env Name: {cc.general.remote_env_name}",
@@ -338,24 +335,29 @@ def make_help_commands() -> Align:
     table.add_column("Options", )
     table.add_column("Function", )
     table.add_row(
-        "run-experiment",
-        "[b blue]--no_protocol, --no_welcome, --resource_to_run, --purpose",
-        "[b red] Start up from .yaml config",
+        "mle run",
+        "[b blue]-np, -nw, -resource, -purpose",
+        "[b red] Start experiment with .yaml config",
     )
     table.add_row(
-        "retrieve-experiment",
+        "mle retrieve",
         "[b blue]-e_id, -fig_dir, -exp_dir",
-        "[b red] Retrieve from remote GCS",
+        "[b red] Retrieve results from cluster/GCS",
     )
     table.add_row(
-        "report-experiment",
+        "mle report",
         "[b blue]--experiment_id",
-        "[b red] Generate .md, .html report",
+        "[b red] Generate results .md, .html report",
     )
     table.add_row(
-        "monitor-cluster",
+        "mle monitor",
         "[b blue]None",
-        "[b red] Monitor resource usage",
+        "[b red] Monitor resource usage on cluster",
+    )
+    table.add_row(
+        "mle init",
+        "[b blue]None",
+        "[b red] Initialize credentials/default setup",
     )
     #table.row_styles = ["none", "dim"]
     table.border_style = "white"
