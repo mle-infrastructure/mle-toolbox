@@ -3,7 +3,7 @@
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 
-ML researchers need to coordinate different types of experiments on separate remote resources. The Machine Learning Experiment (MLE)-Toolbox is designed to facilitate the workflow by providing a simple interface, standardized logging, many common Machine Learning experiment types (multi-seed/-configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters as well as [Google Cloud compute instances](https://cloud.google.com/compute/docs/instances?hl=en). The results are archived (locally/GCS bucket) and can easily retrieved or reported in `.md`/`.html` file.
+ML researchers need to coordinate different types of experiments on separate remote resources. The Machine Learning Experiment (MLE)-Toolbox is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters as well as [Google Cloud compute instances](https://cloud.google.com/compute/docs/instances?hl=en). The results are archived (locally/GCS bucket) and can easily retrieved or reported in `.md`/`.html` file.
 
 ![MLE_demo](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/mle-video.gif?raw=true)
 

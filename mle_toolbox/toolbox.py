@@ -9,15 +9,18 @@ def main():
     - `retrieve`: Retrieve a completed experiment from a cluster/GCS bucket.
     - `report`: Generate a set of reports (.html/.md) from experiment results.
     - `monitor`: Monitor a compute resource and view experiment protocol.
-    - `gcs-sync`: Sync all results from Google Cloud Storage
-    - `initialize`: TBC (setup the config .toml file with credentials)
+    - `sync-gcs`: Sync all new results from Google Cloud Storage.
+    - `init`: Setup the toolbox .toml config with credentials/defaults.
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
-    # Build the subparsers for the individual subcommands
+    # Build subparsers for individual subcommands
     parser_run = run_build_subparser(subparsers)
     parser_retrieve = retrieve_build_subparser(subparsers)
     parser_report = report_build_subparser(subparsers)
+    parser_monitor = monitor_build_subparser(subparsers)
+    parser_sync_gcs = sync_gcs_build_subparser(subparsers)
+    parser_init = init_build_subparser(subparsers)
 
     args = parser.parse_args()
     if args.command == "run":
@@ -113,9 +116,25 @@ def report_build_subparser(subparsers):
     return parser_report
 
 
+def monitor_build_subparser(subparsers):
+    """ Build subparser arguments for `init` subcommand. """
+    parser_monitor = subparsers.add_parser("monitor",
+        help="Monitor a compute resource and view experiment protocol.",)
+    return parser_monitor
+
+
+def sync_gcs_build_subparser(subparsers):
+    """ Build subparser arguments for `init` subcommand. """
+    parser_init = subparsers.add_parser("sync-gcs",
+        help="Sync all new results from Google Cloud Storage.",)
+    return parser_init
+
+
 def init_build_subparser(subparsers):
     """ Build subparser arguments for `init` subcommand. """
-    raise NotImplementedError
+    parser_init = subparsers.add_parser("init",
+        help="Setup the toolbox .toml config with credentials/defaults.",)
+    return parser_init
 
 
 if __name__ == "__main__":
