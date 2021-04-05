@@ -1,23 +1,12 @@
-import argparse
-from datetime import datetime
-from ..report import ReportGenerator
-from ..launch.prepare_experiment import ask_for_experiment_id
-from ..protocol import load_local_protocol_db
+from mle_toolbox.report import ReportGenerator
+from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
+from mle_toolbox.protocol import load_local_protocol_db
 
 
-def get_retrieve_args():
-    """ Get inputs from cmd line """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-e_id', '--experiment_id', type=str,
-                        default="no-id-given",
-                        help ='Experiment ID')
-    return parser.parse_args()
-
-
-def report():
+def report(cmd_args):
     """ Interface for user-defined generation of experiment report. """
     # 0. Get command line input for experiment id
-    experiment_id = get_retrieve_args().experiment_id
+    experiment_id = cmd_args.experiment_id
     # 1. Load db and show recent experiments + let user choose an e_id.
     if experiment_id == "no-id-given":
         experiment_id, _, _, _ = ask_for_experiment_id()
