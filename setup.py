@@ -63,7 +63,7 @@ setup(
      install_requires=requires,
      entry_points={
         'console_scripts': [
-            'mle-toolbox=mle_toolbox.toolbox:main',
+            'mle=mle_toolbox.toolbox:main',
         ]
     }
  )
