@@ -79,31 +79,40 @@ def initialize():
 
     # Go through the base config and update entries - if user wants to
     base_keys = list(mle_config.keys())
+    print(base_keys)
     for k in base_keys:
         update = ask_whether_to_update(k)
         # Update value if user wants to do so
         if update and type(mle_config[k]) == DotMap:
             sub_keys = list(mle_config[k].keys())
+            print(sub_keys)
             for sub_k in sub_keys:
                 update_sub = ask_whether_to_update(sub_k)
                 if update and type(mle_config[k][sub_k]) == DotMap:
                     ss_keys = list(mle_config[k][sub_k].keys())
+                    print(ss_keys)
                     for ss_k in ss_keys:
                         update_ss = ask_whether_to_update(ss_k)
                         if update_ss:
                             update_val = ask_how_to_update()
+                            mle_config[k][sub_k][ss_k] = update_val
                         else:
                             pass
-                elif update and type(mle_config[k][sub_k]) == str:
+                elif update and type(mle_config[k][sub_k]) in [str, int, bool]:
                     update_val = ask_how_to_update()
+                    mle_config[k][sub_k] = update_val
                 else:
                     pass
+
         # Directly update value if shallow
         elif update and type(mle_config[k]) == str:
             update_val = ask_how_to_update()
+            mle_config[k] = update_val
         else:
             pass
+
     # Store the updated config file in ~/mle_config.toml
+    store_config_toml(toml_dict=os.path.expanduser("~/mle_config_test.toml"))
     return
 
 
@@ -134,12 +143,6 @@ def ask_how_to_update():
     """ Ask how variable should be updated - get string/int. """
     print("ask for update")
     return
-
-
-def update_toml_value(var, value):
-    """ Ask if specific variable should be updated - if yes, do so. """
-    with open(toml_fname, 'w') as f:
-        new_toml_string = toml.dump(toml_dict, f)
 
 
 def print_mle_config(mle_config):

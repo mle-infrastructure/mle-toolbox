@@ -1,5 +1,5 @@
 **v0.2.6**
-- Add `mle init` to configure template toml
+- Add `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
 
 **v0.2.5**
 - Raw github links for figures in readme so they are rendered in PyPi.
