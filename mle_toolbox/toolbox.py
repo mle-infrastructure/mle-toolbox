@@ -1,8 +1,5 @@
 import argparse
-from src import run, retrieve, report, monitor, sync_gcs #, initialize
-
-
-__version__ = "0.2.5"
+from .src import run, retrieve, report, monitor, sync_gcs #, initialize
 
 
 def main():
@@ -46,7 +43,6 @@ def run_build_subparser(subparsers):
         help="Run a new experiment on a resource available to you.",)
     # Basic run-experiment options
     parser_run.add_argument('config_fname', metavar='C', type=str,
-                            required=True,
                             default="experiment_config.yaml",
                             help ='Filename to load config yaml from')
     parser_run.add_argument('-d', '--debug', default=False,
@@ -109,7 +105,7 @@ def retrieve_build_subparser(subparsers):
 
 def report_build_subparser(subparsers):
     """ Build subparser arguments for `report` subcommand. """
-    parser_report = subparsers.add_parser("run",
+    parser_report = subparsers.add_parser("report",
         help="Generate set of reports (.html/.md) from experiment results.",)
     parser_report.add_argument('-e_id', '--experiment_id', type=str,
                                default="no-id-given",

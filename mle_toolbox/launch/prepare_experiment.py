@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 from datetime import datetime
+from .. import __version__
 from ..utils import load_mle_toolbox_config
 from ..protocol import protocol_summary, load_local_protocol_db
 from ..remote.gcloud_transfer import get_gcloud_db
