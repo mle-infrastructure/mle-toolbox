@@ -29,11 +29,10 @@ def retrieve(cmd_args):
         while True:
             # If no id given show last experiments & ask for input
             if experiment_id == "no-id-given" and retrieval_counter == 0:
-                experiment_id, db, all_experiment_ids, accessed_remote_db = ask_for_experiment_id()
+                experiment_id, db, all_e_ids, accessed_remote_db = ask_for_experiment_id()
                 if cmd_args.retrieve_local:
                     retrieve_single_experiment(db, experiment_id,
-                                               get_dir_or_fig,
-                                               all_experiment_ids)
+                                               get_dir_or_fig)
                 else:
                     if cmd_args.local_dir_name is None:
                         local_dir_name = input(time_t +
@@ -41,7 +40,7 @@ def retrieve(cmd_args):
                     else:
                         local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
-                                              all_experiment_ids,
+                                              all_e_ids,
                                               local_dir_name)
                 retrieval_counter += 1
             else:
@@ -50,8 +49,7 @@ def retrieve(cmd_args):
                     break
                 if cmd_args.retrieve_local:
                     retrieve_single_experiment(db, experiment_id,
-                                               get_dir_or_fig,
-                                               all_experiment_ids)
+                                               get_dir_or_fig)
                 else:
                     if cmd_args.local_dir_name is None:
                         local_dir_name = input(time_t +
@@ -59,13 +57,13 @@ def retrieve(cmd_args):
                     else:
                         local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
-                                              all_experiment_ids,
+                                              all_e_ids,
                                               local_dir_name)
                 retrieval_counter += 1
     else:
         list_of_new_e_ids = []
-        db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-        for e_id in all_experiment_ids:
+        db, all_e_ids, last_experiment_id = load_local_protocol_db()
+        for e_id in all_e_ids:
             completed = (db.dget(e_id, "job_status") == "completed")
             not_retrieved_yet = not db.dget(e_id, "retrieve_results")
             if completed and not_retrieved_yet:
@@ -79,8 +77,7 @@ def retrieve(cmd_args):
             # Pull either from remote machine or gcloud bucket
             if cmd_args.retrieve_local and not stored_in_gcloud:
                 retrieve_single_experiment(db, experiment_id,
-                                           get_dir_or_fig,
-                                           all_experiment_ids)
+                                           get_dir_or_fig)
             else:
                 if cmd_args.local_dir_name is None:
                     local_dir_name = input(time_t +
@@ -88,7 +85,7 @@ def retrieve(cmd_args):
                 else:
                     local_dir_name = cmd_args.local_dir_name
                 get_gcloud_zip_experiment(db, experiment_id,
-                                          all_experiment_ids)
+                                          all_e_ids)
             print_framed(f'COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}')
 
     if accessed_remote_db:
@@ -98,8 +95,7 @@ def retrieve(cmd_args):
 
 
 def retrieve_single_experiment(db, experiment_id: str,
-                               get_dir_or_fig: str,
-                               all_experiment_ids: list):
+                               get_dir_or_fig: str):
     # Try to retrieve experiment path from protocol db
     while True:
         if get_dir_or_fig == "exp-dir":

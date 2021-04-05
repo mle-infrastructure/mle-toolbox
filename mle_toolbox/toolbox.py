@@ -1,5 +1,5 @@
 import argparse
-from .src import run, retrieve, report, monitor, sync_gcs #, initialize
+from .src import run, retrieve, report, monitor, sync_gcs, initialize
 
 
 def main():
@@ -14,14 +14,17 @@ def main():
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
+
     # Build subparsers for individual subcommands
     parser_run = run_build_subparser(subparsers)
     parser_retrieve = retrieve_build_subparser(subparsers)
     parser_report = report_build_subparser(subparsers)
+    # Following subcommands don't have any options - but are 'helpful' :)
     parser_monitor = monitor_build_subparser(subparsers)
     parser_sync_gcs = sync_gcs_build_subparser(subparsers)
     parser_init = init_build_subparser(subparsers)
 
+    # Parse arguments and executed provided subcommand
     args = parser.parse_args()
     if args.command == "run":
         run(args)
@@ -34,7 +37,7 @@ def main():
     elif args.command == "sync-gcs":
         sync_gcs()
     elif args.command == "init":
-        raise NotImplementedError
+        initialize()
     else:
         parser.parse_args(["--help"])
     return
@@ -135,7 +138,3 @@ def init_build_subparser(subparsers):
     parser_init = subparsers.add_parser("init",
         help="Setup the toolbox .toml config with credentials/defaults.",)
     return parser_init
-
-
-if __name__ == "__main__":
-    main()

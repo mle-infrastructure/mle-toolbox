@@ -71,7 +71,7 @@ def set_random_seeds(seed_id: Union[int, None],
 def get_configs_ready(default_seed: Union[None, int] = None,
                       default_config_fname: str="configs/base_config.json",
                       default_experiment_dir: str="experiments/"):
-    """ Prepare the config files for the experiment run. """
+    """ Prepare job config files for experiment run (add seed id, etc.). """
     parser = argparse.ArgumentParser()
     # Standard inputs for all training runs
     parser.add_argument('-config', '--config_fname', action="store",
