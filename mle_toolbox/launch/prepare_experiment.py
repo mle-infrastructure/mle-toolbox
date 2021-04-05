@@ -1,14 +1,11 @@
 import os
 import sys
 import logging
-import argparse
 from datetime import datetime
+from .. import __version__
 from ..utils import load_mle_toolbox_config
 from ..protocol import protocol_summary, load_local_protocol_db
 from ..remote.gcloud_transfer import get_gcloud_db
-
-
-__version__ = "0.2.2"
 
 
 def welcome_to_mle_toolbox(verbose=False):
@@ -31,44 +28,6 @@ def welcome_to_mle_toolbox(verbose=False):
         print("  - single-experiment: Run a single configuration experiment.")
         print("  - multiple-experiments: Run multiple configs & random seeds.")
         print("  - hyperparameter-search: Run a hyperparameter search.")
-
-
-def get_mle_args():
-    """ Get config file path & other ingredients """
-    parser = argparse.ArgumentParser()
-    # Basic run-experiment options
-    parser.add_argument('config_fname', metavar='C', type=str,
-                        default="experiment_config.yaml",
-                        help ='Filename to load config yaml from')
-    parser.add_argument('-d', '--debug', default=False, action='store_true',
-                        help ='Run simulation in debug mode')
-    parser.add_argument('-p', '--purpose', default=None, nargs='+',
-                        help ='Purpose of the experiment to run')
-    parser.add_argument('-np', '--no_protocol', default=False,
-                        action='store_true',
-                        help ='Run simulation in without protocol recording')
-    parser.add_argument('-del', '--delete_after_upload', default=False,
-                        action='store_true',
-                        help ='Delete results after upload to GCloud.')
-    parser.add_argument('-nw', '--no_welcome', default=False,
-                        action='store_true',
-                        help ='Do not print welcome message.')
-
-    # Which resource to run on and whether to reconnect to running remote job
-    parser.add_argument('-resource', '--resource_to_run', default=None,
-                        help ='Resource to run experiment on '
-                        '{local, sge-cluster, slurm-cluster, gcp-cloud}.')
-    parser.add_argument('-reconnect', '--remote_reconnect', default=None,
-                        help ='Reconnect to experiment by str name.')
-
-    # Allow CLI to change base train fname/config .json/experiment dir
-    parser.add_argument('-train_fname', '--base_train_fname', default=None,
-                        help ='Python script to run exp on.')
-    parser.add_argument('-train_config', '--base_train_config', default=None,
-                        help ='Base config file to load and modify.')
-    parser.add_argument('-exp_dir', '--experiment_dir', default=None,
-                        help ='Experiment directory.')
-    return parser.parse_args()
 
 
 def prepare_logger(experiment_dir: str, debug_mode: bool=False):

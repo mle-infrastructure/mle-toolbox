@@ -98,7 +98,7 @@ class Header:
         grid.add_row(
             "\u2022 GCS Sync Protocol: [green]:heavy_check_mark:" if
             cc.general.use_gcloud_protocol_sync
-            else "\u2022 GCS Sync Protocol: [red]:x:",
+            else "\u2022 GCS Sync Protocol: [red]:heavy_multiplication_x:",
             Header.welcome_ascii[1],
             "Author: @RobertTLange :bird:",
             # TODO: Figure out why link won't work if we use text != url
@@ -107,7 +107,7 @@ class Header:
         grid.add_row(
             "\u2022 GCS Sync Results: [green]:heavy_check_mark:" if
             cc.general.use_gcloud_results_storage
-            else "\u2022 GCS Sync Results: [red]:x:",
+            else "\u2022 GCS Sync Results: [red]:heavy_multiplication_x:",
             Header.welcome_ascii[2],
             f"Resource: {resource}",
         )
@@ -173,17 +173,18 @@ def make_protocol() -> Table:
     df = protocol_summary(tail=29, verbose=False)
     table = Table(show_header=True, show_footer=False,
                   header_style="bold blue")
-    table.add_column(":construction:")
+    sta_str = "[green]:heavy_check_mark:[/green]/[red]:heavy_multiplication_x:"
+    table.add_column(sta_str, justify="center")
     table.add_column("E-ID")
     table.add_column("Date")
     table.add_column("Project")
     table.add_column("Purpose")
     table.add_column("Type")
-    table.add_column(":steam_locomotive:", justify="center")
+    table.add_column("[yellow]:arrow_forward:", justify="center")
     table.add_column("#Jobs", justify="center")
     table.add_column("#CPU", justify="center")
     table.add_column("#GPU", justify="center")
-    table.add_column(":seedling:", justify="center")
+    table.add_column("[yellow]:recycle:", justify="center")
     for index in reversed(df.index):
         row = df.iloc[index]
         if row["Resource"] == "sge-cluster":
@@ -200,7 +201,7 @@ def make_protocol() -> Table:
         elif row["Status"] == "completed":
             status = "[green]:heavy_check_mark:"
         else:
-            status = "[red]:x:"
+            status = "[red]:heavy_multiplication_x:"
         table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
                       row["Purpose"][:25], row["Type"],
                       resource, str(row["Jobs"]), str(row["CPUs"]),
@@ -223,7 +224,7 @@ def make_total_experiments(total_data) -> Align:
     table.add_column()
     table.add_column()
     table.add_row("[b yellow]Total", Spinner('dots', style="magenta"),
-                  "[green]:heavy_check_mark:", "[red]:x:")
+                  "[green]:heavy_check_mark:", "[red]:heavy_multiplication_x:")
     table.add_row(total_data["total"], total_data["run"],
                   total_data["done"], total_data["aborted"])
     table.add_row(Text.from_markup("[b yellow]SGE"),
@@ -369,7 +370,7 @@ def make_cpu_util_plot(cpu_hist) -> Align:
 
     fig = tpl.figure()
     fig.plot(x, y, xlabel="Time", width=40, height=10,
-             ylim=[-0.1, 1.1], label="% Util.")
+             ylim=[-0.1, 1.1])
     plot_str = fig.get_string()
     plot_str = plot_str[:-61] + "                   Time"
     message = Table.grid()
@@ -448,8 +449,7 @@ def update_dashboard(layout, resource, util_hist):
                            + f" | Start: {util_hist['timestamps'][0]}"),
                     border_style="red"),)
     layout["f-box2"].update(Panel(make_memory_util_plot(util_hist),
-                    title=(f"Mem - Total: {int(util_data['mem'])}G"
-                           + f" | Start: {util_hist['timestamps'][0]}"),
+                    title=(f"Mem - Total: {int(util_data['mem'])}G"),
                     border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),
                                   border_style="white",

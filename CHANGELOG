@@ -5,8 +5,14 @@
 - Fix GCS retrieval unzipping so that there are no redundant sub-directories
 - Make logging even better (different model types and top-k checkpointing)
 - Add sklearn SVM classifier + Haiku VAE example with .pkl model saving
-- Add rich dashboard for `monitor-cluster` :heart: (running on SGE grid)
+- Add rich dashboard for `monitor-cluster` :heart: (running only on SGE grid for now)
 - Major clean-up of `utils`. Rename things properly e.g.`hyper_log_to_df` -> `load_hyper_log` and add top-k selection next to variable fixing in `subselect_hyper_log`
+- Refactoring of core src commands and rebranding of core cmd line interface. You now call mle-toolbox commands via `mle <subcmd> <options>`. The toolbox has the following subcommands:
+    - `run`: Run a new experiment on a resource available to you.
+    - `retrieve`: Retrieve a completed experiment from a cluster/GCS bucket.
+    - `report`: Generate a set of reports (.html/.md) from experiment results.
+    - `monitor`: Monitor a compute resource and view experiment protocol.
+    - `gcs-sync`: Sync all results from Google Cloud Storage
 
 
 **v0.2.4**

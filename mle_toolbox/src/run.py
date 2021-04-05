@@ -5,34 +5,35 @@ import numpy as np
 from datetime import datetime
 
 # Import of general tools (loading, etc.)
-from .utils import (load_mle_toolbox_config,
-                    load_yaml_config,
-                    determine_resource,
-                    print_framed)
+from mle_toolbox.utils import (load_mle_toolbox_config,
+                               load_yaml_config,
+                               determine_resource,
+                               print_framed)
+
 # Import of helpers for protocoling experiments
-from .protocol import (protocol_summary,
-                       update_protocol_var,
-                       delete_protocol_from_input,
-                       abort_protocol_from_input,
-                       protocol_experiment)
+from mle_toolbox.protocol import (protocol_summary,
+                                  update_protocol_var,
+                                  delete_protocol_from_input,
+                                  abort_protocol_from_input,
+                                  protocol_experiment)
 
-# Import of setup tools for experiments (log, config, etc.)
-from .src.prepare_experiment import (welcome_to_mle_toolbox, get_mle_args,
-                                     prepare_logger, check_job_config)
 # Import of local-to-remote helpers (verify, rsync, exec)
-from .remote.ssh_execute import (ask_for_resource_to_run,
-                                 remote_connect_monitor_clean,
-                                 run_remote_experiment)
-# Import different experiment executers
-from .src import (run_single_experiment,
-                  run_multiple_experiments,
-                  run_post_processing)
+from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
+                                            remote_connect_monitor_clean,
+                                            run_remote_experiment)
+
+# Import different experiment executers & setup tools (log, config, etc.)
+from mle_toolbox.launch import (run_single_experiment,
+                                run_multiple_experiments,
+                                run_post_processing,
+                                welcome_to_mle_toolbox,
+                                prepare_logger,
+                                check_job_config)
 
 
-def main():
+def run(cmd_args):
     """ Main function of toolbox - Execute different types of experiments. """
     # 1. Load in args for MLE + setup the experiment
-    cmd_args = get_mle_args()
     if not cmd_args.no_welcome:
         welcome_to_mle_toolbox()
     else:
@@ -47,8 +48,9 @@ def main():
     if cc.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
-            from .remote.gcloud_transfer import (get_gcloud_db, send_gcloud_db,
-                                                 send_gcloud_zip_experiment)
+            from ..remote.gcloud_transfer import (get_gcloud_db,
+                                                  send_gcloud_db,
+                                                  send_gcloud_zip_experiment)
         except ImportError as err:
             raise ImportError("You need to install `google-cloud-storage` to "
                               "synchronize protocols with GCloud. Or set "
@@ -142,7 +144,7 @@ def main():
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         # Import only if needed since this has a optional dependency on scikit-optimize
-        from .src import run_hyperparameter_search
+        from ..launch import run_hyperparameter_search
         run_hyperparameter_search(job_config.meta_job_args,
                                   job_config.single_job_args,
                                   job_config.param_search_args)
@@ -160,7 +162,7 @@ def main():
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
             # Import for report generating after experiment finished
-            from .report_experiment import auto_generate_reports
+            from .report import auto_generate_reports
             if job_config.meta_job_args.report_generation:
                 reporter = auto_generate_reports(new_experiment_id, logger,
                                                  pdf_gen=False)

@@ -1,42 +1,16 @@
 import os
-import argparse
 from datetime import datetime
 
-from .utils import print_framed
-from .remote.ssh_transfer import SSH_Manager
-from .remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
-from .src.prepare_experiment import ask_for_experiment_id
-from .protocol import load_local_protocol_db
+from mle_toolbox.utils import print_framed
+from mle_toolbox.remote.ssh_transfer import SSH_Manager
+from mle_toolbox.remote.gcloud_transfer import (send_gcloud_db,
+                                                get_gcloud_zip_experiment)
+from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
+from mle_toolbox.protocol import load_local_protocol_db
 
 
-# Get experiment id to retrieve from cmd
-def get_retrieve_args():
-    """ Get inputs from cmd line """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-e_id', '--experiment_id', type=str,
-                        default="no-id-given",
-                        help ='Experiment ID')
-    parser.add_argument('-all_new', '--retrieve_all_new', default=False,
-                        action='store_true', help ='Retrieve all new results.')
-    parser.add_argument('-fig_dir', '--figures_dir', default=False,
-                        action='store_true',
-                        help ='Retrieve only subdir containing figures.')
-    parser.add_argument('-exp_dir', '--experiment_dir', default=False,
-                        action='store_true',
-                        help ='Retrieve entire experiment dir.')
-    parser.add_argument('-local', '--retrieve_local', default=False,
-                        action='store_true',
-                        help ='Retrieve experiment dir from remote directory.')
-    parser.add_argument('-dir_name', '--local_dir_name', default=None,
-                        action='store_true',
-                        help ='Name of new local results directory.')
-    return parser.parse_args()
-
-
-def main():
+def retrieve(cmd_args):
     """ Copy over experiment results folder from cluster. """
-    # Get inputs from commandline
-    cmd_args = get_retrieve_args()
     experiment_id = cmd_args.experiment_id
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 

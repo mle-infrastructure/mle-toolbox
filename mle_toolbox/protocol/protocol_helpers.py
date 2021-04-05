@@ -158,7 +158,7 @@ def delete_protocol_from_input():
             print("{} Another one? - state the next id: [e_id/N]".format(
                 time_t), end=' ')
         except:
-            print("{} The e_id is not in the protocol db. " \
+            print("\n{} The e_id is not in the protocol db. " \
                   "Please try again: [e_id/N]".format(time_t), end=' ')
         sys.stdout.flush()
 
@@ -192,6 +192,6 @@ def abort_protocol_from_input():
             print("{} Another one? - state the next id: [e_id/N]".format(
                 time_t), end=' ')
         except:
-            print("{} The e_id is not in the protocol db. " \
+            print("\n{} The e_id is not in the protocol db. " \
                   "Please try again: [e_id/N]".format(time_t), end=' ')
         sys.stdout.flush()
