@@ -1,11 +1,5 @@
 from dotmap import DotMap
 
-# Dictionary with description and type of variables to modify
-description_mle_config = DotMap({'general': general_descript,
-                                 'slurm': slurm_descript,
-                                 'sge': sge_descript,
-                                 'gcp': gcp_descript})
-
 
 general_descript = {'general':
                 {'variables': {
@@ -198,3 +192,10 @@ gcp_descript = {'gcp':
              'description': 'Settings specific to Google Cloud Platform'
             },
 }
+
+
+# Dictionary with description and type of variables to modify
+description_mle_config = DotMap({'general': general_descript,
+                                 'slurm': slurm_descript,
+                                 'sge': sge_descript,
+                                 'gcp': gcp_descript})
