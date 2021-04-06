@@ -101,12 +101,12 @@ remote_env_name = 'mle-toolbox'
 #------------------------------------------------------------------------------#
 [gcp]
 # Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
-slurm_gcloud_credentials_path = "~/<slurm_path_to_gcloud_credentials>.json"
-sge_gcloud_credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
+slurm_credentials_path = "~/<slurm_path_to_gcloud_credentials>.json"
+sge_credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
 
 # Set GCloud project and bucket name for storage/compute instances
-gcloud_project_name = "<gcloud_project_name>"
-gcloud_bucket_name = "<gcloud_bucket_name>"
+project_name = "<gcloud_project_name>"
+bucket_name = "<gcloud_bucket_name>"
 
 # Filename to retrieve from gcloud bucket & where to store
-gcloud_protocol_fname = "gcloud_mle_protocol.db"
+protocol_fname = "gcloud_mle_protocol.db"

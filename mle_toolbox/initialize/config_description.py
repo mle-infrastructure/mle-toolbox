@@ -1,4 +1,7 @@
-description_mle_config = {
+from dotmap import DotMap
+
+# Dictionary with description and type of variables to modify
+description_mle_config = DotMap({
     'general': {'general':
                 {'variables': {
                     'development':
@@ -63,7 +66,7 @@ description_mle_config = {
                         },
                 'description': 'Info to setup network, monitor & local launch'
               },
-              'default_job_args':
+              'default_job_arguments':
               {'variables': {
                 'num_logical_cores':
                     {'description': 'No. of cores for single job (0.5xthreads)',
@@ -139,7 +142,7 @@ description_mle_config = {
                         },
                 'description': 'Info to setup network, monitor & local launch'
               },
-             'default_job_args':
+             'default_job_arguments':
               {'variables': {
                 'num_logical_cores':
                     {'description': 'No. of cores for single job (0.5xthreads)',
@@ -149,7 +152,7 @@ description_mle_config = {
                     'type': str},
                 'job_name':
                     {'description': 'Job name extension (listed in qstat)',
-                     'type': },
+                     'type': str},
                 'log_file':
                     {'description': 'Default log file base name',
                      'type': str},
@@ -165,22 +168,24 @@ description_mle_config = {
              },
     'gcp': {'gcp':
                 {'variables': {
-                    'slurm_gcloud_credentials_path':
+                    'slurm_credentials_path':
                         {'description': 'Path to GCP credentials on Slurm',
                          'type': str},
-                    'sge_gcloud_credentials_path':
+                    'sge_credentials_path':
                         {'description': 'Path to GCP credentials on SGE',
                          'type': str},
-                    'gcloud_project_name':
+                    'project_name':
                         {'description': 'Name of project in GCP account',
                          'type': str},
-                    'gcloud_bucket_name':
+                    'bucket_name':
                         {'description': 'Name of GCS bucket in GCP account',
                          'type': str},
-                    'gcloud_protocol_fname':
+                    'protocol_fname':
                         {'description': 'Name of protocol db stored in bucket',
                          'type': str},
+                 },
                  'description': 'Settings specific to Google Cloud Platform'
-                 }
                 },
     }
+  }
+)

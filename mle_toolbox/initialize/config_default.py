@@ -1,5 +1,7 @@
+from dotmap import DotMap
+
 # Default toml dictionary - copy and modify if there is no previous config
-default_mle_config = {
+default_mle_config = DotMap({
     'general': {'development': False,
                 'local_protocol_fname': '~/local_robs_mle_protocol.db',
                 'use_gcloud_protocol_sync': True,
@@ -42,9 +44,9 @@ default_mle_config = {
                                       'log_file': 'log',
                                       'err_file': 'err',
                                       'env_name': '<mle-default-env>'}},
-    'gcp': {'slurm_gcloud_credentials_path': '~/<slurm_path_to_gc_cred>.json',
-            'sge_gcloud_credentials_path': '~/<sge_path_to_gc_cred>.json',
-            'gcloud_project_name': '<gcloud_project_name>',
-            'gcloud_bucket_name': '<gcloud_bucket_name>',
-            'gcloud_protocol_fname': 'gcloud_mle_protocol.db'}
-    }
+    'gcp': {'slurm_credentials_path': '~/<slurm_path_to_gc_cred>.json',
+            'sge_credentials_path': '~/<sge_path_to_gc_cred>.json',
+            'project_name': '<gcloud_project_name>',
+            'bucket_name': '<gcloud_bucket_name>',
+            'protocol_fname': 'gcloud_mle_protocol.db'}
+    })
