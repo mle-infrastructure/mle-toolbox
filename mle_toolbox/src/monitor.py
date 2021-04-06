@@ -14,7 +14,8 @@ def monitor():
 
     # Get host resource [local, sge-cluster, slurm-cluster]
     resource = determine_resource()
-    util_hist = {"rel_mem_util": [], "rel_cpu_util": [],
+    util_hist = {"rel_mem_util": [],
+                 "rel_cpu_util": [],
                  "timestamps": []}
 
     if cc.general.use_gcloud_protocol_sync:

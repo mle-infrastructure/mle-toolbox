@@ -1,5 +1,4 @@
 import argparse
-from .src import run, retrieve, report, monitor, sync_gcs, initialize
 
 
 def main():
@@ -27,16 +26,22 @@ def main():
     # Parse arguments and executed provided subcommand
     args = parser.parse_args()
     if args.command == "run":
+        from .src import run
         run(args)
     elif args.command == "retrieve":
+        from .src import retrieve
         retrieve(args)
     elif args.command == "report":
+        from .src import report
         report(args)
     elif args.command == "monitor":
+        from .src import monitor
         monitor()
     elif args.command == "sync-gcs":
+        from .src import sync_gcs
         sync_gcs()
     elif args.command == "init":
+        from .src import initialize
         initialize()
     else:
         parser.parse_args(["--help"])

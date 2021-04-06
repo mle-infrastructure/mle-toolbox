@@ -25,8 +25,6 @@ requires = [
             'sshtunnel',
             'rich',
             'termplotlib',
-            'colorclass',
-            'terminaltables',
             ]
 
 

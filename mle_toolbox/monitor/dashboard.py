@@ -15,7 +15,7 @@ from mle_toolbox.monitor.components import (Header,
                                             make_memory_util_plot)
 from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
                                              get_host_sge_data,
-                                             get_utilisation_sge_data)
+                                             get_util_sge_data)
 from mle_toolbox.monitor.monitor_db import (get_total_experiments,
                                             get_time_experiment,
                                             get_last_experiment)
@@ -74,7 +74,11 @@ def update_mle_dashboard(layout, resource, util_hist):
     if resource == "sge-cluster":
         user_data = get_user_sge_data()
         host_data = get_host_sge_data()
-        util_data = get_utilisation_sge_data()
+        util_data = get_util_sge_data()
+    elif resource == "slurm-cluster":
+        user_data = get_user_slurm_data()
+        host_data = get_host_slurm_data()
+        util_data = get_util_slurm_data()
 
     # Get resource independent data
     total_data = get_total_experiments(db, all_experiment_ids)

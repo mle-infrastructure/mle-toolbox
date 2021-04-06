@@ -1,10 +1,5 @@
-import re
 from datetime import datetime
-import sys
 import subprocess as sp
-import numpy as np
-from colorclass import Color
-from terminaltables import SingleTable
 from mle_toolbox.utils import load_mle_toolbox_config
 
 
@@ -113,7 +108,7 @@ def get_host_sge_data():
     return host_data
 
 
-def get_utilisation_sge_data():
+def get_util_sge_data():
     """ Get memory and CPU utilisation for specific SGE queue. """
     all_hosts = sp.check_output(['qconf', '-ss']).split(b'\n')
     all_hosts = [u.decode() for u in all_hosts]
@@ -137,7 +132,3 @@ def get_utilisation_sge_data():
             "mem": sum(all_mem),
             "mem_util": sum(all_mem_util),
             "timestamp": datetime.now().strftime("%m/%d %H:%M:%S")}
-
-
-if __name__ == "__main__":
-    print(get_utilisation_sge_data())
