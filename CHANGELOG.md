@@ -2,7 +2,8 @@
 - Add `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
 - Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
 - Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
-
+- Fix report generation bug (everything has to be a string for markdown-ification!).
+- Fix monitor bug: No longer reload the local database at each update call.
 
 **v0.2.5**
 - Raw github links for figures in readme so they are rendered in PyPi.

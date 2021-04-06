@@ -2,7 +2,6 @@ from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 
-from mle_toolbox.protocol import load_local_protocol_db
 from mle_toolbox.monitor.components import (Header,
                                             make_user_jobs,
                                             make_node_jobs,
@@ -16,14 +15,23 @@ from mle_toolbox.monitor.components import (Header,
 from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
                                              get_host_sge_data,
                                              get_util_sge_data)
+from mle_toolbox.monitor.monitor_slurm import (get_user_slurm_data,
+                                               get_host_slurm_data,
+                                               get_util_slurm_data)
 from mle_toolbox.monitor.monitor_db import (get_total_experiments,
                                             get_time_experiment,
                                             get_last_experiment)
 
 """
-TODOS:
-- Make qstat calls more efficient/robust -> Faster at startup
-- Add data collection functions for slurm, local + gcp!
+TODOs:
+- Make cluster resource calls more efficient/robust -> Faster at startup
+- Add data collection functions for local + gcp!
+    - monitor_gcp.py
+    - monitor_local.py
+- Replace help subcommand overview with GCS Bucket info => Only if used!
+    - Jobs running
+    - Bucket GB storage info
+    - Last time all experiments where synced
 - Link Author @RobertTLange to twitter account
 """
 
@@ -66,10 +74,9 @@ def layout_mle_dashboard() -> Layout:
     return layout
 
 
-def update_mle_dashboard(layout, resource, util_hist):
+def update_mle_dashboard(layout, resource, util_hist,
+                         db, all_experiment_ids, last_experiment_id):
     """ Helper function that fills dashboard with life!"""
-    # Get newest data depending on resourse!
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     # Get resource dependent data
     if resource == "sge-cluster":
         user_data = get_user_sge_data()
@@ -79,6 +86,10 @@ def update_mle_dashboard(layout, resource, util_hist):
         user_data = get_user_slurm_data()
         host_data = get_host_slurm_data()
         util_data = get_util_slurm_data()
+    elif resource == "gcp":
+        raise NotImplementedError
+    else:  # Local!
+        raise NotImplementedError
 
     # Get resource independent data
     total_data = get_total_experiments(db, all_experiment_ids)
@@ -86,16 +97,12 @@ def update_mle_dashboard(layout, resource, util_hist):
     time_data = get_time_experiment(db, all_experiment_ids[-1])
 
     # Add utilisation data to storage dictionaries
-    util_hist["timestamps"].append(util_data["timestamp"])
+    util_hist["times_date"].append(util_data["time_date"])
+    util_hist["times_hour"].append(util_data["time_hour"])
     util_hist["total_mem"] = util_data["mem"]
     util_hist["rel_mem_util"].append(util_data["mem_util"]/util_data["mem"])
     util_hist["total_cpu"] = util_data["cores"]
     util_hist["rel_cpu_util"].append(util_data["cores_util"]/util_data["cores"])
-
-    # Limit memory to approx. last 27 hours
-    util_hist["timestamps"] = util_hist["timestamps"][:100000]
-    util_hist["rel_mem_util"] = util_hist["rel_mem_util"][:100000]
-    util_hist["rel_cpu_util"] = util_hist["rel_cpu_util"][:100000]
 
     # Fill the left-main with life!
     layout["l-box1"].update(Panel(make_user_jobs(user_data),
@@ -123,11 +130,14 @@ def update_mle_dashboard(layout, resource, util_hist):
 
     # Fill the footer with life!
     layout["f-box1"].update(Panel(make_cpu_util_plot(util_hist),
-                    title=(f"CPU - Total: {int(util_data['cores'])}T"
-                           + f" | Start: {util_hist['timestamps'][0]}"),
+                    title=(f"CPU - Total: {int(util_data['cores_util'])}/"
+                           + f"{int(util_data['cores'])}T"
+                           + f" | Start: {util_hist['times_date'][0]}"),
                     border_style="red"),)
     layout["f-box2"].update(Panel(make_memory_util_plot(util_hist),
-                    title=(f"Mem - Total: {int(util_data['mem'])}G"),
+                    title=(f"{util_hist['times_hour'][0]} | "
+                           + f"Mem - Total: {int(util_data['mem_util'])}/"
+                           + f"{int(util_data['mem'])}G"),
                     border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),
                                   border_style="white",

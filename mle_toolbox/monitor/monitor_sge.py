@@ -7,6 +7,7 @@ cc = load_mle_toolbox_config()
 
 
 def get_user_sge_data():
+    """ Get jobs scheduled by Slurm cluster users. """
     user_data = []
     all_users = sp.check_output(['qconf', '-suserl']).split(b'\n')[:-1]
     all_users = [u.decode() for u in all_users]
@@ -48,6 +49,7 @@ def get_user_sge_data():
 
 
 def get_host_sge_data():
+    """ Get jobs running on different SGE cluster hosts. """
     host_data = []
     try:
         all_users = sp.check_output(['qconf', '-suserl']).split(b'\n')[:-1]
@@ -131,4 +133,5 @@ def get_util_sge_data():
             "cores_util": sum(all_cores_util),
             "mem": sum(all_mem),
             "mem_util": sum(all_mem_util),
-            "timestamp": datetime.now().strftime("%m/%d %H:%M:%S")}
+            "time_date": datetime.now().strftime("%m/%d/%y"),
+            "time_hour": datetime.now().strftime("%H:%M:%S")}

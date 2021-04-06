@@ -133,7 +133,7 @@ def construct_hypersearch_table(params_to_search):
                 for k_r, v_r in var_range.items():
                     v_temp.append(str(k_r) + ": " + str(v_r))
             except:
-                v_temp = var_range
+                v_temp = [str(x) for x in var_range]
             v = ', '.join(v_temp)
             current_row["Var. Range"] = "`" + str(v) + "`"
             # Append new row of data (variable with range data)

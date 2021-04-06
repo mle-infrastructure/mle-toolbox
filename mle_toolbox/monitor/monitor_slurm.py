@@ -7,16 +7,19 @@ cc = load_mle_toolbox_config()
 
 
 def get_user_slurm_data():
+    """ Get jobs scheduled by Slurm cluster users. """
     user_data = None
     return user_data
 
 
 def get_host_slurm_data():
+    """ Get jobs running on different Slurm cluster hosts. """
     host_data = None
     return host_data
 
 
 def get_util_slurm_data():
+    """ Get memory and CPU utilisation for specific slurm partition. """
     util_data = None
     return util_data
 

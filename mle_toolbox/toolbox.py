@@ -6,7 +6,7 @@ def main():
         Add one of the subcommands to `mle-toolbox <subcmd> --option <opt>`:
     - `run`: Run a new experiment on a resource available to you.
     - `retrieve`: Retrieve a completed experiment from a cluster/GCS bucket.
-    - `report`: Generate a set of reports (.html/.md) from experiment results.
+    - `report`: Generate set of reports (.html/.md) from experiment results.
     - `monitor`: Monitor a compute resource and view experiment protocol.
     - `sync-gcs`: Sync all new results from Google Cloud Storage.
     - `init`: Setup the toolbox .toml config with credentials/defaults.
@@ -18,6 +18,7 @@ def main():
     parser_run = run_build_subparser(subparsers)
     parser_retrieve = retrieve_build_subparser(subparsers)
     parser_report = report_build_subparser(subparsers)
+
     # Following subcommands don't have any options - but are 'helpful' :)
     parser_monitor = monitor_build_subparser(subparsers)
     parser_sync_gcs = sync_gcs_build_subparser(subparsers)
