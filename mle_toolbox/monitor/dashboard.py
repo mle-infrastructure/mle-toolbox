@@ -27,17 +27,17 @@ from mle_toolbox.monitor.monitor_db import (get_total_experiments,
 
 """
 TODOS:
-- Make qstat calls a lot more efficient -> Faster at startup
+- Make qstat calls more efficient/robust -> Faster at startup
 - Add support for slurm, local + gcp!
-- Add documentation/function descriptions
 - Link Author @RobertTLange to twitter account
 """
 
 cc = load_mle_toolbox_config()
 console = Console()
 
+
 def make_layout() -> Layout:
-    """ Define the dashboard layout."""
+    """ Define the MLE-Toolbox `monitor` base dashboard layout."""
     layout = Layout(name="root")
     # Split in three vertical sections: Welcome, core info, help + util plots
     layout.split(
@@ -70,7 +70,7 @@ def make_layout() -> Layout:
 
 
 class Header:
-    """Display header with clock."""
+    """ Display header with clock and general toolbox configurations. """
     welcome_ascii = """            __  _____    ______   ______            ____
            /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
           / /|_/ / /   / __/______/ / / __ \/ __ \/ / __ \/ __ \| |/_/
@@ -122,7 +122,7 @@ class Header:
 
 
 def make_user_jobs(user_data) -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing jobs scheduled by users. """
     sum_all = str(sum([r[1] for r in user_data]))
     sum_running = str(sum([r[2] for r in user_data]))
     sum_login = str(sum([r[3] for r in user_data]))
@@ -144,7 +144,7 @@ def make_user_jobs(user_data) -> Align:
 
 
 def make_node_jobs(host_data) -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing jobs running on different nodes. """
     sum_all = str(sum([r[1] for r in host_data]))
     sum_running = str(sum([r[2] for r in host_data]))
     sum_login = str(sum([r[3] for r in host_data]))
@@ -166,14 +166,14 @@ def make_node_jobs(host_data) -> Align:
 
 
 def make_protocol() -> Table:
-    """Some example content."""
+    """ Generate rich table summarizing experiment protocol summary. """
     df = protocol_summary(tail=29, verbose=False)
     table = generate_protocol_table(df)
     return Align.center(table)
 
 
 def make_total_experiments(total_data) -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing all experiments in protocol db. """
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
@@ -203,7 +203,7 @@ def make_total_experiments(total_data) -> Align:
 
 
 def make_last_experiment(last_data) -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing last scheduled experiment settings. """
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
@@ -262,7 +262,7 @@ def make_last_experiment(last_data) -> Align:
 
 
 def make_est_completion(time_data) -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing estim. time of experim. completion. """
     table = Table(show_header=False, show_footer=False,
                   header_style="bold yellow")
     table.add_column()
@@ -288,7 +288,7 @@ def make_est_completion(time_data) -> Align:
 
 
 def make_help_commands() -> Align:
-    """Some example content."""
+    """ Generate rich table summarizing core toolbox subcommands. """
     table = Table(show_header=True, show_footer=False,
                     header_style="bold magenta")
     table.add_column("Command", style="white", justify="left")
@@ -420,7 +420,7 @@ def update_dashboard(layout, resource, util_hist):
 
 
 def cluster_dashboard():
-    """ Initialize and update rich dashboard with cluster data. """
+    """ Initialize & live update rich dashboard with cluster data. """
     # Get host resource [local, sge-cluster, slurm-cluster]
     resource = determine_resource()
     util_hist = {"rel_mem_util": [], "rel_cpu_util": [], "timestamps": []}

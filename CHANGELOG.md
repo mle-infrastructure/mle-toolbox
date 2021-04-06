@@ -1,6 +1,6 @@
 **v0.2.6**
 - Add `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
-- Print configuration and protocol with rich. This gets rid of `tabulate` dependency.
+- Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
 - Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
 
 

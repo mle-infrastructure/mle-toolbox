@@ -24,7 +24,7 @@ requires = [
             'paramiko',
             'sshtunnel',
             'rich',
-            'tabulate',
+            'termplotlib',
             'colorclass',
             'terminaltables',
             ]
