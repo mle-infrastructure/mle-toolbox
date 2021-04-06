@@ -4,10 +4,13 @@ import pickledb
 import pandas as pd
 from datetime import datetime
 import sys, select
-from tabulate import tabulate
 from typing import Union, List
 
-from ..utils.general import load_mle_toolbox_config
+from rich.console import Console
+from rich.align import Align
+
+from ..utils import load_mle_toolbox_config
+from ..protocol.protocol_table import generate_protocol_table
 
 
 def load_local_protocol_db():
@@ -101,10 +104,12 @@ def protocol_summary(tail: int=5, verbose: bool=True):
         df["ID"] = [e.split("-")[-1] for e in df["ID"]]
         df["Date"] = df["Date"].map('{:.5}'.format)
         df["Purpose"] = df["Purpose"].map('{:.30}'.format)
+
+        # Print a nice table overview (no job resources)
         if verbose:
-            print(time_t, "These were your most recent experiments:")
-            print(tabulate(df[["ID", "Date", "Project", "Purpose", "Status", "Seeds"]],
-                           headers='keys', tablefmt='psql', showindex=False))
+            console = Console()
+            table = Align.left(generate_protocol_table(df, full=False))
+            console.print(table)
         return df
     else:
         if verbose:

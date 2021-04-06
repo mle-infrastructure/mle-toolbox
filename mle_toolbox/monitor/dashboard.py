@@ -1,9 +1,8 @@
 from rich import box
 from rich.align import Align
-from rich.console import Console, RenderGroup
+from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 from rich.live import Live
@@ -17,7 +16,8 @@ import termplotlib as tpl
 from mle_toolbox.utils import (load_mle_toolbox_config,
                                determine_resource)
 from mle_toolbox.protocol import (protocol_summary,
-                                  load_local_protocol_db)
+                                  load_local_protocol_db,
+                                  generate_protocol_table)
 from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
                                              get_host_sge_data,
                                              get_utilisation_sge_data)
@@ -168,47 +168,7 @@ def make_node_jobs(host_data) -> Align:
 def make_protocol() -> Table:
     """Some example content."""
     df = protocol_summary(tail=29, verbose=False)
-    table = Table(show_header=True, show_footer=False,
-                  header_style="bold blue")
-    sta_str = "[green]:heavy_check_mark:[/green]/[red]:heavy_multiplication_x:"
-    table.add_column(sta_str, justify="center")
-    table.add_column("E-ID")
-    table.add_column("Date")
-    table.add_column("Project")
-    table.add_column("Purpose")
-    table.add_column("Type")
-    table.add_column("[yellow]:arrow_forward:", justify="center")
-    table.add_column("#Jobs", justify="center")
-    table.add_column("#CPU", justify="center")
-    table.add_column("#GPU", justify="center")
-    table.add_column("[yellow]:recycle:", justify="center")
-    for index in reversed(df.index):
-        row = df.iloc[index]
-        if row["Resource"] == "sge-cluster":
-            resource = "SGE"
-        elif row["Resource"] == "sge-cluster":
-            resource = "Slurm"
-        elif row["Resource"] == "gcp-cloud":
-            resource = "GCP"
-        else:
-            resource = "Local"
-
-        if row["Status"] == "running":
-            status = Spinner('dots', style="magenta")
-        elif row["Status"] == "completed":
-            status = "[green]:heavy_check_mark:"
-        else:
-            status = "[red]:heavy_multiplication_x:"
-        table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
-                      row["Purpose"][:25], row["Type"],
-                      resource, str(row["Jobs"]), str(row["CPUs"]),
-                      str(row["GPUs"]), str(row["Seeds"]))
-    # TODO: Figure out why entire caption is made white/colored
-    # table.caption = "Experiment Status - \
-    #                 [green]:heavy_check_mark::[/green] Completed, \
-    #                 [red]:x::[/red] Aborted, [magenta].[/magenta] Running"
-    table.border_style = "blue"
-    table.box = box.SIMPLE_HEAD
+    table = generate_protocol_table(df)
     return Align.center(table)
 
 
