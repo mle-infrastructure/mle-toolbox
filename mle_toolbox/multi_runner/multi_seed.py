@@ -28,7 +28,7 @@ def spawn_multiple_seeds_experiment(job_filename: str,
         random_seeds = np.random.choice(1000000, num_seeds,
                                         replace=False).tolist()
     else:
-        random_seeds = [0]
+        random_seeds = [default_seed]
     cmd_line_inputs = [{"seed_id": seed_id} for seed_id in random_seeds]
 
     # Log the beginning of multiple seeds experiments
