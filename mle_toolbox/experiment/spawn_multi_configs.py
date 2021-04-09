@@ -4,16 +4,15 @@ import datetime
 import time
 from typing import List, Union
 import multiprocessing as mp
+from .spawn_multi_seed import spawn_multiple_seeds_experiment
 
-from .multi_seed import spawn_multiple_seeds_experiment
 
-
-def spawn_multiple_runs(job_filename: str,
-                        config_filenames: Union[List[str], str],
-                        job_arguments: Union[None, dict],
-                        experiment_dir: str,
-                        num_seeds: Union[None, int] = None,
-                        logger_level: int=logging.WARNING):
+def spawn_multiple_configs(job_filename: str,
+                           config_filenames: Union[List[str], str],
+                           job_arguments: Union[None, dict],
+                           experiment_dir: str,
+                           num_seeds: Union[None, int] = None,
+                           logger_level: int=logging.WARNING):
     """ Spawn processes to running diff. training configs over diff. seeds. """
     num_configs = len(config_filenames)
     if num_seeds is None:

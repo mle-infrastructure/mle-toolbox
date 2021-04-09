@@ -9,7 +9,7 @@ from typing import Union, List
 from pprint import pformat
 
 from .hyperopt_logger import HyperoptLogger
-from ..multi_runner import spawn_multiple_runs
+from ..experiment import spawn_multiple_configs
 from ..utils import load_json_config, load_meta_log, print_framed
 from ..utils.manipulate_files import merge_hdf5_files
 
@@ -174,12 +174,12 @@ class BaseHyperOptimisation(object):
                           num_evals_per_iter: Union[None, int] = None):
         """ Train the network for a batch of hyperparam configs """
         # Spawn the batch of synchronous evaluations
-        spawn_multiple_runs(job_filename=self.job_fname,
-                            config_filenames=batch_fnames,
-                            job_arguments=self.job_arguments,
-                            experiment_dir=self.experiment_dir,
-                            num_seeds=num_evals_per_iter,
-                            logger_level=logging.WARNING)
+        spawn_multiple_configs(job_filename=self.job_fname,
+                               config_filenames=batch_fnames,
+                               job_arguments=self.job_arguments,
+                               experiment_dir=self.experiment_dir,
+                               num_seeds=num_evals_per_iter,
+                               logger_level=logging.WARNING)
 
         # Clean up config files (redundant see experiment sub-folder)
         for f in batch_fnames:

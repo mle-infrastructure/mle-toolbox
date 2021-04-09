@@ -1,4 +1,4 @@
-from ..multi_runner import spawn_post_processing_job
+from ..experiment import spawn_post_processing_job
 
 
 def run_post_processing(post_process_args: dict, experiment_dir: str):

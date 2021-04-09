@@ -1,7 +1,7 @@
 **TODO**:
-- Add backend functions for `monitor_slurm_cluster`
+- Add backend functions for `monitor_slurm_cluster` and local version
 - Make `mle init` beautiful/a smoother experience.
-- Make bash experiments easy.
+- Make bash experiments with inputs possible.
 
 
 **v0.2.6**
@@ -13,6 +13,7 @@
 - Adds `get_jax_os_ready` helper for setting up JAX environment variables.
 - Adds `load_model_ckpt` for smooth reloading of stored checkpoints.
 - Add `MLE_Experiment` abstraction for minimal imports and smooth workflow.
+- A lot of internal refactoring: E.g. getting rid of `multi_runner` sub directory.
 
 
 **v0.2.5**

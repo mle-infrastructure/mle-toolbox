@@ -6,7 +6,7 @@ from typing import Union
 import numpy as np
 import multiprocessing as mp
 
-from .spawn_single_run import spawn_single_experiment
+from .spawn_single_job import spawn_single_experiment
 from ..utils.manipulate_files import merge_hdf5_files
 
 
