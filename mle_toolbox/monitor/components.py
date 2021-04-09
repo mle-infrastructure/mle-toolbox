@@ -72,19 +72,30 @@ class Header:
 
 def make_user_jobs(user_data) -> Align:
     """ Generate rich table summarizing jobs scheduled by users. """
-    sum_all = str(sum([r[1] for r in user_data]))
-    sum_running = str(sum([r[2] for r in user_data]))
-    sum_login = str(sum([r[3] for r in user_data]))
+    all_active_users = len(user_data["total"])
+    sum_all = str(sum(user_data["total"]))
+    sum_running = str(sum(user_data["run"]))
+    sum_login = str(sum(user_data["login"]))
+    sum_wait = str(sum(user_data["wait"]))
 
+    # Create table with structure with aggregated numbers
     table = Table(show_header=True, show_footer=False,
                   header_style="bold red")
     table.add_column("USER", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
     table.add_column("ALL", sum_all, justify="center")
     table.add_column("RUN", sum_running, justify="center")
-    table.add_column("LOGIN", sum_login, justify="center")
-    for row in user_data:
-        table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
+    table.add_column("LOG", sum_login, justify="center")
+    table.add_column("W", sum_wait, justify="center")
+
+    # Add row for each individual user
+    for u_id in range(all_active_users):
+        table.add_row(user_data["user"][u_id],
+                      str(user_data["total"][u_id]),
+                      str(user_data["run"][u_id]),
+                      str(user_data["login"][u_id]),
+                      str(user_data["wait"][u_id]))
+
     table.show_footer = True
     table.row_styles = ["none", "dim"]
     table.border_style = "red"
@@ -94,9 +105,10 @@ def make_user_jobs(user_data) -> Align:
 
 def make_node_jobs(host_data) -> Align:
     """ Generate rich table summarizing jobs running on different nodes. """
-    sum_all = str(sum([r[1] for r in host_data]))
-    sum_running = str(sum([r[2] for r in host_data]))
-    sum_login = str(sum([r[3] for r in host_data]))
+    all_nodes = len(host_data["total"])
+    sum_all = str(sum(host_data["total"]))
+    sum_running = str(sum(host_data["run"]))
+    sum_login = str(sum(host_data['login']))
 
     table = Table(show_header=True, show_footer=False,
                   header_style="bold red")
@@ -105,8 +117,14 @@ def make_node_jobs(host_data) -> Align:
     table.add_column("ALL", sum_all, justify="center")
     table.add_column("RUN", sum_running, justify="center")
     table.add_column("LOGIN", sum_login, justify="center")
-    for row in host_data:
-        table.add_row(row[0], str(row[1]), str(row[2]), str(row[3]))
+
+    # Add row for each individual cluster/queue/partition node
+    for h_id in range(all_nodes):
+        table.add_row(host_data["user"][h_id],
+                      str(host_data["total"][h_id]),
+                      str(host_data["run"][h_id]),
+                      str(host_data["login"][h_id]))
+
     table.show_footer = True
     table.row_styles = ["none", "dim"]
     table.border_style = "red"
