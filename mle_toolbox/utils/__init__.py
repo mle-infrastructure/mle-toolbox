@@ -1,6 +1,7 @@
 from .general import (load_mle_toolbox_config, load_yaml_config,
                       load_json_config, load_pkl_object,
-                      determine_resource, print_framed)
+                      determine_resource, print_framed,
+                      get_jax_os_ready)
 from .experiment_logger import DeepLogger
 from .core import get_configs_ready, set_random_seeds, load_result_logs
 from .load_meta_log import load_meta_log, subselect_meta_log
@@ -15,6 +16,7 @@ __all__ = [
            'load_pkl_object',
            'determine_resource',
            'print_framed',
+           'get_jax_os_ready',
            'DeepLogger',
            'get_configs_ready',
            'set_random_seeds',
