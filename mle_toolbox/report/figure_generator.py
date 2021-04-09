@@ -1,9 +1,6 @@
 import os
 from mle_toolbox.utils import load_meta_log, load_hyper_log
 from mle_toolbox.visualize import visualize_1D_lcurves, visualize_2D_grid
-# Suppress all axis/future warnings from mpl
-import warnings
-warnings.filterwarnings("ignore", module="matplotlib\..*")
 
 
 class FigureGenerator():

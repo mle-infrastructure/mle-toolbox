@@ -58,18 +58,23 @@ def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
     db.dadd(new_experiment_id, ("git_remote", git_remote))
 
     # Add the absolute path for retrieving the experiment
-    exp_retrieval_path = os.path.join(os.getcwd(),
-                                      job_config.meta_job_args["experiment_dir"])
+    exp_retrieval_path = os.path.join(
+                                os.getcwd(),
+                                job_config.meta_job_args["experiment_dir"])
     db.dadd(new_experiment_id, ("exp_retrieval_path", exp_retrieval_path))
 
     # Add the meta experiment config
     db.dadd(new_experiment_id, ("meta_job_args", job_config.meta_job_args))
     db.dadd(new_experiment_id, ("single_job_args", job_config.single_job_args))
 
-    if db.dget(new_experiment_id, "meta_job_args")["job_type"] == "multiple-experiments":
-        db.dadd(new_experiment_id, ("job_spec_args", job_config.multi_experiment_args))
-    elif db.dget(new_experiment_id, "meta_job_args")["job_type"] == "hyperparameter-search":
-        db.dadd(new_experiment_id, ("job_spec_args", job_config.param_search_args))
+    if (db.dget(new_experiment_id, "meta_job_args")["job_type"]
+        == "multiple-experiments"):
+        db.dadd(new_experiment_id,
+                ("job_spec_args", job_config.multi_experiment_args))
+    elif (db.dget(new_experiment_id, "meta_job_args")["job_type"]
+          == "hyperparameter-search"):
+        db.dadd(new_experiment_id,
+                ("job_spec_args", job_config.param_search_args))
 
     # Add the base config - train, net, log
     base_config = load_json_config(job_config.meta_job_args["base_train_config"])

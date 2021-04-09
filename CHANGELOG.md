@@ -1,3 +1,17 @@
+**v0.2.6**
+- Add `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
+- Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
+- Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
+- Fix report generation bug (everything has to be a string for markdown-ification!).
+- Fix monitor bug: No longer reload the local database at each update call.
+
+**TODO**:
+- Add backend functions for `monitor_slurm_cluster`
+- Make `mle init` beautiful.
+- Add `MLExperimenter` for minimal imports.
+- Make bash experiments easy.
+
+
 **v0.2.5**
 - Raw github links for figures in readme so they are rendered in PyPi.
 - Introduce mle-config variable `use_conda_virtual_env` to allow user to choose between `conda` and `venv` virtual environment setup.
@@ -12,7 +26,7 @@
     - `retrieve`: Retrieve a completed experiment from a cluster/GCS bucket.
     - `report`: Generate a set of reports (.html/.md) from experiment results.
     - `monitor`: Monitor a compute resource and view experiment protocol.
-    - `gcs-sync`: Sync all results from Google Cloud Storage
+    - `sync-gcs`: Sync all results from Google Cloud Storage
 
 
 **v0.2.4**

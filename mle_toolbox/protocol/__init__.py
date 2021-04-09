@@ -4,6 +4,7 @@ from .protocol_helpers import (protocol_summary,
                                delete_protocol_from_input,
                                abort_protocol_from_input,
                                update_protocol_var)
+from .protocol_table import generate_protocol_table
 
 
 __all__ = [
@@ -12,5 +13,6 @@ __all__ = [
            "load_local_protocol_db",
            "delete_protocol_from_input",
            "abort_protocol_from_input",
-           "update_protocol_var"
+           "update_protocol_var",
+           "generate_protocol_table"
           ]

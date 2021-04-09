@@ -3,6 +3,7 @@ from .report import report
 from .retrieve import retrieve
 from .run import run
 from .sync_gcs import sync_gcs
+from .initialize import initialize
 
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
            "report",
            "retrieve",
            "run",
-           "sync_gcs"
+           "sync_gcs",
+           "initialize"
           ]

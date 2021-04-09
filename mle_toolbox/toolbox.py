@@ -1,5 +1,4 @@
 import argparse
-from .src import run, retrieve, report, monitor, sync_gcs #, initialize
 
 
 def main():
@@ -7,34 +6,44 @@ def main():
         Add one of the subcommands to `mle-toolbox <subcmd> --option <opt>`:
     - `run`: Run a new experiment on a resource available to you.
     - `retrieve`: Retrieve a completed experiment from a cluster/GCS bucket.
-    - `report`: Generate a set of reports (.html/.md) from experiment results.
+    - `report`: Generate set of reports (.html/.md) from experiment results.
     - `monitor`: Monitor a compute resource and view experiment protocol.
     - `sync-gcs`: Sync all new results from Google Cloud Storage.
     - `init`: Setup the toolbox .toml config with credentials/defaults.
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
+
     # Build subparsers for individual subcommands
     parser_run = run_build_subparser(subparsers)
     parser_retrieve = retrieve_build_subparser(subparsers)
     parser_report = report_build_subparser(subparsers)
+
+    # Following subcommands don't have any options - but are 'helpful' :)
     parser_monitor = monitor_build_subparser(subparsers)
     parser_sync_gcs = sync_gcs_build_subparser(subparsers)
     parser_init = init_build_subparser(subparsers)
 
+    # Parse arguments and executed provided subcommand
     args = parser.parse_args()
     if args.command == "run":
+        from .src import run
         run(args)
     elif args.command == "retrieve":
+        from .src import retrieve
         retrieve(args)
     elif args.command == "report":
+        from .src import report
         report(args)
     elif args.command == "monitor":
+        from .src import monitor
         monitor()
     elif args.command == "sync-gcs":
+        from .src import sync_gcs
         sync_gcs()
     elif args.command == "init":
-        raise NotImplementedError
+        from .src import initialize
+        initialize(args)
     else:
         parser.parse_args(["--help"])
     return
@@ -125,17 +134,16 @@ def monitor_build_subparser(subparsers):
 
 def sync_gcs_build_subparser(subparsers):
     """ Build subparser arguments for `init` subcommand. """
-    parser_init = subparsers.add_parser("sync-gcs",
+    parser_sync = subparsers.add_parser("sync-gcs",
         help="Sync all new results from Google Cloud Storage.",)
-    return parser_init
+    return parser_sync
 
 
 def init_build_subparser(subparsers):
     """ Build subparser arguments for `init` subcommand. """
     parser_init = subparsers.add_parser("init",
         help="Setup the toolbox .toml config with credentials/defaults.",)
+    parser_init.add_argument('-no_cli', '--no_command_line',
+                             default=False, action='store_true',
+                             help ='Whether to go through settings in CLI.')
     return parser_init
-
-
-if __name__ == "__main__":
-    main()

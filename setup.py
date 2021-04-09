@@ -23,9 +23,8 @@ requires = [
             'scp',
             'paramiko',
             'sshtunnel',
-            'tabulate',
-            'colorclass',
-            'terminaltables',
+            'rich',
+            'termplotlib',
             ]
 
 
@@ -37,7 +36,7 @@ if mo:
     verstr = mo.group(1)
 else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
-git_tar = "https://github.com/RobertTLange/mle-toolbox/archive/v0.2.5.tar.gz"
+git_tar = "https://github.com/RobertTLange/mle-toolbox/archive/v0.2.6.tar.gz"
 
 
 setup(
