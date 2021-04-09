@@ -9,7 +9,7 @@ from typing import Union, List
 from .general import save_pkl_object
 
 
-class DeepLogger(object):
+class MLE_Logger(object):
     """
     Logging object for Deep Learning experiments
 
