@@ -5,6 +5,13 @@
 - Fix report generation bug (everything has to be a string for markdown-ification!).
 - Fix monitor bug: No longer reload the local database at each update call.
 
+**TODO**:
+- Add backend functions for `monitor_slurm_cluster`
+- Make `mle init` beautiful.
+- Add `MLExperimenter` for minimal imports.
+- Make bash experiments easy.
+
+
 **v0.2.5**
 - Raw github links for figures in readme so they are rendered in PyPi.
 - Introduce mle-config variable `use_conda_virtual_env` to allow user to choose between `conda` and `venv` virtual environment setup.
