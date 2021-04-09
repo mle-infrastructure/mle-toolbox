@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 from datetime import datetime
+from typing import Union
 from .. import __version__
 from ..utils import load_mle_toolbox_config
 from ..protocol import protocol_summary, load_local_protocol_db
@@ -30,7 +31,8 @@ def welcome_to_mle_toolbox(verbose=False):
         print("  - hyperparameter-search: Run a hyperparameter search.")
 
 
-def prepare_logger(experiment_dir: str, debug_mode: bool=False):
+def prepare_logger(experiment_dir: Union[str, None]=None,
+                   debug_mode: bool=False):
     """ Setup up the verbose/file logging of the experiment. """
     logger = logging.getLogger()
     if logger.handlers:

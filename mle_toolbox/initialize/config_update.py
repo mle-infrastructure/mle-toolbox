@@ -28,10 +28,25 @@ def whether_update_config(var_name):
     return (answer == "Y")
 
 
-def how_update_config(var_name):
+def how_update_config(var_name, var_type):
     """ Ask how variable should be updated - get string/int. """
-    print("ask for update")
-    return
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+    print("{} How do you want to update {} - {}: ".format(time_t,
+                                                     var_name,
+                                                     str(var_type)),
+          end=' ')
+    sys.stdout.flush()
+    # Loop over experiments to delete until "N" given or timeout after 60 secs
+    i, o, e = select.select([sys.stdin], [], [], 60)
+    if (i):
+        answer = sys.stdin.readline().strip()
+    else:
+        answer = None
+    sys.stdout.flush()
+    # TODO: Make more robust to input errors
+    if var_type == list:
+        answer = answer.strip('[]').split(',')
+    return var_type(answer)
 
 
 def store_mle_config(config_dict,

@@ -43,7 +43,7 @@ def main():
         sync_gcs()
     elif args.command == "init":
         from .src import initialize
-        initialize()
+        initialize(args)
     else:
         parser.parse_args(["--help"])
     return
@@ -134,13 +134,16 @@ def monitor_build_subparser(subparsers):
 
 def sync_gcs_build_subparser(subparsers):
     """ Build subparser arguments for `init` subcommand. """
-    parser_init = subparsers.add_parser("sync-gcs",
+    parser_sync = subparsers.add_parser("sync-gcs",
         help="Sync all new results from Google Cloud Storage.",)
-    return parser_init
+    return parser_sync
 
 
 def init_build_subparser(subparsers):
     """ Build subparser arguments for `init` subcommand. """
     parser_init = subparsers.add_parser("init",
         help="Setup the toolbox .toml config with credentials/defaults.",)
+    parser_init.add_argument('-no_cli', '--no_command_line',
+                             default=False, action='store_true',
+                             help ='Whether to go through settings in CLI.')
     return parser_init
