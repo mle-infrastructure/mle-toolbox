@@ -7,20 +7,21 @@ import logging
 from typing import Union
 import subprocess as sp
 
-from .local_job_submission import (local_check_job_args,
-                                   submit_local_venv_job,
-                                   submit_local_conda_job)
-from .sge_job_management import (sge_check_job_args,
-                                 sge_submit_remote_job,
-                                 sge_monitor_remote_job)
-from .slurm_job_management import (slurm_check_job_args,
-                                   slurm_submit_remote_job,
-                                   slurm_monitor_remote_job)
+from .manage_local_job import (local_check_job_args,
+                               local_submit_venv_job,
+                               local_submit_conda_job)
+from .manage_sge_job import (sge_check_job_args,
+                             sge_submit_remote_job,
+                             sge_monitor_remote_job)
+from .manage_slurm_job import (slurm_check_job_args,
+                               slurm_submit_remote_job,
+                               slurm_monitor_remote_job)
 
 # Import cluster credentials - SGE or Slurm scheduling system
 from ..utils import load_mle_toolbox_config
 
 cc = load_mle_toolbox_config()
+
 
 class Experiment(object):
     """
@@ -137,11 +138,11 @@ class Experiment(object):
     def schedule_local(self):
         """ Schedules experiment locally on your machine. """
         if cc.general.use_conda_virtual_env:
-            proc = submit_local_conda_job(self.job_filename,
+            proc = local_submit_conda_job(self.job_filename,
                                           self.cmd_line_args,
                                           self.job_arguments)
         else:
-            proc = submit_local_venv_job(self.job_filename,
+            proc = local_submit_venv_job(self.job_filename,
                                          self.cmd_line_args,
                                          self.job_arguments)
         self.job_status = 1

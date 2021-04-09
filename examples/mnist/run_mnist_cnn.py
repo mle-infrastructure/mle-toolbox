@@ -3,16 +3,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
-from mle_toolbox.utils import get_configs_ready, DeepLogger, set_random_seeds
+from mle_toolbox import MLE_Experiment
 
 
-def main(net_config, train_config, log_config):
+def main(mle):
     """ Train a network on MNIST dataset. """
-    # Set the random seeds for all random number generation
-    set_random_seeds(train_config.seed_id)
-
     # Start by setting number of cores available to torch processes
-    torch.set_num_threads(train_config.torch_num_threads)
+    torch.set_num_threads(mle.train_config.torch_num_threads)
 
     # Set the training seed as well as the device to train on
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -24,7 +21,7 @@ def main(net_config, train_config, log_config):
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
-        batch_size=train_config.train_batch_size,
+        batch_size=mle.train_config.train_batch_size,
         num_workers=5, pin_memory=True, shuffle=True)
 
     test_loader = torch.utils.data.DataLoader(
@@ -32,28 +29,31 @@ def main(net_config, train_config, log_config):
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
-        batch_size=train_config.test_batch_size,
+        batch_size=mle.train_config.test_batch_size,
         num_workers=5, pin_memory=True, shuffle=True)
 
     # Define the network architecture, loss function, optimizer & logger
     if train_config.net_type == "CNN":
-        mnist_net = MNIST_CNN(net_config.dropout_prob,
-                              net_config.hidden_fc_dim).to(device)
+        mnist_net = MNIST_CNN(mle.net_config.dropout_prob,
+                              mle.net_config.hidden_fc_dim).to(device)
     elif train_config.net_type == "MLP":
-        mnist_net = MNIST_MLP(net_config.dropout_prob,
-                              net_config.hidden_fc_dim).to(device)
+        mnist_net = MNIST_MLP(mle.net_config.dropout_prob,
+                              mle.net_config.hidden_fc_dim).to(device)
 
     nll_loss = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(mnist_net.parameters(), lr=train_config.l_rate)
-    run_log = DeepLogger(**log_config)
+    optimizer = torch.optim.Adam(mnist_net.parameters(),
+                                 lr=mle.train_config.l_rate)
 
     # Train the MNIST Network using the training loop
-    train_mnist_cnn(num_epochs=train_config.num_epochs,
-                    model=mnist_net, optimizer=optimizer,
-                    criterion=nll_loss, device=device,
+    train_mnist_cnn(mle,
+                    model=mnist_net,
+                    optimizer=optimizer,
+                    criterion=nll_loss,
+                    device=device,
                     train_loader=train_loader,
-                    test_loader=test_loader, train_log=run_log,
-                    test_batches=train_config.test_batches)
+                    test_loader=test_loader,
+                    train_log=run_log,
+                    test_batches=mle.train_config.test_batches)
     return
 
 
@@ -98,12 +98,12 @@ class MNIST_MLP(nn.Module):
         return x
 
 
-def train_mnist_cnn(num_epochs, model, optimizer, criterion, device,
-                    train_loader, test_loader, train_log, test_batches):
+def train_mnist_cnn(mle, model, optimizer, criterion, device,
+                    train_loader, test_loader, test_batches):
     """ Run the training loop over a set of epochs. """
     update_counter = 0
     train_losses = []
-    for epoch in range(1, num_epochs + 1):
+    for epoch in range(1, mle.train_config.num_epochs + 1):
         model.train() # prep model for training
         for data, target in train_loader:
             optimizer.zero_grad()
@@ -122,10 +122,8 @@ def train_mnist_cnn(num_epochs, model, optimizer, criterion, device,
                                              device, criterion)
                 time_tick = [update_counter]
                 stats_tick = [np.mean(train_losses), test_loss]
-                train_log.update_log(time_tick, stats_tick)
-                train_log.save_log()
-                train_log.save_network(model)
-    return  model, train_log
+                mle.update_log(time_tick, stats_tick, model=model, save=True)
+    return  model
 
 
 def evaluate_network(update_counter, model, test_loader, test_batches,
@@ -148,7 +146,8 @@ def evaluate_network(update_counter, model, test_loader, test_batches,
     model.train()
     return test_loss
 
-if __name__ == "__main__":
-    train_config, net_config, log_config = get_configs_ready(default_config_fname="mnist_cnn_config_1.json")
 
-    main(net_config, train_config, log_config)
+if __name__ == "__main__":
+    # Run the simulation/Experiment
+    mle = MLE_Experiment()
+    main(mle)

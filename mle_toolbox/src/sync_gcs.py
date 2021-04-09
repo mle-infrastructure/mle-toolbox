@@ -30,4 +30,4 @@ def sync_gcs():
                 print_framed(f'DELETE E-ID {e_id}')
                 delete_gcs_directory(gcloud_hash_fname)
                 print_framed(f'COMPLETED E-ID {e_id}')
-    send_gcloud_db( )
+    send_gcloud_db()

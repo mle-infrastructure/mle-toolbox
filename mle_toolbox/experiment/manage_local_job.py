@@ -25,9 +25,9 @@ def local_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def submit_local_conda_job(filename: str,
-                          cmd_line_arguments: str,
-                          job_arguments: dict):
+def local_submit_conda_job(filename: str,
+                           cmd_line_arguments: str,
+                           job_arguments: dict):
     """ Create a local job & submit it based on provided file to execute. """
     cmd = f"python {filename} {cmd_line_arguments}"
     env_name = job_arguments['env_name']
@@ -41,9 +41,9 @@ def submit_local_conda_job(filename: str,
     return proc
 
 
-def submit_local_venv_job(filename: str,
-                           cmd_line_arguments: str,
-                           job_arguments: dict):
+def local_submit_venv_job(filename: str,
+                          cmd_line_arguments: str,
+                          job_arguments: dict):
     """ Create a local job & submit it based on provided file to execute. """
     cmd = f"python {filename} {cmd_line_arguments}"
     env_name = job_arguments['env_name']

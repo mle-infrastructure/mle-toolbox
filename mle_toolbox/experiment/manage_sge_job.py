@@ -2,23 +2,27 @@ import os
 import time
 import subprocess as sp
 from typing import Union
-from .local_job_submission import submit_subprocess, random_id
+from .manage_local_job import submit_subprocess, random_id
 from ..utils import load_mle_toolbox_config
 
+
 # Base qsub template
-slurm_base_job_config = """#!/bin/bash
-#SBATCH --job-name={job_name}        # job name (not id)
-#SBATCH --output={log_file}.txt      # output file
-#SBATCH --error={err_file}.err       # error file
-#SBATCH --partition={partition}      # partition to submit to
-#SBATCH --cpus={num_logical_cores}   # number of cpus
+sge_base_job_config = """
+#####################################
+#!/bin/sh
+#$ -binding linear:{num_logical_cores}
+#$ -q {queue}
+#$ -cwd
+#$ -V
+#$ -N {job_name}
+#$ -e {err_file}.err
+#$ -o {log_file}.txt
 """
 
 
 # Base template for executing .py script
-slurm_job_exec = """
-module load nvidia/cuda/10.0
-source ~/miniconda3/etc/profile.d/conda.sh
+sge_job_exec = """
+#####################################
 echo "------------------------------------------------------------------------"
 . ~/.bashrc && conda activate {env_name}
 echo "Successfully activated virtual environment - Ready to start job"
@@ -29,11 +33,10 @@ echo "------------------------------------------------------------------------"
 echo "------------------------------------------------------------------------"
 echo "Job ended on" `date`
 echo "------------------------------------------------------------------------"
-conda deactivate
 """
 
 
-def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
+def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
     """ Check the input job arguments & add default values if missing. """
     # Load cluster config
     cc = load_mle_toolbox_config()
@@ -42,53 +45,67 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
         job_arguments = {}
 
     # Add the default config values if they are missing from job_args
-    for k, v in cc.slurm.default_job_arguments.items():
+    for k, v in cc.sge.default_job_arguments.items():
         if k not in job_arguments.keys():
             job_arguments[k] = v
 
-    # Reformatting of time for Slurm SBASH - d-hh:mm but in is dd:hh:mm
+    # Reformatting of time for SGE qsub - hh:mm:ss but in is dd:hh:mm
     if "time_per_job" in job_arguments.keys():
         days, hours, minutes = job_arguments["time_per_job"].split(":")
-        slurm_time = days[1] + "-" + hours + ":" + minutes
-        job_arguments["time_per_job"] = slurm_time
-
-    # SGE gives logical cores while Slurm seems to give only threads?!
-    if "num_logical_cores" in job_arguments.keys():
-        job_arguments["num_logical_cores"] = job_arguments["num_logical_cores"]
+        hours_sge = str(int(days) * 24 + int(hours))
+        if len(hours_sge) < 2: hours_sge = "0" + hours_sge
+        sge_time = hours_sge + ":" + minutes + ":00"
+        job_arguments["time_per_job"] = sge_time
     return job_arguments
 
 
-def slurm_generate_remote_job_template(job_arguments: dict):
-    """ Generate the bash script template to submit with SBATCH. """
+def sge_generate_remote_job_template(job_arguments: dict):
+    """ Generate the bash script template to submit with qsub. """
+    # Load cluster config
+    cc = load_mle_toolbox_config()
+
     # Set the job template depending on the desired number of GPUs
-    base_template = (slurm_base_job_config + '.')[:-1]
+    base_template = (sge_base_job_config + '.')[:-1]
 
     # Add desired number of requested gpus
     if "num_gpus" in job_arguments:
         if job_arguments["num_gpus"] > 0:
-            base_template += "#SBATCH --gres=gpu:tesla:{num_gpus} \n"
+            base_template += '#$ -l cuda="{num_gpus}(RTX2080)" \n'
 
-    # Set the max required memory per job
-    if "memory_per_cpu" in job_arguments:
-        base_template += "#SBATCH --mem-per-cpu={memory_per_job}\n"
+    # Exclude specific nodes from the queue
+    if "exclude_nodes" in job_arguments:
+        base_template += ('#$ -l hostname=' + '&'.join((f'!' + cc.sge.info.node_reg_exp[0]
+                          + f'{x:02}' + cc.sge.info.node_extension
+                          for x in job_arguments['exclude_nodes'])) + '\n')
+
+    # Only run on specific nodes from the queue
+    if "include_nodes" in job_arguments:
+        base_template += ('#$ -l hostname=' + '&'.join(( cc.sge.info.node_reg_exp[0]
+                          + '{x:02}' + cc.sge.info.node_extension
+                          for x in job_arguments['include_nodes'])) + '\n')
+
+    # Set the max required memory per job in MB - standardization Slurm
+    if "memory_per_job" in job_arguments:
+        base_template += "#$ -l h_vmem={memory_per_job}M\n"
+        base_template += "#$ -l mem_free={memory_per_job}M\n"
 
     # Set the max required time per job (afterwards terminate)
     if "time_per_job" in job_arguments:
-        base_template += "#SBATCH --time={time_per_job}\n"
+        base_template += "#$ -l h_rt={time_per_job}\n"
 
-    # Set the max required memory per job in MB - standardization SGE
-    if "memory_per_job" in job_arguments:
-        base_template += "#SBATCH --mem={memory_per_job}\n"
+    # Add the return of the job id
+    base_template += "#$ -terse\n"
 
     # Add the 'tail' - script execution to the string
-    template_out = base_template + slurm_job_exec
+    template_out = base_template + sge_job_exec
     return template_out
 
 
-def slurm_submit_remote_job(filename: str,
-                            cmd_line_arguments: str,
-                            job_arguments: dict,
-                            clean_up: bool=True):
+
+def sge_submit_remote_job(filename: str,
+                          cmd_line_arguments: str,
+                          job_arguments: dict,
+                          clean_up: bool=True):
     """ Create a qsub job & submit it based on provided file to execute. """
     # Load cluster config
     cc = load_mle_toolbox_config()
@@ -99,12 +116,12 @@ def slurm_submit_remote_job(filename: str,
     # Write the desired python code to .py file to execute
     script = "python " + filename + cmd_line_arguments
     job_arguments["script"] = script
-    slurm_job_template = slurm_generate_remote_job_template(job_arguments)
+    sge_job_template = sge_generate_remote_job_template(job_arguments)
 
-    open(base + '.sh', 'w').write(slurm_job_template.format(**job_arguments))
+    open(base + '.qsub', 'w').write(sge_job_template.format(**job_arguments))
 
     # Submit the job via subprocess call
-    command = 'sbatch < ' + base + '.sh'
+    command = 'qsub < ' + base + '.qsub ' + '&>/dev/null'
     proc = submit_subprocess(command)
 
     # Wait until system has processed submission
@@ -121,14 +138,14 @@ def slurm_submit_remote_job(filename: str,
         print(out, err)
         job_id = -1
     else:
-        job_id = int(out.decode("utf-8").split()[-1])
+        job_info = out.split(b'\n')
+        job_id = int(job_info[0].decode("utf-8").split()[0])
 
-    # TODO: Add check that status is running!
     # Wait until the job is listed under the qstat scheduled jobs
     while True:
         try:
-            out = sp.check_output(["squeue", "-u", cc.slurm.credentials.user_name])
-            job_info = out.split(b'\n')[1:]
+            out = sp.check_output(["qstat", "-u", cc.sge.credentials.user_name])
+            job_info = out.split(b'\n')[2:]
             running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                                for i in range(len(job_info) - 1)]
             success = job_id in running_job_ids
@@ -141,19 +158,20 @@ def slurm_submit_remote_job(filename: str,
 
     # Finally delete all the unneccessary log files
     if clean_up:
-        os.remove(base + '.sh')
+        os.remove(base + '.qsub')
 
     return job_id
 
 
-def slurm_monitor_remote_job(job_id: Union[list, int]):
+def sge_monitor_remote_job(job_id: Union[list, int]):
     """ Monitor the status of a job based on its id. """
     # Load cluster config
     cc = load_mle_toolbox_config()
-    #fail_counter = 0
+
+    fail_counter = 0
     while True:
         try:
-            out = sp.check_output(["squeue", "-u", cc.slurm.credentials.user_name])
+            out = sp.check_output(["qstat", "-u", cc.sge.credentials.user_name])
             break
         except sp.CalledProcessError as e:
             stderr = e.stderr
@@ -162,8 +180,7 @@ def slurm_monitor_remote_job(job_id: Union[list, int]):
             # fail_counter += 1
             # if fail_counter > 100:
             #     return -1
-
-    job_info = out.split(b'\n')[1:]
+    job_info = out.split(b'\n')[2:]
     running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                        for i in range(len(job_info) - 1)]
     if type(job_id) == int:
