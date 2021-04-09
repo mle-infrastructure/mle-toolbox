@@ -1,7 +1,6 @@
 **TODO**:
 - Add backend functions for `monitor_slurm_cluster`
-- Make `mle init` beautiful.
-- Add `MLExperimenter` for minimal imports.
+- Make `mle init` beautiful/a smoother experience.
 - Make bash experiments easy.
 
 
@@ -13,6 +12,7 @@
 - Fix monitor bug: No longer reload the local database at each update call.
 - Adds `get_jax_os_ready` helper for setting up JAX environment variables.
 - Adds `load_model_ckpt` for smooth reloading of stored checkpoints.
+- Add `MLE_Experiment` abstraction for minimal imports and smooth workflow.
 
 
 **v0.2.5**

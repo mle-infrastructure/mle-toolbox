@@ -5,7 +5,7 @@ import numpy as np
 import optax
 import tensorflow_datasets as tfds
 from typing import NamedTuple
-from mle_toolbox.utils import get_configs_ready, DeepLogger, set_random_seeds
+from mle_toolbox import MLE_Experiment
 
 # Adapted from dm-haiku example:
 # https://github.com/deepmind/dm-haiku/blob/master/examples/vae.py
@@ -89,12 +89,9 @@ def kl_gaussian(mean: jnp.ndarray, var: jnp.ndarray) -> jnp.ndarray:
     return 0.5 * jnp.sum(-jnp.log(var) - 1.0 + var + mean**2, axis=-1)
 
 
-def main(net_config, train_config, log_config):
-    # Set up toolbox logging
-    train_log = DeepLogger(**log_config)
-
+def main(mle):
     model = hk.transform(lambda x: VariationalAutoEncoder()(x))
-    optimizer = optax.adam(train_config.l_rate)
+    optimizer = optax.adam(mle.train_config.l_rate)
 
     @jax.jit
     def loss_fn(params, rng_key, batch):
@@ -113,26 +110,26 @@ def main(net_config, train_config, log_config):
         new_params = optax.apply_updates(params, updates)
         return new_params, new_opt_state
 
-    rng_seq = hk.PRNGSequence(train_config.seed_id)
+    rng_seq = hk.PRNGSequence(mle.train_config.seed_id)
     params = model.init(next(rng_seq), np.zeros((1, *(28, 28, 1))))
     opt_state = optimizer.init(params)
 
-    train_ds = load_dataset(tfds.Split.TRAIN, train_config.batch_size)
-    valid_ds = load_dataset(tfds.Split.TEST, train_config.batch_size)
+    train_ds = load_dataset(tfds.Split.TRAIN, mle.train_config.batch_size)
+    valid_ds = load_dataset(tfds.Split.TEST, mle.train_config.batch_size)
 
-    for step in range(train_config.training_steps):
+    for step in range(mle.train_config.training_steps):
         params, opt_state = update(params, next(rng_seq), opt_state, next(train_ds))
 
-        if step % train_config.eval_freq == 0:
+        if step % mle.train_config.eval_freq == 0:
             val_loss = loss_fn(params, next(rng_seq), next(valid_ds))
             # Log the results to the logger
             time_tic = [step]
             stats_tic = [float(val_loss)]
-            train_log.update_log(time_tic, stats_tic, model=params, save=True)
+            mle.update_log(time_tic, stats_tic,
+                           model=params, save=True)
 
 
 if __name__ == "__main__":
-    train_config, net_config, log_config = get_configs_ready(
-        default_config_fname="jax_vae/vae_config.json")
-
-    main(net_config, train_config, log_config)
+    # Run the simulation/Experiment
+    mle = MLE_Experiment()
+    main(mle)
