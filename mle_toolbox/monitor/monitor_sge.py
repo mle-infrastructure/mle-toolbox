@@ -126,7 +126,10 @@ def get_util_sge_data():
         out = [u.decode() for u in out][3].split()
         cores, core_util, mem, mem_util = out[2], out[6], out[7], out[8]
         all_cores.append(float(cores))
-        all_cores_util.append(float(core_util) * float(cores))
+        try:
+            all_cores_util.append(float(core_util) * float(cores))
+        except:
+            all_cores_util.append(0)
         all_mem.append(float(mem[:-1]))
         all_mem_util.append(float(mem_util[:-1]))
     return {"cores": sum(all_cores),
