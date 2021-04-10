@@ -50,6 +50,16 @@ class Header:
             res = "sge"
         elif resource == "slurm-cluster":
             res = "slurm"
+        elif resource == "gcp-cloud":
+            res = "gcp"
+        else:
+            res = "local"
+
+        if res in ["sge", "slurm", "gcp"]:
+            user_on_resource = cc[res].credentials.user_name
+        else:
+            import getpass
+            user_on_resource = getpass.getuser()
 
         grid.add_row(
             "\u2022 GCS Sync Results: [green]:heavy_check_mark:" if
@@ -61,7 +71,7 @@ class Header:
         grid.add_row(
             f"\u2022 DB Path: {cc.general.local_protocol_fname}",
             Header.welcome_ascii[3],
-            f"User: {cc[res].credentials.user_name}",
+            f"User: {user_on_resource}",
         )
         grid.add_row(
             f"\u2022 Env Name: {cc.general.remote_env_name}",

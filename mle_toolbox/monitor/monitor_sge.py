@@ -6,6 +6,14 @@ from mle_toolbox.utils import load_mle_toolbox_config
 cc = load_mle_toolbox_config()
 
 
+def get_sge_data():
+    """ Helper to get all utilisation data for sge resource. """
+    user_data = get_user_sge_data()
+    host_data = get_host_sge_data()
+    util_data = get_util_sge_data()
+    return user_data, host_data, util_data
+
+
 def get_user_sge_data():
     """ Get jobs scheduled by Slurm cluster users.
         Return dictionary with `users`, `total`, `run`, `wait`, `login`.

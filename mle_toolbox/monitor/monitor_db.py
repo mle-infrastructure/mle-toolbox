@@ -2,6 +2,14 @@ import os
 import datetime as dt
 
 
+def get_db_data(db, all_e_ids):
+    """ Helper to get all data from pickledb database. """
+    total_data = get_total_experiments(db, all_e_ids)
+    last_data = get_last_experiment(db, all_e_ids[-1])
+    time_data = get_time_experiment(db, all_e_ids[-1])
+    return total_data, last_data, time_data
+
+
 def get_total_experiments(db, all_experiment_ids):
     """ Get data from db to show in 'total_experiments' panel. """
     run, done, aborted, sge, slurm, gcp, local = 0, 0, 0, 0, 0, 0, 0

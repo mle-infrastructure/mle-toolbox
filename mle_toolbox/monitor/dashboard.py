@@ -11,15 +11,10 @@ from mle_toolbox.monitor.components import (Header,
                                             make_help_commands,
                                             make_cpu_util_plot,
                                             make_memory_util_plot)
-from mle_toolbox.monitor.monitor_sge import (get_user_sge_data,
-                                             get_host_sge_data,
-                                             get_util_sge_data)
-from mle_toolbox.monitor.monitor_slurm import (get_user_slurm_data,
-                                               get_host_slurm_data,
-                                               get_util_slurm_data)
-from mle_toolbox.monitor.monitor_db import (get_total_experiments,
-                                            get_time_experiment,
-                                            get_last_experiment)
+from mle_toolbox.monitor.monitor_sge import get_sge_data
+from mle_toolbox.monitor.monitor_slurm import get_slurm_data
+from mle_toolbox.monitor.monitor_local import get_local_data
+from mle_toolbox.monitor.monitor_db import get_db_data
 
 """
 TODOs:
@@ -49,7 +44,7 @@ def layout_mle_dashboard() -> Layout:
         Layout(name="left", ratio=0.3),
         Layout(name="center", ratio=1),
         Layout(name="right", ratio=0.35),
-        direction="horizontal",
+        direction="horizontal"
     )
     # Split center left into user info and node info
     layout["left"].split(Layout(name="l-box1", size=10),
@@ -76,22 +71,16 @@ def update_mle_dashboard(layout, resource, util_hist,
     """ Helper function that fills dashboard with life!"""
     # Get resource dependent data
     if resource == "sge-cluster":
-        user_data = get_user_sge_data()
-        host_data = get_host_sge_data()
-        util_data = get_util_sge_data()
+        user_data, host_data, util_data = get_sge_data()
     elif resource == "slurm-cluster":
-        user_data = get_user_slurm_data()
-        host_data = get_host_slurm_data()
-        util_data = get_util_slurm_data()
+        user_data, host_data, util_data = get_slurm_data()
     elif resource == "gcp":
         raise NotImplementedError
     else:  # Local!
-        raise NotImplementedError
+        user_data, host_data, util_data = get_local_data()
 
     # Get resource independent data
-    total_data = get_total_experiments(db, all_experiment_ids)
-    last_data = get_last_experiment(db, all_experiment_ids[-1])
-    time_data = get_time_experiment(db, all_experiment_ids[-1])
+    total_data, last_data, time_data = get_db_data(db, all_experiment_ids)
 
     # Add utilisation data to storage dictionaries
     util_hist["times_date"].append(util_data["time_date"])

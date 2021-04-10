@@ -7,6 +7,14 @@ from mle_toolbox.utils import load_mle_toolbox_config
 cc = load_mle_toolbox_config()
 
 
+def get_slurm_data():
+    """ Helper to get all utilisation data for slurm resource. """
+    user_data = get_user_slurm_data()
+    host_data = get_host_slurm_data()
+    util_data = get_util_slurm_data()
+    return user_data, host_data, util_data
+
+
 def get_user_slurm_data():
     """ Get jobs scheduled by Slurm cluster users. """
     user_data = {"users": [],

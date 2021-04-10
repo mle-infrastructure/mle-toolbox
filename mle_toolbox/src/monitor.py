@@ -1,5 +1,6 @@
 import time
 from rich.live import Live
+from rich.console import Console
 from mle_toolbox.utils import (load_mle_toolbox_config,
                                determine_resource)
 from mle_toolbox.protocol import load_local_protocol_db
@@ -43,6 +44,9 @@ def monitor():
     # Start timers for GCS pulling and reloading of local protocol db
     timer_gcs = time.time()
     timer_db = time.time()
+
+    # console = Console()
+    # console.print(layout)
 
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
