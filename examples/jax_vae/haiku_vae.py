@@ -5,7 +5,7 @@ import numpy as np
 import optax
 import tensorflow_datasets as tfds
 from typing import NamedTuple
-from mle_toolbox import MLE_Experiment
+from mle_toolbox import MLExperiment
 
 # Adapted from dm-haiku example:
 # https://github.com/deepmind/dm-haiku/blob/master/examples/vae.py
@@ -131,5 +131,5 @@ def main(mle):
 
 if __name__ == "__main__":
     # Run the simulation/Experiment
-    mle = MLE_Experiment()
+    mle = MLExperiment()
     main(mle)

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
-from mle_toolbox import MLE_Experiment
+from mle_toolbox import MLExperiment
 
 
 def main(mle):
@@ -149,5 +149,5 @@ def evaluate_network(update_counter, model, test_loader, test_batches,
 
 if __name__ == "__main__":
     # Run the simulation/Experiment
-    mle = MLE_Experiment()
+    mle = MLExperiment()
     main(mle)

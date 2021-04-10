@@ -4,10 +4,11 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich.spinner import Spinner
+from rich.ansi import AnsiDecoder
 
 import datetime as dt
 import numpy as np
-import termplotlib as tpl
+import plotext as plt
 
 from mle_toolbox.utils import (load_mle_toolbox_config,
                                determine_resource)
@@ -120,7 +121,7 @@ def make_node_jobs(host_data) -> Align:
 
     # Add row for each individual cluster/queue/partition node
     for h_id in range(all_nodes):
-        table.add_row(host_data["user"][h_id],
+        table.add_row(host_data["host_id"][h_id],
                       str(host_data["total"][h_id]),
                       str(host_data["run"][h_id]),
                       str(host_data["login"][h_id]))
@@ -296,15 +297,28 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     """ Plot curve displaying a CPU usage times series for the cluster. """
     x = np.arange(len(cpu_hist["rel_cpu_util"]))
     y = np.array(cpu_hist["rel_cpu_util"])
-
-    fig = tpl.figure()
-    fig.plot(x, y, xlabel="Time", width=40, height=10,
-             ylim=[-0.1, 1.1])
-    plot_str = fig.get_string()
-    plot_str = plot_str[:-61] + "                   Time"
+    # Clear the plot and draw the utilisation lines
+    plt.clear_plot()
+    plt.plot(x, y, line_marker=0, line_color="tomato", label="% CPU Util.")
+    plt.figsize(42, 8)
+    plt.canvas_color("black")
+    plt.axes_color("black")
+    plt.ticks_color("white")
+    plt.ylim(0, 1)
+    # Get time points start and end of monitored period
+    xticks = [0, len(cpu_hist["times_hour"])-1]
+    xlabels = [cpu_hist["times_date"][i][:5] + "-" +
+               cpu_hist["times_hour"][i] for i in xticks]
+    plt.ticks(0, 3)
+    plt.xticks(xticks, xlabels)
+    plot_str = plotext_helper()
+    decoder = AnsiDecoder()
+    lines = list(decoder.decode(plot_str))
     message = Table.grid()
-    message.add_column(no_wrap=True)
-    message.add_row(plot_str,)
+    message.add_column()
+    #message.add_row(plot_str,)
+    for l in lines:
+        message.add_row(l)
     return Align.center(message)
 
 
@@ -312,13 +326,57 @@ def make_memory_util_plot(mem_hist) -> Align:
     """ Plot curve displaying a memory usage times series for the cluster. """
     x = np.arange(len(mem_hist["rel_mem_util"]))
     y = np.array(mem_hist["rel_mem_util"])
-
-    fig = tpl.figure()
-    fig.plot(x, y, xlabel="Time", width=40, height=10,
-             ylim=[-0.1, 1.1], label="% Util.")
-    plot_str = fig.get_string()
-    plot_str = plot_str[:-61] + "                   Time"
+    # Clear the plot and draw the utilisation lines
+    plt.clear_plot()
+    plt.plot(x, y, line_marker=0, line_color="tomato", label="% Memory Util.")
+    plt.figsize(42, 8)
+    plt.canvas_color("black")
+    plt.axes_color("black")
+    plt.ticks_color("white")
+    plt.ylim(0, 1)
+    # Get time points start and end of monitored period
+    xticks = [0, len(mem_hist["times_hour"])-1]
+    xlabels = [mem_hist["times_date"][i][:5] + "-" +
+               mem_hist["times_hour"][i] for i in xticks]
+    plt.ticks(0, 3)
+    plt.xticks(xticks, xlabels)
+    plot_str = plotext_helper()
+    decoder = AnsiDecoder()
+    lines = list(decoder.decode(plot_str))
     message = Table.grid()
-    message.add_column(no_wrap=True)
-    message.add_row(plot_str,)
+    message.add_column()
+    #message.add_row(plot_str,)
+    for l in lines:
+        message.add_row(l)
     return Align.center(message)
+
+
+def plotext_helper():
+    from plotext.plot import (_size_max, _height_min, _height,
+                              _ylim_data, _ylim_plot, _yticks,
+                              _width_min, _width, _xlim_data,
+                              _xlim_plot, _xticks, _matrix, _grid,
+                              _add_data, _legend, _yaxis, _xaxis,
+                              _title, _axes_label, _canvas)
+
+    _size_max()
+    _height_min()
+    _height()
+    _ylim_data()
+    _ylim_plot()
+    _yticks()
+    _width_min()
+    _width()
+    _xlim_data()
+    _xlim_plot()
+    _xticks()
+    _matrix()
+    _grid()
+    _add_data()
+    _legend()
+    _yaxis()
+    _xaxis()
+    _title()
+    _axes_label()
+    _canvas()
+    return plt.par.canvas

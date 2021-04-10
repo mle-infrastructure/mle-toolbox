@@ -2,10 +2,17 @@
 - Add backend functions for `monitor_slurm_cluster` and local version
 - Make `mle init` beautiful/a smoother experience.
 - Make bash experiments with inputs possible.
+- Smoothly launch remote jobs from local machine.
+- Asynchronous job scheduling based on "trigger event"
+- Population-based training.
+
+
+**v0.2.7**
+- Changes monitor resource utilisation to `plotext` to avoid gnuplot dependency
 
 
 **v0.2.6**
-- Add `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
+- Adds `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
 - Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
 - Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
 - Fix report generation bug (everything has to be a string for markdown-ification!).

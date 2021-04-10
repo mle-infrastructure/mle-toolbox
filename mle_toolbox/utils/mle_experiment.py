@@ -2,7 +2,7 @@ from .core import get_configs_ready, set_random_seeds
 from .mle_logger import MLE_Logger
 
 
-class MLE_Experiment(object):
+class MLExperiment(object):
     def __init__(self,
                  config_fname: str="configs/base_config.json",
                  auto_setup: bool=True):

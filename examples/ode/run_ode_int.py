@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mle_toolbox import MLE_Experiment
+from mle_toolbox import MLExperiment
 
 
 def main(mle):
@@ -49,5 +49,5 @@ def sample_plot():
 
 if __name__ == "__main__":
     # Run the simulation/Experiment
-    mle = MLE_Experiment()
+    mle = MLExperiment()
     main(mle)

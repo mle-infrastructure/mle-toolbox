@@ -85,7 +85,8 @@ def get_host_sge_data():
             cmd = ['qstat', '-q', cc.sge.info.queue] + user_cmd
             ps = sp.Popen(cmd, stdout=sp.PIPE)
             try:
-                queue_all = sp.check_output(('grep', cc.sge.info.node_reg_exp[0] + host_id),
+                queue_all = sp.check_output(('grep',
+                                        cc.sge.info.node_reg_exp[0] + host_id),
                                             stdin=ps.stdout)
                 ps.wait()
                 queue_all = len(queue_all.split(b'\n')[:-1])
@@ -94,7 +95,8 @@ def get_host_sge_data():
             cmd = ['qstat', '-q', cc.sge.info.spare] + user_cmd
             ps = sp.Popen(cmd, stdout=sp.PIPE)
             try:
-                queue_spare = sp.check_output(('grep', cc.sge.info.node_reg_exp[0] + host_id),
+                queue_spare = sp.check_output(('grep',
+                                        cc.sge.info.node_reg_exp[0] + host_id),
                                               stdin=ps.stdout)
                 ps.wait()
                 # print(queue_spare)
@@ -106,7 +108,8 @@ def get_host_sge_data():
                 cmd = ['qstat', '-s', 'r', '-q', cc.sge.info.queue] + user_cmd
                 ps = sp.Popen(cmd, stdout=sp.PIPE)
                 try:
-                    running = sp.check_output(('grep', cc.sge.info.node_reg_exp[0] + host_id),
+                    running = sp.check_output(('grep',
+                                        cc.sge.info.node_reg_exp[0] + host_id),
                                                 stdin=ps.stdout)
                     ps.wait()
                     running = len(running.split(b'\n')[:-1])
@@ -117,7 +120,8 @@ def get_host_sge_data():
                 cmd = ['qstat', '-s', 'r', '-q', cc.sge.info.spare] + user_cmd
                 ps = sp.Popen(cmd, stdout=sp.PIPE)
                 try:
-                    qlogins = sp.check_output(('grep', cc.sge.info.node_reg_exp[0] + host_id),
+                    qlogins = sp.check_output(('grep',
+                                        cc.sge.info.node_reg_exp[0] + host_id),
                                                 stdin=ps.stdout)
                     ps.wait()
                     qlogins = len(qlogins.split(b'\n')[:-1])
@@ -127,7 +131,10 @@ def get_host_sge_data():
             # TODO: Figure out double grep and why only my jobs are found
             total_jobs = running + qlogins
             # Add a row for each host in the SGE cluster
-            host_data.append([host_id, total_jobs, running, qlogins])
+            host_data["host_id"].append(host_id)
+            host_data["total"].append(total_jobs)
+            host_data["run"].append(running)
+            host_data["login"].append(qlogins)
     except:
         pass
     return host_data

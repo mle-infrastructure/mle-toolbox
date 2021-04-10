@@ -1,6 +1,6 @@
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
-from mle_toolbox import MLE_Experiment
+from mle_toolbox import MLExperiment
 
 
 def main(mle):
@@ -33,5 +33,5 @@ def main(mle):
 
 
 if __name__ == "__main__":
-    mle = MLE_Experiment()
+    mle = MLExperiment()
     main(mle)

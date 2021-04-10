@@ -1,4 +1,3 @@
-from rich.console import Console
 from rich.layout import Layout
 from rich.panel import Panel
 
@@ -34,8 +33,6 @@ TODOs:
     - Last time all experiments where synced
 - Link Author @RobertTLange to twitter account
 """
-
-console = Console()
 
 
 def layout_mle_dashboard() -> Layout:
@@ -126,17 +123,17 @@ def update_mle_dashboard(layout, resource, util_hist,
                             title="Last Experiment Configuration",))
     layout["r-box3"].update(Panel(make_est_completion(time_data),
                                   border_style="yellow",
-                    title="Est. Experiment Completion Time",))
+                            title="Est. Experiment Completion Time",))
 
     # Fill the footer with life!
     layout["f-box1"].update(Panel(make_cpu_util_plot(util_hist),
-                    title=(f"CPU - Total: {int(util_data['cores_util'])}/"
-                           + f"{int(util_data['cores'])}T"
-                           + f" | Start: {util_hist['times_date'][0]}"),
+                    title=(f"CPU Utilization"
+                           + f" - Total: {int(util_data['cores_util'])}/"
+                           + f"{int(util_data['cores'])}T"),
                     border_style="red"),)
     layout["f-box2"].update(Panel(make_memory_util_plot(util_hist),
-                    title=(f"{util_hist['times_hour'][0]} | "
-                           + f"Mem - Total: {int(util_data['mem_util'])}/"
+                    title=(f"Memory Utilization"
+                           + f" - Total: {int(util_data['mem_util'])}/"
                            + f"{int(util_data['mem'])}G"),
                     border_style="red"))
     layout["f-box3"].update(Panel(make_help_commands(),

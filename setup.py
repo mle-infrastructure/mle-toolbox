@@ -23,8 +23,8 @@ requires = [
             'scp',
             'paramiko',
             'sshtunnel',
-            'rich',
-            'termplotlib',
+            'plotext',
+            'rich==9.13.0',
             ]
 
 
@@ -36,7 +36,7 @@ if mo:
     verstr = mo.group(1)
 else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
-git_tar = "https://github.com/RobertTLange/mle-toolbox/archive/v0.2.6.tar.gz"
+git_tar = "https://github.com/RobertTLange/mle-toolbox/archive/v0.2.7.tar.gz"
 
 
 setup(
