@@ -81,7 +81,7 @@ class Header:
         return Panel(grid, style="white on blue")
 
 
-def make_user_jobs(user_data) -> Align:
+def make_user_jobs(user_data, resource) -> Align:
     """ Generate rich table summarizing jobs scheduled by users. """
     all_active_users = len(user_data["total"])
     sum_all = str(sum(user_data["total"]))
@@ -114,7 +114,7 @@ def make_user_jobs(user_data) -> Align:
     return Align.center(table)
 
 
-def make_node_jobs(host_data) -> Align:
+def make_node_jobs(host_data, resource) -> Align:
     """ Generate rich table summarizing jobs running on different nodes. """
     all_nodes = len(host_data["total"])
     sum_all = str(sum(host_data["total"]))
@@ -362,13 +362,13 @@ def make_memory_util_plot(mem_hist) -> Align:
 
 
 def plotext_helper():
+    """ Helper fct. that generates ansi string  to plot. """
     from plotext.plot import (_size_max, _height_min, _height,
                               _ylim_data, _ylim_plot, _yticks,
                               _width_min, _width, _xlim_data,
                               _xlim_plot, _xticks, _matrix, _grid,
                               _add_data, _legend, _yaxis, _xaxis,
                               _title, _axes_label, _canvas)
-
     _size_max()
     _height_min()
     _height()

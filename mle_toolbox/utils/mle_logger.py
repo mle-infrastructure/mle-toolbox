@@ -253,7 +253,7 @@ class MLE_Logger(object):
                                         clock_tick[0])
             elif self.model_type == "jax":
                 # Try to add parameters from nested dict first - then simple
-                # Gradients would have to be parsed separately...
+                # TODO: Add gradient tracking for JAX models
                 for l in model.keys():
                     try:
                         for w in model[l].keys():

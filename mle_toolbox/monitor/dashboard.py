@@ -21,7 +21,6 @@ TODOs:
 - Make cluster resource calls more efficient/robust -> Faster at startup
 - Add data collection functions for local + gcp!
     - monitor_gcp.py
-    - monitor_local.py
 - Replace help subcommand overview with GCS Bucket info => Only if used!
     - Jobs running
     - Bucket GB storage info
@@ -91,17 +90,17 @@ def update_mle_dashboard(layout, resource, util_hist,
     util_hist["rel_cpu_util"].append(util_data["cores_util"]/util_data["cores"])
 
     # Fill the left-main with life!
-    layout["l-box1"].update(Panel(make_user_jobs(user_data),
+    layout["l-box1"].update(Panel(make_user_jobs(user_data, resource),
                                   border_style="red",
                                   title="Scheduled Jobs by User",))
-    layout["l-box2"].update(Panel(make_node_jobs(host_data),
+    layout["l-box2"].update(Panel(make_node_jobs(host_data, resource),
                                   border_style="red",
                                   title="Running Jobs by Node",))
 
     # Fill the center-main with life!
     layout["center"].update(Panel(make_protocol(),
                                   border_style="bright_blue",
-                                 title="Experiment Protocol Summary",))
+                                  title="Experiment Protocol Summary",))
 
     # Fill the right-main with life!
     layout["r-box1"].update(Panel(make_total_experiments(total_data),

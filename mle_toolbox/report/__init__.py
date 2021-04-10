@@ -11,9 +11,9 @@ except ModuleNotFoundError as err:
                               "to use the `mle_toolbox.report` module.")
 
 
-from .markdown_generator import MarkdownGenerator
-from .figure_generator import FigureGenerator
-from .report_generator import ReportGenerator
+from .generate_markdown import MarkdownGenerator
+from .generate_figures import FigureGenerator
+from .generate_reports import ReportGenerator
 
 
 __all__ = [
