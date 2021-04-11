@@ -1,7 +1,7 @@
+import pickle
 import pandas as pd
 import numpy as np
 from typing import Union, List
-from .general import load_pkl_object
 
 
 def load_hyper_log(hyper_log_fpath: str):
@@ -17,7 +17,8 @@ def load_hyper_log(hyper_log_fpath: str):
 
 def load_pkl_hyper_log(hyper_log_fpath: str):
     """ Load stored .pkl serach log file as list of iteration dicts. """
-    opt_log = load_pkl_object(hyper_log_fpath)
+    with open(hyper_log_fpath, 'rb') as input:
+        opt_log = pickle.load(input)
     all_evaluated_params = []
     # Loop over individual jobs stored in the hyper log
     for key, eval_iter in opt_log.items():

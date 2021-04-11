@@ -94,7 +94,8 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
             if ds in ["time", "stats"]:
                 mean_dict = {key: {} for key in data_items[ds]}
                 for i, o_name in enumerate(data_items[ds]):
-                    mean_tol, std_tol = tolerant_mean(new_results_dict[eval][ds][o_name])
+                    mean_tol, std_tol = tolerant_mean(
+                        new_results_dict[eval][ds][o_name])
                     mean_dict[o_name]["mean"] = mean_tol
                     mean_dict[o_name]["std"] = std_tol
             # Append over all meta data (strings, seeds nothing to mean)

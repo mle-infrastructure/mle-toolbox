@@ -1,41 +1,40 @@
 """ TEMPLATE FOR TRAINING SCRIPT FOR MLE-TOOLBOX W. LOGGING,
     ETC. - HERE TORCH EXAMPLE BUT TOOLBOX IS UNIVERSAL. """
 import torch
-from mle_toolbox.utils import (set_random_seeds,
-                               get_configs_ready,
-                               DeepLogger)
+from mle_toolbox import MLExperiment
 
 
-def main(net_config, train_config, log_config):
+def main(mle):
     """ Train a network. """
-    # Start by setting the random seeds for reproducibility
-    set_random_seeds(train_config.seed_id)
-
     # Set the training seed as well as the device to train on
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Define dataset, network, loss, optimizer to train on
     train_loader, test_loader = get_data()
-    net = define_network().to(device)
+    net = define_net().to(device)
     loss_fct = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(),
-                                 lr=train_config.l_rate,
-                                 w_decay=train_config.w_decay)
-    run_log = DeepLogger(**log_config)
+                                 lr=mle.train_config.l_rate,
+                                 w_decay=mle.train_config.w_decay)
 
     # Train the network using the training loop
-    train_net(num_epochs=train_config.num_epochs,
+    train_net(mle,
               model=net, optimizer=optimizer,
               criterion=loss_fct, device=device,
               train_loader=train_loader,
-              test_loader=test_loader, train_log=run_log)
+              test_loader=test_loader)
     return
 
 
-def train_net(num_epochs, model, optimizer, criterion, device,
+def define_net():
+    """ Boilerplate for constructing a neural net. """
+    return
+
+
+def train_net(mle, model, optimizer, criterion, device,
               train_loader, test_loader, train_log):
     """ Run the training loop over a set of epochs. """
-    for epoch in range(1, num_epochs + 1):
+    for epoch in range(1, mle.train_config.num_epochs + 1):
         train_epoch_loss, test_epoch_loss = [], []
         model.train() # prep model for training
         for data, target in train_loader:
@@ -59,15 +58,14 @@ def train_net(num_epochs, model, optimizer, criterion, device,
         train_loss = np.mean(train_epoch_loss)
         test_loss = np.mean(test_epoch_loss)
 
-        time_tick = [epoch]
-        stats_tick = [train_loss, test_loss]
-        train_log.update_log(time_tick, stats_tick)
-        train_log.save_log()
-        train_log.save_network(model)
+        time_tick = {"epoch": epoch}
+        stats_tick = {"train_loss": train_loss,
+                      "test_loss": test_loss}
+        mle.update_log(time_tick, stats_tick, model, save=True)
 
     return model, train_log
 
 
 if __name__ == "__main__":
-    train_config, net_config, log_config = get_configs_ready(default_config_fname="configs/config_1.json")
-    main(net_config, train_config, log_config)
+    mle = MLExperiment("configs/config_1.json")
+    main(mle)

@@ -1,6 +1,6 @@
 """ TEMPLATE FOR POST-PROCESSING JOB FOR MLE-TOOLBOX SEARCH RESULTS
     WE PARALLELIZE DATA-GENERATION OVER NETWORKS IN EXP DIR. """
-from mle_toolbox.utils import hyper_log_to_df
+from mle_toolbox.utils import load_hyper_log
 import torch.multiprocessing as mp
 
 
@@ -16,7 +16,7 @@ def multi_proc_inner(config_fname, chkpt_fname, add_args):
 def main(hyper_df_fname, num_procs, figures_dir):
     """ Parallelize data-generation over network ckpth. """
     # Load in the hyperlog with all necessary info
-    hyper_df = hyper_log_to_df(hyper_df_fname)
+    hyper_df = load_hyper_log(hyper_df_fname)
 
     # Get all results folder
     all_runs = os.listdir(grid_dir)

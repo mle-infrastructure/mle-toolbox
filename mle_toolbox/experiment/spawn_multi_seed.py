@@ -7,7 +7,7 @@ import numpy as np
 import multiprocessing as mp
 
 from .spawn_single_job import spawn_single_experiment
-from ..utils.manipulate_files import merge_hdf5_files
+from ..utils import merge_hdf5_files
 
 
 def spawn_multiple_seeds_experiment(job_filename: str,

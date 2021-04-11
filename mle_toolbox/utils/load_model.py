@@ -1,4 +1,4 @@
-from .general import load_pkl_object
+from .core_files_load import load_pkl_object
 
 
 def load_model_ckpt(ckpt_path: str, model_type: str, model=None):

@@ -10,6 +10,11 @@
 **v0.2.7**
 - Changes plots of monitored resource utilisation to `plotext` to avoid gnuplot dependency.
 - Change logger interface: Now one has to provide dictionaries as inputs to `update_log`. This is supposed to make the logging more robust.
+- Update template files and refactor/name files in `utils` subdirectory:
+    - `core_experiment`: Includes helpers used in (almost) every experiment
+    - `core_files_load`: Helpers used to load various core components (configs)
+    - `core_files_merge`: Helpers used to merge meta-logs
+    - `helpers`: Random small functionalities (not crucial)
 
 
 **v0.2.6**

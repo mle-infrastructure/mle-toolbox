@@ -4,7 +4,7 @@ import numpy as np
 import logging
 from typing import Union
 from pprint import pformat
-from ..utils.general import load_pkl_object, save_pkl_object, print_framed
+from ..utils import load_pkl_object, save_pkl_object, print_framed
 
 
 class HyperoptLogger(object):
@@ -23,7 +23,7 @@ class HyperoptLogger(object):
 
         if reload:
             self.reload_log()
-            self.logger.info("Reloaded Log with {} Evaluations".format(self.iter_id))
+            self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")
             self.print_log_state()
         else:
             self.opt_log = {}               # List of dict of evals
@@ -32,8 +32,9 @@ class HyperoptLogger(object):
             self.all_evaluated_params = []  # All evaluated parameters
         self.batch_id = 0                   # Batch evaluation tracker
 
-    def update_log(self, params, meta_eval_log, target, time_elapsed, run_ids):
-        """ Update the log dictionary with the most recent result dictionary """
+    def update_log(self, params, meta_eval_log,
+                   target, time_elapsed, run_ids):
+        """ Update  log dictionary with the most recent result dictionary """
         # Update the batch evaluation counter
         self.batch_id += 1
 

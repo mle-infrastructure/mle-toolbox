@@ -6,7 +6,7 @@ import time
 import datetime
 import h5py
 from typing import Union, List
-from .general import save_pkl_object
+from .helpers import save_pkl_object
 
 
 class MLE_Logger(object):

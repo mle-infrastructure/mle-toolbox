@@ -1,4 +1,4 @@
-from .core import get_configs_ready, set_random_seeds
+from .core_experiment import get_configs_ready, set_random_seeds
 from .mle_logger import MLE_Logger
 
 

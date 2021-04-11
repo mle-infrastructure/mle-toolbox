@@ -2,12 +2,11 @@ import os
 import argparse
 import random
 import numpy as np
+import platform
+import re
 from typing import Union, List
 from dotmap import DotMap
-
-from .general import load_json_config
-from .load_meta_log import load_meta_log
-from .load_hyper_log import load_hyper_log
+from .core_files_load import load_json_config, load_mle_toolbox_config
 
 
 # Safely import such that no import errors are thrown - reduce dependencies
@@ -87,11 +86,12 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
                         help='Seed id on which to train')
     cmd_args = parser.parse_args()
 
-    # Load config file + add config fname to clone + add experiment dir
+    # Load .json config file + add config fname to clone + add experiment dir
     config = load_json_config(cmd_args.config_fname)
     config.log_config.config_fname = cmd_args.config_fname
     config.log_config.experiment_dir = cmd_args.experiment_dir
 
+    # Subdivide experiment/job config into net, train and log configs
     net_config = DotMap(config["net_config"], _dynamic=False)
     train_config = DotMap(config["train_config"], _dynamic=False)
     log_config = DotMap(config["log_config"], _dynamic=False)
@@ -99,8 +99,9 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
     # Add device to train on if not already set in the config file
     if "device_name" in train_config.keys():
         device_name = "cpu"
-        if __torch_installed and torch.cuda.is_available():
-            device_name = "cuda"
+        if __torch_installed:
+            if torch.cuda.is_available():
+                device_name = "cuda"
         train_config.device_name = device_name
 
     if "tboard_fname" not in log_config.keys():
@@ -119,10 +120,19 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
     return train_config, net_config, log_config
 
 
-def load_result_logs(experiment_dir: str,
-                     meta_log_fname: str="meta_log.hdf5",
-                     hyper_log_fname: str="hyper_log.pkl"):
-    """ Load both meta and hyper logs for an experiment. """
-    meta_log = load_meta_log(os.path.join(experiment_dir, meta_log_fname))
-    hyper_log = load_hyper_log(os.path.join(experiment_dir, hyper_log_fname))
-    return meta_log, hyper_log
+def determine_resource() -> str:
+    """ Check if cluster (sge/slurm) is available. """
+    cc = load_mle_toolbox_config()
+    hostname = platform.node()
+    on_sge_cluster = any(re.match(l, hostname) for
+                         l in cc.sge.info.node_reg_exp)
+    on_slurm_cluster = any(re.match(l, hostname) for
+                           l in cc.slurm.info.node_reg_exp)
+    on_sge_head = (hostname in cc.sge.info.head_names)
+    on_slurm_head = (hostname in cc.slurm.info.head_names)
+    if on_sge_head or on_sge_cluster:
+        return "sge-cluster"
+    elif on_slurm_head or on_slurm_cluster:
+        return "slurm-cluster"
+    else:
+        return hostname
