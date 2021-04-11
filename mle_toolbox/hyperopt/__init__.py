@@ -1,7 +1,7 @@
-from .hyperopt_logger import HyperoptLogger
-from .random_hyperopt import RandomHyperoptimisation
-from .grid_hyperopt import GridHyperoptimisation
-from .smbo_hyperopt import SMBOHyperoptimisation
+from .hyperlogger import HyperoptLogger
+from .hyperopt_random import RandomHyperoptimisation
+from .hyperopt_grid import GridHyperoptimisation
+from .hyperopt_smbo import SMBOHyperoptimisation
 
 __all__ = [
            'HyperoptLogger',

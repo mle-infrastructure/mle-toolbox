@@ -5,6 +5,7 @@
 - Smoothly launch remote jobs from local machine.
 - Asynchronous job scheduling based on "trigger event"
 - Population-based training.
+- Multi-objective SMBO (pareto front improvements)
 
 
 **v0.2.7**
@@ -15,6 +16,7 @@
     - `core_files_load`: Helpers used to load various core components (configs)
     - `core_files_merge`: Helpers used to merge meta-logs
     - `helpers`: Random small functionalities (not crucial)
+- Rename `hyperopt` subdirectory: `hyperopt_<type>`, `hyperspace`, `hyperlogger`
 
 
 **v0.2.6**

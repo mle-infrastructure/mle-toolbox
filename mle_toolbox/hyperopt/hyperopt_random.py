@@ -1,7 +1,7 @@
 import numpy as np
-from .base_hyperopt import BaseHyperOptimisation
-from .hyperopt_logger import HyperoptLogger
-from .gen_hyperspace import construct_hyperparam_range
+from .hyperopt_base import BaseHyperOptimisation
+from .hyperlogger import HyperoptLogger
+from .hyperspace import construct_hyperparam_range
 
 
 class RandomHyperoptimisation(BaseHyperOptimisation):

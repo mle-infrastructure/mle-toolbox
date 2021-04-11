@@ -8,7 +8,7 @@ import logging
 from typing import Union, List
 from pprint import pformat
 
-from .hyperopt_logger import HyperoptLogger
+from .hyperlogger import HyperoptLogger
 from ..experiment import spawn_multiple_configs
 from ..utils import (load_json_config,
                      load_meta_log,
@@ -97,20 +97,23 @@ class BaseHyperOptimisation(object):
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
-            self.logger.info(f"START - {self.current_iter}/{num_search_batches} batch of" \
+            self.logger.info(f"START - {self.current_iter}/" \
+                             f"{num_search_batches} batch of" \
                              f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Training w. prev. specified hyperparams & evaluate, get time taken
             batch_results_dirs = self.train_hyperparams(batch_fnames,
                                                         num_evals_per_iter)
 
-            self.logger.info(f"DONE - {self.current_iter}/{num_search_batches} batch of" \
+            self.logger.info(f"DONE - {self.current_iter}/" \
+                             "{num_search_batches} batch of" \
                              f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Attempt merging of hyperlogs - until successful!
             while True:
                 try:
-                    meta_eval_log = self.get_meta_eval_log(self.hyper_log.all_run_ids + run_ids)
+                    meta_eval_log = self.get_meta_eval_log(
+                                        self.hyper_log.all_run_ids + run_ids)
                     break
                 except:
                     time.sleep(1)
@@ -119,7 +122,8 @@ class BaseHyperOptimisation(object):
             perf_measures = self.evaluate_hyperparams(meta_eval_log, run_ids)
             time_elapsed = time.time() - start_t
 
-            self.logger.info(f"MERGE - {self.current_iter}/{num_search_batches} batch of" \
+            self.logger.info(f"MERGE - {self.current_iter}/" \
+                             "{num_search_batches} batch of" \
                              f" hyperparameters - {num_evals_per_iter} seeds")
 
             # Update & save the Hyperparam Optimisation Log
@@ -127,7 +131,8 @@ class BaseHyperOptimisation(object):
                                       perf_measures, time_elapsed, run_ids)
             self.hyper_log.save_log()
             self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
-            print_framed(f"COMPLETED BATCH {self.current_iter}/{num_search_batches}")
+            print_framed(f"COMPLETED BATCH {self.current_iter}/" \
+                         f"{num_search_batches}")
 
     def get_hyperparam_proposal(self, num_iter_batch: int):
         """ Get proposals to eval - implemented by specific hyperopt algo"""
@@ -160,7 +165,8 @@ class BaseHyperOptimisation(object):
 
         for s_id in range(len(config_params_batch)):
             run_id = "b_" + str(self.current_iter) + "_eval_" + str(s_id)
-            s_config_fname = os.path.join(self.experiment_dir, run_id + '.json')
+            s_config_fname = os.path.join(self.experiment_dir,
+                                          run_id + '.json')
 
             # Write config dictionary to json file
             with open(s_config_fname, 'w') as f:

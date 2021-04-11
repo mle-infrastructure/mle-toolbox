@@ -1,7 +1,7 @@
 import numpy as np
-from .base_hyperopt import BaseHyperOptimisation
-from .hyperopt_logger import HyperoptLogger
-from .gen_hyperspace import construct_hyperparam_range
+from .hyperopt_base import BaseHyperOptimisation
+from .hyperlogger import HyperoptLogger
+from .hyperspace import construct_hyperparam_range
 
 
 class SMBOHyperoptimisation(BaseHyperOptimisation):
@@ -18,8 +18,9 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         try:
             from skopt import Optimizer
         except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(f"{err}. You need to install `scikit-optimize` "
-                                      "to use the `mle_toolbox.hyperopt` module.")
+            raise ModuleNotFoundError(f"{err}. You need to"
+                                      "install `scikit-optimize` to use "
+                                      "the `mle_toolbox.hyperopt` module.")
 
         BaseHyperOptimisation.__init__(self, hyper_log, job_arguments,
                                        config_fname, job_fname,
@@ -58,7 +59,8 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
             x.append(list(prop.values()))
             # skopt assumes we want to minimize surrogate model
             # Make performance negative if we maximize
-            effective_perf = (-1*perf_measures[to_model][i] if self.hyper_log.max_target
+            effective_perf = (-1*perf_measures[to_model][i]
+                              if self.hyper_log.max_target
                               else perf_measures[to_model][i])
             y.append(effective_perf)
         self.hyper_optimizer.tell(x, y)
