@@ -23,8 +23,9 @@ def main(mle):
 
         # Update & save the newest log
         if (i % mle.train_config.log_every_steps) == 0:
-            time_tick = [i+1]
-            stats_tick = [x_t[-1], np.random.normal()]
+            time_tick = {"step_counter": i+1}
+            stats_tick = {"integral": x_t[-1],
+                          "noise": np.random.normal()}
             mle.update_log(time_tick, stats_tick, save=True)
 
     # Generate a sample plot and store it

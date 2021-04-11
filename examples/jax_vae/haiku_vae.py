@@ -123,8 +123,8 @@ def main(mle):
         if step % mle.train_config.eval_freq == 0:
             val_loss = loss_fn(params, next(rng_seq), next(valid_ds))
             # Log the results to the logger
-            time_tic = [step]
-            stats_tic = [float(val_loss)]
+            time_tic = {"step_counter": step}
+            stats_tic = {"val_loss": float(val_loss)}
             mle.update_log(time_tic, stats_tic,
                            model=params, save=True)
 

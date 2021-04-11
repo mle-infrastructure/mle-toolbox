@@ -120,8 +120,9 @@ def train_mnist_cnn(mle, model, optimizer, criterion, device,
                 test_loss = evaluate_network(update_counter, model,
                                              test_loader, test_batches,
                                              device, criterion)
-                time_tick = [update_counter]
-                stats_tick = [np.mean(train_losses), test_loss]
+                time_tick = {"epoch": update_counter}
+                stats_tick = {"train_loss": np.mean(train_losses),
+                              "test_loss": test_loss}
                 mle.update_log(time_tick, stats_tick, model=model, save=True)
     return  model
 

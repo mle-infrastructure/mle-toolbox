@@ -124,17 +124,22 @@ class MLE_Logger(object):
             try: os.makedirs(os.path.join(self.experiment_dir, "models/"))
             except: pass
 
-        # Create separate sub-dictionaries for checkpoints & final trained model
-        if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
+        # Create separate sub-dirs for checkpoints & final trained model
+        if not os.path.exists(os.path.join(self.experiment_dir,
+                                           "models/final/")):
             try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
             except: pass
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/every_k/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "models/every_k/"))
+            if not os.path.exists(os.path.join(self.experiment_dir,
+                                               "models/every_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir,
+                                           "models/every_k/"))
                 except: pass
         if self.save_top_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/top_k/")):
-                try: os.mkdir(os.path.join(self.experiment_dir, "models/top_k/"))
+            if not os.path.exists(os.path.join(self.experiment_dir,
+                                               "models/top_k/")):
+                try: os.mkdir(os.path.join(self.experiment_dir,
+                                           "models/top_k/"))
                 except: pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
@@ -157,12 +162,14 @@ class MLE_Logger(object):
                                        timestr + base_str + "_" + seed_id)
         if self.save_every_k_ckpt is not None:
             self.every_k_ckpt_list = []
-            self.every_k_model_save_fname = (self.experiment_dir + "models/every_k/" +
+            self.every_k_model_save_fname = (self.experiment_dir +
+                                             "models/every_k/" +
                                              timestr + base_str + "_" + seed_id
                                              + "_k_")
         if self.save_top_k_ckpt is not None:
             self.top_k_ckpt_list = []
-            self.top_k_model_save_fname = (self.experiment_dir + "models/top_k/" +
+            self.top_k_model_save_fname = (self.experiment_dir +
+                                           "models/top_k/" +
                                            timestr + base_str + "_" + seed_id
                                            + "_top_")
 
@@ -194,17 +201,24 @@ class MLE_Logger(object):
             self.writer = None
 
     def update_log(self,
-                   clock_tick: list,
-                   stats_tick: list,
+                   clock_tick: dict,
+                   stats_tick: dict,
                    model=None,
                    plot_to_tboard=None,
                    save=False):
         """ Update with the newest tick of performance stats, net weights """
+        # Check all keys do exist in data dicts to log [exclude time_elapsed]
+        for k in self.time_to_track[:-1]:
+            assert k in clock_tick.keys(), f"{k} not in clock_tick keys."
+        for k in self.stats_to_track:
+            assert k in stats_tick.keys(), f"{k} not in stats_tick keys."
+
         # Transform clock_tick, stats_tick lists into pd arrays
         c_tick = pd.DataFrame(columns=self.time_to_track)
-        c_tick.loc[0] = clock_tick + [time.time() - self.start_time]
+        c_tick.loc[0] = ([clock_tick[k] for k in self.time_to_track[:-1]]
+                          + [time.time() - self.start_time])
         s_tick = pd.DataFrame(columns=self.what_to_track)
-        s_tick.loc[0] = stats_tick
+        s_tick.loc[0] = [stats_tick[k] for k in self.stats_to_track]
 
         # Append time tick & results to pandas dataframes
         self.clock_to_track = pd.concat([self.clock_to_track, c_tick], axis=0)
@@ -231,15 +245,19 @@ class MLE_Logger(object):
             self.save_log()
 
     def update_tboard(self,
-                      clock_tick: list,
-                      stats_tick: list,
+                      clock_tick: dict,
+                      stats_tick: dict,
                       model = None,
                       plot_to_tboard = None):
         """ Update the tensorboard with the newest events """
+        # Set the x-axis time variable to first key provided in time key dict
+        time_var_id = clock_tick[self.time_to_track.keys()[0]]
+
         # Add performance & step counters
-        for i, performance_tick in enumerate(self.what_to_track):
-            self.writer.add_scalar('performance/' + performance_tick,
-                                   np.mean(stats_tick[i]), clock_tick[0])
+        for k in self.what_to_track.keys():
+            self.writer.add_scalar('performance/' + k,
+                                   np.mean(stats_tick[k]),
+                                   time_var_id)
 
         # Log the model params & gradients
         if model is not None:
@@ -247,10 +265,10 @@ class MLE_Logger(object):
                 for name, param in model.named_parameters():
                     self.writer.add_histogram('weights/' + name,
                                               param.clone().cpu().data.numpy(),
-                                              clock_tick[0])
+                                              time_var_id)
                     self.writer.add_histogram('gradients/' + name,
                                         param.grad.clone().cpu().data.numpy(),
-                                        clock_tick[0])
+                                        time_var_id)
             elif self.model_type == "jax":
                 # Try to add parameters from nested dict first - then simple
                 # TODO: Add gradient tracking for JAX models
@@ -259,15 +277,15 @@ class MLE_Logger(object):
                         for w in model[l].keys():
                             self.writer.add_histogram('weights/' + l + '/' + w,
                                                        np.array(model[l][w]),
-                                                       clock_tick[0])
+                                                       time_var_id)
                     except:
                         self.writer.add_histogram('weights/' + l,
                                                   np.array(model[l]),
-                                                  clock_tick[0])
+                                                  time_var_id)
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
-            self.writer.add_figure('plot', plot_to_tboard, stats_tick[i])
+            self.writer.add_figure('plot', plot_to_tboard, time_var_id)
 
         # Flush the log event
         self.writer.flush()

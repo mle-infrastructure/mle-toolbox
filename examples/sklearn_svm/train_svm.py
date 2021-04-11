@@ -27,8 +27,9 @@ def main(mle):
     test_acc = metrics.accuracy_score(test_predicted, y_test)
 
     # Log the results to the logger
-    time_tic = [0]
-    stats_tic = [train_acc, test_acc]
+    time_tic = {"step_counter": 0}
+    stats_tic = {"train_acc": train_acc,
+                 "test_acc": test_acc}
     mle.update_log(time_tic, stats_tic, model=clf, save=True)
 
 

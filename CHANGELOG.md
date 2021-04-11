@@ -8,7 +8,8 @@
 
 
 **v0.2.7**
-- Changes monitor resource utilisation to `plotext` to avoid gnuplot dependency
+- Changes plots of monitored resource utilisation to `plotext` to avoid gnuplot dependency.
+- Change logger interface: Now one has to provide dictionaries as inputs to `update_log`. This is supposed to make the logging more robust.
 
 
 **v0.2.6**
