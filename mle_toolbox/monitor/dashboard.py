@@ -2,8 +2,10 @@ from rich.layout import Layout
 from rich.panel import Panel
 
 from mle_toolbox.monitor.components import (Header,
-                                            make_user_jobs,
-                                            make_node_jobs,
+                                            make_user_jobs_cluster,
+                                            make_node_jobs_cluster,
+                                            make_device_panel_local,
+                                            make_process_panel_local,
                                             make_protocol,
                                             make_total_experiments,
                                             make_last_experiment,
@@ -29,7 +31,7 @@ TODOs:
 """
 
 
-def layout_mle_dashboard() -> Layout:
+def layout_mle_dashboard(resource) -> Layout:
     """ Define the MLE-Toolbox `monitor` base dashboard layout."""
     layout = Layout(name="root")
     # Split in three vertical sections: Welcome, core info, help + util plots
@@ -40,14 +42,18 @@ def layout_mle_dashboard() -> Layout:
     )
     # Split center into 3 horizontal sections
     layout["main"].split(
-        Layout(name="left", ratio=0.3),
+        Layout(name="left", ratio=0.35),
         Layout(name="center", ratio=1),
         Layout(name="right", ratio=0.35),
         direction="horizontal"
     )
     # Split center left into user info and node info
-    layout["left"].split(Layout(name="l-box1", size=10),
-                         Layout(name="l-box2", size=25))
+    if resource in ["sge-cluster", "slurm-cluster"]:
+        layout["left"].split(Layout(name="l-box1", size=10),
+                             Layout(name="l-box2", size=25))
+    else:
+        layout["left"].split(Layout(name="l-box1", size=20),
+                             Layout(name="l-box2", size=15))
     # Split center right into total experiments, last experiments, ETA
     layout["right"].split(Layout(name="r-box1", ratio=0.3),
                           Layout(name="r-box2", ratio=0.4),
@@ -76,7 +82,7 @@ def update_mle_dashboard(layout, resource, util_hist,
     elif resource == "gcp":
         raise NotImplementedError
     else:  # Local!
-        user_data, host_data, util_data = get_local_data()
+        proc_data, device_data, util_data = get_local_data()
 
     # Get resource independent data
     total_data, last_data, time_data = get_db_data(db, all_experiment_ids)
@@ -90,12 +96,20 @@ def update_mle_dashboard(layout, resource, util_hist,
     util_hist["rel_cpu_util"].append(util_data["cores_util"]/util_data["cores"])
 
     # Fill the left-main with life!
-    layout["l-box1"].update(Panel(make_user_jobs(user_data, resource),
-                                  border_style="red",
-                                  title="Scheduled Jobs by User",))
-    layout["l-box2"].update(Panel(make_node_jobs(host_data, resource),
-                                  border_style="red",
-                                  title="Running Jobs by Node",))
+    if resource in ["sge-cluster", "slurm-cluster"]:
+        layout["l-box1"].update(Panel(make_user_jobs_cluster(user_data),
+                                      border_style="red",
+                                      title="Scheduled Jobs by User",))
+        layout["l-box2"].update(Panel(make_node_jobs_cluster(host_data),
+                                      border_style="red",
+                                      title="Running Jobs by Node",))
+    else:
+        layout["l-box1"].update(Panel(make_device_panel_local(device_data),
+                                      border_style="red",
+                                      title="Local - Utilization by Device",))
+        layout["l-box2"].update(Panel(make_process_panel_local(proc_data),
+                                      border_style="red",
+                                      title="Local - Utilization by Process",))
 
     # Fill the center-main with life!
     layout["center"].update(Panel(make_protocol(),

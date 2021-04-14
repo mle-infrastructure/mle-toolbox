@@ -37,7 +37,7 @@ def monitor():
     db, all_e_ids, last_e_id = load_local_protocol_db()
 
     # Generate the dashboard layout and display first data
-    layout = layout_mle_dashboard()
+    layout = layout_mle_dashboard(resource)
     layout, util_hist = update_mle_dashboard(layout, resource, util_hist,
                                              db, all_e_ids, last_e_id)
 
@@ -51,26 +51,29 @@ def monitor():
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
-            layout, util_hist = update_mle_dashboard(layout, resource,
-                                                     util_hist, db,
-                                                     all_e_ids, last_e_id)
+            try:
+                layout, util_hist = update_mle_dashboard(layout, resource,
+                                                         util_hist, db,
+                                                         all_e_ids, last_e_id)
 
-            # Every 10 seconds reload local database file
-            if time.time() - timer_gcs > 10:
-                db, all_e_ids, last_e_id = load_local_protocol_db()
-                timer_db = time.time()
+                # Every 10 seconds reload local database file
+                if time.time() - timer_gcs > 10:
+                    db, all_e_ids, last_e_id = load_local_protocol_db()
+                    timer_db = time.time()
 
-            # Every 10 minutes pull the newest DB from GCS
-            if time.time() - timer_gcs > 600:
-                if cc.general.use_gcloud_protocol_sync:
-                    accessed_remote_db = get_gcloud_db()
-                timer_gcs = time.time()
+                # Every 10 minutes pull the newest DB from GCS
+                if time.time() - timer_gcs > 600:
+                    if cc.general.use_gcloud_protocol_sync:
+                        accessed_remote_db = get_gcloud_db()
+                    timer_gcs = time.time()
 
-            # Limit memory to approx. last 27 hours
-            util_hist["times_date"] = util_hist["times_date"][:100000]
-            util_hist["times_hour"] = util_hist["times_hour"][:100000]
-            util_hist["rel_mem_util"] = util_hist["rel_mem_util"][:100000]
-            util_hist["rel_cpu_util"] = util_hist["rel_cpu_util"][:100000]
+                # Limit memory to approx. last 27 hours
+                util_hist["times_date"] = util_hist["times_date"][:100000]
+                util_hist["times_hour"] = util_hist["times_hour"][:100000]
+                util_hist["rel_mem_util"] = util_hist["rel_mem_util"][:100000]
+                util_hist["rel_cpu_util"] = util_hist["rel_cpu_util"][:100000]
 
-            # Wait a second
-            time.sleep(1)
+                # Wait a second
+                time.sleep(1)
+            except:
+                pass

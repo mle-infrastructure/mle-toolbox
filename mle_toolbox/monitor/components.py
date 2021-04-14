@@ -58,6 +58,7 @@ class Header:
         if res in ["sge", "slurm", "gcp"]:
             user_on_resource = cc[res].credentials.user_name
         else:
+            # Get local user name
             import getpass
             user_on_resource = getpass.getuser()
 
@@ -81,7 +82,7 @@ class Header:
         return Panel(grid, style="white on blue")
 
 
-def make_user_jobs(user_data, resource) -> Align:
+def make_user_jobs_cluster(user_data) -> Align:
     """ Generate rich table summarizing jobs scheduled by users. """
     all_active_users = len(user_data["total"])
     sum_all = str(sum(user_data["total"]))
@@ -90,8 +91,9 @@ def make_user_jobs(user_data, resource) -> Align:
     sum_wait = str(sum(user_data["wait"]))
 
     # Create table with structure with aggregated numbers
-    table = Table(show_header=True, show_footer=False,
-                  header_style="bold red")
+    table = Table(show_header=True, show_footer=True,
+                  header_style="bold red", row_styles=["none", "dim"],
+                  border_style="red", box=box.SIMPLE)
     table.add_column("USER", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
     table.add_column("ALL", sum_all, justify="center")
@@ -106,23 +108,19 @@ def make_user_jobs(user_data, resource) -> Align:
                       str(user_data["run"][u_id]),
                       str(user_data["login"][u_id]),
                       str(user_data["wait"][u_id]))
-
-    table.show_footer = True
-    table.row_styles = ["none", "dim"]
-    table.border_style = "red"
-    table.box = box.SIMPLE
     return Align.center(table)
 
 
-def make_node_jobs(host_data, resource) -> Align:
+def make_node_jobs_cluster(host_data) -> Align:
     """ Generate rich table summarizing jobs running on different nodes. """
     all_nodes = len(host_data["total"])
     sum_all = str(sum(host_data["total"]))
     sum_running = str(sum(host_data["run"]))
     sum_login = str(sum(host_data['login']))
 
-    table = Table(show_header=True, show_footer=False,
-                  header_style="bold red")
+    table = Table(show_header=True, show_footer=True,
+                  header_style="bold red", row_styles=["none", "dim"],
+                  border_style="red", box=box.SIMPLE)
     table.add_column("NODE", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
     table.add_column("ALL", sum_all, justify="center")
@@ -135,11 +133,85 @@ def make_node_jobs(host_data, resource) -> Align:
                       str(host_data["total"][h_id]),
                       str(host_data["run"][h_id]),
                       str(host_data["login"][h_id]))
+    return Align.center(table)
 
-    table.show_footer = True
-    table.row_styles = ["none", "dim"]
-    table.border_style = "red"
-    table.box = box.SIMPLE
+
+def make_device_panel_local(device_data) -> Align:
+    """ Generate rich table summarizing jobs running on different nodes. """
+    sum_all = str(round(sum(device_data["percent_util"]), 1))
+    t1 = Table(show_header=True, show_footer=True,
+               header_style="bold red", row_styles=["none", "dim"],
+               border_style="red", box=box.SIMPLE)
+    t1.add_column("CORE", Text.from_markup("[b]Total", justify="right"),
+                  style="white", justify="left")
+    t1.add_column("UTIL", sum_all, justify="center")
+    t1.add_column("CORE", "---", justify="center")
+    t1.add_column("UTIL", "---", justify="center")
+
+    # Add row for each individual core
+    num_cores = len(device_data["core_id"])
+    for i in range(int(num_cores/2)):
+        t1.add_row("C-" + str(device_data["core_id"][i]),
+                   str(device_data["percent_util"][i]),
+                   "C-" + str(device_data["core_id"][int(i+num_cores/2-1)]),
+                   str(device_data["percent_util"][int(i+num_cores/2-1)]))
+
+    t2 = Table(show_header=True, show_footer=False, box=box.SIMPLE,
+               border_style="red", header_style="bold red")
+    t2.add_column("GPU", style="white", justify="left")
+    t2.add_column("LOAD-%", justify="center")
+    t2.add_column("MEM-%", justify="center")
+    t2.add_column("MEM-GB", justify="center")
+
+    for i in range(len(device_data["gpu_name"])):
+        t2.add_row(str(device_data["gpu_name"][i]),
+                   str(device_data["gpu_load"][i]),
+                   str(device_data["gpu_mem_util"][i]),
+                   str(device_data["gpu_mem_total"][i]))
+
+    table = Table(box=box.SIMPLE_HEAD, show_header=False, show_footer=True)
+    table.add_column()
+    table.add_row(t1)
+    table.add_row(t2)
+    return Align.center(table)
+    return Align.center(table)
+
+
+def make_process_panel_local(proc_data) -> Align:
+    """ Generate rich table summarizing jobs running on different nodes. """
+    num_procs = len(proc_data["pid"])
+    t1 = Table(show_header=True, header_style="bold red",
+               border_style="red", box=box.SIMPLE)
+    t1.add_column("PID", "---", style="white", justify="left")
+    t1.add_column("NAME", "---", justify="center")
+    t1.add_column("CPU-%", str(round(proc_data["total_cpu_util"], 1)),
+                  justify="center")
+    t1.add_column("MEM-MB", str(round(proc_data["total_mem_util"], 1)),
+                  justify="center")
+
+    for i in range(int(num_procs/2)):
+        t1.add_row(str(proc_data["pid"][i]),
+                   str(proc_data["p_name"][i][:6]),
+                   str(round(proc_data["cpu_util"][i], 1)),
+                   str(round(proc_data["mem_util"][i], 1)))
+
+    t2 = Table(show_header=False, show_footer=True, box=box.SIMPLE,
+               border_style="red")
+    t2.add_column("PID", style="white", justify="left")
+    t2.add_column("NAME", justify="center")
+    t2.add_column("CPU-%", justify="center")
+    t2.add_column("MEM-MB", justify="center")
+
+    for i in range(int(num_procs/2), num_procs):
+        t2.add_row(str(proc_data["pid"][i]),
+                   str(proc_data["p_name"][i][:6]),
+                   str(round(proc_data["cpu_util"][i], 1)),
+                   str(round(proc_data["mem_util"][i], 1)))
+
+    table = Table(box=box.SIMPLE_HEAD, show_header=False, show_footer=True)
+    table.add_column()
+    table.add_row(t1)
+    table.add_row(t2)
     return Align.center(table)
 
 
@@ -153,7 +225,8 @@ def make_protocol() -> Table:
 def make_total_experiments(total_data) -> Align:
     """ Generate rich table summarizing all experiments in protocol db. """
     table = Table(show_header=False, show_footer=False,
-                  header_style="bold yellow")
+                  header_style="bold yellow", border_style="yellow",
+                  box=box.SIMPLE_HEAD)
     table.add_column()
     table.add_column()
     table.add_column()
@@ -174,16 +247,13 @@ def make_total_experiments(total_data) -> Align:
                   Text.from_markup("[b yellow]Sync"),)
     table.add_row("-", total_data["report_gen"],
                   total_data["gcs_stored"], total_data["retrieved"])
-    #table.row_styles = ["none", "dim"]
-    table.border_style = "yellow"
-    table.box = box.SIMPLE_HEAD
     return Align.center(table)
 
 
 def make_last_experiment(last_data) -> Align:
     """ Generate rich table summarizing last scheduled experiment settings. """
-    table = Table(show_header=False, show_footer=False,
-                  header_style="bold yellow")
+    table = Table(show_header=False, show_footer=False, box=box.SIMPLE_HEAD,
+                  header_style="bold yellow", border_style="yellow")
     table.add_column()
     table.add_column()
     table.add_row(Text.from_markup("[b yellow]E-ID"),
@@ -196,8 +266,6 @@ def make_last_experiment(last_data) -> Align:
                   last_data["e_script"],)
     table.add_row(Text.from_markup("[b yellow]Config"),
                   last_data["e_config"],)
-    # table.add_row(Text.from_markup("[b yellow]Report"),
-    #               str(last_data["report_gen"]),)
 
     if last_data["e_type"] == "hyperparameter-search":
         table.add_row(Text.from_markup("[b yellow]Search"),
@@ -232,17 +300,13 @@ def make_last_experiment(last_data) -> Align:
                 else:
                     table.add_row("", str(row),)
                 p_counter += 1
-
-    #table.row_styles = ["none", "dim"]
-    table.border_style = "yellow"
-    table.box = box.SIMPLE_HEAD
     return Align.center(table)
 
 
 def make_est_completion(time_data) -> Align:
     """ Generate rich table summarizing estim. time of experim. completion. """
-    table = Table(show_header=False, show_footer=False,
-                  header_style="bold yellow")
+    table = Table(show_header=False, show_footer=False, box = box.SIMPLE_HEAD,
+                  header_style="bold yellow", border_style="yellow")
     table.add_column()
     table.add_column()
     table.add_row(Text.from_markup("[b yellow]Total Jobs"),
@@ -259,16 +323,13 @@ def make_est_completion(time_data) -> Align:
                   str(time_data["stop_time"]))
     table.add_row(Text.from_markup("[b yellow]Est. Duration"),
                   str(time_data["est_duration"]))
-    #table.row_styles = ["none", "dim"]
-    table.border_style = "yellow"
-    table.box = box.SIMPLE_HEAD
     return Align.center(table)
 
 
 def make_help_commands() -> Align:
     """ Generate rich table summarizing core toolbox subcommands. """
-    table = Table(show_header=True, show_footer=False,
-                    header_style="bold magenta")
+    table = Table(show_header=True, show_footer=False, border_style="white",
+                  header_style="bold magenta", box=box.SIMPLE_HEAD)
     table.add_column("Command", style="white", justify="left")
     table.add_column("Options", )
     table.add_column("Function", )
@@ -297,9 +358,6 @@ def make_help_commands() -> Align:
         "[b blue]None",
         "[b red] Initialize credentials/default setup",
     )
-    #table.row_styles = ["none", "dim"]
-    table.border_style = "white"
-    table.box = box.SIMPLE_HEAD
     return table
 
 
@@ -307,6 +365,7 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     """ Plot curve displaying a CPU usage times series for the cluster. """
     x = np.arange(len(cpu_hist["rel_cpu_util"]))
     y = np.array(cpu_hist["rel_cpu_util"])
+
     # Clear the plot and draw the utilisation lines
     plt.clear_plot()
     plt.plot(x, y, line_marker=0, line_color="tomato", label="% CPU Util.")
@@ -315,6 +374,7 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     plt.axes_color("black")
     plt.ticks_color("white")
     plt.ylim(0, 1)
+
     # Get time points start and end of monitored period
     xticks = [0, len(cpu_hist["times_hour"])-1]
     xlabels = [cpu_hist["times_date"][i][:5] + "-" +
@@ -324,9 +384,10 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     plot_str = plotext_helper()
     decoder = AnsiDecoder()
     lines = list(decoder.decode(plot_str))
+
+    # Build the rich table graph
     message = Table.grid()
     message.add_column()
-    #message.add_row(plot_str,)
     for l in lines:
         message.add_row(l)
     return Align.center(message)
@@ -336,6 +397,7 @@ def make_memory_util_plot(mem_hist) -> Align:
     """ Plot curve displaying a memory usage times series for the cluster. """
     x = np.arange(len(mem_hist["rel_mem_util"]))
     y = np.array(mem_hist["rel_mem_util"])
+
     # Clear the plot and draw the utilisation lines
     plt.clear_plot()
     plt.plot(x, y, line_marker=0, line_color="tomato", label="% Memory Util.")
@@ -344,6 +406,7 @@ def make_memory_util_plot(mem_hist) -> Align:
     plt.axes_color("black")
     plt.ticks_color("white")
     plt.ylim(0, 1)
+
     # Get time points start and end of monitored period
     xticks = [0, len(mem_hist["times_hour"])-1]
     xlabels = [mem_hist["times_date"][i][:5] + "-" +
@@ -353,9 +416,10 @@ def make_memory_util_plot(mem_hist) -> Align:
     plot_str = plotext_helper()
     decoder = AnsiDecoder()
     lines = list(decoder.decode(plot_str))
+
+    # Build the rich table graph
     message = Table.grid()
     message.add_column()
-    #message.add_row(plot_str,)
     for l in lines:
         message.add_row(l)
     return Align.center(message)

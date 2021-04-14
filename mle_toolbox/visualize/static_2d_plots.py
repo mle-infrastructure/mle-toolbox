@@ -5,7 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import List, Union
 
 
-def moving_smooth_ts(ts, window_size=20):
+def moving_smooth_ts(ts, window_size: int=20):
     """ Smoothes a time series using a moving average filter. """
     smooth_df = pd.DataFrame(ts)
     mean_ts = smooth_df[0].rolling(window_size, min_periods=1).mean()
