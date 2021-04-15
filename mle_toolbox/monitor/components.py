@@ -84,7 +84,7 @@ class Header:
 
 def make_user_jobs_cluster(user_data) -> Align:
     """ Generate rich table summarizing jobs scheduled by users. """
-    all_active_users = len(user_data["total"])
+    all_active_users = min(len(user_data["total"]), 13)
     sum_all = str(sum(user_data["total"]))
     sum_running = str(sum(user_data["run"]))
     sum_login = str(sum(user_data["login"]))
@@ -121,7 +121,7 @@ def make_node_jobs_cluster(host_data) -> Align:
     table = Table(show_header=True, show_footer=True,
                   header_style="bold red", row_styles=["none", "dim"],
                   border_style="red", box=box.SIMPLE)
-    table.add_column("NODE", Text.from_markup("[b]Total", justify="right"),
+    table.add_column("NODE/PART", Text.from_markup("[b]Total", justify="right"),
                      style="white", justify="left")
     table.add_column("ALL", sum_all, justify="center")
     table.add_column("RUN", sum_running, justify="center")
@@ -180,7 +180,7 @@ def make_device_panel_local(device_data) -> Align:
 def make_process_panel_local(proc_data) -> Align:
     """ Generate rich table summarizing jobs running on different nodes. """
     num_procs = len(proc_data["pid"])
-    t1 = Table(show_header=True, header_style="bold red",
+    t1 = Table(show_header=True, show_footer=True, header_style="bold red",
                border_style="red", box=box.SIMPLE)
     t1.add_column("PID", "---", style="white", justify="left")
     t1.add_column("NAME", "---", justify="center")

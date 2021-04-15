@@ -48,12 +48,15 @@ def layout_mle_dashboard(resource) -> Layout:
         direction="horizontal"
     )
     # Split center left into user info and node info
-    if resource in ["sge-cluster", "slurm-cluster"]:
+    if resource == "sge-cluster":
         layout["left"].split(Layout(name="l-box1", size=10),
                              Layout(name="l-box2", size=25))
-    else:
+    elif resource == "slurm-cluster":
         layout["left"].split(Layout(name="l-box1", size=20),
                              Layout(name="l-box2", size=15))
+    else:
+        layout["left"].split(Layout(name="l-box1", size=17),
+                             Layout(name="l-box2", size=18))
     # Split center right into total experiments, last experiments, ETA
     layout["right"].split(Layout(name="r-box1", ratio=0.3),
                           Layout(name="r-box2", ratio=0.4),
@@ -102,7 +105,7 @@ def update_mle_dashboard(layout, resource, util_hist,
                                       title="Scheduled Jobs by User",))
         layout["l-box2"].update(Panel(make_node_jobs_cluster(host_data),
                                       border_style="red",
-                                      title="Running Jobs by Node",))
+                                      title="Running Jobs by Node/Partition",))
     else:
         layout["l-box1"].update(Panel(make_device_panel_local(device_data),
                                       border_style="red",
