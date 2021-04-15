@@ -90,8 +90,9 @@ class Experiment(object):
 
         # Add additional cmd line args if extra ones are specified
         if extra_cmd_line_input is not None:
-            self.cmd_line_args = self.generate_extra_cmd_line_args(self.cmd_line_args,
-                                                                   extra_cmd_line_input)
+            self.cmd_line_args = self.generate_extra_cmd_line_args(
+                                            self.cmd_line_args,
+                                            extra_cmd_line_input)
 
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
@@ -234,7 +235,8 @@ class Experiment(object):
         return cmd_line_args
 
     def generate_extra_cmd_line_args(self, cmd_line_args: str,
-                                     extra_cmd_line_input: Union[None, dict]=None) -> str:
+                                     extra_cmd_line_input: Union[None,
+                                     dict]=None) -> str:
         """ Generate extra cmd line args for .py -> mainly for results postprocessing """
         full_cmd_line_args = (cmd_line_args + '.')[:-1]
         for k, v in extra_cmd_line_input.items():

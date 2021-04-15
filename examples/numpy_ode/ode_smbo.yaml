@@ -36,5 +36,5 @@ single_job_args:
     num_gpus: 0
     num_logical_cores: 2
     log_file: "log-ode"
-    err_file: "error-pde"
-    env_name: "multi-agent-cpu"
+    err_file: "error-ode"
+    env_name: "mle-toolbox"

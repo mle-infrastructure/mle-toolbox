@@ -9,8 +9,8 @@ meta_job_args:
 
 multi_experiment_args:
     config_fnames:
-        - "ode/ode_int_config_1.json"
-        - "ode/ode_int_config_2.json"
+        - "numpy_ode/ode_int_config_1.json"
+        - "numpy_ode/ode_int_config_2.json"
     num_seeds: 10
 
 

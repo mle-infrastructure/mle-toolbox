@@ -14,7 +14,6 @@ def spawn_multiple_configs(job_filename: str,
                            num_seeds: Union[None, int] = None,
                            logger_level: int=logging.WARNING):
     """ Spawn processes to running diff. training configs over diff. seeds. """
-    num_configs = len(config_filenames)
     if num_seeds is None:
         num_seeds = 1
     spawn_multiple_configs_experiment(job_filename, config_filenames,
