@@ -29,7 +29,15 @@ def local_submit_conda_job(filename: str,
                            cmd_line_arguments: str,
                            job_arguments: dict):
     """ Create a local job & submit it based on provided file to execute. """
-    cmd = f"python {filename} {cmd_line_arguments}"
+    f_name, f_extension = os.path.splitext(filename)
+    if f_extension == ".py":
+        cmd = f"python {filename} {cmd_line_arguments}"
+    elif f_extension == ".sh":
+        cmd = f"bash {filename} {cmd_line_arguments}"
+    else:
+        raise ValueError(f"Script with {f_extension} cannot be handled"
+                         " by mle-toolbox. Only base .py, .sh experiments"
+                         " are so far implemented. Please open an issue.")
     env_name = job_arguments['env_name']
     current_env = os.environ["CONDA_PREFIX"]
     if current_env != env_name:

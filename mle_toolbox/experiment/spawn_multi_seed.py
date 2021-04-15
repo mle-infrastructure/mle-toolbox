@@ -53,7 +53,6 @@ def spawn_multiple_seeds_experiment(job_filename: str,
 
     # Only merge logs if experiment is based on python experiment!
     filename, file_extension = os.path.splitext(job_filename)
-
     if file_extension == ".py":
         # Merge all resulting .hdf5 files for different seeds into single log
         collected_log_path = os.path.join(log_dir, base_str + ".hdf5")
