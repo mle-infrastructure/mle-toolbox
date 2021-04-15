@@ -51,19 +51,22 @@ def spawn_multiple_seeds_experiment(job_filename: str,
     logger.info("DONE  - {} random seeds - {}".format(num_seeds,
                                                       config_filename))
 
-    # Merge all resulting .hdf5 files for different seeds into single log
-    collected_log_path = os.path.join(log_dir, base_str + ".hdf5")
-    while True:
-        log_paths = [os.path.join(log_dir, l) for l in os.listdir(log_dir)]
-        # print(len(log_paths))
-        if len(log_paths) == num_seeds:
-            # Delete joined log if at some point over-eagerly merged
-            if collected_log_path in log_paths:
-                os.remove(collected_log_path)
-            break
-        else: time.sleep(1)
+    # Only merge logs if experiment is based on python experiment!
+    filename, file_extension = os.path.splitext(job_filename)
+    if file_extension == ".py":
+        # Merge all resulting .hdf5 files for different seeds into single log
+        collected_log_path = os.path.join(log_dir, base_str + ".hdf5")
+        while True:
+            log_paths = [os.path.join(log_dir, l) for l in os.listdir(log_dir)]
+            # print(len(log_paths))
+            if len(log_paths) == num_seeds:
+                # Delete joined log if at some point over-eagerly merged
+                if collected_log_path in log_paths:
+                    os.remove(collected_log_path)
+                break
+            else: time.sleep(1)
 
-    merge_hdf5_files(collected_log_path, log_paths, delete_files=True)
+        merge_hdf5_files(collected_log_path, log_paths, delete_files=True)
 
-    logger.info("MERGE - {} logs: {}".format(len(log_paths),
-                                             collected_log_path))
+        logger.info("MERGE - {} logs: {}".format(len(log_paths),
+                                                 collected_log_path))

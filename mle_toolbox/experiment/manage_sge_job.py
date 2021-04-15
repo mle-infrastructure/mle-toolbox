@@ -114,7 +114,15 @@ def sge_submit_remote_job(filename: str,
     base = "submit_{0}".format(random_id())
 
     # Write the desired python code to .py file to execute
-    script = "python " + filename + cmd_line_arguments
+    f_name, f_extension = os.path.splitext(filename)
+    if f_extension == ".py":
+        script = f"python {filename} {cmd_line_arguments}"
+    elif f_extension == ".sh":
+        script = f"bash {filename} {cmd_line_arguments}"
+    else:
+        raise ValueError(f"Script with {f_extension} cannot be handled"
+                         " by mle-toolbox. Only base .py, .sh experiments"
+                         " are so far implemented. Please open an issue.")
     job_arguments["script"] = script
     sge_job_template = sge_generate_remote_job_template(job_arguments)
 
