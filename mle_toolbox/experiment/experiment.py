@@ -7,13 +7,13 @@ import logging
 from typing import Union
 import subprocess as sp
 
-from .manage_local_job import (local_check_job_args,
+from .manage_job_local import (local_check_job_args,
                                local_submit_venv_job,
                                local_submit_conda_job)
-from .manage_sge_job import (sge_check_job_args,
+from .manage_job_sge import (sge_check_job_args,
                              sge_submit_remote_job,
                              sge_monitor_remote_job)
-from .manage_slurm_job import (slurm_check_job_args,
+from .manage_job_slurm import (slurm_check_job_args,
                                slurm_submit_remote_job,
                                slurm_monitor_remote_job)
 

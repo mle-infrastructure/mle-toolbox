@@ -5,7 +5,6 @@ import datetime
 from typing import Union
 import numpy as np
 import multiprocessing as mp
-
 from .spawn_single_job import spawn_single_experiment
 from ..utils import merge_hdf5_files
 

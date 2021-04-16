@@ -32,6 +32,9 @@ except ImportError:
     pass
 
 
+mle_config = load_mle_toolbox_config()
+
+
 def set_random_seeds(seed_id: Union[int, None],
                      return_key: bool=False,
                      verbose: bool=False):
@@ -122,14 +125,13 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
 
 def determine_resource() -> str:
     """ Check if cluster (sge/slurm) is available. """
-    cc = load_mle_toolbox_config()
     hostname = platform.node()
     on_sge_cluster = any(re.match(l, hostname) for
-                         l in cc.sge.info.node_reg_exp)
+                         l in mle_config.sge.info.node_reg_exp)
     on_slurm_cluster = any(re.match(l, hostname) for
-                           l in cc.slurm.info.node_reg_exp)
-    on_sge_head = (hostname in cc.sge.info.head_names)
-    on_slurm_head = (hostname in cc.slurm.info.head_names)
+                           l in mle_config.slurm.info.node_reg_exp)
+    on_sge_head = (hostname in mle_config.sge.info.head_names)
+    on_slurm_head = (hostname in mle_config.slurm.info.head_names)
     if on_sge_head or on_sge_cluster:
         return "sge-cluster"
     elif on_slurm_head or on_slurm_cluster:

@@ -1,10 +1,8 @@
 **TODO**:
-- Add backend functions for `monitor_slurm_cluster` and local version
 - Make `mle init` beautiful/a smoother experience.
-- Make bash experiments with inputs possible.
 - Smoothly launch remote jobs from local machine.
-- Asynchronous job scheduling based on "trigger event"
-- Population-based training.
+- Asynchronous job scheduling based on "trigger event".
+- Core functionalities for Population-based training.
 - Multi-objective SMBO (pareto front improvements)
 
 
@@ -17,6 +15,8 @@
     - `core_files_merge`: Helpers used to merge meta-logs
     - `helpers`: Random small functionalities (not crucial)
 - Rename `hyperopt` subdirectory: `hyperopt_<type>`, `hyperspace`, `hyperlogger`
+- Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
+- Add backend functions for `monitor_slurm_cluster` and local version to get resource utilisation.
 
 
 **v0.2.6**

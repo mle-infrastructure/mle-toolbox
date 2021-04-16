@@ -1,5 +1,5 @@
 from typing import Union
-from ..experiment import Experiment
+from .experiment import Experiment
 
 
 def spawn_single_experiment(job_filename: str,
