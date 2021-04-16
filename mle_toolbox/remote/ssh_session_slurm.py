@@ -1,7 +1,6 @@
 import os
-from ..utils import load_mle_toolbox_config
-# Import cluster credentials/settings - SGE or Slurm scheduling system
-cc = load_mle_toolbox_config()
+from typing import Union
+from mle_toolbox import mle_config
 
 
 slurm_pre = """#!/bin/bash
@@ -29,10 +28,10 @@ def generate_remote_slurm_str(exec_config: str,
     purpose_str = f"-p {purpose}" if purpose is not None else f"-np"
 
     # Copy the exec string over into home directory
-    if cc.general.use_conda_virtual_env:
+    if mle_config.general.use_conda_virtual_env:
         qsub_str = (slurm_pre.format(random_str=random_str) +
                     enable_conda.format(
-                        remote_env_name=cc.general.remote_env_name) +
+                        remote_env_name=mle_config.general.remote_env_name) +
                     slurm_post.format(exec_dir=exec_dir,
                                       exec_config=exec_config,
                                       purpose_str=purpose_str))
@@ -40,7 +39,7 @@ def generate_remote_slurm_str(exec_config: str,
         qsub_str = (slurm_pre.format(random_str=random_str) +
                     enable_venv.format(
                         os.environ['WORKON_HOME'],
-                        cc.general.remote_env_name) +
+                        mle_config.general.remote_env_name) +
                     slurm_post.format(exec_dir=exec_dir,
                                       exec_config=exec_config,
                                       purpose_str=purpose_str))

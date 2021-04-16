@@ -1,7 +1,6 @@
 import os
-from ..utils import load_mle_toolbox_config
-# Import cluster credentials/settings - SGE or Slurm scheduling system
-cc = load_mle_toolbox_config()
+from typing import Union
+from mle_toolbox import mle_config
 
 
 qsub_pre = """
@@ -29,18 +28,18 @@ enable_conda = ('/bin/bash -c'
 enable_venv = '/bin/bash -c "source {}/{}/bin/activate"'
 
 
-def generate_remote_qsub_str(exec_config: str,
-                             exec_dir: str,
-                             purpose: Union[None, str]):
+def generate_remote_sge_str(exec_config: str,
+                            exec_dir: str,
+                            purpose: Union[None, str]):
     """ Generate qsub exec file for this experiment. """
     random_str = "q" + str(random.randint(0, 10000))
     purpose_str = f"-p {purpose}" if purpose is not None else f"-np"
 
     # Copy the exec string over into home directory
-    if cc.general.use_conda_virtual_env:
+    if mle_config.general.use_conda_virtual_env:
         qsub_str = (qsub_pre.format(random_str=random_str) +
                     enable_conda.format(
-                        remote_env_name=cc.general.remote_env_name) +
+                        remote_env_name=mle_config.general.remote_env_name) +
                     qsub_post.format(exec_dir=exec_dir,
                                      exec_config=exec_config,
                                      purpose_str=purpose_str))
@@ -48,7 +47,7 @@ def generate_remote_qsub_str(exec_config: str,
         qsub_str = (qsub_pre.format(random_str=random_str) +
                     enable_venv.format(
                         os.environ['WORKON_HOME'],
-                        cc.general.remote_env_name) +
+                        mle_config.general.remote_env_name) +
                     qsub_post.format(exec_dir=exec_dir,
                                      exec_config=exec_config,
                                      purpose_str=purpose_str))

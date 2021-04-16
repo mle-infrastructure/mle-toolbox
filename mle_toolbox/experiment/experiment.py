@@ -18,9 +18,7 @@ from .manage_job_slurm import (slurm_check_job_args,
                                slurm_monitor_remote_job)
 
 # Import cluster credentials - SGE or Slurm scheduling system
-from ..utils import load_mle_toolbox_config
-
-cc = load_mle_toolbox_config()
+from mle_toolbox import mle_config
 
 
 class Experiment(object):
@@ -138,7 +136,7 @@ class Experiment(object):
 
     def schedule_local(self):
         """ Schedules experiment locally on your machine. """
-        if cc.general.use_conda_virtual_env:
+        if mle_config.general.use_conda_virtual_env:
             proc = local_submit_conda_job(self.job_filename,
                                           self.cmd_line_args,
                                           self.job_arguments)
@@ -204,10 +202,12 @@ class Experiment(object):
     def cluster_available(self):
         """ Check if cluster (sge/slurm) is available or only local run. """
         hostname = platform.node()
-        on_sge_cluster = any(re.match(l, hostname) for l in cc.sge.info.node_reg_exp)
-        on_slurm_cluster = any(re.match(l, hostname) for l in cc.slurm.info.node_reg_exp)
-        on_sge_head = (hostname in cc.sge.info.head_names)
-        on_slurm_head = (hostname in cc.slurm.info.head_names)
+        on_sge_cluster = any(re.match(l, hostname) for l
+                             in mle_config.sge.info.node_reg_exp)
+        on_slurm_cluster = any(re.match(l, hostname) for l
+                               in mle_config.slurm.info.node_reg_exp)
+        on_sge_head = (hostname in mle_config.sge.info.head_names)
+        on_slurm_head = (hostname in mle_config.slurm.info.head_names)
         if on_sge_head or on_sge_cluster:
             self.run_on_sge_cluster = 1
             self.run_on_slurm_cluster = 0
@@ -237,7 +237,7 @@ class Experiment(object):
     def generate_extra_cmd_line_args(self, cmd_line_args: str,
                                      extra_cmd_line_input: Union[None,
                                      dict]=None) -> str:
-        """ Generate extra cmd line args for .py -> mainly for results postprocessing """
+        """ Generate extra cmd line args for .py -> e.g. for postproc """
         full_cmd_line_args = (cmd_line_args + '.')[:-1]
         for k, v in extra_cmd_line_input.items():
             full_cmd_line_args += " -" + k + " " + str(v)
@@ -246,7 +246,7 @@ class Experiment(object):
     def clean_up(self):
         """ Remove error and log files at end of training. """
         # Clean up if not development!
-        if not cc.general.development:
+        if not mle_config.general.development:
             for filename in glob.glob(self.job_arguments["err_file"] + "*"):
                 try: os.remove(filename)
                 except: pass

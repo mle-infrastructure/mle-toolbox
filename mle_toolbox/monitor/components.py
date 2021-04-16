@@ -10,13 +10,11 @@ import datetime as dt
 import numpy as np
 import plotext as plt
 
+from mle_toolbox import mle_config
 from mle_toolbox.utils import (load_mle_toolbox_config,
                                determine_resource)
 from mle_toolbox.protocol import (protocol_summary,
                                   generate_protocol_table)
-
-
-cc = load_mle_toolbox_config()
 
 
 class Header:
@@ -38,7 +36,7 @@ class Header:
         )
         grid.add_row(
             "\u2022 GCS Sync Protocol: [green]:heavy_check_mark:" if
-            cc.general.use_gcloud_protocol_sync
+            mle_config.general.use_gcloud_protocol_sync
             else "\u2022 GCS Sync Protocol: [red]:heavy_multiplication_x:",
             Header.welcome_ascii[1],
             "Author: @RobertTLange :bird:",
@@ -56,7 +54,7 @@ class Header:
             res = "local"
 
         if res in ["sge", "slurm", "gcp"]:
-            user_on_resource = cc[res].credentials.user_name
+            user_on_resource = mle_config[res].credentials.user_name
         else:
             # Get local user name
             import getpass
@@ -64,18 +62,18 @@ class Header:
 
         grid.add_row(
             "\u2022 GCS Sync Results: [green]:heavy_check_mark:" if
-            cc.general.use_gcloud_results_storage
+            mle_config.general.use_gcloud_results_storage
             else "\u2022 GCS Sync Results: [red]:heavy_multiplication_x:",
             Header.welcome_ascii[2],
             f"Resource: {resource}",
         )
         grid.add_row(
-            f"\u2022 DB Path: {cc.general.local_protocol_fname}",
+            f"\u2022 DB Path: {mle_config.general.local_protocol_fname}",
             Header.welcome_ascii[3],
             f"User: {user_on_resource}",
         )
         grid.add_row(
-            f"\u2022 Env Name: {cc.general.remote_env_name}",
+            f"\u2022 Env Name: {mle_config.general.remote_env_name}",
             Header.welcome_ascii[4],
             "Hi there! [not italic]:hugging_face:[/]",
         )

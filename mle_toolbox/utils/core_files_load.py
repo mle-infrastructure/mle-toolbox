@@ -14,8 +14,11 @@ from .helpers import overwrite_config_with_args
 def load_mle_toolbox_config():
     """ Load cluster config from the .toml file. See docs for more info. """
     # This assumes that the config file is always named the same way!
-    return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
-                  _dynamic=False)
+    try:
+        return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                      _dynamic=False)
+    except:
+        return None
 
 
 def load_yaml_config(cmd_args: dict) -> DotMap:

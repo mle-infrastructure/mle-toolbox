@@ -2,10 +2,6 @@ from datetime import datetime
 import subprocess as sp
 import pandas as pd
 import numpy as np
-from mle_toolbox.utils import load_mle_toolbox_config
-
-
-cc = load_mle_toolbox_config()
 
 
 def get_slurm_data():
@@ -114,7 +110,8 @@ def get_util_slurm_data():
             used_cores += float(node_clean[2]) * float(node_clean[3])/100
             total_mem += float(node_clean[4])/1000
             # Total memory - free memory
-            used_mem += float(node_clean[4])/1000 - float(node_clean[5][:-1])/1000
+            used_mem += (float(node_clean[4])/1000 -
+                         float(node_clean[5][:-1])/1000)
         except:
             pass
 

@@ -3,8 +3,7 @@ import sys
 import logging
 from datetime import datetime
 from typing import Union
-from .. import __version__
-from ..utils import load_mle_toolbox_config
+from .. import __version__, mle_config
 from ..protocol import protocol_summary, load_local_protocol_db
 from ..remote.gcloud_transfer import get_gcloud_db
 
@@ -79,11 +78,9 @@ def check_job_config(job_config: dict):
 
 def ask_for_experiment_id(repeated_question: bool=False):
     """ Helper function asking user for experiment id from protocol log. """
-    # Load cluster config
-    cc = load_mle_toolbox_config()
     # Get most recent/up-to-date experiment DB from Google Cloud Storage
     if not repeated_question:
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             accessed_remote_db = get_gcloud_db()
         else:
             accessed_remote_db = False

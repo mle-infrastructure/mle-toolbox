@@ -4,9 +4,11 @@ import shutil
 import numpy as np
 from datetime import datetime
 
+# Import the MLE-Toolbox configuration
+from mle_toolbox import mle_config
+
 # Import of general tools (loading, etc.)
-from mle_toolbox.utils import (load_mle_toolbox_config,
-                               load_yaml_config,
+from mle_toolbox.utils import (load_yaml_config,
                                determine_resource,
                                print_framed)
 
@@ -39,13 +41,12 @@ def run(cmd_args):
     else:
         print_framed("EXPERIMENT STARTED")
 
-    # Load experiment yaml config, toolbox variables & determine exec resource
+    # Load experiment yaml config & determine exec resource
     job_config = load_yaml_config(cmd_args)
-    cc = load_mle_toolbox_config()
     resource = determine_resource()
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
-    if cc.general.use_gcloud_protocol_sync:
+    if mle_config.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
             from ..remote.gcloud_transfer import (get_gcloud_db,
@@ -95,7 +96,7 @@ def run(cmd_args):
     # 5. Protocol experiment if desired (can also only be locally)!
     if not cmd_args.no_protocol:
         # 3a. Get up-to-date experiment DB from Google Cloud Storage
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             accessed_remote_db = get_gcloud_db()
         else:
             accessed_remote_db = False
@@ -111,7 +112,7 @@ def run(cmd_args):
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
         # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage
-        if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
+        if mle_config.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
     # 6. Copy over the experiment config .yaml file for easy re-running
@@ -172,12 +173,12 @@ def run(cmd_args):
     # 10. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
         # 9a. Get most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
         # 9b. Store experiment directory in GCS bucket under hash
-        if (cc.general.use_gcloud_results_storage
-            and cc.general.use_gcloud_protocol_sync):
+        if (mle_config.general.use_gcloud_results_storage
+            and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
@@ -192,7 +193,7 @@ def run(cmd_args):
                                           report_generated])
 
         # 9d. Send most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             send_gcloud_db()
     print_framed("EXPERIMENT FINISHED")
 

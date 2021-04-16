@@ -4,15 +4,10 @@ import time
 import logging
 from datetime import datetime
 from typing import Union
-import os
-import sys, select
+import os, sys, select
 from .ssh_transfer import SSH_Manager
-from .ssh_session_sge import generate_remote_qsub_str
+from .ssh_session_sge import generate_remote_sge_str
 from .ssh_session_slurm import generate_remote_slurm_str
-from ..utils import load_mle_toolbox_config
-
-# Import cluster credentials/settings - SGE or Slurm scheduling system
-cc = load_mle_toolbox_config()
 
 
 def ask_for_resource_to_run():
@@ -43,7 +38,7 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
 
     # 1. Rsync over the current working dir into remote_exec_dir
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(f"{time_t} Do you want to sync the remote dir? [Y/N]", end= ' '),
+    print(f"{time_t} Do you want to sync the remote dir? [Y/N]", end= ' ')
     sys.stdout.flush()
     i, o, e = select.select([sys.stdin], [], [], 30)
     if (i):
@@ -57,7 +52,7 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
 
     # 2. Generate and execute bash qsub file
     if remote_resource == "sge-cluster":
-        exec_str, random_str, exec_cmd = generate_remote_qsub_str(
+        exec_str, random_str, exec_cmd = generate_remote_sge_str(
                                                     exec_config,
                                                     remote_exec_dir,
                                                     purpose)

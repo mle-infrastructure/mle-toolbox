@@ -3,7 +3,7 @@ import time
 import subprocess as sp
 from typing import Union
 from .manage_job_local import submit_subprocess, random_id
-from ..utils import load_mle_toolbox_config
+from mle_toolbox import mle_config
 
 
 # Base qsub template
@@ -38,14 +38,11 @@ echo "------------------------------------------------------------------------"
 
 def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
     """ Check the input job arguments & add default values if missing. """
-    # Load cluster config
-    cc = load_mle_toolbox_config()
-
     if job_arguments is None:
         job_arguments = {}
 
     # Add the default config values if they are missing from job_args
-    for k, v in cc.sge.default_job_arguments.items():
+    for k, v in mle_config.sge.default_job_arguments.items():
         if k not in job_arguments.keys():
             job_arguments[k] = v
 
@@ -61,9 +58,6 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
 
 def sge_generate_remote_job_template(job_arguments: dict):
     """ Generate the bash script template to submit with qsub. """
-    # Load cluster config
-    cc = load_mle_toolbox_config()
-
     # Set the job template depending on the desired number of GPUs
     base_template = (sge_base_job_config + '.')[:-1]
 
@@ -74,14 +68,16 @@ def sge_generate_remote_job_template(job_arguments: dict):
 
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:
-        base_template += ('#$ -l hostname=' + '&'.join((f'!' + cc.sge.info.node_reg_exp[0]
-                          + f'{x:02}' + cc.sge.info.node_extension
+        base_template += ('#$ -l hostname=' + '&'.join((f'!'
+                          + mle_config.sge.info.node_reg_exp[0]
+                          + f'{x:02}' + mle_config.sge.info.node_extension
                           for x in job_arguments['exclude_nodes'])) + '\n')
 
     # Only run on specific nodes from the queue
     if "include_nodes" in job_arguments:
-        base_template += ('#$ -l hostname=' + '&'.join(( cc.sge.info.node_reg_exp[0]
-                          + '{x:02}' + cc.sge.info.node_extension
+        base_template += ('#$ -l hostname=' + '&'.join((
+                          mle_config.sge.info.node_reg_exp[0]
+                          + '{x:02}' + mle_config.sge.info.node_extension
                           for x in job_arguments['include_nodes'])) + '\n')
 
     # Set the max required memory per job in MB - standardization Slurm
@@ -107,9 +103,6 @@ def sge_submit_remote_job(filename: str,
                           job_arguments: dict,
                           clean_up: bool=True):
     """ Create a qsub job & submit it based on provided file to execute. """
-    # Load cluster config
-    cc = load_mle_toolbox_config()
-
     # Create base string of job id
     base = "submit_{0}".format(random_id())
 
@@ -152,19 +145,20 @@ def sge_submit_remote_job(filename: str,
     # Wait until the job is listed under the qstat scheduled jobs
     while True:
         try:
-            out = sp.check_output(["qstat", "-u", cc.sge.credentials.user_name])
+            out = sp.check_output(["qstat", "-u",
+                                   mle_config.sge.credentials.user_name])
             job_info = out.split(b'\n')[2:]
             running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                                for i in range(len(job_info) - 1)]
-            success = job_id in running_job_ids
-            if success:
+            sumle_configess = job_id in running_job_ids
+            if sumle_configess:
                 break
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
             time.sleep(0.5)
 
-    # Finally delete all the unneccessary log files
+    # Finally delete all the unnemle_configessary log files
     if clean_up:
         os.remove(base + '.qsub')
 
@@ -173,13 +167,11 @@ def sge_submit_remote_job(filename: str,
 
 def sge_monitor_remote_job(job_id: Union[list, int]):
     """ Monitor the status of a job based on its id. """
-    # Load cluster config
-    cc = load_mle_toolbox_config()
-
     fail_counter = 0
     while True:
         try:
-            out = sp.check_output(["qstat", "-u", cc.sge.credentials.user_name])
+            out = sp.check_output(["qstat", "-u",
+                                   mle_config.sge.credentials.user_name])
             break
         except sp.CalledProcessError as e:
             stderr = e.stderr

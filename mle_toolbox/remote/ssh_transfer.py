@@ -10,12 +10,14 @@ def setup_proxy_server():
     """ Set Gcloud creds & port to tunnel for internet connection. """
     cc = load_mle_toolbox_config()
     if determine_resource() == "slurm-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.slurm_credentials_path)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(
+                                cc.gcp.slurm_credentials_path)
         if cc.slurm.info.http_proxy is not "":
             os.environ["HTTP_PROXY"] = cc.slurm.info.http_proxy
             os.environ["HTTPS_PROXY"] = cc.slurm.info.https_proxy
     elif determine_resource() == "sge-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(cc.gcp.sge_credentials_path)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(
+                                cc.gcp.sge_credentials_path)
         if cc.sge.info.http_proxy is not "":
             os.environ["HTTP_PROXY"] = cc.sge.info.http_proxy
             os.environ["HTTPS_PROXY"] = cc.sge.info.https_proxy

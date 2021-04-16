@@ -9,14 +9,13 @@ from typing import Union, List
 from rich.console import Console
 from rich.align import Align
 
-from ..utils import load_mle_toolbox_config
+from mle_toolbox import mle_config
 from ..protocol.protocol_table import generate_protocol_table
 
 
 def load_local_protocol_db():
     """ Load local database from config name & reconstruct experiment id. """
-    cc = load_mle_toolbox_config()
-    db = pickledb.load(cc.general.local_protocol_fname, False)
+    db = pickledb.load(mle_config.general.local_protocol_fname, False)
     # Get the most recent experiment id
     all_experiment_ids = list(db.getall())
 
