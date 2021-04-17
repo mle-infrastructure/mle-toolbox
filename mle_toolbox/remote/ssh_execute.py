@@ -5,9 +5,9 @@ import logging
 from datetime import datetime
 from typing import Union
 import os, sys, select
-from .ssh_transfer import SSH_Manager
-from .ssh_session_sge import generate_remote_sge_str
-from .ssh_session_slurm import generate_remote_slurm_str
+from .ssh_manager import SSH_Manager
+from .ssh_session_sge import generate_remote_sge_cmd
+from .ssh_session_slurm import generate_remote_slurm_cmd
 
 
 def ask_for_resource_to_run():
@@ -52,44 +52,31 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
 
     # 2. Generate and execute bash qsub file
     if remote_resource == "sge-cluster":
-        exec_str, random_str, exec_cmd = generate_remote_sge_str(
-                                                    exec_config,
-                                                    remote_exec_dir,
-                                                    purpose)
-        remote_exec_fname = 'qsub_cmd.qsub'
+        session_name, exec_cmd = generate_remote_sge_cmd(exec_config,
+                                                         remote_exec_dir,
+                                                         purpose)
     elif remote_resource == "slurm-cluster":
-        exec_str, random_str, exec_cmd = generate_remote_slurm_str(
-                                                    exec_config,
-                                                    remote_exec_dir,
-                                                    purpose)
-        remote_exec_fname = 'sbash_cmd.sh'
+        session_name, exec_cmd = generate_remote_slurm_cmd(exec_config,
+                                                           remote_exec_dir,
+                                                           purpose)
 
-    ssh_manager.write_to_file(exec_str, remote_exec_fname)
     ssh_manager.execute_command(exec_cmd)
-    logger.info(f"Generated & executed {random_str} remote job" +
-                f" on {remote_resource}.")
+    logger.info(f"Generated & executed remote job on {remote_resource}.")
+    logger.info(f"Attach to the tmux session via"
+                f"`screen -r {session_name}`.")
 
     # 3. Monitor progress & clean up experiment (separate for reconnect!)
-    remote_connect_monitor_clean(remote_resource, random_str)
+    #remote_connect_monitor_clean(remote_resource, tmux_name)
 
 
-def remote_connect_monitor_clean(remote_resource, random_str):
+def remote_connect_monitor_clean(remote_resource: str,
+                                 tmux_name: str):
     """ Reconnect & monitor running job. """
     logger = logging.getLogger(__name__)
     ssh_manager = SSH_Manager(remote_resource)
     # Monitor the experiment
     monitor_remote_job(ssh_manager, random_str)
     logger.info(f"Experiment on {remote_resource} finished.")
-
-    # Delete .qsub gen files
-    ssh_manager.delete_file(random_str + ".txt")
-    ssh_manager.delete_file(random_str + ".err")
-    if remote_resource == "slurm-cluster":
-        remote_exec_fname = 'sbash_cmd.sh'
-    elif remote_resource == "sge-cluster":
-        remote_exec_fname = 'qsub_cmd.qsub'
-    ssh_manager.delete_file(remote_exec_fname)
-    logger.info(f"Done cleaning up experiment debris.")
     return
 
 

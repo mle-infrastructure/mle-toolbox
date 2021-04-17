@@ -2,25 +2,24 @@ import os
 import paramiko
 from scp import SCPClient
 from sshtunnel import SSHTunnelForwarder
-from os.path import expanduser
-from ..utils import determine_resource, load_mle_toolbox_config
+from ..utils import determine_resource
+from mle_toolbox import mle_config
 
 
 def setup_proxy_server():
     """ Set Gcloud creds & port to tunnel for internet connection. """
-    cc = load_mle_toolbox_config()
     if determine_resource() == "slurm-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(
-                                cc.gcp.slurm_credentials_path)
-        if cc.slurm.info.http_proxy is not "":
-            os.environ["HTTP_PROXY"] = cc.slurm.info.http_proxy
-            os.environ["HTTPS_PROXY"] = cc.slurm.info.https_proxy
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
+                                mle_config.gcp.slurm_credentials_path)
+        if mle_config.slurm.info.http_proxy is not "":
+            os.environ["HTTP_PROXY"] = mle_config.slurm.info.http_proxy
+            os.environ["HTTPS_PROXY"] = mle_config.slurm.info.https_proxy
     elif determine_resource() == "sge-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = expanduser(
-                                cc.gcp.sge_credentials_path)
-        if cc.sge.info.http_proxy is not "":
-            os.environ["HTTP_PROXY"] = cc.sge.info.http_proxy
-            os.environ["HTTPS_PROXY"] = cc.sge.info.https_proxy
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
+                                mle_config.gcp.sge_credentials_path)
+        if mle_config.sge.info.http_proxy is not "":
+            os.environ["HTTP_PROXY"] = mle_config.sge.info.http_proxy
+            os.environ["HTTPS_PROXY"] = mle_config.sge.info.https_proxy
 
 
 class SSH_Manager(object):
@@ -28,22 +27,21 @@ class SSH_Manager(object):
     def __init__(self, remote_resource: str):
         """ Set the credentials & resource details. """
         setup_proxy_server()
-        self.cc = load_mle_toolbox_config()
         self.remote_resource = remote_resource
 
         # Set credentials depending on remote resource
         if self.remote_resource == "sge-cluster":
-            self.main_server = self.cc.sge.info.main_server_name
-            self.jump_server = self.cc.sge.info.jump_server_name
-            self.port = self.cc.sge.info.ssh_port
-            self.user = self.cc.sge.credentials.user_name
-            self.password = self.cc.sge.credentials.password
+            self.main_server = mle_config.sge.info.main_server_name
+            self.jump_server = mle_config.sge.info.jump_server_name
+            self.port = mle_config.sge.info.ssh_port
+            self.user = mle_config.sge.credentials.user_name
+            self.password = mle_config.sge.credentials.password
         elif self.remote_resource == "slurm-cluster":
-            self.main_server = self.cc.slurm.info.main_server_name
-            self.jump_server = self.cc.slurm.info.jump_server_name
-            self.port = self.cc.slurm.info.ssh_port
-            self.user = self.cc.slurm.credentials.user_name
-            self.password = self.cc.slurm.credentials.password
+            self.main_server = mle_config.slurm.info.main_server_name
+            self.jump_server = mle_config.slurm.info.jump_server_name
+            self.port = mle_config.slurm.info.ssh_port
+            self.user = mle_config.slurm.credentials.user_name
+            self.password = mle_config.slurm.credentials.password
 
         # We are always using tunnel even if not necessary!
         if self.jump_server == '':
@@ -82,11 +80,16 @@ class SSH_Manager(object):
             client.close()
         return
 
-    def execute_command(self, cmd_to_exec: str):
+    def execute_command(self, cmds_to_exec: str):
         """ Execute a shell command on the remote server. """
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
-            stdin, stdout, stderr = client.exec_command(cmd_to_exec, get_pty=True)
+            stdin, stdout, stderr = client.exec_command(cmds_to_exec[0],
+                                                        get_pty=True)
+            for l in stderr:
+                print(l)
+            stdin, stdout, stderr = client.exec_command(cmds_to_exec[1],
+                                                        get_pty=True)
             for l in stderr:
                 print(l)
             client.close()

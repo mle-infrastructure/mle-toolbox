@@ -13,14 +13,14 @@ slurm_pre = """#!/bin/bash
 module load nvidia/cuda/10.0
 """
 
-slurm_pre = """
+slurm_post = """
 chmod a+rx {exec_dir}
 cd {exec_dir}
-run-experiment {exec_config} {purpose_str} --no_welcome
+mle run {exec_config} {purpose_str} --no_welcome
 """
 
 
-def generate_remote_slurm_str(exec_config: str,
+def generate_remote_slurm_cmd(exec_config: str,
                               exec_dir: str,
                               purpose: Union[None, str]):
     """ Generate qsub exec file for this experiment. """
@@ -29,14 +29,14 @@ def generate_remote_slurm_str(exec_config: str,
 
     # Copy the exec string over into home directory
     if mle_config.general.use_conda_virtual_env:
-        qsub_str = (slurm_pre.format(random_str=random_str) +
+        slurm_str = (slurm_pre.format(random_str=random_str) +
                     enable_conda.format(
                         remote_env_name=mle_config.general.remote_env_name) +
                     slurm_post.format(exec_dir=exec_dir,
                                       exec_config=exec_config,
                                       purpose_str=purpose_str))
     else:
-        qsub_str = (slurm_pre.format(random_str=random_str) +
+        slurm_str = (slurm_pre.format(random_str=random_str) +
                     enable_venv.format(
                         os.environ['WORKON_HOME'],
                         mle_config.general.remote_env_name) +

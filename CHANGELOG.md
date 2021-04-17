@@ -1,25 +1,23 @@
-**TODO**:
-- Make `mle init` beautiful/a smoother experience.
-- Smoothly launch remote jobs from local machine.
-- Asynchronous job scheduling based on "trigger event".
-- Core functionalities for Population-based training.
-- Multi-objective SMBO (pareto front improvements)
+### v0.2.7 - Unreleased
 
-
-**v0.2.7**
+##### Changed
 - Changes plots of monitored resource utilisation to `plotext` to avoid gnuplot dependency.
 - Change logger interface: Now one has to provide dictionaries as inputs to `update_log`. This is supposed to make the logging more robust.
-- Update template files and refactor/name files in `utils` subdirectory:
+- Change template files and refactor/name files in `utils` subdirectory:
     - `core_experiment`: Includes helpers used in (almost) every experiment
     - `core_files_load`: Helpers used to load various core components (configs)
     - `core_files_merge`: Helpers used to merge meta-logs
     - `helpers`: Random small functionalities (not crucial)
 - Rename `hyperopt` subdirectory: `hyperopt_<type>`, `hyperspace`, `hyperlogger`
+- Change the naming of the config from `cc` to `mle_config` for easy readability.
+
+##### Added
 - Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
 - Add backend functions for `monitor_slurm_cluster` and local version to get resource utilisation.
 
+##### Fixed
 
-**v0.2.6**
+### v0.2.6 - 04/09/2021
 - Adds `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
 - Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
 - Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
@@ -31,7 +29,7 @@
 - A lot of internal refactoring: E.g. getting rid of `multi_runner` sub directory.
 
 
-**v0.2.5**
+### v0.2.5 - 04/05/2021
 - Raw github links for figures in readme so they are rendered in PyPi.
 - Introduce mle-config variable `use_conda_virtual_env` to allow user to choose between `conda` and `venv` virtual environment setup.
 - Introduce mle-config variable `remote_env_name` to allow user to set name for the remote experiment execution environment.
@@ -48,7 +46,7 @@
     - `sync-gcs`: Sync all results from Google Cloud Storage
 
 
-**v0.2.4**
+### v0.2.4 -02/16/2021
 - Major reduction of dependencies. Now for all more optional/specialized features (e.g. SMBO, visualization, JAX/torch idiosyncracies) there will be an exception raised if the package isn't installed and you still want to use the toolbox feature.
 - Refactored `visualization` into its own subdirectory to clean up `utils`.
 - Change from own `DotDic` to `DotMap`, which appears more stable and better maintained. Be aware that now we can't rely on `None` outputs if key is not in dict. We shouldn't have done that in the first place due to being error prone.
@@ -58,5 +56,5 @@
 - Added an example notebook that shows how to load/analyze and report the results from the simple ODE integration example.
 
 
-**v0.2.2**
+### v0.2.3 - 02/16/2021
 - Minor update to the credential `.toml` template file

@@ -10,7 +10,7 @@ from typing import Union
 
 from mle_toolbox import mle_config
 from ..protocol import load_local_protocol_db
-from .ssh_transfer import setup_proxy_server
+from .ssh_manager import setup_proxy_server
 
 
 # Set environment variable for gcloud credentials & proxy remote
