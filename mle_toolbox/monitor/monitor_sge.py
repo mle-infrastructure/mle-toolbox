@@ -1,9 +1,6 @@
 from datetime import datetime
 import subprocess as sp
-from mle_toolbox.utils import load_mle_toolbox_config
-
-
-cc = load_mle_toolbox_config()
+from mle_toolbox import mle_config
 
 
 def get_sge_data():
@@ -31,12 +28,14 @@ def get_user_sge_data():
         try:
             queue_all = len(sp.check_output(
                                     ['qstat', '-u', user, '-q',
-                                     cc.sge.info.queue]).split(b'\n')[:-1])
+                                     mle_config.sge.info.queue]
+                                    ).split(b'\n')[:-1])
             if queue_all != 0: queue_all -= 2
 
             queue_spare = len(sp.check_output(
                                     ['qstat', '-u', user, '-q',
-                                     cc.sge.info.spare]).split(b'\n')[:-1])
+                                     mle_config.sge.info.spare]
+                                    ).split(b'\n')[:-1])
             if queue_spare != 0: queue_spare -= 2
             total_jobs = queue_all + queue_spare
 
@@ -45,7 +44,7 @@ def get_user_sge_data():
                 # Get logins.
                 if queue_spare != 0:
                     ps = sp.Popen(('qstat', '-u', user, '-q',
-                                   cc.sge.info.spare), stdout=sp.PIPE)
+                                   mle_config.sge.info.spare), stdout=sp.PIPE)
                     try:
                         qlogins = sp.check_output(('grep', 'QLOGIN'),
                                                   stdin=ps.stdout)
@@ -60,7 +59,8 @@ def get_user_sge_data():
                 if queue_all != 0:
                     running = len(sp.check_output(
                                     ['qstat', '-s', 'r', '-u', user, '-q',
-                                     cc.sge.info.queue]).split(b'\n')[:-1])
+                                     mle_config.sge.info.queue]
+                                    ).split(b'\n')[:-1])
                     if running != 0: running -= 2
                 # Add a row for each user that has running jobs
                 if qlogins + running != 0:
@@ -87,24 +87,26 @@ def get_host_sge_data():
         all_users = [u.decode() for u in all_users]
         user_cmd = [['-u', u] for u in all_users]
         user_cmd = [item for sublist in user_cmd for item in sublist]
-        for host_id in cc.sge.info.node_ids:
+        for host_id in mle_config.sge.info.node_ids:
             queue_all, queue_spare = 0, 0
             qlogins, running = 0, 0
-            cmd = ['qstat', '-q', cc.sge.info.queue] + user_cmd
+            cmd = ['qstat', '-q', mle_config.sge.info.queue] + user_cmd
             ps = sp.Popen(cmd, stdout=sp.PIPE)
             try:
                 queue_all = sp.check_output(('grep',
-                                        cc.sge.info.node_reg_exp[0] + host_id),
+                                        mle_config.sge.info.node_reg_exp[0]
+                                        + host_id),
                                             stdin=ps.stdout)
                 ps.wait()
                 queue_all = len(queue_all.split(b'\n')[:-1])
             except:
                 pass
-            cmd = ['qstat', '-q', cc.sge.info.spare] + user_cmd
+            cmd = ['qstat', '-q', mle_config.sge.info.spare] + user_cmd
             ps = sp.Popen(cmd, stdout=sp.PIPE)
             try:
                 queue_spare = sp.check_output(('grep',
-                                        cc.sge.info.node_reg_exp[0] + host_id),
+                                        mle_config.sge.info.node_reg_exp[0]
+                                        + host_id),
                                               stdin=ps.stdout)
                 ps.wait()
                 # print(queue_spare)
@@ -113,11 +115,13 @@ def get_host_sge_data():
                 pass
 
             if queue_all != 0:
-                cmd = ['qstat', '-s', 'r', '-q', cc.sge.info.queue] + user_cmd
+                cmd = (['qstat', '-s', 'r', '-q', mle_config.sge.info.queue]
+                       + user_cmd)
                 ps = sp.Popen(cmd, stdout=sp.PIPE)
                 try:
                     running = sp.check_output(('grep',
-                                        cc.sge.info.node_reg_exp[0] + host_id),
+                                        mle_config.sge.info.node_reg_exp[0]
+                                        + host_id),
                                                 stdin=ps.stdout)
                     ps.wait()
                     running = len(running.split(b'\n')[:-1])
@@ -125,11 +129,13 @@ def get_host_sge_data():
                     pass
 
             if queue_spare != 0:
-                cmd = ['qstat', '-s', 'r', '-q', cc.sge.info.spare] + user_cmd
+                cmd = (['qstat', '-s', 'r', '-q', mle_config.sge.info.spare]
+                       + user_cmd)
                 ps = sp.Popen(cmd, stdout=sp.PIPE)
                 try:
                     qlogins = sp.check_output(('grep',
-                                        cc.sge.info.node_reg_exp[0] + host_id),
+                                        mle_config.sge.info.node_reg_exp[0]
+                                        + host_id),
                                                 stdin=ps.stdout)
                     ps.wait()
                     qlogins = len(qlogins.split(b'\n')[:-1])
@@ -153,7 +159,7 @@ def get_util_sge_data():
     all_hosts = sp.check_output(['qconf', '-ss']).split(b'\n')
     all_hosts = [u.decode() for u in all_hosts]
     # Filter list of hosts by node 'stem'
-    all_hosts = list(filter(lambda k: cc.sge.info.node_reg_exp[0]
+    all_hosts = list(filter(lambda k: mle_config.sge.info.node_reg_exp[0]
                             in k, all_hosts))
 
     all_cores, all_cores_util, all_mem, all_mem_util = [], [], [], []

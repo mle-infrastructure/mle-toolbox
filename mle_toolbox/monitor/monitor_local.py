@@ -1,7 +1,7 @@
 from datetime import datetime
 import subprocess as sp
 import numpy as np
-from mle_toolbox.utils import load_mle_toolbox_config
+
 
 try:
     import psutil
@@ -15,9 +15,6 @@ try:
 except ModuleNotFoundError as err:
     raise ModuleNotFoundError(f"{err}. You need to install `gputil` "
                               "to monitor local GPU resources.")
-
-
-cc = load_mle_toolbox_config()
 
 
 def get_local_data():

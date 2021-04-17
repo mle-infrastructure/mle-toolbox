@@ -3,8 +3,8 @@ import logging
 import pdfkit
 import markdown2
 from dotmap import DotMap
-from .markdown_generator import MarkdownGenerator
-from .figure_generator import FigureGenerator
+from .generate_markdown import MarkdownGenerator
+from .generate_figures import FigureGenerator
 from ..launch.prepare_experiment import prepare_logger
 
 

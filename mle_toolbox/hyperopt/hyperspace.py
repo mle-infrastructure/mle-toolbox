@@ -1,5 +1,4 @@
 import numpy as np
-from skopt.space import Real, Integer, Categorical
 
 
 def construct_hyperparam_range(params_to_search: dict,
@@ -19,12 +18,20 @@ def construct_hyperparam_range(params_to_search: dict,
             for k, v in params_to_search["integer"].items():
                 param_range[k] = np.arange(int(v["begin"]), int(v["end"]),
                                            int(v["spacing"])).tolist()
+
     # For SMBO-based hyperopt generate spaces with skopt classes
     elif search_type == "smbo":
         # Can specify prior distribution over hyperp. distrib
         # log-uniform samples more from the lower tail of the hyperparam range
         #   real: ["uniform", "log-uniform"]
         #   integer: ["uniform", "log-uniform"]
+        try:
+            from skopt.space import Real, Integer, Categorical
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(f"{err}. You need to"
+                                      "install `scikit-optimize` to use "
+                                      "the `mle_toolbox.hyperopt` module.")
+
         if "categorical" in params_to_search.keys():
             for k, v in params_to_search["categorical"].items():
                 param_range[k] = Categorical(v, name=k)

@@ -1,12 +1,13 @@
-#!/usr/bin/env python
 import os
 import shutil
 import numpy as np
 from datetime import datetime
 
+# Import the MLE-Toolbox configuration
+from mle_toolbox import mle_config
+
 # Import of general tools (loading, etc.)
-from mle_toolbox.utils import (load_mle_toolbox_config,
-                               load_yaml_config,
+from mle_toolbox.utils import (load_yaml_config,
                                determine_resource,
                                print_framed)
 
@@ -19,7 +20,8 @@ from mle_toolbox.protocol import (protocol_summary,
 
 # Import of local-to-remote helpers (verify, rsync, exec)
 from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
-                                            remote_connect_monitor_clean,
+                                            SSH_Manager,
+                                            monitor_remote_session,
                                             run_remote_experiment)
 
 # Import different experiment executers & setup tools (log, config, etc.)
@@ -39,13 +41,12 @@ def run(cmd_args):
     else:
         print_framed("EXPERIMENT STARTED")
 
-    # Load experiment yaml config, toolbox variables & determine exec resource
+    # Load experiment yaml config & determine exec resource
     job_config = load_yaml_config(cmd_args)
-    cc = load_mle_toolbox_config()
     resource = determine_resource()
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
-    if cc.general.use_gcloud_protocol_sync:
+    if mle_config.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
             from ..remote.gcloud_transfer import (get_gcloud_db,
@@ -69,11 +70,13 @@ def run(cmd_args):
             resource_to_run = ask_for_resource_to_run()
         else:
             resource_to_run = cmd_args.resource_to_run
-        if resource_to_run in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
-            if cmd_args.remote_reconnect is not None:
+        if resource_to_run in ["slurm-cluster", "sge-cluster"]:
+            if cmd_args.remote_reconnect:
                 print_framed("RECONNECT TO REMOTE")
-                remote_connect_monitor_clean(resource_to_run,
-                                             cmd_args.reconnect_remote)
+                ssh_manager = SSH_Manager(resource_to_run)
+                base, fname_and_ext = os.path.split(cmd_args.config_fname)
+                session_name, ext = os.path.splitext(fname_and_ext)
+                monitor_remote_session(ssh_manager, session_name)
                 return
             else:
                 print_framed("TRANSFER TO REMOTE")
@@ -95,7 +98,7 @@ def run(cmd_args):
     # 5. Protocol experiment if desired (can also only be locally)!
     if not cmd_args.no_protocol:
         # 3a. Get up-to-date experiment DB from Google Cloud Storage
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             accessed_remote_db = get_gcloud_db()
         else:
             accessed_remote_db = False
@@ -111,7 +114,7 @@ def run(cmd_args):
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
         # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage
-        if cc.general.use_gcloud_protocol_sync and accessed_remote_db:
+        if mle_config.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
     # 6. Copy over the experiment config .yaml file for easy re-running
@@ -149,6 +152,13 @@ def run(cmd_args):
                                   job_config.single_job_args,
                                   job_config.param_search_args)
 
+    # TODO: (d) Experiment: Run population-based-training for NN training
+    elif job_config.meta_job_args["job_type"] == "population-based-training":
+        raise NotImplementedError
+
+    else:
+        raise ValueError(f"Job type has to be in {experiment_types}.")
+
     # 8. Perform post-processing of results if arguments are provided
     if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
@@ -172,12 +182,12 @@ def run(cmd_args):
     # 10. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
         # 9a. Get most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
         # 9b. Store experiment directory in GCS bucket under hash
-        if (cc.general.use_gcloud_results_storage
-            and cc.general.use_gcloud_protocol_sync):
+        if (mle_config.general.use_gcloud_results_storage
+            and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
@@ -192,7 +202,7 @@ def run(cmd_args):
                                           report_generated])
 
         # 9d. Send most recent/up-to-date experiment DB to GCS
-        if cc.general.use_gcloud_protocol_sync:
+        if mle_config.general.use_gcloud_protocol_sync:
             send_gcloud_db()
     print_framed("EXPERIMENT FINISHED")
 

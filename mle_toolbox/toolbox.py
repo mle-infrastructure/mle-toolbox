@@ -76,8 +76,9 @@ def run_build_subparser(subparsers):
     parser_run.add_argument('-resource', '--resource_to_run', default=None,
                             help ='Resource to run experiment on '
                             '{local, sge-cluster, slurm-cluster, gcp-cloud}.')
-    parser_run.add_argument('-reconnect', '--remote_reconnect', default=None,
-                            help ='Reconnect to experiment by str name.')
+    parser_run.add_argument('-reconnect', '--remote_reconnect',
+                            default=False, action='store_true',
+                            help ='Reconnects to experiment via .yaml str.')
 
     # Allow CLI to change base train fname/config .json/experiment dir
     parser_run.add_argument('-train_fname', '--base_train_fname', default=None,

@@ -1,5 +1,5 @@
 from dotmap import DotMap
-from mle_toolbox.utils import load_mle_toolbox_config
+from mle_toolbox import mle_config
 from mle_toolbox.launch import prepare_logger
 from mle_toolbox.initialize import (default_mle_config,
                                     description_mle_config,
@@ -34,10 +34,10 @@ def initialize(cmd_args):
             +- gcloud_protocol_fname: Name of protocol db stored in bucket
     """
     # Look for toml config and reload it exists - otherwise start w. default
-    try:
-        mle_config, reloaded_config = load_mle_toolbox_config(), True
-    except:
+    if mle_config is None:
         mle_config, reloaded_config = default_mle_config, False
+    else:
+        reloaded_config = True
 
     # Pretty print current state of MLE-Toolbox configuration
     print_mle_config(mle_config)
