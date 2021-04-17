@@ -8,7 +8,6 @@ from dotmap import DotMap
 # Import helpers for loading meta-log and hyper-log files
 from .load_meta_log import load_meta_log
 from .load_hyper_log import load_hyper_log
-from .helpers import overwrite_config_with_args
 
 
 def load_mle_toolbox_config():
@@ -22,12 +21,17 @@ def load_mle_toolbox_config():
 
 
 def load_yaml_config(cmd_args: dict) -> DotMap:
-    """ Load in a YAML config file & wrap as DotMap. """
+    """ Load in YAML config file, overwrite based on cmd & wrap as DotMap. """
     with open(cmd_args.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     # Update job config with specific cmd args (if provided)
-    config = overwrite_config_with_args(config, cmd_args)
+    if cmd_args.base_train_fname is not None:
+        config["meta_job_args"]["base_train_fname"] = cmd_args.base_train_fname
+    if cmd_args.base_train_config is not None:
+        config["meta_job_args"]["base_train_config"] = cmd_args.base_train_config
+    if cmd_args.experiment_dir is not None:
+        config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
     return DotMap(config, _dynamic=False)
 
 

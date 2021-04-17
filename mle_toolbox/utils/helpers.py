@@ -13,17 +13,6 @@ def print_framed(str_to_print: str,
     print(left*frame_str + "  " + str_to_print + "  " + right*frame_str)
 
 
-def overwrite_config_with_args(config, cmd_args):
-    """ Update entries if there was command line input. """
-    if cmd_args.base_train_fname is not None:
-        config["meta_job_args"]["base_train_fname"] = cmd_args.base_train_fname
-    if cmd_args.base_train_config is not None:
-        config["meta_job_args"]["base_train_config"] = cmd_args.base_train_config
-    if cmd_args.experiment_dir is not None:
-        config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
-    return config
-
-
 def save_pkl_object(obj, filename: str):
     """ Helper to store pickle objects. """
     with open(filename, 'wb') as output:

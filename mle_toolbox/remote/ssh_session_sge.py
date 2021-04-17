@@ -18,7 +18,7 @@ enable_venv = """source {}/{}/bin/activate && """
 qrsh_post = ("""chmod a+rx {exec_dir} && """
              """cd {exec_dir} && """
              """mle run {exec_config} {purpose_str} --no_welcome """
-             """2>&1 | tee {session_name}.txt"^M'""")
+             """2>&1 | tee ~/{session_name}.txt"^M'""")
 
 
 def generate_remote_sge_cmd(exec_config: str,

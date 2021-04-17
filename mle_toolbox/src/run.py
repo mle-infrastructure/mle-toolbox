@@ -21,7 +21,7 @@ from mle_toolbox.protocol import (protocol_summary,
 
 # Import of local-to-remote helpers (verify, rsync, exec)
 from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
-                                            remote_connect_monitor_clean,
+                                            monitor_remote_session,
                                             run_remote_experiment)
 
 # Import different experiment executers & setup tools (log, config, etc.)
@@ -70,11 +70,12 @@ def run(cmd_args):
             resource_to_run = ask_for_resource_to_run()
         else:
             resource_to_run = cmd_args.resource_to_run
-        if resource_to_run in ["slurm-cluster", "sge-cluster", "gcp-cloud"]:
-            if cmd_args.remote_reconnect is not None:
+        if resource_to_run in ["slurm-cluster", "sge-cluster"]:
+            if cmd_args.remote_reconnect:
                 print_framed("RECONNECT TO REMOTE")
-                remote_connect_monitor_clean(resource_to_run,
-                                             cmd_args.reconnect_remote)
+                base, fname_and_ext = os.path.split(cmd_args.config_fname)
+                session_name, ext = os.path.splitext(fname_and_ext)
+                monitor_remote_session(resource_to_run, session_name)
                 return
             else:
                 print_framed("TRANSFER TO REMOTE")
@@ -149,6 +150,13 @@ def run(cmd_args):
         run_hyperparameter_search(job_config.meta_job_args,
                                   job_config.single_job_args,
                                   job_config.param_search_args)
+
+    # TODO: (d) Experiment: Run population-based-training for NN training
+    elif job_config.meta_job_args["job_type"] == "population-based-training":
+        raise NotImplementedError
+
+    else:
+        raise ValueError(f"Job type has to be in {experiment_types}.")
 
     # 8. Perform post-processing of results if arguments are provided
     if "post_process_args" in job_config.keys():
