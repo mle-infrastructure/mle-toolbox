@@ -16,7 +16,7 @@ def ask_for_resource_to_run():
     resource = input(time_t + " Where to run? [local/slurm/sge] ")
     while resource not in ["local", "slurm", "sge", "gcp"]:
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        resource = input(time_t + " Please repeat: [local/slurm/sge/gcp] ")
+        resource = input(time_t + " Please repeat: [local/slurm/sge] ")
 
     if resource == "local":
         resource_to_run = "local"
@@ -24,8 +24,6 @@ def ask_for_resource_to_run():
         resource_to_run = "slurm-cluster"
     elif resource == "sge":
         resource_to_run = "sge-cluster"
-    elif resurce == "gcp":
-        resource_to_run = "gcp-cloud"
     return resource_to_run
 
 
@@ -52,17 +50,17 @@ def run_remote_experiment(remote_resource: str, exec_config: str,
 
     # 2. Generate and execute bash qsub file
     if remote_resource == "sge-cluster":
-        session_name, exec_cmd = generate_remote_sge_cmd(exec_config,
+        session_name, exec_cmds = generate_remote_sge_cmd(exec_config,
                                                          remote_exec_dir,
                                                          purpose)
     elif remote_resource == "slurm-cluster":
-        session_name, exec_cmd = generate_remote_slurm_cmd(exec_config,
+        session_name, exec_cmds = generate_remote_slurm_cmd(exec_config,
                                                            remote_exec_dir,
                                                            purpose)
 
-    ssh_manager.execute_command(exec_cmd)
+    ssh_manager.execute_command(exec_cmds)
     logger.info(f"Generated & executed remote job on {remote_resource}.")
-    logger.info(f"Attach to the screen session via"
+    logger.info(f"Attach to the screen session via "
                 f"`screen -r {session_name}`.")
 
     # 3. Monitor progress & clean up experiment (separate for reconnect!)
@@ -74,7 +72,7 @@ def monitor_remote_session(ssh_manager: SSH_Manager,
                            session_name: str):
     """ Monitor the remote experiment. """
     logger = logging.getLogger(__name__)
-    print("start monitor", f"{session_name}.txt")
+
     # Monitor the experiment
     terminal_print = 31*"=" + "  EXPERIMENT FINISHED  " + 31*"="
     file_length, fail_counter = 0, 0
@@ -102,7 +100,8 @@ def monitor_remote_session(ssh_manager: SSH_Manager,
         if len(all_lines) > 0:
             if all_lines[-1][:-1] == terminal_print:
                 break
+
     # Delete the log file
     os.remove(f"{session_name}.txt")
-    logger.info(f"Experiment on {remote_resource} finished.")
+    logger.info(f"Experiment on {ssh_manager.remote_resource} finished.")
     return

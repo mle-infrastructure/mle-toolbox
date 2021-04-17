@@ -22,7 +22,8 @@ def welcome_to_mle_toolbox(verbose=False):
     print(72*" " + "@RobertTLange")
     print(85*"=")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(time_t, f"Thx for using MLE-Toolbox {__version__} Locally, on SGE, Slurm or GCP")
+    print(time_t, f"Thx for using MLE-Toolbox {__version__}"
+                  f" Locally, on SGE or Slurm or Clusters.")
     if verbose:
         print(time_t, "It implements the following experiment types:")
         print("  - single-experiment: Run a single configuration experiment.")

@@ -13,7 +13,6 @@ qrsh_pre = ("""qrsh -N {session_name} " """
 enable_conda = """conda activate {remote_env_name} && """
 enable_venv = """source {}/{}/bin/activate && """
 
-
 # Execute experiment and log output to file with base config .yaml fname
 qrsh_post = ("""chmod a+rx {exec_dir} && """
              """cd {exec_dir} && """

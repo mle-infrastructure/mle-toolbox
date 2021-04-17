@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import shutil
 import numpy as np
@@ -21,6 +20,7 @@ from mle_toolbox.protocol import (protocol_summary,
 
 # Import of local-to-remote helpers (verify, rsync, exec)
 from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
+                                            SSH_Manager,
                                             monitor_remote_session,
                                             run_remote_experiment)
 
@@ -73,9 +73,10 @@ def run(cmd_args):
         if resource_to_run in ["slurm-cluster", "sge-cluster"]:
             if cmd_args.remote_reconnect:
                 print_framed("RECONNECT TO REMOTE")
+                ssh_manager = SSH_Manager(resource_to_run)
                 base, fname_and_ext = os.path.split(cmd_args.config_fname)
                 session_name, ext = os.path.splitext(fname_and_ext)
-                monitor_remote_session(resource_to_run, session_name)
+                monitor_remote_session(ssh_manager, session_name)
                 return
             else:
                 print_framed("TRANSFER TO REMOTE")

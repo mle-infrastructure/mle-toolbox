@@ -6,7 +6,7 @@ class MLExperiment(object):
     def __init__(self,
                  config_fname: str="configs/base_config.json",
                  auto_setup: bool=True,
-                 create_jax_prng: bool=True):
+                 create_jax_prng: bool=False):
         ''' Load the job configs for the MLE experiment. '''
         # Load the different configurations for the experiment.
         train_config, net_config, log_config = get_configs_ready(config_fname)

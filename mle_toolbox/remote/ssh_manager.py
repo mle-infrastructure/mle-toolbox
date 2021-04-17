@@ -2,6 +2,7 @@ import os
 import paramiko
 from scp import SCPClient
 from sshtunnel import SSHTunnelForwarder
+from typing import List
 from ..utils import determine_resource
 from mle_toolbox import mle_config
 
@@ -80,19 +81,15 @@ class SSH_Manager(object):
             client.close()
         return
 
-    def execute_command(self, cmds_to_exec: str):
+    def execute_command(self, cmds_to_exec: List[str]):
         """ Execute a shell command on the remote server. """
-        with self.generate_tunnel() as tunnel:
-            client = self.connect(tunnel)
-            stdin, stdout, stderr = client.exec_command(cmds_to_exec[0],
-                                                        get_pty=True)
-            for l in stderr:
-                print(l)
-            stdin, stdout, stderr = client.exec_command(cmds_to_exec[1],
-                                                        get_pty=True)
-            for l in stderr:
-                print(l)
-            client.close()
+        for cmd in cmds_to_exec:
+            with self.generate_tunnel() as tunnel:
+                client = self.connect(tunnel)
+                stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
+                for l in stderr:
+                    print(l)
+                client.close()
         return
 
     def read_file(self, file_name: str):

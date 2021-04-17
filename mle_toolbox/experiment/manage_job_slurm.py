@@ -92,6 +92,7 @@ def slurm_submit_remote_job(filename: str,
     base = "submit_{0}".format(random_id())
 
     # Write the desired python code to .py file to execute
+    f_name, f_extension = os.path.splitext(filename)
     if f_extension == ".py":
         script = f"python {filename} {cmd_line_arguments}"
     elif f_extension == ".sh":
