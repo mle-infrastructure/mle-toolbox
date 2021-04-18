@@ -1,4 +1,4 @@
-import os
+import random, string
 from typing import Union
 import base64
 from Crypto.Cipher import AES
@@ -7,6 +7,13 @@ from Crypto import Random
 
 # Credential encryption based on Stack Overflow discussion:
 # stackoverflow.com/questions/42568262/how-to-encrypt-text-with-a-password-in-python
+
+def get_random_string(length):
+    """ Sample a random string. """
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
+
 
 def encrypt(key: Union[str, bytes],
             source: Union[str, bytes],
@@ -48,7 +55,7 @@ def decrypt(key: Union[str, bytes],
 def encrypt_ssh_credentials(user_name: Union[str, bytes],
                             password: Union[str, bytes]):
     """ Generate an AES key and encrypt user name and password. """
-    random_key = os.urandom(32)   # Number of bytes 32
+    random_key = get_random_string(32)
     encrypt_user_name = encrypt(random_key, user_name)
     encrypt_password = encrypt(random_key, password)
     return random_key, encrypt_user_name, encrypt_password
@@ -64,8 +71,8 @@ def decrypt_ssh_credentials(aes_key: Union[str, bytes],
 
 
 if __name__ == "__main__":
-    user_name = "rob"
-    password = "pass"
+    user_name = 'user'
+    password = 'pass!'
     aes_key, enc_user_name, enc_password = encrypt_ssh_credentials(user_name,
                                                                    password)
     print(aes_key, enc_user_name, enc_password)

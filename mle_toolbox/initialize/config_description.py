@@ -39,7 +39,7 @@ slurm_descript = {'credentials':
                     {'description': 'Password on Slurm cluster',
                      'type': str},
                 'aes_key':
-                    {'description': 'AES key for SHA-256 crypto - same for SGE',
+                    {'description': 'AES key for SHA-256 crypto for Slurm',
                      'type': bytes}
                     },
             'description': 'Slurm credentials to submit/retrieve jobs'
@@ -108,7 +108,7 @@ sge_descript = {'credentials':
                     {'description': 'Password on SGE cluster',
                      'type': str},
                 'aes_key':
-                    {'description': 'AES key for SHA-256 crypto - same for Slurm',
+                    {'description': 'AES key for SHA-256 crypto for SGE',
                      'type': bytes}
                     },
             'description': 'SGE credentials to submit/retrieve jobs'

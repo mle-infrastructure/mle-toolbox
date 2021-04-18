@@ -20,7 +20,7 @@ def load_mle_toolbox_config():
         return None
 
     # Decrypt ssh credentials for SGE & Slurm -> Only if local launch used!
-    if mle_config.use_credential_encryption:
+    if mle_config.general.use_credential_encryption:
         # Import decrypt functionality - requires pycrypto!
         try:
             from mle_toolbox.initialize import decrypt_ssh_credentials
@@ -30,15 +30,13 @@ def load_mle_toolbox_config():
                                       "`decrypt_ssh_credentials`.")
         # Decrypt for slurm and sge independently - if key provided!
         for resource in ["slurm", "sge"]:
-            try:
+            if "aes_key" in mle_config[resource].credentials.keys():
                 dec_user, dec_pass = decrypt_ssh_credentials(
-                                                mle_config[resource].aes_key,
-                                                mle_config[resource].user_name,
-                                                mle_config[resource].password)
-                mle_config[resource].user_name = dec_user
-                mle_config[resource].password = dec_pass
-            except:
-                pass
+                                mle_config[resource].credentials.aes_key,
+                                mle_config[resource].credentials.user_name,
+                                mle_config[resource].credentials.password)
+                mle_config[resource].credentials.user_name = dec_user
+                mle_config[resource].credentials.password = dec_pass
         return mle_config
 
 
