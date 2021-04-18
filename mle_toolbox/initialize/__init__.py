@@ -4,6 +4,8 @@ from .config_update import (whether_update_config,
                             how_update_config,
                             store_mle_config,
                             print_mle_config)
+from .crypto_credentials import (encrypt_ssh_credentials,
+                                 decrypt_ssh_credentials)
 
 
 __all__ = [
@@ -12,5 +14,7 @@ __all__ = [
            "whether_update_config",
            "how_update_config",
            "store_mle_config",
-           "print_mle_config"
+           "print_mle_config",
+           "encrypt_ssh_credentials",
+           "decrypt_ssh_credentials"
           ]

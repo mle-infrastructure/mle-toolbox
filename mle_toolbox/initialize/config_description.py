@@ -15,6 +15,9 @@ general_descript = {'general':
                     'use_gcloud_results_storage':
                         {'description': 'Whether to sync exp results with GCS',
                          'type': bool},
+                    'use_credential_encryption':
+                        {'description': 'Whether to en/decrypt SSH credentials',
+                         'type': bool},
                     'use_conda_virtual_env':
                         {'description': 'Whether to use anaconda or venv',
                          'type': bool},
@@ -34,8 +37,13 @@ slurm_descript = {'credentials':
                      'type': str},
                 'password':
                     {'description': 'Password on Slurm cluster',
-                     'type': str}
-                    },
+                     'type': str},
+                'aes_key':
+                    {'description': 'AES key for SHA-256 crypto for Slurm',
+                     'type': str},
+                'gcp_credentials_path':
+                    {'description': 'Path to GCP credentials',
+                     'type': str}},
             'description': 'Slurm credentials to submit/retrieve jobs'
           },
           'info':
@@ -100,8 +108,13 @@ sge_descript = {'credentials':
                      'type': str},
                 'password':
                     {'description': 'Password on SGE cluster',
-                     'type': str}
-                    },
+                     'type': str},
+                'aes_key':
+                    {'description': 'AES key for SHA-256 crypto for SGE',
+                     'type': str},
+                'gcp_credentials_path':
+                    {'description': 'Path to GCP credentials',
+                     'type': str}},
             'description': 'SGE credentials to submit/retrieve jobs'
           },
          'info':
@@ -173,12 +186,6 @@ sge_descript = {'credentials':
 
 gcp_descript = {'gcp':
             {'variables': {
-                'slurm_credentials_path':
-                    {'description': 'Path to GCP credentials on Slurm',
-                     'type': str},
-                'sge_credentials_path':
-                    {'description': 'Path to GCP credentials on SGE',
-                     'type': str},
                 'project_name':
                     {'description': 'Name of project in GCP account',
                      'type': str},

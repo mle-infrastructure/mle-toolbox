@@ -1,21 +1,25 @@
 ### v0.2.7 - Unreleased
 
+##### Added
+- Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
+- Adds backend functions for `monitor_slurm_cluster` and local version to get resource utilisation.
+- Adds SHA-256 encryption/decryption of ssh credentials. Also part of initialization setup.
+
 ##### Changed
 - Changes plots of monitored resource utilisation to `plotext` to avoid gnuplot dependency.
-- Change logger interface: Now one has to provide dictionaries as inputs to `update_log`. This is supposed to make the logging more robust.
-- Change template files and refactor/name files in `utils` subdirectory:
+- Changes logger interface: Now one has to provide dictionaries as inputs to `update_log`. This is supposed to make the logging more robust.
+- Changes template files and refactor/name files in `utils` subdirectory:
     - `core_experiment`: Includes helpers used in (almost) every experiment
     - `core_files_load`: Helpers used to load various core components (configs)
     - `core_files_merge`: Helpers used to merge meta-logs
     - `helpers`: Random small functionalities (not crucial)
-- Rename `hyperopt` subdirectory: `hyperopt_<type>`, `hyperspace`, `hyperlogger`
-- Change the naming of the config from `cc` to `mle_config` for easy readability.
-
-##### Added
-- Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
-- Add backend functions for `monitor_slurm_cluster` and local version to get resource utilisation.
+- Renames `hyperopt` subdirectory: `hyperopt_<type>`, `hyperspace`, `hyperlogger`
+- Changes the naming of the config from `cc` to `mle_config` for easy readability.
+- Changes the naming of files to be more intuitive: E.g. `abc_1_def.py`, `abc_2_def.py` are changed to `abc_def_1.py`, `abc_def_2.py`
 
 ##### Fixed
+- Fixed local launch of remote projects via `screen` session and pipping to `qrsh` or `srun --pty bash`. If you are on a local machine and run `mle run`, you will get to choose the remote resource and can later reattach to that resource.
+
 
 ### v0.2.6 - 04/09/2021
 - Adds `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.

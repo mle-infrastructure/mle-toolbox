@@ -7,10 +7,10 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## The 4 Step MLE-Toolbox Cooking Recipe
 
-1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and to set up your credentials/configurations (e.g. via `mle init`).
-2. Read the [documentation](docs/how_to_toolbox.md) explaining the pillars of the toolbox & how to compose the meta-configuration job `.yaml` files for your experiments.
-3. Check out the [examples :notebook:](#examples-getting-started-running-jobs) to get started with a toy [ODE integration](examples/ode), training [PyTorch MNIST-CNNs](examples/mnist) or [VAEs in JAX](examples/jax_vae).
-4. Start up your own experiments using the [template files](templates/).
+1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
+2. Read the [docs](docs/how_to_toolbox.md) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
+3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/ode), training [PyTorch MNIST-CNNs](examples/mnist) or [VAEs in JAX](examples/jax_vae).
+4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
 
 
 ## Installing `mle_toolbox` & dependencies
@@ -34,8 +34,8 @@ pip install -e .
 
 You are now ready to dive deeper into the specifics of [job configuration](docs/how_to_toolbox.md) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
 
-1. **Initial setup of credentials & toolbox**: `mle init`
-2. **Start up an experiment**: `mle run <experiment_config>.yaml`
+1. **Initial setup of credentials & toolbox settings**: `mle init`
+2. **Start up an experiment**: `mle run <exp_config>.yaml`
 3. **Monitor resource utilisation**: `mle monitor`
 4. **Retrieve an experiment result**: `mle retrieve`
 5. **Create an experiment report with figures**: `mle report`
@@ -59,14 +59,18 @@ The configuration procedure consists of 4 optional steps, which depend on your n
 
 ## Examples & Getting Your First Job Running
 
-* :notebook: [Euler ODE](examples/ode) - Integrate an ODE using forward Euler for different initial conditions.
-* :notebook: [MNIST CNN](examples/mnist) - Train CNNs on multiple random seeds & different training configs.
-* :notebook: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
-* :notebook: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
-* :notebook: [Multi Bash](examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
+* :page_facing_up: [Euler ODE](examples/ode) - Integrate an ODE using forward Euler for different initial conditions.
+* :page_facing_up: [MNIST CNN](examples/mnist) - Train CNNs on multiple random seeds & different training configs.
+* :page_facing_up: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
+* :page_facing_up: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
+* :page_facing_up: [Multi Bash](examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
+
+- :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).
+- :notebook: [GIF Animations](notebooks/animate_results.ipynb) - Walk through set of animation helpers.
 
 
 ## Notes, Development & Questions
 
 - If you find a bug or would like to see a feature implemented, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue :hugs:
-- You can find a set of open milestones in the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+- You can check out the history of release modifications in [`CHANGELOG.md`](CHANGELOG.md) (*added, changed, fixed*). 
+- You can find a set of open milestones in [`CONTRIBUTING.md`](CONTRIBUTING.md).

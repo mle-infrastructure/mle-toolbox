@@ -14,10 +14,31 @@ def load_mle_toolbox_config():
     """ Load cluster config from the .toml file. See docs for more info. """
     # This assumes that the config file is always named the same way!
     try:
-        return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
-                      _dynamic=False)
+        mle_config = DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                                      _dynamic=False)
     except:
         return None
+
+    # Decrypt ssh credentials for SGE & Slurm -> Only if local launch used!
+    if mle_config.general.use_credential_encryption:
+        # Import decrypt functionality - requires pycrypto!
+        try:
+            from mle_toolbox.initialize import decrypt_ssh_credentials
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(f"{err}. You need to"
+                                      "install `pycrypto` to use "
+                                      "`decrypt_ssh_credentials`.")
+        # Decrypt for slurm and sge independently - if key provided!
+        for resource in ["slurm", "sge"]:
+            if "aes_key" in mle_config[resource].credentials.keys():
+                dec_user, dec_pass = decrypt_ssh_credentials(
+                                mle_config[resource].credentials.aes_key,
+                                mle_config[resource].credentials.user_name,
+                                mle_config[resource].credentials.password)
+                mle_config[resource].credentials.user_name = dec_user
+                mle_config[resource].credentials.password = dec_pass
+        return mle_config
+
 
 
 def load_yaml_config(cmd_args: dict) -> DotMap:
