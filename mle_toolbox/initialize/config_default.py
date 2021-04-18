@@ -6,12 +6,14 @@ general_default = {'development': False,
                    'local_protocol_fname': '~/local_robs_mle_protocol.db',
                    'use_gcloud_protocol_sync': True,
                    'use_gcloud_results_storage': True,
+                   'use_credential_encryption': True,
                    'use_conda_virtual_env': True,
                    'remote_env_name': 'mle-toolbox'}
 
 
 slurm_default = {'credentials': {'user_name': '<slurm-user-name>',
-                          'password': '<slurm-password>'},
+                                 'password': '<slurm-password>',
+                                 'aes_key': '<aes_crypto_key>'},
                  'info': {'head_names': ['<headnode1>'],
                           'node_reg_exp': ['<nodes-to-monitor1>'],
                           'partitions': ['<partition1>'],
@@ -29,7 +31,8 @@ slurm_default = {'credentials': {'user_name': '<slurm-user-name>',
 
 
 sge_default = {'credentials': {'user_name': 'sge-user-name',
-                               'password': 'sge-password'},
+                               'password': 'sge-password',
+                               'aes_key': '<aes_crypto_key>'},
                 'info': {'head_names': ['<headnode1>'],
                          'node_reg_exp': ['<nodes-to-monitor2>'],
                          'node_extension': '<ip-extension>',

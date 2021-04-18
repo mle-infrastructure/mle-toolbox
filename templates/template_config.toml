@@ -17,6 +17,9 @@ use_gcloud_protocol_sync = true
 # Storing of experiment results in bucket
 use_gcloud_results_storage = true
 
+# Storing of encrypted ssh credentials
+use_credential_encryption = false
+
 # Whether to use conda or venv for experiment virtual environment
 use_conda_virtual_env = true
 
@@ -32,6 +35,7 @@ remote_env_name = 'mle-toolbox'
     [slurm.credentials]
     user_name = '<slurm-user-name>'
     password = '<slurm-password>'
+    aes_key = '<aes-key>'
 
     # Slurm cluster information - Job scheduling, monitoring & retrieval
     [slurm.info]
@@ -63,8 +67,9 @@ remote_env_name = 'mle-toolbox'
 [sge]
     # SGE credentials - Needed only if you want to retrieve results from cluster
     [sge.credentials]
-    user_name = 'sge-user-name'
-    password = 'sge-password'
+    user_name = '<sge-user-name>'
+    password = '<sge-password>'
+    aes_key = '<aes-key>'
 
     # SGE cluster information - Job scheduling, monitoring & retrieval
     [sge.info]

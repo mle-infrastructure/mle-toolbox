@@ -15,6 +15,9 @@ general_descript = {'general':
                     'use_gcloud_results_storage':
                         {'description': 'Whether to sync exp results with GCS',
                          'type': bool},
+                    'use_credential_encryption':
+                        {'description': 'Whether to en/decrypt SSH credentials',
+                         'type': bool},
                     'use_conda_virtual_env':
                         {'description': 'Whether to use anaconda or venv',
                          'type': bool},
@@ -34,7 +37,10 @@ slurm_descript = {'credentials':
                      'type': str},
                 'password':
                     {'description': 'Password on Slurm cluster',
-                     'type': str}
+                     'type': str},
+                'aes_key':
+                    {'description': 'AES key for SHA-256 crypto - same for SGE',
+                     'type': bytes}
                     },
             'description': 'Slurm credentials to submit/retrieve jobs'
           },
@@ -100,7 +106,10 @@ sge_descript = {'credentials':
                      'type': str},
                 'password':
                     {'description': 'Password on SGE cluster',
-                     'type': str}
+                     'type': str},
+                'aes_key':
+                    {'description': 'AES key for SHA-256 crypto - same for Slurm',
+                     'type': bytes}
                     },
             'description': 'SGE credentials to submit/retrieve jobs'
           },
