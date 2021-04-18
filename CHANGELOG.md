@@ -3,6 +3,7 @@
 ##### Added
 - Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
 - Adds backend functions for `monitor_slurm_cluster` and local version to get resource utilisation.
+- Adds SHA-256 encryption/decryption of ssh credentials. Also part of initialization setup.
 
 ##### Changed
 - Changes plots of monitored resource utilisation to `plotext` to avoid gnuplot dependency.

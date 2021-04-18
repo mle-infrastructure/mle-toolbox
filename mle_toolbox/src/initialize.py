@@ -73,6 +73,15 @@ def initialize(cmd_args):
                                     logger.info(f'Updated {var}: {update_val}')
                                 else:
                                     pass
+                        if (sk == "credentials" and
+                            mle_config["general"]["use_credential_encryption"]):
+                            aes, enc_user, enc_pass = encrypt_ssh_credentials(
+                                                mle_config[k][sk]["user_name"],
+                                                mle_config[k][sk]["password"])
+                            mle_config[k][sk]["user_name"] = enc_user
+                            mle_config[k][sk]["password"] = enc_pass
+                            mle_config[k][sk]["aes_key"] = aes
+                            logger.info(f'Encrypted {var}: {update_val}')
                     else:
                         for var in ss_keys:
                             update_ss = whether_update_config(var)
