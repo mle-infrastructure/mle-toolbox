@@ -14,8 +14,8 @@ def load_mle_toolbox_config():
     """ Load cluster config from the .toml file. See docs for more info. """
     # This assumes that the config file is always named the same way!
     try:
-        return DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
-                      _dynamic=False)
+        mle_config = DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+                                      _dynamic=False)
     except:
         return None
 
