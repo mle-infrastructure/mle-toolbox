@@ -13,7 +13,8 @@ general_default = {'development': False,
 
 slurm_default = {'credentials': {'user_name': '<slurm-user-name>',
                                  'password': '<slurm-password>',
-                                 'aes_key': '<aes_crypto_key>'},
+                                 'aes_key': '<aes_crypto_key>',
+                                 'gcp_credentials_path': '~/<path_to_gcp_cred>.json',},
                  'info': {'head_names': ['<headnode1>'],
                           'node_reg_exp': ['<nodes-to-monitor1>'],
                           'partitions': ['<partition1>'],
@@ -32,7 +33,8 @@ slurm_default = {'credentials': {'user_name': '<slurm-user-name>',
 
 sge_default = {'credentials': {'user_name': 'sge-user-name',
                                'password': 'sge-password',
-                               'aes_key': '<aes_crypto_key>'},
+                               'aes_key': '<aes_crypto_key>',
+                               'gcp_credentials_path': '~/<path_to_gcp_cred>.json',},
                 'info': {'head_names': ['<headnode1>'],
                          'node_reg_exp': ['<nodes-to-monitor2>'],
                          'node_extension': '<ip-extension>',
@@ -53,9 +55,7 @@ sge_default = {'credentials': {'user_name': 'sge-user-name',
                                           'env_name': '<mle-default-env>'}}
 
 
-gcp_default = {'slurm_credentials_path': '~/<slurm_path_to_gc_cred>.json',
-               'sge_credentials_path': '~/<sge_path_to_gc_cred>.json',
-               'project_name': '<gcloud_project_name>',
+gcp_default = {'project_name': '<gcloud_project_name>',
                'bucket_name': '<gcloud_bucket_name>',
                'protocol_fname': 'gcloud_mle_protocol.db'}
 

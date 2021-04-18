@@ -40,8 +40,10 @@ slurm_descript = {'credentials':
                      'type': str},
                 'aes_key':
                     {'description': 'AES key for SHA-256 crypto for Slurm',
-                     'type': str}
-                    },
+                     'type': str},
+                'gcp_credentials_path':
+                    {'description': 'Path to GCP credentials',
+                     'type': str}},
             'description': 'Slurm credentials to submit/retrieve jobs'
           },
           'info':
@@ -109,8 +111,10 @@ sge_descript = {'credentials':
                      'type': str},
                 'aes_key':
                     {'description': 'AES key for SHA-256 crypto for SGE',
-                     'type': str}
-                    },
+                     'type': str},
+                'gcp_credentials_path':
+                    {'description': 'Path to GCP credentials',
+                     'type': str}},
             'description': 'SGE credentials to submit/retrieve jobs'
           },
          'info':
@@ -182,12 +186,6 @@ sge_descript = {'credentials':
 
 gcp_descript = {'gcp':
             {'variables': {
-                'slurm_credentials_path':
-                    {'description': 'Path to GCP credentials on Slurm',
-                     'type': str},
-                'sge_credentials_path':
-                    {'description': 'Path to GCP credentials on SGE',
-                     'type': str},
                 'project_name':
                     {'description': 'Name of project in GCP account',
                      'type': str},
