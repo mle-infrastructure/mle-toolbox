@@ -4,7 +4,7 @@ import random
 import numpy as np
 import platform
 import re
-from typing import Union, List
+from typing import Union
 from dotmap import DotMap
 from .core_files_load import load_json_config, load_mle_toolbox_config
 
@@ -87,7 +87,7 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
     parser.add_argument('-seed', '--seed_id', action="store",
                         default=default_seed,
                         help='Seed id on which to train')
-    cmd_args, _ = parser.parse_known_args()
+    cmd_args, extra_args = parser.parse_known_args()
 
     # Load .json config file + add config fname to clone + add experiment dir
     config = load_json_config(cmd_args.config_fname)
@@ -120,23 +120,25 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
         log_config.seed_id = "seed_" + str(cmd_args.seed_id)
     else:
         log_config.seed_id = "seed_" + str(train_config.seed_id)
-    return train_config, net_config, log_config
+    return train_config, net_config, log_config, extra_args
 
 
-def get_extra_cmd_line_input(extra_cmd_line_keys: Union[List[str], None]=None):
+def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):
     """ Parse additional command line inputs & return them as dotmap. """
-    if extra_cmd_line_keys is not None:
-        parser = argparse.ArgumentParser()
-        for k in extra_cmd_line_keys:
-            parser.add_argument(f'-{k}', f'--{k}', action="store",
-                                default="default",
-                                help=f'Some extra input: {k}')
-        extra_args, _ = parser.parse_known_args()
-
+    # extra_cmd_args is a sequential list of command line keys & arguments 
+    if extra_cmd_args is not None:
         # Unpack the command line data into a dotmap dict
         extra_input = {}
-        for k in extra_cmd_line_keys:
-            extra_input[k] = vars(extra_args)[k]
+        num_extra_args = int(len(extra_cmd_args)/2)
+        counter = 0
+        for i in range(num_extra_args):
+            cmd_val = extra_cmd_args[counter+1]
+            try:
+                cmd_val = float(cmd_val)
+            except:
+                pass
+            extra_input[extra_cmd_args[counter]] = cmd_val
+            counter += 2
         return DotMap(extra_input, _dynamic=False)
     else:
         return None

@@ -9,13 +9,13 @@ class MLExperiment(object):
     def __init__(self,
                  config_fname: str="configs/base_config.json",
                  auto_setup: bool=True,
-                 create_jax_prng: bool=False,
-                 extra_cmd_line_keys: Union[List[str], None]=None):
+                 create_jax_prng: bool=False):
         ''' Load the job configs for the MLE experiment. '''
         # Load the different configurations for the experiment.
-        train_config, net_config, log_config = get_configs_ready(config_fname)
+        train_config, net_config, log_config, extra_args = get_configs_ready(
+                                                                config_fname)
         # Optional addition of more command line inputs
-        extra_config = get_extra_cmd_line_input(extra_cmd_line_keys)
+        extra_config = get_extra_cmd_line_input(extra_args)
 
         # Add experiment configuration to experiment instance
         self.train_config = train_config
