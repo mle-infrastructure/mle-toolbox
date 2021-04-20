@@ -1,4 +1,7 @@
-from .core_experiment import get_configs_ready, set_random_seeds
+from typing import Union, List
+from .core_experiment import (get_configs_ready,
+                              get_extra_cmd_line_input,
+                              set_random_seeds)
 from .mle_logger import MLE_Logger
 
 
@@ -6,13 +9,19 @@ class MLExperiment(object):
     def __init__(self,
                  config_fname: str="configs/base_config.json",
                  auto_setup: bool=True,
-                 create_jax_prng: bool=False):
+                 create_jax_prng: bool=False,
+                 extra_cmd_line_keys: Union[List[str], None]=None):
         ''' Load the job configs for the MLE experiment. '''
         # Load the different configurations for the experiment.
         train_config, net_config, log_config = get_configs_ready(config_fname)
+        # Optional addition of more command line inputs
+        extra_config = get_extra_cmd_line_input(extra_cmd_line_keys)
+
+        # Add experiment configuration to experiment instance
         self.train_config = train_config
         self.net_config = net_config
         self.log_config = log_config
+        self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng
 
         # Make initial setup optional so that configs can be modified ad-hoc

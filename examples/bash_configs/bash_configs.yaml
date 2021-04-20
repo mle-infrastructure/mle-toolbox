@@ -21,3 +21,5 @@ single_job_args:
     log_file: "l-bash"
     err_file: "e-bash"
     env_name: "mle-toolbox"
+    extra_cmd_line_input:
+        random_in: 10

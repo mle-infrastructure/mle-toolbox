@@ -87,7 +87,7 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
     parser.add_argument('-seed', '--seed_id', action="store",
                         default=default_seed,
                         help='Seed id on which to train')
-    cmd_args = parser.parse_args()
+    cmd_args, _ = parser.parse_known_args()
 
     # Load .json config file + add config fname to clone + add experiment dir
     config = load_json_config(cmd_args.config_fname)
@@ -121,6 +121,25 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
     else:
         log_config.seed_id = "seed_" + str(train_config.seed_id)
     return train_config, net_config, log_config
+
+
+def get_extra_cmd_line_input(extra_cmd_line_keys: Union[List[str], None]=None):
+    """ Parse additional command line inputs & return them as dotmap. """
+    if extra_cmd_line_keys is not None:
+        parser = argparse.ArgumentParser()
+        for k in extra_cmd_line_keys:
+            parser.add_argument('-'+k, '--c'+k, action="store",
+                                default="default",
+                                help=f'Some extra input: {k}')
+        extra_args, _ = parser.parse_known_args()
+
+        # Unpack the command line data into a dotmap dict
+        extra_input = {}
+        for k in extra_cmd_line_keys:
+            extra_input[k] = vars(extra_args)[k]
+        return DotMap(extra_input, _dynamic=False)
+    else:
+        return None
 
 
 def determine_resource() -> str:

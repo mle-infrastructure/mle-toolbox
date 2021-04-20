@@ -13,21 +13,32 @@ ML researchers need to coordinate different types of experiments on separate rem
 4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
 
 
-## Installing `mle_toolbox` & dependencies
+## Installation & Credentials Setup
 
-If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective remote resource (Slurm or SGE). A simple PyPI installation can be done via:
+If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective remote resource (Slurm or SGE). A PyPI installation is available via:
 
 ```
 pip install mle-toolbox
 ```
 
-Alternatively, you can clone this repository and afterwards 'manually' install the toolbox and its dependencies (preferably in a clean Python 3.6 environment):
+Alternatively, you can clone this repository and afterwards 'manually' install it:
 
 ```
 git clone https://github.com/RobertTLange/mle-toolbox.git
 cd mle-toolbox
 pip install -e .
 ```
+
+By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster resources, you have to provide additional data. There 2 ways to do so:
+
+1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
+2. Manually edit the [`template_config.toml`](templates/template_config.toml) template. Move/rename the template to your home directory via `mv template_config.toml ~/mle_config.toml`.
+
+The configuration procedure consists of 3 optional steps, which depend on your needs:
+
+1. Set whether to store all results & your database locally or remote in a GCS bucket.
+2. Add SGE and/or Slurm credentials and cluster-specific details (headnode names, partitions, proxy server for internet) and default job arguments.
+3. Add the GCP project, GCS bucket name and database filename to store your results.
 
 
 ## The 5 Core Commands of the MLE-Toolbox
@@ -39,22 +50,6 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 3. **Monitor resource utilisation**: `mle monitor`
 4. **Retrieve an experiment result**: `mle retrieve`
 5. **Create an experiment report with figures**: `mle report`
-
-
-## Remote Credentials & Toolbox Configuration
-
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster resources, you have to provide additional data. There are 2 options to do so:
-
-1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
-2. Manually edit the [`template_config.toml`](templates/template_config.toml) template. Move/rename the template to your home directory via `mv template_config.toml ~/mle_config.toml`.
-
-
-The configuration procedure consists of 4 optional steps, which depend on your needs:
-
-1. Set whether to store all results & your database locally or remote in the GCS bucket.
-2. Add the Slurm credentials and cluster-specific details (headnode names, partitions, proxy server for internet) and default job arguments.
-3. Add the SGE credentials and cluster-specific details (headnode names, queues, proxy server for internet) and default job arguments.
-4. Add the path to your GCP credentials `.json` file, project and GCS bucket name to store your experiment data (as well as protocol database).
 
 
 ## Examples & Getting Your First Job Running
@@ -71,6 +66,6 @@ The configuration procedure consists of 4 optional steps, which depend on your n
 
 ## Notes, Development & Questions
 
-- If you find a bug or would like to see a feature implemented, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue :hugs:
-- You can check out the history of release modifications in [`CHANGELOG.md`](CHANGELOG.md) (*added, changed, fixed*). 
+- If you find a bug or want a new feature, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue :hugs:
+- You can check out the history of release modifications in [`CHANGELOG.md`](CHANGELOG.md) (*added, changed, fixed*).
 - You can find a set of open milestones in [`CONTRIBUTING.md`](CONTRIBUTING.md).

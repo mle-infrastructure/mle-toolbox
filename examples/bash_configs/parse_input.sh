@@ -20,6 +20,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -random_in|--random_input)
+    RANDOM_INPUT="$2"
+    shift # past argument
+    shift # past value
+    ;;
 esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
@@ -27,4 +32,4 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 mkdir -p ${EXPERIMENT_DIR}
 FNAME_WO_EXT="${CONFIG_FNAME##*/}"
 FNAME_WO_EXT="${FNAME_WO_EXT%%.*}"
-echo "some data for the file" >> "${EXPERIMENT_DIR}/${FNAME_WO_EXT}_${SEED_ID}.txt"
+echo "some data for the file & random ${RANDOM_INPUT}" >> "${EXPERIMENT_DIR}/${FNAME_WO_EXT}_${SEED_ID}.txt"
