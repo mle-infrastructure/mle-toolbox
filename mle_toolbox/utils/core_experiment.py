@@ -128,7 +128,7 @@ def get_extra_cmd_line_input(extra_cmd_line_keys: Union[List[str], None]=None):
     if extra_cmd_line_keys is not None:
         parser = argparse.ArgumentParser()
         for k in extra_cmd_line_keys:
-            parser.add_argument('-'+k, '--c'+k, action="store",
+            parser.add_argument(f'-{k}', f'--{k}', action="store",
                                 default="default",
                                 help=f'Some extra input: {k}')
         extra_args, _ = parser.parse_known_args()
