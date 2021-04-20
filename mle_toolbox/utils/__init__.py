@@ -1,4 +1,5 @@
 from .core_experiment import (get_configs_ready,
+                              get_extra_cmd_line_input,
                               set_random_seeds,
                               determine_resource)
 from .core_files_load import (load_mle_toolbox_config,
@@ -25,6 +26,7 @@ __all__ = [
            'get_jax_os_ready',
            'MLE_Logger',
            'get_configs_ready',
+           'get_extra_cmd_line_input',
            'set_random_seeds',
            'load_result_logs'
            'load_meta_log',

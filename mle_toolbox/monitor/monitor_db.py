@@ -90,6 +90,8 @@ def get_time_experiment(db, last_experiment_id):
                                                  minutes=int(tot_mins))
             stop_time = end_date.strftime("%m/%d/%Y %H:%M:%S")
     else:
+        start_time = "-"
+        stop_time = "-"
         time_per_batch = "-"
         est_stop_time = "-"
         est_duration = "-"
@@ -114,12 +116,16 @@ def get_last_experiment(db, last_experiment_id):
     e_dir = meta_args["experiment_dir"]
     e_script = meta_args["base_train_fname"]
     e_config = os.path.split(meta_args["base_train_config"])[1]
+    try:
+        e_report = meta_args["report_generation"]
+    except:
+        e_report = False
     results = {"e_id": str(last_experiment_id),
                "e_dir": e_dir,
                "e_type": e_type,
                "e_script": e_script,
                "e_config": e_config,
-               "report_gen": meta_args["report_generation"]}
+               "report_gen": e_report}
 
     # Add additional data based on the experiment type
     if e_type == "hyperparameter-search":

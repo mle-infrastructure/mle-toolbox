@@ -8,12 +8,21 @@ def spawn_single_experiment(job_filename: str,
                             experiment_dir: str,
                             cmd_line_input: Union[None, dict]=None):
     """ Spawn a single experiment locally/remote. """
+    # 0. Extract extra_cmd_line_input from job_arguments
+    if job_arguments is not None:
+        if "extra_cmd_line_input" in job_arguments.keys():
+            extra_cmd_line_input = job_arguments["extra_cmd_line_input"]
+            del job_arguments["extra_cmd_line_input"]
+        else:
+            extra_cmd_line_input = None
+
     # 1. Instantiate the experiment class
     experiment = Experiment(job_filename,
                             config_filename,
                             job_arguments,
                             experiment_dir,
-                            cmd_line_input)
+                            cmd_line_input,
+                            extra_cmd_line_input)
     # 2. Run the single experiment
     status_out = experiment.run()
     return status_out
