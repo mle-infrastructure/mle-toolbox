@@ -20,6 +20,7 @@
 
 ##### Fixed
 - Fixed local launch of remote projects via `screen` session and pipping to `qrsh` or `srun --pty bash`. If you are on a local machine and run `mle run`, you will get to choose the remote resource and can later reattach to that resource.
+- Fixed 2D plot with `fixed_params`. The naming as well as subtitle of the `.png` files/plots accounts for the fixed parameter. 
 
 
 ### v0.2.6 - 04/09/2021

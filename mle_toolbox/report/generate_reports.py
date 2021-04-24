@@ -212,7 +212,8 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
         # Add figure inclusion to HTML text
         # By default: 2 Figures per row - 45% width
         for fig in figure_fnames:
-            html_text += f'<img src="{fig}" width="45%" style="margin-right:20px">'
+            html_text += (f'<img src="{fig}" width="45%"'
+                            + 'style="margin-right:20px">')
         output_file.write(html_text)
     return html_text
 
@@ -234,7 +235,8 @@ def add_figures_to_markdown(md_report_fname, figure_fnames):
         for f_name in figure_fnames:
             path, file = os.path.split(f_name)
             file_object.write("\n")
-            file_object.write(f'<img src=../figures/{file} width="45%" style="margin-right:20px">')
+            file_object.write(f'<img src=../figures/{file} width="45%"'
+                              + ' style="margin-right:20px">')
 
 
 def abs_figure_paths(directory):

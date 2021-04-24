@@ -7,19 +7,20 @@ def main(mle):
     """ Euler integrate a simple ODE for a specified length of time steps. """
     # Define function to integrate & run the integration
     def func(x):
-        return -0.1*x
+        return -0.01*x
 
     # Let seed determine initial condition
-    x_t = [mle.train_config.x_0 + mle.train_config.seed_id]
+    x_t = [mle.train_config.x_0]
     t_seq = np.arange(mle.train_config.dt,
                       mle.train_config.t_max,
                       mle.train_config.dt).tolist()
 
     for i, t in enumerate(t_seq):
-        x_t.append(x_t[-1] + func(x_t[-1])*mle.train_config.dt
-                   + (mle.train_config.noise_mean
-                      + mle.train_config.noise_std*
-                      np.random.normal()) * mle.train_config.dt)
+        integral_det = x_t[-1] + func(x_t[-1]) * mle.train_config.dt
+        integral_stoch = ((mle.train_config.noise_mean +
+                          mle.train_config.noise_std* np.random.normal()) *
+                          mle.train_config.dt)
+        x_t.append(integral_det + integral_stoch)
 
         # Update & save the newest log
         if (i % mle.train_config.log_every_steps) == 0:

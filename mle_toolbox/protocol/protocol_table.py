@@ -27,7 +27,7 @@ def generate_protocol_table(df, full=True):
         row = df.iloc[index]
         if row["Resource"] == "sge-cluster":
             resource = "SGE"
-        elif row["Resource"] == "sge-cluster":
+        elif row["Resource"] == "slurm-cluster":
             resource = "Slurm"
         elif row["Resource"] == "gcp-cloud":
             resource = "GCP"

@@ -8,9 +8,9 @@
                "print_every_k_updates": 10,
                "overwrite_experiment_dir": 0},
 "train_config": {"x_0": 1,
-                 "t_max": 10000,
+                 "t_max": 100,
                  "noise_mean": 0,
                  "noise_std": 0.1,
                  "dt": 0.1,
-                 "log_every_steps": 1000}
+                 "log_every_steps": 100}
 }

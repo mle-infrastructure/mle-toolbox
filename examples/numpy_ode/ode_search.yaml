@@ -20,8 +20,8 @@ param_search_args:
         - "integral"
         - "noise"
     num_search_batches: 2
-    num_iter_per_batch: 5
-    num_evals_per_iter: 2
+    num_iter_per_batch: 10
+    num_evals_per_iter: 1
     params_to_search:
         real:
             x_0:
@@ -32,6 +32,10 @@ param_search_args:
                 begin: 0
                 end: 0.01
                 bins: 3
+        categorical:
+            r_var:
+                - 0
+                - 1
 
 # Parameters specific to an individual job
 single_job_args:
@@ -42,3 +46,5 @@ single_job_args:
     err_file: "err"
     env_name: "mle-toolbox"
     time_per_job: "00:00:05"
+    extra_cmd_line_input:
+        some_random_var: 1

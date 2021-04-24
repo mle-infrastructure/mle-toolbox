@@ -18,6 +18,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       params_to_plot: list=[],
                       target_to_plot: str="target",
                       plot_title: str = "Temp Title",
+                      plot_subtitle: Union[None, str] = None,
                       xy_labels: list = [],
                       variable_name: Union[None, str] = "Var Label",
                       every_nth_tick: int = 1,
@@ -36,20 +37,16 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
 
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = params_to_plot + [target_to_plot]
+    sub_log = hyper_df.copy()
     if fixed_params is not None:
-        param_list = list(fixed_params.items())
-        fix_param1 = hyper_df[param_list[0][0]] == param_list[0][1]
-        fix_param2 = hyper_df[param_list[1][0]] == param_list[1][1]
+        for k, v in fixed_params.items():
+            sub_log = sub_log[sub_log[k] == v]
 
-        # Subselect the desired params from the pd df
-        temp_df = hyper_df[fix_param1 & fix_param2][p_to_plot]
-    else:
-        temp_df = hyper_df[p_to_plot]
-
+    # Subselect the desired params from the pd df
+    temp_df = sub_log[p_to_plot]
     # Construct the 2D array using helper function
     range_x = np.unique(temp_df[p_to_plot[0]])
     range_y = np.unique(temp_df[p_to_plot[1]])
-
     heat_array = get_heatmap_array(range_x, range_y, temp_df.to_numpy(),
                                    norm_cols, norm_rows)
 
@@ -57,7 +54,8 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
         return heat_array
     else:
         # Construct the plot
-        fig, ax = plot_heatmap_array(range_x, range_y, heat_array, plot_title,
+        fig, ax = plot_heatmap_array(range_x, range_y, heat_array,
+                                     plot_title, plot_subtitle,
                                      xy_labels, variable_name, every_nth_tick,
                                      plot_colorbar, text_in_cell, max_heat,
                                      min_heat, round_ticks, figsize=figsize,
@@ -74,7 +72,8 @@ def get_heatmap_array(range_x: np.ndarray,
     bring_the_heat = np.zeros((len(range_y), len(range_x)))
     for i, val_x in enumerate(range_x):
         for j, val_y in enumerate(range_y):
-            case_at_hand = np.where((results_df[:, 0] == val_x) & (results_df[:, 1] == val_y))
+            case_at_hand = np.where((results_df[:, 0] == val_x)
+                                    & (results_df[:, 1] == val_y))
             results_temp = results_df[case_at_hand, 2]
             # Reverse index so that small in bottom left corner
             bring_the_heat[len(range_y)-1 - j, i] = results_temp
@@ -91,6 +90,7 @@ def plot_heatmap_array(range_x: np.ndarray,
                        range_y: np.ndarray,
                        heat_array: np.ndarray,
                        title: str,
+                       subtitle: Union[None, str],
                        xy_labels: list,
                        variable_name: Union[None, str],
                        every_nth_tick: int,
@@ -159,7 +159,10 @@ def plot_heatmap_array(range_x: np.ndarray,
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
 
-    ax.set_title(title)
+    if subtitle is None:
+        ax.set_title(title)
+    else:
+        ax.set_title(title + '\n' + subtitle)
     if len(range_x) != 0:
         ax.set_xlabel(xy_labels[0])
     if len(range_y) != 0:
