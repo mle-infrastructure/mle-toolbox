@@ -29,7 +29,7 @@ cd mle-toolbox
 pip install -e .
 ```
 
-#### Setting up Remote Credentials :see_no_evil:
+#### Setting Up Your Remote Credentials :see_no_evil:
 
 By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster resources, you have to provide additional data. There 2 ways to do so:
 

@@ -4,7 +4,39 @@ from dotmap import DotMap
 from typing import Union, List
 
 
-def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
+class MetaLog(object):
+    """ Class wrapper for meta_log dictionary w. additional functionality. """
+    def __init__(self, meta_log: DotMap):
+        self.meta_log = meta_log
+        # Make it possible that all runs are accessible via attribute as in pd
+        for key in meta_log:
+            setattr(self, key, meta_log[key])
+
+    def filter(self, run_ids: List[str]):
+        """ Subselect the meta log dict based on a list of run ids. """
+        sub_dict = subselect_meta_log(self.meta_log, run_ids)
+        return MetaLog(sub_dict)
+
+    @property
+    def eval_ids(self):
+        """ Get ids of runs stored in meta_log instance. """
+        return list(self.meta_log.keys())
+
+    def __str__(self):
+        """ Print the meta_log. """
+        return self.meta_log
+
+    def __len__(self):
+        """ Return number of runs stored in meta_log. """
+        return len(self.eval_ids)
+
+    def __getitem__(self, item):
+        """ Get run log via string subscription. """
+        return self.meta_log[item]
+
+
+def load_meta_log(log_fname: str, mean_seeds: bool=True,
+                  wrapped: bool=False) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -37,7 +69,11 @@ def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
     # Return as dot-callable dictionary
     if mean_seeds:
         result_dict = mean_over_seeds(result_dict)
-    return DotMap(result_dict, _dynamic=False)
+
+    if not wrapped:
+        return DotMap(result_dict, _dynamic=False)
+    else:
+        return MetaLog(DotMap(result_dict, _dynamic=False))
 
 
 def mean_over_seeds(result_dict: DotMap) -> DotMap:

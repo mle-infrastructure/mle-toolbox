@@ -1,4 +1,17 @@
-### v0.2.7 - Unreleased
+### v0.2.8 - Unreleased
+
+##### Added
+
+- `MetaLog` and `HyperLog` classes: Implement convenient functionalities like `hyper_log.filter()` and ease the post-processing analysis.
+
+##### Changed
+
+- `load_result_logs` is now directly imported with `import mle_toolbox` since it is part of the core functionality.
+
+##### Fixed
+
+
+### v0.2.7 - 04/24/2021
 
 ##### Added
 - Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
@@ -20,7 +33,7 @@
 
 ##### Fixed
 - Fixed local launch of remote projects via `screen` session and pipping to `qrsh` or `srun --pty bash`. If you are on a local machine and run `mle run`, you will get to choose the remote resource and can later reattach to that resource.
-- Fixed 2D plot with `fixed_params`. The naming as well as subtitle of the `.png` files/plots accounts for the fixed parameter. 
+- Fixed 2D plot with `fixed_params`. The naming as well as subtitle of the `.png` files/plots accounts for the fixed parameter.
 
 
 ### v0.2.6 - 04/09/2021
