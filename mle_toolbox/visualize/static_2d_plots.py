@@ -30,6 +30,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       norm_rows: bool = False,
                       return_array: bool = False,
                       round_ticks: int = 1,
+                      fig=None, ax=None,
                       figsize: tuple=(10, 8),
                       cmap="magma"):
     """ Fix certain params & visualize grid target value over other two. """
@@ -40,7 +41,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     sub_log = hyper_df.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
-            sub_log = sub_log[sub_log[k] == v]
+            sub_log = sub_log[sub_log[k].astype(float) == v]
 
     # Subselect the desired params from the pd df
     temp_df = sub_log[p_to_plot]
@@ -54,12 +55,12 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
         return heat_array
     else:
         # Construct the plot
-        fig, ax = plot_heatmap_array(range_x, range_y, heat_array,
-                                     plot_title, plot_subtitle,
-                                     xy_labels, variable_name, every_nth_tick,
-                                     plot_colorbar, text_in_cell, max_heat,
-                                     min_heat, round_ticks, figsize=figsize,
-                                     cmap=cmap)
+        fig, ax = plot_2D_heatmap(range_x, range_y, heat_array,
+                                  plot_title, plot_subtitle,
+                                  xy_labels, variable_name, every_nth_tick,
+                                  plot_colorbar, text_in_cell, max_heat,
+                                  min_heat, round_ticks, figsize=figsize,
+                                  fig=fig, ax=ax, cmap=cmap)
         return fig, ax
 
 
@@ -86,23 +87,23 @@ def get_heatmap_array(range_x: np.ndarray,
     return bring_the_heat
 
 
-def plot_heatmap_array(range_x: np.ndarray,
-                       range_y: np.ndarray,
-                       heat_array: np.ndarray,
-                       title: str,
-                       subtitle: Union[None, str],
-                       xy_labels: list,
-                       variable_name: Union[None, str],
-                       every_nth_tick: int,
-                       plot_colorbar: bool = True,
-                       text_in_cell: bool = True,
-                       max_heat: Union[None, float] = None,
-                       min_heat: Union[None, float] = None,
-                       round_ticks: int=1,
-                       fig = None,
-                       ax = None,
-                       figsize: tuple=(10, 8),
-                       cmap = "magma"):
+def plot_2D_heatmap(range_x: np.ndarray,
+                    range_y: np.ndarray,
+                    heat_array: np.ndarray,
+                    title: str = "Placeholder Title",
+                    subtitle: Union[None, str] = None,
+                    xy_labels: list=["x-label", "y-label"],
+                    variable_name: Union[None, str] = None,
+                    every_nth_tick: int = 1,
+                    plot_colorbar: bool = True,
+                    text_in_cell: bool = False,
+                    max_heat: Union[None, float] = None,
+                    min_heat: Union[None, float] = None,
+                    round_ticks: int=1,
+                    fig = None,
+                    ax = None,
+                    figsize: tuple=(10, 8),
+                    cmap = "magma"):
     """ Plot the 2D heatmap. """
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=figsize)
@@ -162,7 +163,7 @@ def plot_heatmap_array(range_x: np.ndarray,
     if subtitle is None:
         ax.set_title(title)
     else:
-        ax.set_title(title + '\n' + subtitle)
+        ax.set_title(title + '\n' + str(subtitle))
     if len(range_x) != 0:
         ax.set_xlabel(xy_labels[0])
     if len(range_y) != 0:

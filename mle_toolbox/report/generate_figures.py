@@ -1,5 +1,5 @@
 import os, itertools
-from mle_toolbox.utils import load_meta_log, load_hyper_log
+from mle_toolbox import load_result_logs
 from mle_toolbox.visualize import visualize_1D_lcurves, visualize_2D_grid
 
 
@@ -14,10 +14,10 @@ class FigureGenerator():
         self.hyper_log_fname = hyper_log_fname
 
         # Load in both meta and hyper log
-        self.meta_log = load_meta_log(os.path.join(experiment_dir,
-                                                   self.meta_log_fname))
-        self.hyper_log = load_hyper_log(os.path.join(experiment_dir,
-                                                     self.hyper_log_fname))
+        self.meta_log, self.hyper_log = load_result_logs(experiment_dir,
+                                                         meta_log_fname,
+                                                         hyper_log_fname)
+        self.hyper_log = load_hyper_log(os.path.join(experiment_dir)
 
         # Create a directory for the figures to be generated
         self.figures_dir = os.path.join(experiment_dir, "figures")
