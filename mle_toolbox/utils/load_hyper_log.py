@@ -44,7 +44,8 @@ class HyperLog(object):
         return sub_df
 
     def plot_1D_bar(self, var_name:str, metric_name: str,
-                    fixed_params: Union[dict, None]=None):
+                    fixed_params: Union[dict, None]=None,
+                    fig=None, ax=None):
         """ Plot a 1D bar of metric for filtered hyper_df with 1 dof. """
         from mle_toolbox.visualize import visualize_1D_bar
         visualize_1D_bar(self.hyper_log,
@@ -54,10 +55,12 @@ class HyperLog(object):
                          plot_title=metric_name,
                          xy_labels=[var_name, metric_name],
                          every_nth_tick=1,
-                         round_ticks=2)
+                         round_ticks=2,
+                         fig=fig, ax=ax)
 
     def plot_2D_heat(self, var_names: List[str], metric_name: str,
-                     fixed_params: Union[dict, None]=None):
+                     fixed_params: Union[dict, None]=None,
+                     fig=None, ax=None):
         """ Plot a 2D heat of metric for filtered hyper_df with 2 dof. """
         from mle_toolbox.visualize import visualize_2D_grid
         visualize_2D_grid(self.hyper_log,
@@ -69,7 +72,8 @@ class HyperLog(object):
                           xy_labels=var_names,
                           variable_name=metric_name,
                           round_ticks=2,
-                          text_in_cell=False)
+                          text_in_cell=False,
+                          fig=fig, ax=ax)
 
     def unique(self, var_name: Union[str, None, List[str]]=None):
         """ Get unique values of (all) variable. """

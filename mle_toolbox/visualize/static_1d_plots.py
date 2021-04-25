@@ -48,10 +48,11 @@ def plot_1D_bar(param_array, target_array, fig=None, ax=None,
                 every_nth_tick: int = 1,
                 ylims: Union[None, tuple] = None,
                 round_ticks: int = 1,
-                hline: Union[None, float] = None):
+                hline: Union[None, float] = None,
+                figsize: tuple=(9, 6)):
     """ Do actual matplotlib plotting task from selected data. """
     if fig is None or ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Plot the bar data
     xlen = len(param_array)
@@ -89,9 +90,11 @@ def visualize_1D_line(hyper_df: pd.core.frame.DataFrame,
                      ylims: Union[None, tuple] = None,
                      round_ticks: int = 1,
                      figsize: tuple=(8, 5),
-                     hline: Union[None, float] = None):
+                     hline: Union[None, float] = None,
+                     fig=None, ax=None):
     """ Plot a 1d Line w. dots for single var. and its y mapping. """
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
     ax.plot(hyper_df[param_to_plot], hyper_df[target_to_plot])
     ax.scatter(hyper_df[param_to_plot], hyper_df[target_to_plot],
                zorder=5)
@@ -125,10 +128,11 @@ def plot_1D_line(param_array, target_array, fig=None, ax=None,
                  ylims: Union[None, tuple] = None,
                  round_ticks: int = 1,
                  hline: Union[None, float] = None,
-                 labels: Union[list, None] = None):
+                 labels: Union[list, None] = None,
+                 figsize: tuple=(9, 6)):
     """ Do actual matplotlib plotting task from selected data. """
     if fig is None or ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Plot the bar data
     if len(target_array.shape) < 2:
@@ -192,8 +196,12 @@ def visualize_1D_lcurves(main_log: dict,
                         plot_std_bar: bool = False,
                         run_ids: Union[None, list] = None,
                         rgb_tuples: Union[List[tuple], None] = None,
-                        num_legend_cols: Union[int, None] = 1):
+                        num_legend_cols: Union[int, None] = 1,
+                        fig=None, ax=None, figsize: tuple=(9, 6)):
     """ Plot learning curves from meta_log. Select data and customize plot. """
+    if fig is None or ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
     # Plot all curves if not subselected
     if run_ids is None:
         run_ids = list(main_log.keys())
@@ -202,7 +210,6 @@ def visualize_1D_lcurves(main_log: dict,
     if len(curve_labels) == 0:
         curve_labels = run_ids
 
-    fig, axs = plt.subplots(1, 1, figsize=(8, 5))
     if rgb_tuples is None:
         # Default colormap is blue to red diverging seaborn palette
         color_by = sns.diverging_palette(240, 10, sep=1, n=len(run_ids))
@@ -218,26 +225,26 @@ def visualize_1D_lcurves(main_log: dict,
             main_log[run_id].stats[target_to_plot]["mean"], smooth_window)
         smooth_std, _ = moving_smooth_ts(
             main_log[run_id].stats[target_to_plot]["std"], smooth_window)
-        axs.plot(main_log[run_id].time[iter_to_plot]["mean"], smooth_mean,
+        ax.plot(main_log[run_id].time[iter_to_plot]["mean"], smooth_mean,
                  color=color_by[i], label=base_label.format(label))
 
         if plot_std_bar:
-            axs.fill_between(main_log[run_id].time[iter_to_plot]["mean"],
+            ax.fill_between(main_log[run_id].time[iter_to_plot]["mean"],
                              smooth_mean-smooth_std, smooth_mean+smooth_std,
                              color=color_by[i], alpha=0.5)
 
     range_x = main_log[run_id].time[iter_to_plot]["mean"]
-    axs.set_xticks(range_x)
-    axs.set_xticklabels([str(int(label)) for label in range_x])
-    for n, label in enumerate(axs.xaxis.get_ticklabels()):
+    ax.set_xticks(range_x)
+    ax.set_xticklabels([str(int(label)) for label in range_x])
+    for n, label in enumerate(ax.xaxis.get_ticklabels()):
         if n % every_nth_tick != 0:
             label.set_visible(False)
 
-    axs.legend(fontsize=15, ncol=num_legend_cols)
-    axs.spines['top'].set_visible(False)
-    axs.spines['right'].set_visible(False)
-    axs.set_title(plot_title)
-    axs.set_xlabel(xy_labels[0])
-    axs.set_ylabel(xy_labels[1])
+    ax.legend(fontsize=15, ncol=num_legend_cols)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_title(plot_title)
+    ax.set_xlabel(xy_labels[0])
+    ax.set_ylabel(xy_labels[1])
     fig.tight_layout()
-    return fig, axs
+    return fig, ax

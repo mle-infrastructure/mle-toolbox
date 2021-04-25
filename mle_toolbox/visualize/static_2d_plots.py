@@ -30,6 +30,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       norm_rows: bool = False,
                       return_array: bool = False,
                       round_ticks: int = 1,
+                      fig=None, ax=None,
                       figsize: tuple=(10, 8),
                       cmap="magma"):
     """ Fix certain params & visualize grid target value over other two. """
@@ -59,7 +60,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                                   xy_labels, variable_name, every_nth_tick,
                                   plot_colorbar, text_in_cell, max_heat,
                                   min_heat, round_ticks, figsize=figsize,
-                                  cmap=cmap)
+                                  fig=fig, ax=ax, cmap=cmap)
         return fig, ax
 
 

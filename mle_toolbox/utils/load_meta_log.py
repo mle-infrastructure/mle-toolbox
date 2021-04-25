@@ -24,7 +24,8 @@ class MetaLog(object):
         sub_dict = subselect_meta_log(self.meta_log, run_ids)
         return MetaLog(sub_dict)
 
-    def plot(self, target_to_plot: str, iter_to_plot: Union[str, None]=None):
+    def plot(self, target_to_plot: str, iter_to_plot: Union[str, None]=None,
+             fig=None, ax=None):
         """ Plot all runs in meta-log for variable 'target_to_plot'. """
         from mle_toolbox.visualize import visualize_1D_lcurves
         if iter_to_plot is None:
@@ -36,7 +37,8 @@ class MetaLog(object):
                              every_nth_tick=20,
                              num_legend_cols=2,
                              plot_title=target_to_plot,
-                             xy_labels=[iter_to_plot, target_to_plot])
+                             xy_labels=[iter_to_plot, target_to_plot],
+                             fig=fig, ax=ax)
 
     @property
     def eval_ids(self):
