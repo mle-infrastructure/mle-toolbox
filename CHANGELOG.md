@@ -2,7 +2,8 @@
 
 ##### Added
 
-- `MetaLog` and `HyperLog` classes: Implement convenient functionalities like `hyper_log.filter()` and ease the post-processing analysis.
+- Adds `HypothesisTester`: Simple time average difference comparison between individual runs. With multiple testing correction and p-value plotting. Example `hypothesis_testing.ipynb` notebook.
+- Adds `MetaLog` and `HyperLog` classes: Implement convenient functionalities like `hyper_log.filter()` and ease the post-processing analysis.
 
 ##### Changed
 
