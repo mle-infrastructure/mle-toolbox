@@ -193,7 +193,8 @@ def visualize_1D_lcurves(main_log: dict,
                         every_nth_tick: int = 1,
                         plot_std_bar: bool = False,
                         run_ids: Union[None, list] = None,
-                        rgb_tuples: Union[List[tuple], None] = None):
+                        rgb_tuples: Union[List[tuple], None] = None,
+                        num_legend_cols: Union[int, None] = 1):
     """ Plot learning curves from meta_log. Select data and customize plot. """
     # Plot all curves if not subselected
     if run_ids is None:
@@ -234,7 +235,7 @@ def visualize_1D_lcurves(main_log: dict,
         if n % every_nth_tick != 0:
             label.set_visible(False)
 
-    axs.legend(fontsize=15)
+    axs.legend(fontsize=15, ncol=num_legend_cols)
     axs.spines['top'].set_visible(False)
     axs.spines['right'].set_visible(False)
     axs.set_title(plot_title)

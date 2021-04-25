@@ -74,7 +74,10 @@ def load_result_logs(experiment_dir: str,
                      meta_log_fname: str="meta_log.hdf5",
                      hyper_log_fname: str="hyper_log.pkl"):
     """ Load both meta and hyper logs for an experiment. """
-    meta_log = load_meta_log(os.path.join(experiment_dir, meta_log_fname),
-                             wrapped=True)
+    meta_log = load_meta_log(os.path.join(experiment_dir, meta_log_fname))
     hyper_log = load_hyper_log(os.path.join(experiment_dir, hyper_log_fname))
+    # Reconstruct search variables and evaluation metrics
+    hyper_log.set_search_metrics(meta_log.meta_vars,
+                                 meta_log.stats_vars,
+                                 meta_log.time_vars)
     return meta_log, hyper_log

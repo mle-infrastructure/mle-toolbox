@@ -19,7 +19,7 @@ except ModuleNotFoundError as err:
 
 # Static plots of results
 from .static_2d_plots import (visualize_2D_grid,
-                              plot_heatmap_array,
+                              plot_2D_heatmap,
                               moving_smooth_ts)
 from .static_1d_plots import (visualize_1D_lcurves,
                               visualize_1D_bar,

@@ -8,6 +8,13 @@ class MetaLog(object):
     """ Class wrapper for meta_log dictionary w. additional functionality. """
     def __init__(self, meta_log: DotMap):
         self.meta_log = meta_log
+        placeholder_run = list(meta_log.keys())[0]
+
+        # Extract different variable names from meta log
+        self.meta_vars = list(meta_log[placeholder_run].meta.keys())
+        self.stats_vars = list(meta_log[placeholder_run].stats.keys())
+        self.time_vars = list(meta_log[placeholder_run].time.keys())
+
         # Make it possible that all runs are accessible via attribute as in pd
         for key in meta_log:
             setattr(self, key, meta_log[key])
@@ -17,14 +24,24 @@ class MetaLog(object):
         sub_dict = subselect_meta_log(self.meta_log, run_ids)
         return MetaLog(sub_dict)
 
+    def plot(self, target_to_plot: str, iter_to_plot: Union[str, None]=None):
+        """ Plot all runs in meta-log for variable 'target_to_plot'. """
+        from mle_toolbox.visualize import visualize_1D_lcurves
+        if iter_to_plot is None:
+            iter_to_plot = self.time_vars[0]
+        assert target_to_plot in self.stats_vars
+        assert iter_to_plot in self.time_vars
+        visualize_1D_lcurves(self.meta_log, iter_to_plot, target_to_plot,
+                             smooth_window=1,
+                             every_nth_tick=20,
+                             num_legend_cols=2,
+                             plot_title=target_to_plot,
+                             xy_labels=[iter_to_plot, target_to_plot])
+
     @property
     def eval_ids(self):
         """ Get ids of runs stored in meta_log instance. """
         return list(self.meta_log.keys())
-
-    def __str__(self):
-        """ Print the meta_log. """
-        return self.meta_log
 
     def __len__(self):
         """ Return number of runs stored in meta_log. """
@@ -35,8 +52,7 @@ class MetaLog(object):
         return self.meta_log[item]
 
 
-def load_meta_log(log_fname: str, mean_seeds: bool=True,
-                  wrapped: bool=False) -> DotMap:
+def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -69,11 +85,7 @@ def load_meta_log(log_fname: str, mean_seeds: bool=True,
     # Return as dot-callable dictionary
     if mean_seeds:
         result_dict = mean_over_seeds(result_dict)
-
-    if not wrapped:
-        return DotMap(result_dict, _dynamic=False)
-    else:
-        return MetaLog(DotMap(result_dict, _dynamic=False))
+    return MetaLog(DotMap(result_dict, _dynamic=False))
 
 
 def mean_over_seeds(result_dict: DotMap) -> DotMap:

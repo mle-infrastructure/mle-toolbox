@@ -54,12 +54,12 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
         return heat_array
     else:
         # Construct the plot
-        fig, ax = plot_heatmap_array(range_x, range_y, heat_array,
-                                     plot_title, plot_subtitle,
-                                     xy_labels, variable_name, every_nth_tick,
-                                     plot_colorbar, text_in_cell, max_heat,
-                                     min_heat, round_ticks, figsize=figsize,
-                                     cmap=cmap)
+        fig, ax = plot_2D_heatmap(range_x, range_y, heat_array,
+                                  plot_title, plot_subtitle,
+                                  xy_labels, variable_name, every_nth_tick,
+                                  plot_colorbar, text_in_cell, max_heat,
+                                  min_heat, round_ticks, figsize=figsize,
+                                  cmap=cmap)
         return fig, ax
 
 
@@ -86,23 +86,23 @@ def get_heatmap_array(range_x: np.ndarray,
     return bring_the_heat
 
 
-def plot_heatmap_array(range_x: np.ndarray,
-                       range_y: np.ndarray,
-                       heat_array: np.ndarray,
-                       title: str,
-                       subtitle: Union[None, str],
-                       xy_labels: list,
-                       variable_name: Union[None, str],
-                       every_nth_tick: int,
-                       plot_colorbar: bool = True,
-                       text_in_cell: bool = True,
-                       max_heat: Union[None, float] = None,
-                       min_heat: Union[None, float] = None,
-                       round_ticks: int=1,
-                       fig = None,
-                       ax = None,
-                       figsize: tuple=(10, 8),
-                       cmap = "magma"):
+def plot_2D_heatmap(range_x: np.ndarray,
+                    range_y: np.ndarray,
+                    heat_array: np.ndarray,
+                    title: str = "Placeholder Title",
+                    subtitle: Union[None, str] = None,
+                    xy_labels: list=["x-label", "y-label"],
+                    variable_name: Union[None, str] = None,
+                    every_nth_tick: int = 1,
+                    plot_colorbar: bool = True,
+                    text_in_cell: bool = False,
+                    max_heat: Union[None, float] = None,
+                    min_heat: Union[None, float] = None,
+                    round_ticks: int=1,
+                    fig = None,
+                    ax = None,
+                    figsize: tuple=(10, 8),
+                    cmap = "magma"):
     """ Plot the 2D heatmap. """
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=figsize)

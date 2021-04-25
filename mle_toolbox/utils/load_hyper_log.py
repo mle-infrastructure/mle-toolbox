@@ -8,6 +8,15 @@ class HyperLog(object):
     """ Class wrapper for hyper_log dataframe w. additional functionality. """
     def __init__(self, hyper_df: pd.DataFrame):
         self.hyper_log = hyper_df
+        for col in hyper_df.columns:
+            setattr(self, col, hyper_df[col])
+
+    def set_search_metrics(self, meta_vars: list, stats_vars: list,
+                           time_vars: list):
+        """ Reconstruct search & metric variable names from meta log data. """
+        self.search_vars = list(set(self.columns) -  set(meta_vars + stats_vars
+                                + time_vars + ["run_id", "log_fname"]))
+        self.search_metrics = stats_vars
 
     def filter(self,
                param_name: Union[None, List[str], str]=None,
@@ -27,7 +36,43 @@ class HyperLog(object):
         if metric_name is not None:
             df = sub_top_k_hyper_log(self.hyper_log, metric_name, top_k,
                                      maximize_metric)
-        return HyperLog(df)
+
+        # Recursively wrap sub df and transfr search vars & metrics
+        sub_df = HyperLog(df)
+        if 'search_vars' in dir(self):
+            sub_df.search_vars = self.search_vars
+            sub_df.search_metrics = self.search_metrics
+        return sub_df
+
+    def plot_1D_bar(self, metric_name: str):
+        """ Plot a 1D bar of metric for filtered hyper_df with 1 dof. """
+        return
+
+    def plot_2D_heat(self, metric_name: str):
+        """ Plot a 2D heat of metric for filtered hyper_df with 2 dof. """
+        return
+
+    def unique(self, var_name: Union[str, None, List[str]]):
+        """ Get unique values of (all) variable. """
+        # Get unique values for single column
+        if type(var_name) == str:
+            return self.hyper_log[var_name].unique()
+        # Get unique values for list of columns
+        elif type(var_name) == list:
+            for v in var_name:
+                unique_dict[v] = self.hyper_log[v].unique()
+            return unique_dict
+        # Get unique values for all columns
+        elif var_namme is None:
+            unique_dict = {}
+            for v in self.columns:
+                unique_dict[v] = self.hyper_log[v].unique()
+            return unique_dict
+
+    @property
+    def columns(self):
+        """ Get columns of hyper_log dataframe. """
+        return list(self.hyper_log.columns)
 
     @property
     def eval_ids(self):
@@ -36,11 +81,19 @@ class HyperLog(object):
 
     def __str__(self):
         """ Print the hyper_log. """
-        return self.hyper_log
+        return str(self.hyper_log)
+
+    def __repr__(self):
+        """ Represent the hyper_log. """
+        return str(self.hyper_log)
 
     def __len__(self):
         """ Return number of runs stored in hyper_log. """
         return len(self.eval_ids)
+
+    def __getitem__(self, item):
+        """ Get run log via string subscription. """
+        return self.hyper_log[item]
 
 
 def load_hyper_log(hyper_log_fpath: str):
@@ -99,9 +152,9 @@ def sub_variable_hyper_log(df: pd.core.frame.DataFrame,
 
     # Loop over parameters and construct the sub-df
     for i, name in enumerate(param_name):
-        all_values = df[name].unique()
-        min_id = np.argmin(np.abs(all_values - param_value[i]))
-        sub_df = sub_df[sub_df[name] == all_values[min_id]]
+        all_values = df[name].unique().astype(float)
+        min_id = np.argmin(np.abs(all_values - float(param_value[i])))
+        sub_df = sub_df[sub_df[name].astype(float) == all_values[min_id]]
     return sub_df
 
 
