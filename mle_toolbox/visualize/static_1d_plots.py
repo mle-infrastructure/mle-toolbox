@@ -25,16 +25,14 @@ def visualize_1D_bar(hyper_df: pd.core.frame.DataFrame,
 
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = [param_to_plot] + [target_to_plot]
+
+    sub_log = hyper_df.copy()
     if fixed_params is not None:
-        param_list = list(fixed_params.items())
-        fix_param1 = hyper_df[param_list[0][0]] == param_list[0][1]
-        fix_param2 = hyper_df[param_list[1][0]] == param_list[1][1]
+        for k, v in fixed_params.items():
+            sub_log = sub_log[sub_log[k].astype(float) == v]
 
-        # Subselect the desired params from the pd df
-        temp_df = hyper_df[fix_param1 & fix_param2][p_to_plot]
-    else:
-        temp_df = hyper_df[p_to_plot]
-
+    # Subselect the desired params from the pd df
+    temp_df = sub_log[p_to_plot]
     param_array = temp_df[param_to_plot]
     target_array = temp_df[target_to_plot]
 

@@ -18,9 +18,7 @@ class HyperLog(object):
                                 + time_vars + ["run_id", "log_fname"]))
         self.search_metrics = stats_vars
 
-    def filter(self,
-               param_name: Union[None, List[str], str]=None,
-               param_value: Union[None, List[float], float]=None,
+    def filter(self, param_dict: Union[None, dict]=None,
                metric_name: Union[None, str]=None,
                top_k: int=5,
                maximize_metric: bool=False):
@@ -29,9 +27,10 @@ class HyperLog(object):
             2. Subselect top k performing runs according to a metric.
         """
         # Filter df: All runs with fixed params closest to param_value
-        if param_name is not None:
-            df = sub_variable_hyper_log(self.hyper_log, param_name,
-                                        param_value)
+        if param_dict is not None:
+            df = sub_variable_hyper_log(self.hyper_log,
+                                        list(param_dict.keys()),
+                                        list(param_dict.values()))
         # Filter df: Top-k performing runs for metric
         if metric_name is not None:
             df = sub_top_k_hyper_log(self.hyper_log, metric_name, top_k,
@@ -44,15 +43,35 @@ class HyperLog(object):
             sub_df.search_metrics = self.search_metrics
         return sub_df
 
-    def plot_1D_bar(self, metric_name: str):
+    def plot_1D_bar(self, var_name:str, metric_name: str,
+                    fixed_params: Union[dict, None]=None):
         """ Plot a 1D bar of metric for filtered hyper_df with 1 dof. """
-        return
+        from mle_toolbox.visualize import visualize_1D_bar
+        visualize_1D_bar(self.hyper_log,
+                         param_to_plot=var_name,
+                         target_to_plot=metric_name,
+                         fixed_params=fixed_params,
+                         plot_title=metric_name,
+                         xy_labels=[var_name, metric_name],
+                         every_nth_tick=1,
+                         round_ticks=2)
 
-    def plot_2D_heat(self, metric_name: str):
+    def plot_2D_heat(self, var_names: List[str], metric_name: str,
+                     fixed_params: Union[dict, None]=None):
         """ Plot a 2D heat of metric for filtered hyper_df with 2 dof. """
-        return
+        from mle_toolbox.visualize import visualize_2D_grid
+        visualize_2D_grid(self.hyper_log,
+                          params_to_plot=var_names,
+                          target_to_plot=metric_name,
+                          fixed_params=fixed_params,
+                          plot_title=metric_name,
+                          plot_subtitle=fixed_params,
+                          xy_labels=var_names,
+                          variable_name=metric_name,
+                          round_ticks=2,
+                          text_in_cell=False)
 
-    def unique(self, var_name: Union[str, None, List[str]]):
+    def unique(self, var_name: Union[str, None, List[str]]=None):
         """ Get unique values of (all) variable. """
         # Get unique values for single column
         if type(var_name) == str:
@@ -63,10 +82,13 @@ class HyperLog(object):
                 unique_dict[v] = self.hyper_log[v].unique()
             return unique_dict
         # Get unique values for all columns
-        elif var_namme is None:
+        elif var_name is None:
             unique_dict = {}
             for v in self.columns:
-                unique_dict[v] = self.hyper_log[v].unique()
+                try:
+                    unique_dict[v] = self.hyper_log[v].unique()
+                except:
+                    pass
             return unique_dict
 
     @property

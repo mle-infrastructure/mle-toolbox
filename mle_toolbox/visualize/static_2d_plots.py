@@ -40,7 +40,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     sub_log = hyper_df.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
-            sub_log = sub_log[sub_log[k] == v]
+            sub_log = sub_log[sub_log[k].astype(float) == v]
 
     # Subselect the desired params from the pd df
     temp_df = sub_log[p_to_plot]
@@ -162,7 +162,7 @@ def plot_2D_heatmap(range_x: np.ndarray,
     if subtitle is None:
         ax.set_title(title)
     else:
-        ax.set_title(title + '\n' + subtitle)
+        ax.set_title(title + '\n' + str(subtitle))
     if len(range_x) != 0:
         ax.set_xlabel(xy_labels[0])
     if len(range_y) != 0:
