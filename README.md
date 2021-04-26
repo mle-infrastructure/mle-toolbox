@@ -31,7 +31,7 @@ pip install -e .
 
 #### Setting Up Your Remote Credentials :see_no_evil:
 
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster resources, you have to provide additional data. There 2 ways to do so:
+By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:
 
 1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
 2. Manually edit the [`template_config.toml`](templates/template_config.toml) template. Move/rename the template to your home directory via `mv template_config.toml ~/mle_config.toml`.
@@ -62,8 +62,9 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 * :page_facing_up: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
 * :page_facing_up: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
 * :page_facing_up: [Multi Bash](examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
-
+---
 - :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).
+- :notebook: [Hypothesis Testing](notebooks/hypothesis_testing.ipynb) - Compare different experiment runs & perform hypothesis tests.
 - :notebook: [GIF Animations](notebooks/animate_results.ipynb) - Walk through set of animation helpers.
 
 
