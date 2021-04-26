@@ -7,7 +7,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## The 4 Step `mle-toolbox` Cooking Recipe :stew:
 
-1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
+1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your remote credentials/configuration.
 2. Read the [docs](docs/how_to_toolbox.md) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
 3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/ode), training [PyTorch MNIST-CNNs](examples/mnist) or [VAEs in JAX](examples/jax_vae).
 4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
@@ -15,7 +15,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## Installation :memo:
 
-If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective remote resource (Slurm or SGE). A PyPI installation is available via:
+If you would like to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective remote resource (Slurm or SGE). A PyPI installation is available via:
 
 ```
 pip install mle-toolbox
@@ -31,7 +31,7 @@ pip install -e .
 
 #### Setting Up Your Remote Credentials :see_no_evil:
 
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster resources, you have to provide additional data. There 2 ways to do so:
+By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm cluster, you have to provide additional data. There 2 ways to do so:
 
 1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
 2. Manually edit the [`template_config.toml`](templates/template_config.toml) template. Move/rename the template to your home directory via `mv template_config.toml ~/mle_config.toml`.
@@ -62,8 +62,9 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 * :page_facing_up: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
 * :page_facing_up: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
 * :page_facing_up: [Multi Bash](examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
-
+---
 - :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).
+- :notebook: [Hypothesis Testing](notebooks/hypothesis_testing.ipynb) - Walk through experiment performance comparison.
 - :notebook: [GIF Animations](notebooks/animate_results.ipynb) - Walk through set of animation helpers.
 
 
