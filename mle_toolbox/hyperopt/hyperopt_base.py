@@ -61,14 +61,19 @@ class BaseHyperOptimisation(object):
 
         # Key Input: Specify which params to optimize & in which ranges (dict)
         self.params_to_search = params_to_search
-        self.current_iter = len(hyper_log)            # get prev its
 
-        # Problem - set up eval: {"best", "final"}
-        self.problem_type = problem_type
-        self.eval_metrics = eval_metrics
-        if type(self.eval_metrics) == str:
-            self.eval_metrics = [self.eval_metrics]
-        # NOTE: Need to generate self.param_range in specific hyperopt instance
+        # If desired don't use hyper_log! - Don't rely on meta-log aggregation
+        if hyper_log is not None:
+            self.current_iter = len(hyper_log)            # get prev its
+
+            # Problem - set up eval: {"best", "final"}
+            self.problem_type = problem_type
+            self.eval_metrics = eval_metrics
+            if type(self.eval_metrics) == str:
+                self.eval_metrics = [self.eval_metrics]
+            self.log_hyper_results = True
+        else:
+            self.log_hyper_results = False
 
     def run_search(self,
                    num_search_batches: int,
@@ -84,6 +89,7 @@ class BaseHyperOptimisation(object):
         self.logger.info(f"Total No. Search Batches: {num_search_batches} |" \
                          f" Batchsize: {num_iter_per_batch} |" \
                          f" Evaluations: {num_evals_per_iter}")
+        print_framed(f"START HYPEROPT RUNS")
 
         # Only run the batch loop for the remaining iterations
         self.current_iter = int(self.current_iter/num_iter_per_batch)
@@ -97,6 +103,9 @@ class BaseHyperOptimisation(object):
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
+            if self.hyper_log.no_results_logging:
+                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
+
             self.logger.info(f"START - {self.current_iter}/" \
                              f"{num_search_batches} batch of" \
                              f" hyperparameters - {num_evals_per_iter} seeds")
@@ -106,31 +115,43 @@ class BaseHyperOptimisation(object):
                                                         num_evals_per_iter)
 
             self.logger.info(f"DONE - {self.current_iter}/" \
-                             "{num_search_batches} batch of" \
+                             f"{num_search_batches} batch of" \
                              f" hyperparameters - {num_evals_per_iter} seeds")
-
-            # Attempt merging of hyperlogs - until successful!
-            while True:
-                try:
-                    meta_eval_log = self.get_meta_eval_log(
-                                        self.hyper_log.all_run_ids + run_ids)
-                    break
-                except:
-                    time.sleep(1)
-                    continue
-
-            perf_measures = self.evaluate_hyperparams(meta_eval_log, run_ids)
             time_elapsed = time.time() - start_t
 
-            self.logger.info(f"MERGE - {self.current_iter}/" \
-                             "{num_search_batches} batch of" \
-                             f" hyperparameters - {num_evals_per_iter} seeds")
+            # Attempt merging of hyperlogs - until successful!
+            if not self.hyper_log.no_results_logging:
+                while True:
+                    try:
+                        meta_eval_log = self.get_meta_eval_log(
+                                            self.hyper_log.all_run_ids
+                                            + run_ids)
+                        break
+                    except:
+                        time.sleep(1)
+                        continue
 
-            # Update & save the Hyperparam Optimisation Log
-            self.hyper_log.update_log(batch_proposals, meta_eval_log,
-                                      perf_measures, time_elapsed, run_ids)
+                perf_measures = self.evaluate_hyperparams(meta_eval_log,
+                                                          run_ids)
+
+                self.logger.info(f"MERGE - {self.current_iter}/" \
+                                 f"{num_search_batches} batch of " \
+                                 f"hyperparameters - {num_evals_per_iter} seeds")
+
+                # Update & save the Hyperparam Optimisation Log
+                self.hyper_log.update_log(batch_proposals, meta_eval_log,
+                                          perf_measures, time_elapsed, run_ids)
+                self.clean_up_after_batch_iteration(batch_proposals,
+                                                    perf_measures)
+            else:
+                # Log without collected results
+                self.hyper_log.update_log(batch_proposals, None,
+                                          None, time_elapsed, run_ids)
+                self.logger.info(f"UPDATE - {self.current_iter}/" \
+                                 f"{num_search_batches} batch of " \
+                                 f"hyperparameters - {num_evals_per_iter} seeds")
+
             self.hyper_log.save_log()
-            self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
             print_framed(f"COMPLETED BATCH {self.current_iter}/" \
                          f"{num_search_batches}")
 

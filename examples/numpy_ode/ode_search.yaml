@@ -12,6 +12,7 @@ meta_job_args:
 param_search_args:
     search_type: "grid"
     hyperlog_fname: "hyper_log.pkl"
+    no_results_logging: False
     reload_log: False
     verbose_logging: True
     maximize_objective: True

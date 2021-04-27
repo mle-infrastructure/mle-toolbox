@@ -10,12 +10,14 @@ from ..utils import load_pkl_object, save_pkl_object, print_framed
 class HyperoptLogger(object):
     def __init__(self, hyperlog_fname: str, max_target: bool=True,
                  eval_metrics: Union[str, list]=[],
-                 verbose: bool=True, reload: bool=False):
+                 verbose: bool=True, reload: bool=False,
+                 no_results_logging: bool=False):
         """ Mini-class to log the  """
         self.hyperlog_fname = hyperlog_fname    # Where to save the log to
         self.max_target = max_target  # Whether we want to max target (reward)
         self.eval_metrics = eval_metrics  # Var names to compare across runs
         self.verbose = verbose
+        self.no_results_logging = no_results_logging  # Option to not log metrics
 
         # Instantiate the meta-logger
         self.logger = logging.getLogger(__name__)
@@ -53,20 +55,21 @@ class HyperoptLogger(object):
             current_iter = {"params": params[iter],
                             "time_elapsed": time_elapsed,
                             "run_id": run_ids[iter],}
-            # Add all of the individual tracked metrics
-            for k, v in target.items():
-                current_iter[k] = v[run_ids[iter]]
-            # Add the meta data from the meta_eval_log
-            for k in meta_keys_to_track:
-                try:
-                    current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
-                except:
-                    continue
+            if not self.no_results_logging:
+                # Add all of the individual tracked metrics
+                for k, v in target.items():
+                    current_iter[k] = v[run_ids[iter]]
+                # Add the meta data from the meta_eval_log
+                for k in meta_keys_to_track:
+                    try:
+                        current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
+                    except:
+                        continue
 
-            # Add collected log path (after merging seeds)
-            current_iter["log_fname"] = os.path.join(
-                current_iter["experiment_dir"], "logs",
-                current_iter["run_id"] + ".hdf5")
+                # Add collected log path (after merging seeds)
+                current_iter["log_fname"] = os.path.join(
+                    current_iter["experiment_dir"], "logs",
+                    current_iter["run_id"] + ".hdf5")
 
             # Merge collected info from eval to the log
             self.opt_log[self.iter_id] = current_iter
@@ -76,12 +79,14 @@ class HyperoptLogger(object):
 
         # Keep track of all results/runs sofar!
         self.all_run_ids += run_ids
-        # Update best performance tracker
-        self.best_per_metric = self.get_best_performances(target.keys())
 
-        # Print currently best evaluation
-        if self.verbose:
-            self.print_log_state()
+        if not self.no_results_logging:
+            # Update best performance tracker
+            self.best_per_metric = self.get_best_performances(target.keys())
+
+            # Print currently best evaluation
+            if self.verbose:
+                self.print_log_state()
 
     def print_log_state(self):
         """ Log currently best param config for each metric. """

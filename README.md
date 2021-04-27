@@ -3,13 +3,13 @@
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 
-ML researchers need to coordinate different types of experiments on separate remote resources. The Machine Learning Experiment (MLE)-Toolbox is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters. The results are archived (locally/Google Cloud Storage bucket) and can easily retrieved or automatically summarized/reported as `.md`/`.html` files.
+ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters. The results are archived (locally/Google Cloud Storage bucket) and can easily be retrieved or automatically summarized/reported as `.md`/`.html` files.
 
 ## The 4 Step `mle-toolbox` Cooking Recipe :stew:
 
 1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](docs/how_to_toolbox.md) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/ode), training [PyTorch MNIST-CNNs](examples/mnist) or [VAEs in JAX](examples/jax_vae).
+3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/numpy_ode), training [PyTorch MNIST-CNNs](examples/pytorch_mnist) or [VAEs in JAX](examples/jax_vae).
 4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
 
 

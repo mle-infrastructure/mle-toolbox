@@ -19,11 +19,15 @@ def run_hyperparameter_search(meta_job_args: dict,
     else:
         hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
                                       "hyper_log.pkl")
+
+    if "no_results_logging" not in param_search_args.keys():
+        param_search_args["no_results_logging"] = False
     hyper_log = HyperoptLogger(hyperlog_fname,
                                param_search_args.maximize_objective,
                                param_search_args.eval_metrics,
                                param_search_args.verbose_logging,
-                               param_search_args.reload_log)
+                               param_search_args.reload_log,
+                               param_search_args.no_results_logging)
 
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
