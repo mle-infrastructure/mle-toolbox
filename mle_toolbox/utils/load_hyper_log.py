@@ -178,9 +178,15 @@ def sub_variable_hyper_log(df: pd.core.frame.DataFrame,
 
     # Loop over parameters and construct the sub-df
     for i, name in enumerate(param_name):
-        all_values = df[name].unique().astype(float)
-        min_id = np.argmin(np.abs(all_values - float(param_value[i])))
-        sub_df = sub_df[sub_df[name].astype(float) == all_values[min_id]]
+        all_values = df[name].unique()
+        if type(param_value[i]) == float or type(param_value[i]) == int:
+            all_values = all_values.astype(float)
+            min_id = np.argmin(np.abs(all_values - float(param_value[i])))
+            sub_df = sub_df[sub_df[name].astype(float) == all_values[min_id]]
+        elif type(param_value[i]) == str:
+            sub_df = sub_df[sub_df[name] == param_value[i]]
+        else:
+            raise ValueError("Please provide a int/float/str value to filter.")
     return sub_df
 
 

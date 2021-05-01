@@ -17,7 +17,6 @@ class FigureGenerator():
         self.meta_log, self.hyper_log = load_result_logs(experiment_dir,
                                                          meta_log_fname,
                                                          hyper_log_fname)
-        self.hyper_log = load_hyper_log(os.path.join(experiment_dir)
 
         # Create a directory for the figures to be generated
         self.figures_dir = os.path.join(experiment_dir, "figures")

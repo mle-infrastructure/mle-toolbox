@@ -171,9 +171,9 @@ def run(cmd_args):
     report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
-            # Import for report generating after experiment finished
-            from .report import auto_generate_reports
             if job_config.meta_job_args.report_generation:
+                # Import for report generating after experiment finished
+                from .report import auto_generate_reports
                 reporter = auto_generate_reports(new_experiment_id, logger,
                                                  pdf_gen=False)
                 report_generated = True

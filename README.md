@@ -67,6 +67,21 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 - :notebook: [Hypothesis Testing](notebooks/hypothesis_testing.ipynb) - Compare different experiment runs & perform hypothesis tests.
 - :notebook: [GIF Animations](notebooks/animate_results.ipynb) - Walk through set of animation helpers.
 
+### Acknowledgements & Citing `mle-toolbox` :pencil2:
+
+To cite this repository:
+
+```
+@software{mle_toolbox2021github,
+  author = {Robert Tjarko Lange},
+  title = {{MLE-Toolbox}: A Reproducible Workflow for Machine Learning Experiments},
+  url = {http://github.com/RobertTLange/mle-toolbox},
+  version = {1.0.0},
+  year = {2021},
+}
+```
+
+Much of the `mle-toolbox` design has been inspired by discussions with Jonathan Frankle and Nandan Rao about the quest for empirically sound and supported claims.
 
 ## Notes, Development & Questions :question:
 
