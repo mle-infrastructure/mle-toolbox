@@ -9,7 +9,8 @@ from .spawn_single_job import spawn_single_experiment
 from ..utils import merge_hdf5_files
 
 
-def spawn_multiple_seeds_experiment(job_filename: str,
+def spawn_multiple_seeds_experiment(resource_to_run: str,
+                                    job_filename: str,
                                     config_filename: str,
                                     job_arguments: Union[None, dict],
                                     experiment_dir: str,
@@ -39,7 +40,8 @@ def spawn_multiple_seeds_experiment(job_filename: str,
 
     # Spawn the different processes for the different seeds
     procs = [mp.Process(target=spawn_single_experiment,
-                        args=(job_filename,
+                        args=(resource_to_run,
+                              job_filename,
                               config_filename,
                               job_arguments,
                               experiment_dir,

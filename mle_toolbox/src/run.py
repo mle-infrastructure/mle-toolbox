@@ -43,7 +43,7 @@ def run(cmd_args):
 
     # Load experiment yaml config & determine exec resource
     job_config = load_yaml_config(cmd_args)
-    resource = determine_resource()
+    resource_to_run = determine_resource()
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
     if mle_config.general.use_gcloud_protocol_sync:
@@ -64,12 +64,14 @@ def run(cmd_args):
     logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
 
     # 3. If local - check if experiment should be run on remote resource
-    if resource not in ["sge-cluster", "slurm-cluster"]:
+    if resource_to_run not in ["sge-cluster", "slurm-cluster"]:
         # Ask user on which resource to run on
         if cmd_args.resource_to_run is None:
             resource_to_run = ask_for_resource_to_run()
         else:
             resource_to_run = cmd_args.resource_to_run
+
+        # If locally launched & want to run on Slurm/SGE - execute on remote!
         if resource_to_run in ["slurm-cluster", "sge-cluster"]:
             if cmd_args.remote_reconnect:
                 print_framed("RECONNECT TO REMOTE")
@@ -90,7 +92,7 @@ def run(cmd_args):
                                       purpose)
                 # After successful completion on remote resource - BREAK
                 return
-    logger.info(f"Run on resource: {resource}")
+    logger.info(f"Run on resource: {resource_to_run}")
 
     # 4. Check that job config to complies with/includes necessary ingredients
     check_job_config(job_config)
@@ -135,12 +137,14 @@ def run(cmd_args):
 
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["job_type"] == "single-experiment":
-        run_single_experiment(job_config.meta_job_args,
+        run_single_experiment(resource_to_run,
+                              job_config.meta_job_args,
                               job_config.single_job_args)
 
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
-        run_multiple_experiments(job_config.meta_job_args,
+        run_multiple_experiments(resource_to_run,
+                                 job_config.meta_job_args,
                                  job_config.single_job_args,
                                  job_config.multi_experiment_args)
 
@@ -148,7 +152,8 @@ def run(cmd_args):
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         # Import only if needed since this has a optional dependency on scikit-optimize
         from ..launch import run_hyperparameter_search
-        run_hyperparameter_search(job_config.meta_job_args,
+        run_hyperparameter_search(resource_to_run,
+                                  job_config.meta_job_args,
                                   job_config.single_job_args,
                                   job_config.param_search_args)
 
@@ -163,7 +168,8 @@ def run(cmd_args):
     if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
-        run_post_processing(job_config.post_process_args,
+        run_post_processing(resource_to_run,
+                            job_config.post_process_args,
                             job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 

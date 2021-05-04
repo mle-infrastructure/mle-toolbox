@@ -16,6 +16,9 @@ from .manage_job_sge import (sge_check_job_args,
 from .manage_job_slurm import (slurm_check_job_args,
                                slurm_submit_remote_job,
                                slurm_monitor_remote_job)
+from .manage_job_gcp import (gcp_check_job_args,
+                             gcp_submit_remote_job,
+                             gcp_monitor_remote_job)
 
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
@@ -56,6 +59,7 @@ class Experiment(object):
         monitor_remote: Monitors experiment remotely on SGE/Slurm clusters
     """
     def __init__(self,
+                 resource_to_run: str,
                  job_filename: str,
                  config_filename: Union[None, str],
                  job_arguments: Union[None, dict],
@@ -73,6 +77,7 @@ class Experiment(object):
             os.makedirs(self.experiment_dir)
 
         # Check the availability of the cluster to run job
+        self.resource_to_run = resource_to_run
         self.run_on_remote = self.cluster_available()
 
         # Check if all required args are given - otw. add default

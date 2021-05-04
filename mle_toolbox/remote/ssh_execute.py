@@ -13,7 +13,7 @@ from .ssh_session_slurm import generate_remote_slurm_cmd
 def ask_for_resource_to_run():
     """ Ask user if they want to exec on remote resource. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    resource = input(time_t + " Where to run? [local/slurm/sge] ")
+    resource = input(time_t + " Where to run? [local/slurm/sge/gcp] ")
     while resource not in ["local", "slurm", "sge", "gcp"]:
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
         resource = input(time_t + " Please repeat: [local/slurm/sge] ")
@@ -24,6 +24,8 @@ def ask_for_resource_to_run():
         resource_to_run = "slurm-cluster"
     elif resource == "sge":
         resource_to_run = "sge-cluster"
+    elif resource == "gcp":
+        resource_to_run = "gcp-cloud"
     return resource_to_run
 
 
