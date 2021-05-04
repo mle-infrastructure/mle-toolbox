@@ -103,7 +103,7 @@ class Experiment(object):
             job_id = self.schedule_remote()
             if self.job_status == 1:
                 self.logger.info(f"Job ID: {job_id} - Remote job scheduled" \
-                                  " - {self.config_filename}")
+                                 f" - {self.config_filename}")
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when scheduling " \
                                  f"remote job - {self.config_filename}")
@@ -125,7 +125,7 @@ class Experiment(object):
             status_out = self.monitor_local(proc)
             if status_out == 0:
                 self.logger.info("PID: {proc.pid} - Local job successfully " \
-                                 "completed - { self.config_filename}")
+                                 f"completed - { self.config_filename}")
             else:
                 self.logger.info(f"PID: {proc.pid} - Error when running local " \
                                  f"job - {self.config_filename}")
@@ -217,7 +217,8 @@ class Experiment(object):
         else:
             self.run_on_sge_cluster = 0
             self.run_on_slurm_cluster = 0
-        return on_sge_cluster or on_sge_head or on_slurm_head or on_slurm_cluster
+        return (on_sge_cluster or on_sge_head or
+                on_slurm_head or on_slurm_cluster)
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:

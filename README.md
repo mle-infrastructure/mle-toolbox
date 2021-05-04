@@ -81,7 +81,7 @@ To cite this repository:
 }
 ```
 
-Much of the `mle-toolbox` design has been inspired by discussions with Jonathan Frankle and Nandan Rao about the quest for empirically sound and supported claims.
+Much of the `mle-toolbox` design has been inspired by discussions with [Jonathan Frankle](http://www.jfrankle.com/) and [Nandan Rao](https://twitter.com/nandanrao) about the quest for empirically sound and supported claims in Machine Learning.
 
 ## Notes, Development & Questions :question:
 

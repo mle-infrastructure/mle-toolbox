@@ -3,13 +3,15 @@ from .core_experiment import (get_configs_ready,
                               get_extra_cmd_line_input,
                               set_random_seeds)
 from .mle_logger import MLE_Logger
+from .helpers import print_framed
 
 
 class MLExperiment(object):
     def __init__(self,
                  config_fname: str="configs/base_config.json",
                  auto_setup: bool=True,
-                 create_jax_prng: bool=False):
+                 create_jax_prng: bool=False,
+                 default_seed: int=0):
         ''' Load the job configs for the MLE experiment. '''
         # Load the different configurations for the experiment.
         train_config, net_config, log_config, extra_args = get_configs_ready(
@@ -23,6 +25,7 @@ class MLExperiment(object):
         self.log_config = log_config
         self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng
+        self.default_seed = default_seed
 
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
@@ -30,6 +33,12 @@ class MLExperiment(object):
 
     def setup(self):
         ''' Set the random seed & initialize the logger. '''
+        # If no seed is provided in train_config - set it to default
+        if "seed_id" not in self.train_config.keys():
+            self.train_config.seed_id = self.default_seed
+            print_framed(f"!!!WARNING!!!: No seed provided - set to default "
+                         f"{self.default_seed}.")
+
         # Set the random seeds for all random number generation
         if self.create_jax_prng:
             # Return JAX random number generating key

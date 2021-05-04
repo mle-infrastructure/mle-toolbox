@@ -17,7 +17,7 @@ class HyperoptLogger(object):
         self.max_target = max_target  # Whether we want to max target (reward)
         self.eval_metrics = eval_metrics  # Var names to compare across runs
         self.verbose = verbose
-        self.no_results_logging = no_results_logging  # Option to not log metrics
+        self.no_results_logging = no_results_logging  # Want to not log metrics?
 
         # Instantiate the meta-logger
         self.logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ class HyperoptLogger(object):
 
     def print_log_state(self):
         """ Log currently best param config for each metric. """
-        if self.iter_id > 0:
+        if self.iter_id > 0 and not self.no_results_logging:
             for i, m in enumerate(self.best_per_metric.keys()):
                 print_framed(m, frame_str="-")
                 self.logger.info(
@@ -123,7 +123,8 @@ class HyperoptLogger(object):
             self.all_run_ids = []
 
         # Get best performing params for each eval metric
-        self.best_per_metric = self.get_best_performances(self.eval_metrics)
+        if not self.no_results_logging:
+            self.best_per_metric = self.get_best_performances(self.eval_metrics)
 
     def get_best_performances(self, eval_metrics):
         """ Get best performing hyperparam configuration up to current iter """
