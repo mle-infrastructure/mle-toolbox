@@ -11,13 +11,11 @@ cores_to_machine_type = {1: "n2-highcpu-2",
                          8: "c2-standard-16",
                          15: "c2-standard-30"}
 
-gpu_types = ["nvidia-tesla-p100", "nvidia-tesla-v100", "nvidia-tesla-t4",
-             "nvidia-tesla-p4", "nvidia-tesla-k80"]
-
-default_job_arguments = {"job_name": "launch",
-                         "use_tpus": False,
-                         "num_gpus": 0,
-                         "num_logical_cores": 2}
+gpu_types = ["nvidia-tesla-p100",
+             "nvidia-tesla-v100",
+             "nvidia-tesla-t4",
+             "nvidia-tesla-p4",
+             "nvidia-tesla-k80"]
 
 
 base_gcp_args = DotMap({
@@ -37,10 +35,11 @@ tpu_gcp_args = DotMap({
                 })
 
 
-def gcp_get_submission_cmd(vm_name: str, job_args: DotMap,
+def gcp_get_submission_cmd(vm_name: str,
+                           job_args: DotMap,
                            startup_fname: str) -> list:
     """ Construct gcloud VM instance creation cmd to execute via cmd line. """
-    if job_args.use_tpu:
+    if job_args.use_tpus:
         job_gcp_args = tpu_gcp_args
     else:
         job_gcp_args = base_gcp_args
@@ -49,7 +48,7 @@ def gcp_get_submission_cmd(vm_name: str, job_args: DotMap,
             job_gcp_args.ACCELERATOR_TYPE = "nvidia-tesla-v100"
             job_gcp_args.ACCELERATOR_COUNT = job_args.num_gpus
 
-    if job_args.use_tpu:
+    if job_args.use_tpus:
         # TPU VM Alpha gcloud create CMD
         gcp_launch_cmd = [
             'gcloud', 'alpha', 'compute', 'tpus', 'tpu-vm', 'create',
@@ -98,7 +97,7 @@ def gcp_generate_startup_file(remote_code_dir: str,
                               experiment_dir: str,
                               startup_fname: str,
                               gcp_bucket_name: str,
-                              use_tpu: bool=False,
+                              use_tpus: bool=False,
                               use_cuda: bool=False) -> str:
     """ Generate bash script template to launch at VM startup. """
     # Build the start job execution script
@@ -116,7 +115,7 @@ def gcp_generate_startup_file(remote_code_dir: str,
                     remote_dir=remote_code_dir)
                 )
 
-    if use_tpu:
+    if use_tpus:
         # Install TPU version JAX
         startup_script_content += jax_tpu_build
     elif use_cuda:
@@ -141,9 +140,10 @@ def gcp_generate_startup_file(remote_code_dir: str,
         f.write(startup_script_content)
 
 
-def gcp_delete_vm_instance(vm_name: str, vm_zone: str, use_tpu: bool=False):
+def gcp_delete_vm_instance(vm_name: str, use_tpus: bool=False):
     """ Quitely delete job by its name + zone. TODO: Add robustness check. """
-    if not use_tpu:
+    vm_zone = 'europe-west4-a'if use_tpus else 'us-west1-a'
+    if not use_tpus:
         gcp_delete_cmd = ['gcloud', 'compute', 'instances', 'delete',
                           f'{vm_name}', '--zone', f'{vm_zone}', '--quiet',
                           '--no-user-output-enabled', '--verbosity', 'error']

@@ -266,7 +266,7 @@ class Experiment(object):
 
         # Delete VM instance and code directory stored in data bucket
         if self.resource_to_run == "gcp-cloud":
-            gcp_clean_up(job_id, self.job_arguments)
+            gcp_clean_up(job_id, self.job_arguments, self.experiment_dir)
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:

@@ -32,6 +32,9 @@ from mle_toolbox.launch import (run_single_experiment,
                                 prepare_logger,
                                 check_job_config)
 
+# Import utility to copy local code directory to GCS bucket
+from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
+
 
 def run(cmd_args):
     """ Main function of toolbox - Execute different types of experiments. """
@@ -117,7 +120,7 @@ def run(cmd_args):
                                                 cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
-        # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage
+        # 3c. Send recent/up-to-date experiment DB to Google Cloud Storage
         if mle_config.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
@@ -130,7 +133,18 @@ def run(cmd_args):
     if not os.path.exists(config_copy):
         shutil.copy(cmd_args.config_fname, config_copy)
 
-    # 7. Run the experiment
+    # 7. Copy local code directory into GCP bucket if required
+    if resource_to_run == "gcp-cloud":
+        if "local_code_dir" in job_config.single_job_args.keys():
+            local_code_dir = job_config.single_job_args["local_code_dir"]
+        else:
+            local_code_dir = os.getcwd()
+        upload_local_dir_to_gcs(local_path=local_code_dir,
+                                gcs_path=mle_config.gcp.code_dir)
+        logger.info(f"Uploaded {local_code_dir} to GCP bucket:" +
+                    f" {mle_config.gcp.code_dir}")
+
+    # 8. Run the experiment
     print_framed("RUN EXPERIMENT")
     experiment_types = ["single-experiment",
                         "multiple-experiments",
@@ -166,7 +180,7 @@ def run(cmd_args):
     else:
         raise ValueError(f"Job type has to be in {experiment_types}.")
 
-    # 8. Perform post-processing of results if arguments are provided
+    # 9. Perform post-processing of results if arguments are provided
     if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
@@ -175,7 +189,7 @@ def run(cmd_args):
                             job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 
-    # 9. Generate .md, and .html report w. figures for e_id - inherit logger
+    # 10. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
@@ -187,20 +201,20 @@ def run(cmd_args):
                 report_generated = True
                 print_framed("REPORT GENERATION")
 
-    # 10. Update the experiment protocol & send back to GCS (if desired)
+    # 11. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
-        # 9a. Get most recent/up-to-date experiment DB to GCS
+        # 11a. Get most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
-        # 9b. Store experiment directory in GCS bucket under hash
+        # 11b. Store experiment directory in GCS bucket under hash
         if (mle_config.general.use_gcloud_results_storage
             and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
 
-        # 9c. Update the experiment protocol status
+        # 11c. Update the experiment protocol status
         logger.info(f'Updated protocol - COMPLETED: {new_experiment_id}')
         time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         update_protocol_var(new_experiment_id,
