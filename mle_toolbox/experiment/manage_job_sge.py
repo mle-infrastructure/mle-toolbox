@@ -56,7 +56,7 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def sge_generate_remote_job_template(job_arguments: dict):
+def sge_generate_job_template(job_arguments: dict):
     """ Generate the bash script template to submit with qsub. """
     # Set the job template depending on the desired number of GPUs
     base_template = (sge_base_job_config + '.')[:-1]
@@ -98,10 +98,10 @@ def sge_generate_remote_job_template(job_arguments: dict):
 
 
 
-def sge_submit_remote_job(filename: str,
-                          cmd_line_arguments: str,
-                          job_arguments: dict,
-                          clean_up: bool=True):
+def sge_submit_job(filename: str,
+                   cmd_line_arguments: str,
+                   job_arguments: dict,
+                   clean_up: bool=True):
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
@@ -117,7 +117,7 @@ def sge_submit_remote_job(filename: str,
                          " by mle-toolbox. Only base .py, .sh experiments"
                          " are so far implemented. Please open an issue.")
     job_arguments["script"] = script
-    sge_job_template = sge_generate_remote_job_template(job_arguments)
+    sge_job_template = sge_generate_job_template(job_arguments)
 
     open(base + '.qsub', 'w').write(sge_job_template.format(**job_arguments))
 
@@ -165,9 +165,8 @@ def sge_submit_remote_job(filename: str,
     return job_id
 
 
-def sge_monitor_remote_job(job_id: Union[list, int]):
+def sge_monitor_job(job_id: Union[list, int]):
     """ Monitor the status of a job based on its id. """
-    fail_counter = 0
     while True:
         try:
             out = sp.check_output(["qstat", "-u",
@@ -177,9 +176,7 @@ def sge_monitor_remote_job(job_id: Union[list, int]):
             stderr = e.stderr
             return_code = e.returncode
             time.sleep(0.5)
-            # fail_counter += 1
-            # if fail_counter > 100:
-            #     return -1
+
     job_info = out.split(b'\n')[2:]
     running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                        for i in range(len(job_info) - 1)]

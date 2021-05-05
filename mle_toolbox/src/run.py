@@ -65,7 +65,7 @@ def run(cmd_args):
 
     # 3. If local - check if experiment should be run on remote resource
     if resource_to_run not in ["sge-cluster", "slurm-cluster"]:
-        # Ask user on which resource to run on
+        # Ask user on which resource to run on [local/sge/slurm/gcp]
         if cmd_args.resource_to_run is None:
             resource_to_run = ask_for_resource_to_run()
         else:

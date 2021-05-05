@@ -11,14 +11,14 @@ from .manage_job_local import (local_check_job_args,
                                local_submit_venv_job,
                                local_submit_conda_job)
 from .manage_job_sge import (sge_check_job_args,
-                             sge_submit_remote_job,
-                             sge_monitor_remote_job)
+                             sge_submit_job,
+                             sge_monitor_job)
 from .manage_job_slurm import (slurm_check_job_args,
-                               slurm_submit_remote_job,
-                               slurm_monitor_remote_job)
+                               slurm_submit_job,
+                               slurm_monitor_job)
 from .manage_job_gcp import (gcp_check_job_args,
-                             gcp_submit_remote_job,
-                             gcp_monitor_remote_job)
+                             gcp_submit_job,
+                             gcp_monitor_job)
 
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
@@ -53,10 +53,10 @@ class Experiment(object):
         run: Executes experiment, logs it & returns status if experiment done
         schedule: Schedules experiment locally or remotely
         schedule_local: Schedules experiment locally on your machine
-        schedule_remote: Schedules experiment remotely on SGE/Slurm clusters
+        schedule_cluster: Schedules experiment remotely on SGE/Slurm clusters
         monitor: Monitors experiment locally or remotely
         monitor_local: Monitors experiment locally on your machine
-        monitor_remote: Monitors experiment remotely on SGE/Slurm clusters
+        monitor_cluster: Monitors experiment remotely on SGE/Slurm clusters
     """
     def __init__(self,
                  resource_to_run: str,
@@ -78,13 +78,14 @@ class Experiment(object):
 
         # Check the availability of the cluster to run job
         self.resource_to_run = resource_to_run
-        self.run_on_remote = self.cluster_available()
 
         # Check if all required args are given - otw. add default
-        if self.run_on_sge_cluster:
+        if self.resource_to_run == "sge-cluster":
             self.job_arguments = sge_check_job_args(job_arguments)
-        elif self.run_on_slurm_cluster:
+        elif self.resource_to_run == "slurm-cluster":
             self.job_arguments = slurm_check_job_args(job_arguments)
+        elif self.resource_to_run == "gcp-cloud":
+            self.job_arguments = gcp_check_job_args(job_arguments)
         else:
             self.job_arguments = local_check_job_args(job_arguments)
 
@@ -104,21 +105,23 @@ class Experiment(object):
     def run(self):
         """ Exec experiment, logs & returns status if experiment done. """
         # Schedule the job, return its identifier & monitor job status
-        if self.run_on_remote:
-            job_id = self.schedule_remote()
+        if self.resource_to_run in ["sge-cluster", "slurm-cluster"]:
+            job_id = self.schedule_cluster()
             if self.job_status == 1:
-                self.logger.info(f"Job ID: {job_id} - Remote job scheduled" \
+                self.logger.info(f"Job ID: {job_id} - Cluster job scheduled" \
                                  f" - {self.config_filename}")
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when scheduling " \
-                                 f"remote job - {self.config_filename}")
-            status_out = self.monitor_remote(job_id)
+                                 f"cluster job - {self.config_filename}")
+            status_out = self.monitor_cluster(job_id)
             if status_out == 0:
-                self.logger.info(f"Job ID: {job_id} - Remote job successfully " \
+                self.logger.info(f"Job ID: {job_id} - Cluster job successfully " \
                                  f"completed - {self.config_filename}")
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when running " \
-                                 f"remote job - {self.config_filename}")
+                                 f"cluster job - {self.config_filename}")
+        elif self.resource_to_run in ["gcp-cloud"]:
+            raise NotImplementedError
         else:
             proc = self.schedule_local()
             if self.job_status == 1:
@@ -152,18 +155,18 @@ class Experiment(object):
         self.job_status = 1
         return proc
 
-    def schedule_remote(self):
-        """ Schedules experiment to run remotely on SGE. """
+    def schedule_cluster(self):
+        """ Schedules experiment to run remotely on SGE or Slurm clusters. """
         if self.run_on_sge_cluster:
-            job_id = sge_submit_remote_job(self.job_filename,
-                                           self.cmd_line_args,
-                                           self.job_arguments,
-                                           clean_up=True)
+            job_id = sge_submit_job(self.job_filename,
+                                    self.cmd_line_args,
+                                    self.job_arguments,
+                                    clean_up=True)
         elif self.run_on_slurm_cluster:
-            job_id = slurm_submit_remote_job(self.job_filename,
-                                             self.cmd_line_args,
-                                             self.job_arguments,
-                                             clean_up=True)
+            job_id = slurm_submit_job(self.job_filename,
+                                      self.cmd_line_args,
+                                      self.job_arguments,
+                                      clean_up=True)
 
         if job_id == -1:
             self.job_status = 0
@@ -171,6 +174,10 @@ class Experiment(object):
             self.job_status = 1
 
         return job_id
+
+    def schedule_cloud(self):
+        """ Schedules experiment to run remotely on GCP cloud. """
+        raise NotImplementedError
 
     def monitor_local(self, proc):
         """ Monitors experiment locally on your machine. """
@@ -194,36 +201,19 @@ class Experiment(object):
         else:
             return 0
 
-    def monitor_remote(self, job_id):
-        """ Schedules experiment remotely on SGE. """
+    def monitor_cluster(self, job_id):
+        """ Monitors experiment remotely on SGE or Slurm clusters. """
         while self.job_status:
             if self.run_on_sge_cluster:
-                self.job_status = sge_monitor_remote_job(job_id)
+                self.job_status = sge_monitor_job(job_id)
             elif self.run_on_slurm_cluster:
-                self.job_status = slurm_monitor_remote_job(job_id)
+                self.job_status = slurm_monitor_job(job_id)
             time.sleep(1)
         return 0
 
-    def cluster_available(self):
-        """ Check if cluster (sge/slurm) is available or only local run. """
-        hostname = platform.node()
-        on_sge_cluster = any(re.match(l, hostname) for l
-                             in mle_config.sge.info.node_reg_exp)
-        on_slurm_cluster = any(re.match(l, hostname) for l
-                               in mle_config.slurm.info.node_reg_exp)
-        on_sge_head = (hostname in mle_config.sge.info.head_names)
-        on_slurm_head = (hostname in mle_config.slurm.info.head_names)
-        if on_sge_head or on_sge_cluster:
-            self.run_on_sge_cluster = 1
-            self.run_on_slurm_cluster = 0
-        elif on_slurm_head or on_slurm_cluster:
-            self.run_on_sge_cluster = 0
-            self.run_on_slurm_cluster = 1
-        else:
-            self.run_on_sge_cluster = 0
-            self.run_on_slurm_cluster = 0
-        return (on_sge_cluster or on_sge_head or
-                on_slurm_head or on_slurm_cluster)
+    def monitor_cloud(self, vm_name):
+        """ Monitors experiment remotely on GCP cloud. """
+        raise NotImplementedError
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:
