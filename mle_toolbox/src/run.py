@@ -9,6 +9,7 @@ from mle_toolbox import mle_config
 # Import of general tools (loading, etc.)
 from mle_toolbox.utils import (load_yaml_config,
                                determine_resource,
+                               ask_for_resource_to_run,
                                print_framed)
 
 # Import of helpers for protocoling experiments
@@ -19,8 +20,7 @@ from mle_toolbox.protocol import (protocol_summary,
                                   protocol_experiment)
 
 # Import of local-to-remote helpers (verify, rsync, exec)
-from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
-                                            SSH_Manager,
+from mle_toolbox.remote.ssh_execute import (SSH_Manager,
                                             monitor_remote_session,
                                             run_remote_experiment)
 
@@ -112,7 +112,9 @@ def run(cmd_args):
         if cmd_args.purpose is None:
             delete_protocol_from_input()
             abort_protocol_from_input()
-        new_experiment_id = protocol_experiment(job_config, cmd_args.purpose)
+        new_experiment_id = protocol_experiment(job_config,
+                                                resource_to_run,
+                                                cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
         # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage

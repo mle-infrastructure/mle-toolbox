@@ -80,14 +80,7 @@ class Experiment(object):
         self.resource_to_run = resource_to_run
 
         # Check if all required args are given - otw. add default
-        if self.resource_to_run == "sge-cluster":
-            self.job_arguments = sge_check_job_args(job_arguments)
-        elif self.resource_to_run == "slurm-cluster":
-            self.job_arguments = slurm_check_job_args(job_arguments)
-        elif self.resource_to_run == "gcp-cloud":
-            self.job_arguments = gcp_check_job_args(job_arguments)
-        else:
-            self.job_arguments = local_check_job_args(job_arguments)
+        self.job_arguments = self.check_job_args(job_arguments)
 
         # Create command line arguments for job to schedule (passed to .py)
         self.cmd_line_args = self.generate_cmd_line_args(cmd_line_input)
@@ -102,9 +95,30 @@ class Experiment(object):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logger_level)
 
+    def check_job_args(self, job_arguments):
+        """ Check if all requirements are provided. Complete w. default otw. """
+        if self.resource_to_run == "sge-cluster":
+            full_job_arguments = sge_check_job_args(job_arguments)
+        elif self.resource_to_run == "slurm-cluster":
+            full_job_arguments = slurm_check_job_args(job_arguments)
+        elif self.resource_to_run == "gcp-cloud":
+            full_job_arguments = gcp_check_job_args(job_arguments)
+        else:
+            full_job_arguments = local_check_job_args(job_arguments)
+        return full_job_arguments
+
     def run(self):
-        """ Exec experiment, logs & returns status if experiment done. """
-        # Schedule the job, return its identifier & monitor job status
+        """ Schedule experiment, monitor and clean up afterwards. """
+        # Schedule job, create success boolean and job identifier
+        job_id = self.schedule()
+        # Monitor status of job based on identifier
+        status_out = self.monitor(job_id)
+        # If they exist - remove log & error file
+        self.clean_up()
+        return status_out
+
+    def schedule(self):
+        """ Schedule job on cluster (sge/slurm), cloud (gcp) or locally. """
         if self.resource_to_run in ["sge-cluster", "slurm-cluster"]:
             job_id = self.schedule_cluster()
             if self.job_status == 1:
@@ -113,6 +127,22 @@ class Experiment(object):
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when scheduling " \
                                  f"cluster job - {self.config_filename}")
+        elif self.resource_to_run in ["gcp-cloud"]:
+            raise NotImplementedError
+        else:
+            job_id = self.schedule_local()
+            if self.job_status == 1:
+                self.logger.info(f"PID: {job_id.pid} - Local job scheduled " \
+                                 f"- {self.config_filename}")
+            else:
+                self.logger.info(f"PID: {job_id.pid} - Error when scheduling local " \
+                                 f"job - {self.config_filename}")
+        # Return sge/slurm - job_id (qstat/squeue), gcp - vm_name, local - proc
+        return job_id
+
+    def monitor(self, job_id: str):
+        """ Monitor on cluster (sge/slurm), cloud (gcp) or locally via id. """
+        if self.resource_to_run in ["sge-cluster", "slurm-cluster"]:
             status_out = self.monitor_cluster(job_id)
             if status_out == 0:
                 self.logger.info(f"Job ID: {job_id} - Cluster job successfully " \
@@ -123,23 +153,13 @@ class Experiment(object):
         elif self.resource_to_run in ["gcp-cloud"]:
             raise NotImplementedError
         else:
-            proc = self.schedule_local()
-            if self.job_status == 1:
-                self.logger.info(f"PID: {proc.pid} - Local job scheduled " \
-                                 f"- {self.config_filename}")
-            else:
-                self.logger.info(f"PID: {proc.pid} - Error when scheduling local " \
-                                 f"job - {self.config_filename}")
-            status_out = self.monitor_local(proc)
+            status_out = self.monitor_local(job_id)
             if status_out == 0:
-                self.logger.info("PID: {proc.pid} - Local job successfully " \
+                self.logger.info("PID: {job_id.pid} - Local job successfully " \
                                  f"completed - { self.config_filename}")
             else:
-                self.logger.info(f"PID: {proc.pid} - Error when running local " \
+                self.logger.info(f"PID: {job_id.pid} - Error when running local " \
                                  f"job - {self.config_filename}")
-
-        # If they exist - remove qsub log & error file
-        self.clean_up()
         return status_out
 
     def schedule_local(self):
@@ -157,22 +177,18 @@ class Experiment(object):
 
     def schedule_cluster(self):
         """ Schedules experiment to run remotely on SGE or Slurm clusters. """
-        if self.run_on_sge_cluster:
+        if self.resource_to_run == "sge-cluster":
             job_id = sge_submit_job(self.job_filename,
                                     self.cmd_line_args,
                                     self.job_arguments,
                                     clean_up=True)
-        elif self.run_on_slurm_cluster:
+        elif self.resource_to_run == "slurm-cluster":
             job_id = slurm_submit_job(self.job_filename,
                                       self.cmd_line_args,
                                       self.job_arguments,
                                       clean_up=True)
-
-        if job_id == -1:
-            self.job_status = 0
-        else:
-            self.job_status = 1
-
+        if job_id == -1: self.job_status = 0
+        else: self.job_status = 1
         return job_id
 
     def schedule_cloud(self):
@@ -193,7 +209,6 @@ class Experiment(object):
 
         # Get output & error messages (if there is an error)
         out, err = proc.communicate()
-
         # Return -1 if job failed & 0 otherwise
         if proc.returncode != 0:
             print(out, err)
@@ -204,16 +219,20 @@ class Experiment(object):
     def monitor_cluster(self, job_id):
         """ Monitors experiment remotely on SGE or Slurm clusters. """
         while self.job_status:
-            if self.run_on_sge_cluster:
+            if self.resource_to_run == "sge-cluster":
                 self.job_status = sge_monitor_job(job_id)
-            elif self.run_on_slurm_cluster:
+            elif self.resource_to_run == "slurm-cluster":
                 self.job_status = slurm_monitor_job(job_id)
             time.sleep(1)
         return 0
 
-    def monitor_cloud(self, vm_name):
+    def monitor_cloud(self, job_id):
         """ Monitors experiment remotely on GCP cloud. """
-        raise NotImplementedError
+        while self.job_status:
+            if self.resource_to_run == "gcp-cloud":
+                self.job_status = gcp_monitor_job(job_id)
+            time.sleep(1)
+        return 0
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:

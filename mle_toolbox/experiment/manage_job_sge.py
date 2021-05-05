@@ -165,7 +165,7 @@ def sge_submit_job(filename: str,
     return job_id
 
 
-def sge_monitor_job(job_id: Union[list, int]):
+def sge_monitor_job(job_id: Union[list, int]) -> bool:
     """ Monitor the status of a job based on its id. """
     while True:
         try:
