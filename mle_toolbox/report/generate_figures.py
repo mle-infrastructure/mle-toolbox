@@ -50,14 +50,11 @@ class FigureGenerator():
 
     def generate_all_1D_figures(self):
         """ Loop over 1D stats variables in meta_log and generate figures. """
-        run_ids = list(self.meta_log.keys())
-        time_vars = list(self.meta_log[run_ids[0]].time.keys())
-        stats_vars = list(self.meta_log[run_ids[0]].stats.keys())
-
         # Loop over stats variables and generate figures
         figure_fnames = []
-        for stats in stats_vars:
-            stats_fname = self.generate_1D_figure(time_vars[0], stats)
+        for stats in self.meta_log.stats_vars:
+            stats_fname = self.generate_1D_figure(self.meta_log.time_vars[0],
+                                                  stats)
             figure_fnames.append(stats_fname)
         return figure_fnames
 

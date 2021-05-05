@@ -18,7 +18,8 @@ from .manage_job_slurm import (slurm_check_job_args,
                                slurm_monitor_job)
 from .manage_job_gcp import (gcp_check_job_args,
                              gcp_submit_job,
-                             gcp_monitor_job)
+                             gcp_monitor_job,
+                             gcp_clean_up)
 
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
@@ -32,6 +33,8 @@ class Experiment(object):
     either be run locally, on a sungrid-engine (SGE) or SLURM cluster.
 
     Args:
+        resource_to_run (str): Compute resource to execute job on.
+
         job_filename (str): filepath to .py script to be executed for job.
 
         config_filename (str): filepath to .json file specifying configuration
@@ -68,16 +71,12 @@ class Experiment(object):
                  extra_cmd_line_input: Union[None, dict]=None,
                  logger_level: str=logging.WARNING):
         # Init experiment class with relevant info
+        self.resource_to_run = resource_to_run     # compute resource for job
         self.job_filename = job_filename           # path to train script
         self.config_filename = config_filename     # path to config json
-
-        # Create the main experiment directory if it doesn't exist yet
-        self.experiment_dir = experiment_dir
+        self.experiment_dir = experiment_dir       # main results dir (create)
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
-
-        # Check the availability of the cluster to run job
-        self.resource_to_run = resource_to_run
 
         # Check if all required args are given - otw. add default
         self.job_arguments = self.check_job_args(job_arguments)
@@ -114,7 +113,7 @@ class Experiment(object):
         # Monitor status of job based on identifier
         status_out = self.monitor(job_id)
         # If they exist - remove log & error file
-        self.clean_up()
+        self.clean_up(job_id)
         return status_out
 
     def schedule(self):
@@ -249,9 +248,25 @@ class Experiment(object):
         """ Monitors experiment remotely on GCP cloud. """
         while self.job_status:
             if self.resource_to_run == "gcp-cloud":
-                self.job_status = gcp_monitor_job(job_id)
+                self.job_status = gcp_monitor_job(job_id, self.job_arguments)
             time.sleep(1)
         return 0
+
+    def clean_up(self, job_id):
+        """ Remove error and log files at end of training. """
+        # Clean up if not development!
+        if not mle_config.general.development:
+            for filename in glob.glob(self.job_arguments["err_file"] + "*"):
+                try: os.remove(filename)
+                except: pass
+            for filename in glob.glob(self.job_arguments["log_file"] + "*"):
+                try: os.remove(filename)
+                except: pass
+            self.logger.info("Cleaned up log, error, results files")
+
+        # Delete VM instance and code directory stored in data bucket
+        if self.resource_to_run == "gcp-cloud":
+            gcp_clean_up(job_id, self.job_arguments)
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:
@@ -277,15 +292,3 @@ class Experiment(object):
         for k, v in extra_cmd_line_input.items():
             full_cmd_line_args += " -" + k + " " + str(v)
         return full_cmd_line_args
-
-    def clean_up(self):
-        """ Remove error and log files at end of training. """
-        # Clean up if not development!
-        if not mle_config.general.development:
-            for filename in glob.glob(self.job_arguments["err_file"] + "*"):
-                try: os.remove(filename)
-                except: pass
-            for filename in glob.glob(self.job_arguments["log_file"] + "*"):
-                try: os.remove(filename)
-                except: pass
-            self.logger.info("Cleaned up log, error, results files")

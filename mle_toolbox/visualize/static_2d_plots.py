@@ -38,7 +38,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
 
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = params_to_plot + [target_to_plot]
-    sub_log = hyper_df.copy()
+    sub_log = hyper_df.hyper_log.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
             sub_log = sub_log[sub_log[k].astype(float) == v]

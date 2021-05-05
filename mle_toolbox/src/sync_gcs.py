@@ -3,7 +3,7 @@ from mle_toolbox.protocol import load_local_protocol_db
 from mle_toolbox.remote.gcloud_transfer import (get_gcloud_db,
                                                 send_gcloud_db,
                                                 get_gcloud_zip_experiment,
-                                                delete_gcs_directory)
+                                                delete_gcs_dir)
 
 
 def sync_gcs():
@@ -28,6 +28,6 @@ def sync_gcs():
                                             db, e_id, all_experiment_ids
                                                               )
                 print_framed(f'DELETE E-ID {e_id}')
-                delete_gcs_directory(gcloud_hash_fname)
+                delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f'COMPLETED E-ID {e_id}')
     send_gcloud_db()

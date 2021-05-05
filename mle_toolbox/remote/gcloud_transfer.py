@@ -73,7 +73,7 @@ def send_gcloud_db(number_of_connect_tries: int=5):
     return 0
 
 
-def delete_gcs_directory(gcs_path: str,
+def delete_gcs_dir(gcs_path: str,
                          number_of_connect_tries: int=5):
     """ Delete a directory in a GCS bucket. """
     logger = logging.getLogger(__name__)
@@ -92,8 +92,9 @@ def delete_gcs_directory(gcs_path: str,
         blob.delete()
 
 
-def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
-                                  number_of_connect_tries: int=5):
+def upload_local_dir_to_gcs(local_path: str,
+                            gcs_path: str,
+                            number_of_connect_tries: int=5):
     """ Send entire dir (recursively) to Google Cloud Storage Bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -128,8 +129,9 @@ def upload_local_directory_to_gcs(local_path: str, gcs_path: str,
     upload_single_file(local_path, gcs_path, bucket)
 
 
-def download_gcs_directory_to_local(gcs_path: str, local_path: str="",
-                                    number_of_connect_tries: int=5):
+def download_gcs_dir(gcs_path: str,
+                     local_path: str="",
+                     number_of_connect_tries: int=5):
     """ Download entire dir (recursively) from Google Cloud Storage Bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -178,7 +180,8 @@ def zipdir(path: str, zip_fname: str):
     ziph.close()
 
 
-def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
+def send_gcloud_zip_experiment(experiment_dir: str,
+                               experiment_id: str,
                                delete_after_upload: bool=False):
     """ Zip & upload experiment dir to Gcloud storage. """
     logger = logging.getLogger(__name__)
@@ -194,8 +197,8 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
     zipdir(experiment_dir, local_hash_fname)
 
     # 3. Upload the zip file to the GCS bucket
-    upload_local_directory_to_gcs(local_path=local_hash_fname,
-                                  gcs_path=gcloud_hash_fname)
+    upload_local_dir_to_gcs(local_path=local_hash_fname,
+                            gcs_path=gcloud_hash_fname)
     logger.info(f"UPLOAD TO GCS BUCKET - {experiment_id}:")
     logger.info(f"{gcloud_hash_fname}")
 
@@ -210,7 +213,8 @@ def send_gcloud_zip_experiment(experiment_dir: str, experiment_id: str,
         logger.info(f"DELETED - {experiment_id}: experiment dir + .zip file")
 
 
-def get_gcloud_zip_experiment(db, experiment_id: str,
+def get_gcloud_zip_experiment(db,
+                              experiment_id: str,
                               all_experiment_ids: list,
                               local_dir_name: Union[None, str] = None):
     """ Download zipped experiment from GCS. Unpack & clean up. """
@@ -230,7 +234,7 @@ def get_gcloud_zip_experiment(db, experiment_id: str,
     hash_to_store = db.dget(experiment_id, "e-hash")
     local_hash_fname = hash_to_store + ".zip"
     gcloud_hash_fname = "experiments/" + local_hash_fname
-    download_gcs_directory_to_local(gcloud_hash_fname)
+    download_gcs_dir(gcloud_hash_fname)
 
     # Unzip the retrieved file
     if local_dir_name is None:

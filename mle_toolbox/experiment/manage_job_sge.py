@@ -150,8 +150,8 @@ def sge_submit_job(filename: str,
             job_info = out.split(b'\n')[2:]
             running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
                                for i in range(len(job_info) - 1)]
-            sumle_configess = job_id in running_job_ids
-            if sumle_configess:
+            job_running = job_id in running_job_ids
+            if job_running:
                 break
         except sp.CalledProcessError as e:
             stderr = e.stderr
