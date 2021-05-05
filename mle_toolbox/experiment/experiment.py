@@ -128,7 +128,13 @@ class Experiment(object):
                 self.logger.info(f"Job ID: {job_id} - Error when scheduling " \
                                  f"cluster job - {self.config_filename}")
         elif self.resource_to_run in ["gcp-cloud"]:
-            raise NotImplementedError
+            job_id = self.schedule_cloud()
+            if self.job_status == 1:
+                self.logger.info(f"VM Name: {job_id} - Cloud job scheduled" \
+                                 f" - {self.config_filename}")
+            else:
+                self.logger.info(f"VM Name: {job_id} - Error when scheduling " \
+                                 f"cloud job - {self.config_filename}")
         else:
             job_id = self.schedule_local()
             if self.job_status == 1:
@@ -151,7 +157,13 @@ class Experiment(object):
                 self.logger.info(f"Job ID: {job_id} - Error when running " \
                                  f"cluster job - {self.config_filename}")
         elif self.resource_to_run in ["gcp-cloud"]:
-            raise NotImplementedError
+            status_out = self.monitor_cloud(job_id)
+            if status_out == 0:
+                self.logger.info(f"VM Name: {job_id} - Cloud job successfully " \
+                                 f"completed - {self.config_filename}")
+            else:
+                self.logger.info(f"VM Name: {job_id} - Error when running " \
+                                 f"cloud job - {self.config_filename}")
         else:
             status_out = self.monitor_local(job_id)
             if status_out == 0:
@@ -193,7 +205,14 @@ class Experiment(object):
 
     def schedule_cloud(self):
         """ Schedules experiment to run remotely on GCP cloud. """
-        raise NotImplementedError
+        if self.resource_to_run == "gcp-cloud":
+            job_id = gcp_submit_job(self.job_filename,
+                                    self.cmd_line_args,
+                                    self.job_arguments,
+                                    clean_up=True)
+        if job_id == -1: self.job_status = 0
+        else: self.job_status = 1
+        return job_id
 
     def monitor_local(self, proc):
         """ Monitors experiment locally on your machine. """
@@ -246,7 +265,8 @@ class Experiment(object):
             if "seed_id" in cmd_line_input.keys():
                 cmd_line_args += " -seed " + str(cmd_line_input["seed_id"])
                 # Update the job argument details with the seed-job-id
-                self.job_arguments["job_name"] += "-" + str(cmd_line_input["seed_id"])
+                self.job_arguments["job_name"] += "-" + str(
+                                                cmd_line_input["seed_id"])
         return cmd_line_args
 
     def generate_extra_cmd_line_args(self, cmd_line_args: str,

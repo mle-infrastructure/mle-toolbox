@@ -56,7 +56,7 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def sge_generate_job_template(job_arguments: dict):
+def sge_generate_job_template(job_arguments: dict) -> str:
     """ Generate the bash script template to submit with qsub. """
     # Set the job template depending on the desired number of GPUs
     base_template = (sge_base_job_config + '.')[:-1]
@@ -101,7 +101,7 @@ def sge_generate_job_template(job_arguments: dict):
 def sge_submit_job(filename: str,
                    cmd_line_arguments: str,
                    job_arguments: dict,
-                   clean_up: bool=True):
+                   clean_up: bool=True) -> str:
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
@@ -161,7 +161,6 @@ def sge_submit_job(filename: str,
     # Finally delete all the unnemle_configessary log files
     if clean_up:
         os.remove(base + '.qsub')
-
     return job_id
 
 

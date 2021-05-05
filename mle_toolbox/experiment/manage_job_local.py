@@ -75,6 +75,6 @@ def submit_subprocess(cmd: str):
     return proc
 
 
-def random_id(length: int=8):
+def random_id(length: int=8) -> str:
     """ Sample a random string to use for job id. """
     return ''.join(random.sample(string.ascii_letters + string.digits, length))

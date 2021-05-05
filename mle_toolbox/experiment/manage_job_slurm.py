@@ -56,7 +56,7 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def slurm_generate_job_template(job_arguments: dict):
+def slurm_generate_job_template(job_arguments: dict) -> str:
     """ Generate the bash script template to submit with SBATCH. """
     # Set the job template depending on the desired number of GPUs
     base_template = (slurm_base_job_config + '.')[:-1]
@@ -86,7 +86,7 @@ def slurm_generate_job_template(job_arguments: dict):
 def slurm_submit_job(filename: str,
                      cmd_line_arguments: str,
                      job_arguments: dict,
-                     clean_up: bool=True):
+                     clean_up: bool=True) -> str:
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
@@ -150,7 +150,7 @@ def slurm_submit_job(filename: str,
     return job_id
 
 
-def slurm_monitor_job(job_id: Union[list, int]):
+def slurm_monitor_job(job_id: Union[list, int]) -> bool:
     """ Monitor the status of a job based on its id. """
     while True:
         try:
