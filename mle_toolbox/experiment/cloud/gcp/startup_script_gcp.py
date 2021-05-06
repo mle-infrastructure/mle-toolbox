@@ -60,7 +60,20 @@ tmux send "
 (
   cd /{remote_dir} &&
   . env/bin/activate &&
-  python3 {job_filename} --config_fname {config_filename} --experiment_dir {experiment_dir} --seed_id {seed_id}
+  python3 {filename} {cmd_line_arguments}
+) 2>&1 | tee -a /{remote_dir}/log.txt
+
+echo WILL SHUT DOWN IN 5 MIN ...
+sleep 300 && sudo shutdown now
+"
+'''
+
+exec_bash = '''
+tmux send "
+(
+  cd /{remote_dir} &&
+  . env/bin/activate &&
+  bash {filename} {cmd_line_arguments}
 ) 2>&1 | tee -a /{remote_dir}/log.txt
 
 echo WILL SHUT DOWN IN 5 MIN ...
@@ -75,7 +88,7 @@ tmux split-window -h
 tmux send "
 while true; do
     gsutil rsync -x 'env' -r /{remote_code_dir}/{experiment_dir} gs://{gcp_bucket_name}/{remote_results_dir}/{experiment_dir}
-    sleep 20
+    sleep 10
 done
 " ENTER
 '''

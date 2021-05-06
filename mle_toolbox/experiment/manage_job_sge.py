@@ -106,7 +106,7 @@ def sge_submit_job(filename: str,
     # Create base string of job id
     base = "submit_{0}".format(random_id())
 
-    # Write the desired python code to .py file to execute
+    # Write the desired python/bash execution to sge job submission file
     f_name, f_extension = os.path.splitext(filename)
     if f_extension == ".py":
         script = f"python {filename} {cmd_line_arguments}"

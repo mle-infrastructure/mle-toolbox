@@ -139,9 +139,11 @@ def run(cmd_args):
             local_code_dir = job_config.single_job_args["local_code_dir"]
         else:
             local_code_dir = os.getcwd()
+        logger.info(f"Start uploading {local_code_dir} to GCP bucket:" +
+                    f" {mle_config.gcp.code_dir}")
         upload_local_dir_to_gcs(local_path=local_code_dir,
                                 gcs_path=mle_config.gcp.code_dir)
-        logger.info(f"Uploaded {local_code_dir} to GCP bucket:" +
+        logger.info(f"Completed uploading {local_code_dir} to GCP bucket:" +
                     f" {mle_config.gcp.code_dir}")
 
     # 8. Run the experiment

@@ -32,7 +32,6 @@ def run_hyperparameter_search(resource_to_run: str,
 
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
-
     if param_search_args.search_type == "random":
         hyper_opt = RandomHyperoptimisation(hyper_log,
                                             resource_to_run,

@@ -1,4 +1,4 @@
-import time
+import os, time
 import subprocess as sp
 from dotmap import DotMap
 from typing import Union
@@ -43,7 +43,8 @@ def gcp_get_submission_cmd(vm_name: str,
         job_gcp_args = tpu_gcp_args
     else:
         job_gcp_args = base_gcp_args
-        job_gcp_args.MACHINE_TYPE = cores_to_machine_type[job_args.num_logical_cores]
+        job_gcp_args.MACHINE_TYPE = cores_to_machine_type[
+                                        job_args.num_logical_cores]
         if job_args.num_gpus > 0:
             job_gcp_args.ACCELERATOR_TYPE = "nvidia-tesla-v100"
             job_gcp_args.ACCELERATOR_COUNT = job_args.num_gpus
@@ -92,18 +93,18 @@ def gcp_get_submission_cmd(vm_name: str,
 
 def gcp_generate_startup_file(remote_code_dir: str,
                               remote_results_dir: str,
+                              gcp_bucket_name: str,
                               job_filename: str,
-                              config_filename: str,
                               experiment_dir: str,
                               startup_fname: str,
-                              gcp_bucket_name: str,
+                              cmd_line_arguments: str,
                               use_tpus: bool=False,
                               use_cuda: bool=False) -> str:
     """ Generate bash script template to launch at VM startup. """
     # Build the start job execution script
     # 1. Connecting to tmux via: gcloud compute ssh $VM -- /sudo_tmux_a.sh
     # 2a. Launch venv & install dependencies from requirements.txt
-    # 2b. [OPTIONAL] Setup JAX TPU build
+    # 2b. [OPTIONAL] Setup JAX TPU/GPU build
     # 3. Separate tmux split for rsync of results to GCS bucket
     startup_script_content = (
                 "#!/bin/bash" +
@@ -122,18 +123,28 @@ def gcp_generate_startup_file(remote_code_dir: str,
         # Install GPU version JAX
         startup_script_content += jax_gpu_build
 
-    startup_script_content += (exec_python.format(
-                                remote_dir=remote_code_dir,
-                                job_filename=job_filename,
-                                config_filename=config_filename,
-                                experiment_dir=experiment_dir,
-                                seed_id=0) +
-                               sync_results_from_dir.format(
+    # Write the desired python/bash execution to slurm job submission file
+    f_name, f_extension = os.path.splitext(job_filename)
+    if f_extension == ".py":
+        startup_script_content += exec_python.format(
+                                    remote_dir=remote_code_dir,
+                                    filename=job_filename,
+                                    cmd_line_arguments=cmd_line_arguments)
+    elif f_extension == ".sh":
+        startup_script_content += exec_bash.format(
+                                    remote_dir=remote_code_dir,
+                                    filename=job_filename,
+                                    cmd_line_arguments=cmd_line_arguments)
+    else:
+        raise ValueError(f"Script with {f_extension} cannot be handled"
+                         " by mle-toolbox. Only base .py, .sh experiments"
+                         " are so far implemented. Please open an issue.")
+
+    startup_script_content += sync_results_from_dir.format(
                                 remote_code_dir=remote_code_dir,
                                 remote_results_dir=remote_results_dir,
                                 gcp_bucket_name=gcp_bucket_name,
                                 experiment_dir=experiment_dir)
-                               )
 
     # Write startup script to physical file
     with open(startup_fname, 'w', encoding='utf8') as f:

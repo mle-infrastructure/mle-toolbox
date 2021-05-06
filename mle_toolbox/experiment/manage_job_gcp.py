@@ -1,6 +1,6 @@
 import subprocess as sp
 import time, datetime
-import os
+import os, random, re
 from dotmap import DotMap
 from typing import Union
 from .cloud.gcp.helpers_launch_gcp import (gcp_generate_startup_file,
@@ -10,10 +10,9 @@ from mle_toolbox import mle_config
 from mle_toolbox.remote.gcloud_transfer import (delete_gcs_dir,
                                                 download_gcs_dir)
 
-# 1. How to also allow for bash script execution!? Not only python!
-# 2. Where to add experiment dir/all necessary ingredients os.getcwd() etc.
-# 3. Make sure experiment results are archived nicely on local machine
-# 4. Refactor everything into sub dirs: local, cluster, cloud
+# TODO:
+# 1. Make sure experiment results are archived nicely on local machine
+# 2. Refactor everything into sub dirs: local, cluster, cloud
 
 
 def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
@@ -33,7 +32,6 @@ def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
 
 
 def gcp_submit_job(filename: str,
-                   config_filename: str,
                    cmd_line_arguments: str,
                    job_arguments: dict,
                    experiment_dir: str,
@@ -42,18 +40,18 @@ def gcp_submit_job(filename: str,
     # 0. Create VM Name - Timestamp + Random 4 digit id
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     random_str = str(random.randrange(1000, 9999))
-    vm_name = '-'.join([job_args["job_name"], timestamp, random_str])
+    vm_name = '-'.join([job_arguments["job_name"], timestamp, random_str])
     vm_name = re.sub(r'[^a-z0-9-]', '-', vm_name)
 
     # 1. Generate GCP startup file with provided arguments
     startup_fname = vm_name + "-startup.sh"
     gcp_generate_startup_file(mle_config.gcp.code_dir,
                               mle_config.gcp.results_dir,
-                              job_filename,
-                              config_filename,
+                              mle_config.gcp.bucket_name,
+                              filename,
                               experiment_dir,
                               startup_fname,
-                              mle_config.gcp.bucket_name,
+                              cmd_line_arguments,
                               job_arguments.use_tpus,
                               job_arguments.num_gpus > 0)
 
@@ -63,14 +61,13 @@ def gcp_submit_job(filename: str,
                                             startup_fname)
 
     # 3. Launch GCP VM Instance - Everything handled by startup file
-    sp.run(vm_instance_cmd)
+    sp.run(gcp_launch_cmd)
 
     # 4. Wait until job is listed as running (ca. 2 minute!)
-    for i in range(50):
+    while True:
         try:
-            job_running = gcp_monitor_remote_job(vm_name,
-                                                 job_arguments.use_tpus)
-            if job_running:
+            job_running = gcp_monitor_job(vm_name, job_arguments)
+            if job_running == 1:
                 # Delete statup bash file
                 try:
                     os.remove(startup_fname)
@@ -78,6 +75,7 @@ def gcp_submit_job(filename: str,
                 except:
                     pass
                 return vm_name
+            time.sleep(10)
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
@@ -94,11 +92,9 @@ def gcp_monitor_job(vm_name: str, job_arguments: dict):
     while True:
         try:
             check_cmd = (["gcloud", "alpha", "compute", "tpus", "--zone",
-                          "europe-west4-a", "--no-user-output-enabled",
-                          "--verbosity", "error"]
+                          "europe-west4-a", "--verbosity", "critical"]
                          if use_tpu else ["gcloud", "compute", "instances",
-                                          "list", "--no-user-output-enabled",
-                                          "--verbosity", "error"])
+                                          "list", "--verbosity", "critical"])
             out = sp.check_output(check_cmd)
             break
         except sp.CalledProcessError as e:

@@ -7,7 +7,7 @@ import subprocess as sp
 from typing import Union
 
 
-# Default job arguments (if not different supplied) - TBC
+# Default job arguments (if not different supplied)
 local_default_job_arguments = {'job_name': 'temp',
                                'log_file': 'log',
                                'err_file': 'err'}

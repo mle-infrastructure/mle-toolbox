@@ -208,6 +208,7 @@ class Experiment(object):
             job_id = gcp_submit_job(self.job_filename,
                                     self.cmd_line_args,
                                     self.job_arguments,
+                                    self.experiment_dir,
                                     clean_up=True)
         if job_id == -1: self.job_status = 0
         else: self.job_status = 1
@@ -249,7 +250,7 @@ class Experiment(object):
         while self.job_status:
             if self.resource_to_run == "gcp-cloud":
                 self.job_status = gcp_monitor_job(job_id, self.job_arguments)
-            time.sleep(1)
+            time.sleep(10)
         return 0
 
     def clean_up(self, job_id):
@@ -284,7 +285,8 @@ class Experiment(object):
                                                 cmd_line_input["seed_id"])
         return cmd_line_args
 
-    def generate_extra_cmd_line_args(self, cmd_line_args: str,
+    def generate_extra_cmd_line_args(self,
+                                     cmd_line_args: str,
                                      extra_cmd_line_input: Union[None,
                                      dict]=None) -> str:
         """ Generate extra cmd line args for .py -> e.g. for postproc """

@@ -4,13 +4,19 @@
 
 - Adds `HypothesisTester`: Simple time average difference comparison between individual runs. With multiple testing correction and p-value plotting. Example `hypothesis_testing.ipynb` notebook.
 - Adds `MetaLog` and `HyperLog` classes: Implement convenient functionalities like `hyper_log.filter()` and ease the post-processing analysis.
+- Adds GCP job launch/monitor support for all experiment types and organizes GCS syncing of results.
 
 ##### Changed
 
 - `load_result_logs` is now directly imported with `import mle_toolbox` since it is part of the core functionality.
+- Major restructuring of `experiment` sub-directory (`local`, `cluster`, `cloud`) with easy 3 part extension for new resources:
+    1. `monitor`
+    2. `launch`
+    3. `check_job_args`
 
 ##### Fixed
 
+- Fixes plotting with new `MetaLog` and `HyperLog` classes.
 
 ### v0.2.7 - 04/24/2021
 
