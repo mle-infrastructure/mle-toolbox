@@ -1,7 +1,8 @@
 from .core_experiment import (get_configs_ready,
                               get_extra_cmd_line_input,
                               set_random_seeds,
-                              determine_resource)
+                              determine_resource,
+                              ask_for_resource_to_run)
 from .core_files_load import (load_mle_toolbox_config,
                               load_yaml_config,
                               load_json_config,
@@ -22,6 +23,7 @@ __all__ = [
            'load_json_config',
            'load_pkl_object',
            'determine_resource',
+           'ask_for_resource_to_run',
            'print_framed',
            'get_jax_os_ready',
            'MLE_Logger',

@@ -7,7 +7,8 @@ import multiprocessing as mp
 from .spawn_multi_seed import spawn_multiple_seeds_experiment
 
 
-def spawn_multiple_configs(job_filename: str,
+def spawn_multiple_configs(resource_to_run: str,
+                           job_filename: str,
                            config_filenames: Union[List[str], str],
                            job_arguments: Union[None, dict],
                            experiment_dir: str,
@@ -16,13 +17,15 @@ def spawn_multiple_configs(job_filename: str,
     """ Spawn processes to running diff. training configs over diff. seeds. """
     if num_seeds is None:
         num_seeds = 1
-    spawn_multiple_configs_experiment(job_filename, config_filenames,
+    spawn_multiple_configs_experiment(resource_to_run, job_filename,
+                                      config_filenames,
                                       job_arguments, experiment_dir,
                                       num_seeds, logger_level)
     return 1
 
 
-def spawn_multiple_configs_experiment(job_filename: str,
+def spawn_multiple_configs_experiment(resource_to_run: str,
+                                      job_filename: str,
                                       config_filenames: Union[List[str], str],
                                       job_arguments: Union[None, dict],
                                       experiment_dir: str,
@@ -44,7 +47,8 @@ def spawn_multiple_configs_experiment(job_filename: str,
     # Spawn the different processes for the different seeds
     if num_seeds is not None:
         procs = [mp.Process(target=spawn_multiple_seeds_experiment,
-                            args=(job_filename,
+                            args=(resource_to_run,
+                                  job_filename,
                                   config_filenames[i],
                                   job_arguments,
                                   experiment_dir,

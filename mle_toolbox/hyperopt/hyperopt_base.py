@@ -32,6 +32,7 @@ class BaseHyperOptimisation(object):
     """
     def __init__(self,
                  hyper_log: HyperoptLogger,
+                 resource_to_run: str,
                  job_arguments: dict,
                  config_fname: str,
                  job_fname: str,
@@ -41,6 +42,7 @@ class BaseHyperOptimisation(object):
                  eval_metrics: Union[str, List[str]]):
         # Set up the random hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
+        self.resource_to_run = resource_to_run        # Compute resource to run
         self.config_fname = config_fname              # Fname base config file
         self.base_config = load_json_config(config_fname)  # Base Train Config
         self.job_fname = job_fname                    # Python file to run job
@@ -203,7 +205,8 @@ class BaseHyperOptimisation(object):
                           num_evals_per_iter: Union[None, int] = None):
         """ Train the network for a batch of hyperparam configs """
         # Spawn the batch of synchronous evaluations
-        spawn_multiple_configs(job_filename=self.job_fname,
+        spawn_multiple_configs(resource_to_run=self.resource_to_run,
+                               job_filename=self.job_fname,
                                config_filenames=batch_fnames,
                                job_arguments=self.job_arguments,
                                experiment_dir=self.experiment_dir,
@@ -231,11 +234,13 @@ class BaseHyperOptimisation(object):
         for i in range(len(hyperp_results_folder)):
             log_d_t = os.path.join(hyperp_results_folder[i], "logs/")
             for file in os.listdir(log_d_t):
-                if file.endswith(".hdf5"):
+                fname, fext = os.path.splitext(file)
+                if file.endswith(".hdf5") and fname in all_run_ids:
                     log_paths.append(os.path.join(log_d_t, file))
 
         # Merge individual run results into a single hdf5 file
         meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
+
         assert len(log_paths) == len(all_run_ids)
 
         merge_hdf5_files(meta_log_fname, log_paths,

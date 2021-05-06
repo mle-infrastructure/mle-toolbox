@@ -8,7 +8,9 @@ from ..utils import load_json_config, determine_resource
 from .protocol_helpers import load_local_protocol_db
 
 
-def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
+def protocol_experiment(job_config: dict,
+                        resource_to_run: str,
+                        cmd_purpose: Union[None, str]=None):
     """ Protocol the new experiment. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -38,8 +40,7 @@ def protocol_experiment(job_config: dict, cmd_purpose: Union[None, str]=None):
                                 job_config.meta_job_args["project_name"]))
 
     # Add resource on which experiment was run
-    resource = determine_resource()
-    db.dadd(new_experiment_id, ("exec_resource", resource))
+    db.dadd(new_experiment_id, ("exec_resource", resource_to_run))
 
     # Add the git latest commit hash
     try:

@@ -1,7 +1,8 @@
 import os
 
 
-def run_hyperparameter_search(meta_job_args: dict,
+def run_hyperparameter_search(resource_to_run: str,
+                              meta_job_args: dict,
                               single_job_args: dict,
                               param_search_args: dict):
     """ Run a hyperparameter search experiment. """
@@ -31,9 +32,10 @@ def run_hyperparameter_search(meta_job_args: dict,
 
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
-
     if param_search_args.search_type == "random":
-        hyper_opt = RandomHyperoptimisation(hyper_log, single_job_args,
+        hyper_opt = RandomHyperoptimisation(hyper_log,
+                                            resource_to_run,
+                                            single_job_args,
                                             meta_job_args.base_train_config,
                                             meta_job_args.base_train_fname,
                                             meta_job_args.experiment_dir,
@@ -42,7 +44,9 @@ def run_hyperparameter_search(meta_job_args: dict,
                                             param_search_args.eval_metrics)
 
     elif param_search_args.search_type == "grid":
-        hyper_opt = GridHyperoptimisation(hyper_log, single_job_args,
+        hyper_opt = GridHyperoptimisation(hyper_log,
+                                          resource_to_run,
+                                          single_job_args,
                                           meta_job_args.base_train_config,
                                           meta_job_args.base_train_fname,
                                           meta_job_args.experiment_dir,
@@ -51,7 +55,9 @@ def run_hyperparameter_search(meta_job_args: dict,
                                           param_search_args.eval_metrics)
 
     elif param_search_args.search_type == "smbo":
-        hyper_opt = SMBOHyperoptimisation(hyper_log, single_job_args,
+        hyper_opt = SMBOHyperoptimisation(hyper_log,
+                                          resource_to_run,
+                                          single_job_args,
                                           meta_job_args.base_train_config,
                                           meta_job_args.base_train_fname,
                                           meta_job_args.experiment_dir,

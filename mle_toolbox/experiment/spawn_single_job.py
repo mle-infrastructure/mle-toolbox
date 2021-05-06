@@ -2,7 +2,8 @@ from typing import Union
 from .experiment import Experiment
 
 
-def spawn_single_experiment(job_filename: str,
+def spawn_single_experiment(resource_to_run: str,
+                            job_filename: str,
                             config_filename: str,
                             job_arguments: Union[None, dict],
                             experiment_dir: str,
@@ -17,7 +18,8 @@ def spawn_single_experiment(job_filename: str,
             extra_cmd_line_input = None
 
     # 1. Instantiate the experiment class
-    experiment = Experiment(job_filename,
+    experiment = Experiment(resource_to_run,
+                            job_filename,
                             config_filename,
                             job_arguments,
                             experiment_dir,
@@ -28,13 +30,15 @@ def spawn_single_experiment(job_filename: str,
     return status_out
 
 
-def spawn_post_processing_job(job_filename: str,
+def spawn_post_processing_job(resource_to_run: str,
+                              job_filename: str,
                               job_arguments: Union[None, dict],
                               experiment_dir: str,
                               extra_cmd_line_input: Union[None, dict]):
     """ Spawn a single experiment locally/remote to generate figures, etc. """
     # 1. Instantiate the experiment class
-    experiment = Experiment(job_filename=job_filename,
+    experiment = Experiment(resource_to_run=resource_to_run,
+                            job_filename=job_filename,
                             config_filename=None,
                             job_arguments=job_arguments,
                             experiment_dir=experiment_dir,

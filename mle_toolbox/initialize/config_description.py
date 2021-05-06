@@ -195,9 +195,38 @@ gcp_descript = {'gcp':
                 'protocol_fname':
                     {'description': 'Name of protocol db stored in bucket',
                      'type': str},
+                'code_dir':
+                    {'description': 'Name of GCS directory for local code',
+                     'type': str},
+                'results_dir':
+                    {'description': 'Name of GCS directory for results',
+                     'type': str},
              },
              'description': 'Settings specific to Google Cloud Platform'
             },
+            'default_job_arguments':
+             {'variables': {
+               'num_logical_cores':
+                   {'description': 'No. of cores for single job (0.5xthreads)',
+                    'type': int},
+                'num_gpus':
+                    {'description': 'No. of attached GPUs',
+                 'type': int},
+                'use_tpus':
+                    {'description': 'Whether to use a TPU VM',
+                 'type': int},
+               'job_name':
+                   {'description': 'Job name extension (listed in gcloud)',
+                    'type': str},
+               'log_file':
+                   {'description': 'Default log file base name',
+                    'type': str},
+               'err_file':
+                   {'description': 'Default error file base name',
+                    'type': str},
+                   },
+              'description': 'Default settings for a single job'
+             }
 }
 
 

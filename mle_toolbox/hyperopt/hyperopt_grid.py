@@ -11,6 +11,7 @@ from .hyperspace import construct_hyperparam_range
 class GridHyperoptimisation(BaseHyperOptimisation):
     def __init__(self,
                  hyper_log: HyperoptLogger,
+                 resource_to_run: str,
                  job_arguments: dict,
                  config_fname: str,
                  job_fname: str,
@@ -18,8 +19,8 @@ class GridHyperoptimisation(BaseHyperOptimisation):
                  params_to_search: dict,
                  problem_type: str,
                  eval_score_type: str):
-        BaseHyperOptimisation.__init__(self, hyper_log, job_arguments,
-                                       config_fname, job_fname,
+        BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
+                                       job_arguments, config_fname, job_fname,
                                        experiment_dir, params_to_search,
                                        problem_type, eval_score_type)
         # Generate all possible combinations of param configs in list & loop

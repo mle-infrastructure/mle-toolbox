@@ -57,7 +57,14 @@ sge_default = {'credentials': {'user_name': 'sge-user-name',
 
 gcp_default = {'project_name': '<gcloud_project_name>',
                'bucket_name': '<gcloud_bucket_name>',
-               'protocol_fname': 'gcloud_mle_protocol.db'}
+               'protocol_fname': 'gcloud_mle_protocol.db',
+               'code_dir': 'mle_experiments_code',
+               'results_dir': 'mle_experiments_results',
+               'default_job_arguments': {'num_logical_cores': 2,
+                                         'num_gpus': 0,
+                                         'use_tpus': False,
+                                         'log_file': 'log',
+                                         'err_file': 'err'}}
 
 
 default_mle_config = DotMap({'general': general_default,

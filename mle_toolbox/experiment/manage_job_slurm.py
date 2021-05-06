@@ -56,7 +56,7 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def slurm_generate_remote_job_template(job_arguments: dict):
+def slurm_generate_job_template(job_arguments: dict) -> str:
     """ Generate the bash script template to submit with SBATCH. """
     # Set the job template depending on the desired number of GPUs
     base_template = (slurm_base_job_config + '.')[:-1]
@@ -83,15 +83,15 @@ def slurm_generate_remote_job_template(job_arguments: dict):
     return template_out
 
 
-def slurm_submit_remote_job(filename: str,
-                            cmd_line_arguments: str,
-                            job_arguments: dict,
-                            clean_up: bool=True):
+def slurm_submit_job(filename: str,
+                     cmd_line_arguments: str,
+                     job_arguments: dict,
+                     clean_up: bool=True) -> str:
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
 
-    # Write the desired python code to .py file to execute
+    # Write the desired python/bash execution to slurm job submission file
     f_name, f_extension = os.path.splitext(filename)
     if f_extension == ".py":
         script = f"python {filename} {cmd_line_arguments}"
@@ -102,7 +102,7 @@ def slurm_submit_remote_job(filename: str,
                          " by mle-toolbox. Only base .py, .sh experiments"
                          " are so far implemented. Please open an issue.")
     job_arguments["script"] = script
-    slurm_job_template = slurm_generate_remote_job_template(job_arguments)
+    slurm_job_template = slurm_generate_job_template(job_arguments)
 
     open(base + '.sh', 'w').write(slurm_job_template.format(**job_arguments))
 
@@ -150,9 +150,8 @@ def slurm_submit_remote_job(filename: str,
     return job_id
 
 
-def slurm_monitor_remote_job(job_id: Union[list, int]):
+def slurm_monitor_job(job_id: Union[list, int]) -> bool:
     """ Monitor the status of a job based on its id. """
-    #fail_counter = 0
     while True:
         try:
             out = sp.check_output(["squeue", "-u",
@@ -162,9 +161,6 @@ def slurm_monitor_remote_job(job_id: Union[list, int]):
             stderr = e.stderr
             return_code = e.returncode
             time.sleep(0.5)
-            # fail_counter += 1
-            # if fail_counter > 100:
-            #     return -1
 
     job_info = out.split(b'\n')[1:]
     running_job_ids = [int(job_info[i].decode("utf-8").split()[0])

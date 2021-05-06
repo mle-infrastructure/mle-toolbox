@@ -9,6 +9,7 @@ from mle_toolbox import mle_config
 # Import of general tools (loading, etc.)
 from mle_toolbox.utils import (load_yaml_config,
                                determine_resource,
+                               ask_for_resource_to_run,
                                print_framed)
 
 # Import of helpers for protocoling experiments
@@ -19,8 +20,7 @@ from mle_toolbox.protocol import (protocol_summary,
                                   protocol_experiment)
 
 # Import of local-to-remote helpers (verify, rsync, exec)
-from mle_toolbox.remote.ssh_execute import (ask_for_resource_to_run,
-                                            SSH_Manager,
+from mle_toolbox.remote.ssh_execute import (SSH_Manager,
                                             monitor_remote_session,
                                             run_remote_experiment)
 
@@ -31,6 +31,9 @@ from mle_toolbox.launch import (run_single_experiment,
                                 welcome_to_mle_toolbox,
                                 prepare_logger,
                                 check_job_config)
+
+# Import utility to copy local code directory to GCS bucket
+from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
 
 
 def run(cmd_args):
@@ -43,7 +46,7 @@ def run(cmd_args):
 
     # Load experiment yaml config & determine exec resource
     job_config = load_yaml_config(cmd_args)
-    resource = determine_resource()
+    resource_to_run = determine_resource()
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
     if mle_config.general.use_gcloud_protocol_sync:
@@ -64,12 +67,14 @@ def run(cmd_args):
     logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
 
     # 3. If local - check if experiment should be run on remote resource
-    if resource not in ["sge-cluster", "slurm-cluster"]:
-        # Ask user on which resource to run on
+    if resource_to_run not in ["sge-cluster", "slurm-cluster"]:
+        # Ask user on which resource to run on [local/sge/slurm/gcp]
         if cmd_args.resource_to_run is None:
             resource_to_run = ask_for_resource_to_run()
         else:
             resource_to_run = cmd_args.resource_to_run
+
+        # If locally launched & want to run on Slurm/SGE - execute on remote!
         if resource_to_run in ["slurm-cluster", "sge-cluster"]:
             if cmd_args.remote_reconnect:
                 print_framed("RECONNECT TO REMOTE")
@@ -90,7 +95,7 @@ def run(cmd_args):
                                       purpose)
                 # After successful completion on remote resource - BREAK
                 return
-    logger.info(f"Run on resource: {resource}")
+    logger.info(f"Run on resource: {resource_to_run}")
 
     # 4. Check that job config to complies with/includes necessary ingredients
     check_job_config(job_config)
@@ -110,10 +115,12 @@ def run(cmd_args):
         if cmd_args.purpose is None:
             delete_protocol_from_input()
             abort_protocol_from_input()
-        new_experiment_id = protocol_experiment(job_config, cmd_args.purpose)
+        new_experiment_id = protocol_experiment(job_config,
+                                                resource_to_run,
+                                                cmd_args.purpose)
         logger.info(f'Updated protocol - STARTING: {new_experiment_id}')
 
-        # 3c. Send most recent/up-to-date experiment DB to Google Cloud Storage
+        # 3c. Send recent/up-to-date experiment DB to Google Cloud Storage
         if mle_config.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
@@ -126,7 +133,20 @@ def run(cmd_args):
     if not os.path.exists(config_copy):
         shutil.copy(cmd_args.config_fname, config_copy)
 
-    # 7. Run the experiment
+    # 7. Copy local code directory into GCP bucket if required
+    if resource_to_run == "gcp-cloud":
+        if "local_code_dir" in job_config.single_job_args.keys():
+            local_code_dir = job_config.single_job_args["local_code_dir"]
+        else:
+            local_code_dir = os.getcwd()
+        logger.info(f"Start uploading {local_code_dir} to GCP bucket:" +
+                    f" {mle_config.gcp.code_dir}")
+        upload_local_dir_to_gcs(local_path=local_code_dir,
+                                gcs_path=mle_config.gcp.code_dir)
+        logger.info(f"Completed uploading {local_code_dir} to GCP bucket:" +
+                    f" {mle_config.gcp.code_dir}")
+
+    # 8. Run the experiment
     print_framed("RUN EXPERIMENT")
     experiment_types = ["single-experiment",
                         "multiple-experiments",
@@ -135,12 +155,14 @@ def run(cmd_args):
 
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["job_type"] == "single-experiment":
-        run_single_experiment(job_config.meta_job_args,
+        run_single_experiment(resource_to_run,
+                              job_config.meta_job_args,
                               job_config.single_job_args)
 
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
-        run_multiple_experiments(job_config.meta_job_args,
+        run_multiple_experiments(resource_to_run,
+                                 job_config.meta_job_args,
                                  job_config.single_job_args,
                                  job_config.multi_experiment_args)
 
@@ -148,7 +170,8 @@ def run(cmd_args):
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         # Import only if needed since this has a optional dependency on scikit-optimize
         from ..launch import run_hyperparameter_search
-        run_hyperparameter_search(job_config.meta_job_args,
+        run_hyperparameter_search(resource_to_run,
+                                  job_config.meta_job_args,
                                   job_config.single_job_args,
                                   job_config.param_search_args)
 
@@ -159,15 +182,16 @@ def run(cmd_args):
     else:
         raise ValueError(f"Job type has to be in {experiment_types}.")
 
-    # 8. Perform post-processing of results if arguments are provided
+    # 9. Perform post-processing of results if arguments are provided
     if "post_process_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
-        run_post_processing(job_config.post_process_args,
+        run_post_processing(resource_to_run,
+                            job_config.post_process_args,
                             job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 
-    # 9. Generate .md, and .html report w. figures for e_id - inherit logger
+    # 10. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
@@ -179,20 +203,20 @@ def run(cmd_args):
                 report_generated = True
                 print_framed("REPORT GENERATION")
 
-    # 10. Update the experiment protocol & send back to GCS (if desired)
+    # 11. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
-        # 9a. Get most recent/up-to-date experiment DB to GCS
+        # 11a. Get most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
-        # 9b. Store experiment directory in GCS bucket under hash
+        # 11b. Store experiment directory in GCS bucket under hash
         if (mle_config.general.use_gcloud_results_storage
             and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
 
-        # 9c. Update the experiment protocol status
+        # 11c. Update the experiment protocol status
         logger.info(f'Updated protocol - COMPLETED: {new_experiment_id}')
         time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         update_protocol_var(new_experiment_id,

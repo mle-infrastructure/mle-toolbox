@@ -26,7 +26,7 @@ def visualize_1D_bar(hyper_df: pd.core.frame.DataFrame,
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = [param_to_plot] + [target_to_plot]
 
-    sub_log = hyper_df.copy()
+    sub_log = hyper_df.hyper_log.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
             sub_log = sub_log[sub_log[k].astype(float) == v]
@@ -204,7 +204,7 @@ def visualize_1D_lcurves(main_log: dict,
 
     # Plot all curves if not subselected
     if run_ids is None:
-        run_ids = list(main_log.keys())
+        run_ids = main_log.eval_ids
         run_ids.sort(key=tokenize)
 
     if len(curve_labels) == 0:

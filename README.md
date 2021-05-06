@@ -3,7 +3,7 @@
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 
-ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, on [Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html) clusters. The results are archived (locally/Google Cloud Storage bucket) and can easily be retrieved or automatically summarized/reported as `.md`/`.html` files.
+ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported as `.md`/`.html` files.
 
 ## The 4 Step `mle-toolbox` Cooking Recipe :stew:
 
@@ -15,7 +15,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## Installation :memo:
 
-If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective remote resource (Slurm or SGE). A PyPI installation is available via:
+If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective cluster resource (Slurm/SGE). A PyPI installation is available via:
 
 ```
 pip install mle-toolbox

@@ -6,6 +6,7 @@ import platform
 import re
 from typing import Union
 from dotmap import DotMap
+from datetime import datetime
 from .core_files_load import load_json_config, load_mle_toolbox_config
 
 
@@ -125,7 +126,7 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
 
 def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):
     """ Parse additional command line inputs & return them as dotmap. """
-    # extra_cmd_args is a sequential list of command line keys & arguments 
+    # extra_cmd_args is a sequential list of command line keys & arguments
     if extra_cmd_args is not None:
         # Unpack the command line data into a dotmap dict
         extra_input = {}
@@ -142,6 +143,25 @@ def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):
         return DotMap(extra_input, _dynamic=False)
     else:
         return None
+
+
+def ask_for_resource_to_run():
+    """ Ask user if they want to exec on remote resource. """
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+    resource = input(time_t + " Where to run? [local/slurm/sge/gcp] ")
+    while resource not in ["local", "slurm", "sge", "gcp"]:
+        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+        resource = input(time_t + " Please repeat: [local/slurm/sge/gcp] ")
+
+    if resource == "local":
+        resource_to_run = "local"
+    elif resource == "slurm":
+        resource_to_run = "slurm-cluster"
+    elif resource == "sge":
+        resource_to_run = "sge-cluster"
+    elif resource == "gcp":
+        resource_to_run = "gcp-cloud"
+    return resource_to_run
 
 
 def determine_resource() -> str:
