@@ -213,7 +213,7 @@ class Experiment(object):
                                     gcs_path=os.path.join(
                                         mle_config.gcp.code_dir,
                                         self.config_filename))
-            
+
             # Submit VM Creation + Startup exec
             job_id = gcp_submit_job(self.job_filename,
                                     self.cmd_line_args,
@@ -278,6 +278,8 @@ class Experiment(object):
         # Delete VM instance and code directory stored in data bucket
         if self.resource_to_run == "gcp-cloud":
             gcp_clean_up(job_id, self.job_arguments, self.experiment_dir)
+            # Wait for download to wrap up!
+            time.sleep(100)
 
     def generate_cmd_line_args(self,
                                cmd_line_input: Union[None, dict]=None) -> str:

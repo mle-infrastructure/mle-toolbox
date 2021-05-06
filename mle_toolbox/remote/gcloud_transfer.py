@@ -157,12 +157,14 @@ def download_gcs_dir(gcs_path: str,
             os.makedirs(local_path)
         for blob in blobs:
             filename = blob.name[len(gcs_path):]
-            print(os.path.join(local_path, filename))
             local_f_path = os.path.join(local_path, filename)
             dir_path = os.path.dirname(local_f_path)
 
             if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
+                try:
+                    os.makedirs(dir_path)
+                except:
+                    pass
             blob.download_to_filename(os.path.join(local_path, filename))
     # Only download single file - e.g. zip compressed experiment
     else:

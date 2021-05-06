@@ -64,7 +64,7 @@ tmux send "
 ) 2>&1 | tee -a /{remote_dir}/log.txt
 
 echo WILL SHUT DOWN IN 5 MIN ...
-sleep 300 && sudo shutdown now
+sleep 100 && sudo shutdown now
 "
 '''
 
@@ -77,7 +77,7 @@ tmux send "
 ) 2>&1 | tee -a /{remote_dir}/log.txt
 
 echo WILL SHUT DOWN IN 5 MIN ...
-sleep 300 && sudo shutdown now
+sleep 100 && sudo shutdown now
 "
 '''
 

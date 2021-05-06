@@ -67,7 +67,8 @@ def spawn_multiple_seeds_experiment(resource_to_run: str,
                 break
             else: time.sleep(1)
 
-        merge_hdf5_files(collected_log_path, log_paths, delete_files=True)
+        merge_hdf5_files(collected_log_path, log_paths,
+                         delete_files=True)
 
         logger.info("MERGE - {} logs: {}".format(len(log_paths),
                                                  collected_log_path))

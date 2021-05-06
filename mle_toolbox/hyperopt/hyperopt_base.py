@@ -234,11 +234,13 @@ class BaseHyperOptimisation(object):
         for i in range(len(hyperp_results_folder)):
             log_d_t = os.path.join(hyperp_results_folder[i], "logs/")
             for file in os.listdir(log_d_t):
-                if file.endswith(".hdf5"):
+                fname, fext = os.path.splitext(file)
+                if file.endswith(".hdf5") and fname in all_run_ids:
                     log_paths.append(os.path.join(log_d_t, file))
 
         # Merge individual run results into a single hdf5 file
         meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
+
         assert len(log_paths) == len(all_run_ids)
 
         merge_hdf5_files(meta_log_fname, log_paths,

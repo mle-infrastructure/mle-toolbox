@@ -122,7 +122,7 @@ def gcp_clean_up(vm_name: str, job_arguments: dict, experiment_dir: str):
     gcp_delete_vm_instance(vm_name, job_arguments.use_tpus)
 
     # Delete code dir in GCS bucket (only keep results of computation)
-    delete_gcs_dir(gcs_path=mle_config.gcp.code_dir)
+    # delete_gcs_dir(gcs_path=mle_config.gcp.code_dir)
 
     # Download results back to local directory
     download_gcs_dir(gcs_path=os.path.join(mle_config.gcp.results_dir,
