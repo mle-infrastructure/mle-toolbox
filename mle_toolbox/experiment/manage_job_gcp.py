@@ -11,7 +11,6 @@ from mle_toolbox.remote.gcloud_transfer import (delete_gcs_dir,
                                                 download_gcs_dir)
 
 # TODO:
-# 1. Make sure experiment results are archived nicely on local machine
 # 2. Refactor everything into sub dirs: local, cluster, cloud
 # 3. Differentiate between conda and venv setup
 # 4. Add Q/A option to upload and delete code dir or not
