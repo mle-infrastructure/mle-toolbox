@@ -13,6 +13,9 @@ from mle_toolbox.remote.gcloud_transfer import (delete_gcs_dir,
 # TODO:
 # 1. Make sure experiment results are archived nicely on local machine
 # 2. Refactor everything into sub dirs: local, cluster, cloud
+# 3. Differentiate between conda and venv setup
+# 4. Add Q/A option to upload and delete code dir or not
+# 5. Replace initial code copy to GCP with rsync?
 
 
 def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
@@ -119,13 +122,9 @@ def gcp_clean_up(vm_name: str, job_arguments: dict, experiment_dir: str):
     gcp_delete_vm_instance(vm_name, job_arguments.use_tpus)
 
     # Delete code dir in GCS bucket (only keep results of computation)
-    delete_gcs_dir(gcs_path=mle_config.gcp.code_dir,
-                   gcp_project_name=mle_config.gcp.project_name,
-                   gcp_bucket_name=mle_config.gcp.bucket_name)
+    delete_gcs_dir(gcs_path=mle_config.gcp.code_dir)
 
     # Download results back to local directory
     download_gcs_dir(gcs_path=os.path.join(mle_config.gcp.results_dir,
                                            experiment_dir),
-                     local_path=".",
-                     gcp_project_name=mle_config.gcp.project_name,
-                     gcp_bucket_name=mle_config.gcp.bucket_name)
+                     local_path="./" + experiment_dir)

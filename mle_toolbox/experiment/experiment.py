@@ -24,6 +24,9 @@ from .manage_job_gcp import (gcp_check_job_args,
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
 
+# Import utility to copy local code directory to GCS bucket
+from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
+
 
 class Experiment(object):
     """
@@ -205,6 +208,13 @@ class Experiment(object):
     def schedule_cloud(self):
         """ Schedules experiment to run remotely on GCP cloud. """
         if self.resource_to_run == "gcp-cloud":
+            # Send config file to remote machine
+            upload_local_dir_to_gcs(local_path=self.config_filename,
+                                    gcs_path=os.path.join(
+                                        mle_config.gcp.code_dir,
+                                        self.config_filename))
+            
+            # Submit VM Creation + Startup exec
             job_id = gcp_submit_job(self.job_filename,
                                     self.cmd_line_args,
                                     self.job_arguments,

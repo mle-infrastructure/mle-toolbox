@@ -74,7 +74,7 @@ def send_gcloud_db(number_of_connect_tries: int=5):
 
 
 def delete_gcs_dir(gcs_path: str,
-                         number_of_connect_tries: int=5):
+                   number_of_connect_tries: int=5):
     """ Delete a directory in a GCS bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -89,7 +89,10 @@ def delete_gcs_dir(gcs_path: str,
     # Delete all files in directory
     blobs = bucket.list_blobs(prefix=gcs_path)
     for blob in blobs:
-        blob.delete()
+        try:
+            blob.delete()
+        except:
+            pass
 
 
 def upload_local_dir_to_gcs(local_path: str,
@@ -154,6 +157,7 @@ def download_gcs_dir(gcs_path: str,
             os.makedirs(local_path)
         for blob in blobs:
             filename = blob.name[len(gcs_path):]
+            print(os.path.join(local_path, filename))
             local_f_path = os.path.join(local_path, filename)
             dir_path = os.path.dirname(local_f_path)
 
