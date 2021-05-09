@@ -47,6 +47,11 @@ def gcp_submit_job(filename: str,
 
     # 1. Generate GCP startup file with provided arguments
     startup_fname = vm_name + "-startup.sh"
+    if "extra_install_fname" in job_arguments.keys():
+        extra_install_fname = job_arguments.extra_install_fname
+    else:
+        extra_install_fname = None
+
     gcp_generate_startup_file(mle_config.gcp.code_dir,
                               mle_config.gcp.results_dir,
                               mle_config.gcp.bucket_name,
@@ -54,6 +59,7 @@ def gcp_submit_job(filename: str,
                               experiment_dir,
                               startup_fname,
                               cmd_line_arguments,
+                              extra_install_fname,
                               job_arguments.use_tpus,
                               job_arguments.num_gpus > 0)
 

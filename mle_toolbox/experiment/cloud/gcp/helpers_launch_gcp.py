@@ -98,6 +98,7 @@ def gcp_generate_startup_file(remote_code_dir: str,
                               experiment_dir: str,
                               startup_fname: str,
                               cmd_line_arguments: str,
+                              extra_install_fname: Union[None, str],
                               use_tpus: bool=False,
                               use_cuda: bool=False) -> str:
     """ Generate bash script template to launch at VM startup. """
@@ -115,6 +116,11 @@ def gcp_generate_startup_file(remote_code_dir: str,
                 install_venv.format(
                     remote_dir=remote_code_dir)
                 )
+
+    if extra_install_fname is not None:
+        # Bash execute .sh file for additional requirements (if specified)
+        startup_script_content += install_additional_setup.format(
+                                        extra_install_fname)
 
     if use_tpus:
         # Install TPU version JAX

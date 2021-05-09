@@ -1,4 +1,15 @@
-### v0.2.8 - Unreleased
+### v0.2.9 - 05/06/2021
+
+##### Added
+
+##### Changed
+
+- Adds support for additional setup bash files when launching GCP VM in `single_job_args`.
+
+##### Fixed
+
+
+### v0.2.8 - 05/06/2021
 
 ##### Added
 

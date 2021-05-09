@@ -37,7 +37,15 @@ tmux send "
 "
 '''
 
-jax_tpu_build = '''
+install_additional_setup = '''# Setup virtual env + install base required packages
+tmux send "
+    cd /{remote_dir}
+    . env/bin/activate
+    bash {extra_install_fname}
+    "
+'''
+
+jax_tpu_build = '''# Install jaxlib for TPU
 tmux send "
     cd /{remote_dir}
     . env/bin/activate
@@ -47,7 +55,7 @@ tmux send "
     "
 '''
 
-jax_gpu_build = '''
+jax_gpu_build = '''# Install jaxlib for GPU
 tmux send "
     cd /{remote_dir}
     . env/bin/activate
