@@ -10,6 +10,7 @@ from mle_toolbox import mle_config
 from mle_toolbox.utils import (load_yaml_config,
                                determine_resource,
                                ask_for_resource_to_run,
+                               ask_for_binary_input,
                                print_framed)
 
 # Import of helpers for protocoling experiments
@@ -33,7 +34,8 @@ from mle_toolbox.launch import (run_single_experiment,
                                 check_job_config)
 
 # Import utility to copy local code directory to GCS bucket
-from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
+from mle_toolbox.remote.gcloud_transfer import (upload_local_dir_to_gcs,
+                                                delete_gcs_dir)
 
 
 def run(cmd_args):
@@ -139,12 +141,21 @@ def run(cmd_args):
             local_code_dir = job_config.single_job_args["local_code_dir"]
         else:
             local_code_dir = os.getcwd()
-        logger.info(f"Start uploading {local_code_dir} to GCP bucket:" +
-                    f" {mle_config.gcp.code_dir}")
-        upload_local_dir_to_gcs(local_path=local_code_dir,
-                                gcs_path=mle_config.gcp.code_dir)
-        logger.info(f"Completed uploading {local_code_dir} to GCP bucket:" +
-                    f" {mle_config.gcp.code_dir}")
+        # Ask user if code dir should be uploaded + afterwards deleted
+        copy_code_dir = ask_for_binary_input("Do you want to copy local"
+                                             + " directory to GCS bucket?")
+        delete_code_dir = ask_for_binary_input("Do you want to delete GCS code"
+                                               + " directory at completion?")
+        if copy_code_dir:
+            logger.info(f"Start uploading {local_code_dir} to GCP bucket:" +
+                        f" {mle_config.gcp.code_dir}")
+            upload_local_dir_to_gcs(local_path=local_code_dir,
+                                    gcs_path=mle_config.gcp.code_dir)
+            logger.info(f"Completed uploading {local_code_dir} to GCP bucket:" +
+                        f" {mle_config.gcp.code_dir}")
+        else:
+            logger.info(f"Continue with {local_code_dir} previously stored " +
+                        f"in GCP bucket: {mle_config.gcp.code_dir}")
 
     # 8. Run the experiment
     print_framed("RUN EXPERIMENT")
@@ -228,6 +239,11 @@ def run(cmd_args):
         # 9d. Send most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             send_gcloud_db()
+
+    # 12. If job ran on GCP: Clean up & delete local code dir form GCS bucket
+    if resource_to_run == "gcp-cloud":
+        if delete_code_dir:
+            delete_gcs_dir(mle_config.gcp.code_dir)
     print_framed("EXPERIMENT FINISHED")
 
 

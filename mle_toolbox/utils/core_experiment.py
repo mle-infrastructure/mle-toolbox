@@ -4,6 +4,7 @@ import random
 import numpy as np
 import platform
 import re
+import sys, select
 from typing import Union
 from dotmap import DotMap
 from datetime import datetime
@@ -162,6 +163,27 @@ def ask_for_resource_to_run():
     elif resource == "gcp":
         resource_to_run = "gcp-cloud"
     return resource_to_run
+
+
+def ask_for_binary_input(question: str, default_answer: str="N"):
+    """ Ask user if they want to exec on remote resource. """
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+    q_str = f"{time_t} {question} [Y/N]"
+    print(q_str, end=' ')
+    sys.stdout.flush()
+    # Loop over experiments to delete until "N" given or timeout after 60 secs
+    answer = default_answer
+    while True:
+        i, o, e = select.select([sys.stdin], [], [], 60)
+        if (i):
+            answer = sys.stdin.readline().strip()
+            if answer in ["y", "n", "Y", "N"]:
+                break
+            else:
+                print("Please repeat your answer. [Y/N]")
+        else:
+            break
+    return answer in ["Y", "y"]
 
 
 def determine_resource() -> str:
