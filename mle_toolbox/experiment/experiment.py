@@ -27,6 +27,10 @@ from mle_toolbox import mle_config
 # Import utility to copy local code directory to GCS bucket
 from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
 
+# Overview of implemented remote resources in addition to local processes
+cluster_resources = ['sge-cluster', 'slurm-cluster']
+cloud_resources = ['gcp-cloud']
+
 
 class Experiment(object):
     """
@@ -121,7 +125,7 @@ class Experiment(object):
 
     def schedule(self):
         """ Schedule job on cluster (sge/slurm), cloud (gcp) or locally. """
-        if self.resource_to_run in ["sge-cluster", "slurm-cluster"]:
+        if self.resource_to_run in cluster_resources:
             job_id = self.schedule_cluster()
             if self.job_status == 1:
                 self.logger.info(f"Job ID: {job_id} - Cluster job scheduled" \
@@ -129,7 +133,7 @@ class Experiment(object):
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when scheduling " \
                                  f"cluster job - {self.config_filename}")
-        elif self.resource_to_run in ["gcp-cloud"]:
+        elif self.resource_to_run in cloud_resources:
             job_id = self.schedule_cloud()
             if self.job_status == 1:
                 self.logger.info(f"VM Name: {job_id} - Cloud job scheduled" \
@@ -150,7 +154,7 @@ class Experiment(object):
 
     def monitor(self, job_id: str):
         """ Monitor on cluster (sge/slurm), cloud (gcp) or locally via id. """
-        if self.resource_to_run in ["sge-cluster", "slurm-cluster"]:
+        if self.resource_to_run in cluster_resources:
             status_out = self.monitor_cluster(job_id)
             if status_out == 0:
                 self.logger.info(f"Job ID: {job_id} - Cluster job successfully " \
@@ -158,7 +162,7 @@ class Experiment(object):
             else:
                 self.logger.info(f"Job ID: {job_id} - Error when running " \
                                  f"cluster job - {self.config_filename}")
-        elif self.resource_to_run in ["gcp-cloud"]:
+        elif self.resource_to_run in cloud_resources:
             status_out = self.monitor_cloud(job_id)
             if status_out == 0:
                 self.logger.info(f"VM Name: {job_id} - Cloud job successfully " \
@@ -208,7 +212,7 @@ class Experiment(object):
     def schedule_cloud(self):
         """ Schedules experiment to run remotely on GCP cloud. """
         if self.resource_to_run == "gcp-cloud":
-            # Send config file to remote machine
+            # Send config file to remote machine - independent of code base!
             upload_local_dir_to_gcs(local_path=self.config_filename,
                                     gcs_path=os.path.join(
                                         mle_config.gcp.code_dir,

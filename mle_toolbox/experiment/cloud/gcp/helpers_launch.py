@@ -2,7 +2,7 @@ import os, time
 import subprocess as sp
 from dotmap import DotMap
 from typing import Union
-from .startup_script_gcp import *
+from .startup_script import *
 
 
 cores_to_machine_type = {1: "n2-highcpu-2",

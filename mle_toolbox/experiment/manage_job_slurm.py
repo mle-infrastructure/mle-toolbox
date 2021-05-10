@@ -3,35 +3,8 @@ import time
 import subprocess as sp
 from typing import Union
 from .manage_job_local import submit_subprocess, random_id
+from .cluster.slurm.helpers_launch import slurm_generate_startup_file
 from mle_toolbox import mle_config
-
-
-# Base qsub template
-slurm_base_job_config = """#!/bin/bash
-#SBATCH --job-name={job_name}        # job name (not id)
-#SBATCH --output={log_file}.txt      # output file
-#SBATCH --error={err_file}.err       # error file
-#SBATCH --partition={partition}      # partition to submit to
-#SBATCH --cpus={num_logical_cores}   # number of cpus
-"""
-
-
-# Base template for executing .py script
-slurm_job_exec = """
-module load nvidia/cuda/10.0
-source ~/miniconda3/etc/profile.d/conda.sh
-echo "------------------------------------------------------------------------"
-. ~/.bashrc && conda activate {env_name}
-echo "Successfully activated virtual environment - Ready to start job"
-echo "------------------------------------------------------------------------"
-echo "Job started on" `date`
-echo "------------------------------------------------------------------------"
-{script}
-echo "------------------------------------------------------------------------"
-echo "Job ended on" `date`
-echo "------------------------------------------------------------------------"
-conda deactivate
-"""
 
 
 def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
@@ -56,33 +29,6 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def slurm_generate_job_template(job_arguments: dict) -> str:
-    """ Generate the bash script template to submit with SBATCH. """
-    # Set the job template depending on the desired number of GPUs
-    base_template = (slurm_base_job_config + '.')[:-1]
-
-    # Add desired number of requested gpus
-    if "num_gpus" in job_arguments:
-        if job_arguments["num_gpus"] > 0:
-            base_template += "#SBATCH --gres=gpu:tesla:{num_gpus} \n"
-
-    # Set the max required memory per job
-    if "memory_per_cpu" in job_arguments:
-        base_template += "#SBATCH --mem-per-cpu={memory_per_job}\n"
-
-    # Set the max required time per job (afterwards terminate)
-    if "time_per_job" in job_arguments:
-        base_template += "#SBATCH --time={time_per_job}\n"
-
-    # Set the max required memory per job in MB - standardization SGE
-    if "memory_per_job" in job_arguments:
-        base_template += "#SBATCH --mem={memory_per_job}\n"
-
-    # Add the 'tail' - script execution to the string
-    template_out = base_template + slurm_job_exec
-    return template_out
-
-
 def slurm_submit_job(filename: str,
                      cmd_line_arguments: str,
                      job_arguments: dict,
@@ -102,7 +48,7 @@ def slurm_submit_job(filename: str,
                          " by mle-toolbox. Only base .py, .sh experiments"
                          " are so far implemented. Please open an issue.")
     job_arguments["script"] = script
-    slurm_job_template = slurm_generate_job_template(job_arguments)
+    slurm_job_template = slurm_generate_startup_file(job_arguments)
 
     open(base + '.sh', 'w').write(slurm_job_template.format(**job_arguments))
 

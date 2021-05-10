@@ -48,7 +48,8 @@ def run(cmd_args):
 
     # Load experiment yaml config & determine exec resource
     job_config = load_yaml_config(cmd_args)
-    resource_to_run = determine_resource()
+    current_resource = determine_resource()
+    resource_to_run = cmd_args.resource_to_run
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
     if mle_config.general.use_gcloud_protocol_sync:
@@ -69,12 +70,12 @@ def run(cmd_args):
     logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
 
     # 3. If local - check if experiment should be run on remote resource
-    if resource_to_run not in ["sge-cluster", "slurm-cluster"]:
+    if (current_resource not in ["sge-cluster", "slurm-cluster"] or
+        (current_resource in ["sge-cluster", "slurm-cluster"] and
+         resource_to_run is not None)):
         # Ask user on which resource to run on [local/sge/slurm/gcp]
         if cmd_args.resource_to_run is None:
             resource_to_run = ask_for_resource_to_run()
-        else:
-            resource_to_run = cmd_args.resource_to_run
 
         # If locally launched & want to run on Slurm/SGE - execute on remote!
         if resource_to_run in ["slurm-cluster", "sge-cluster"]:

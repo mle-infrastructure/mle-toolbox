@@ -3,18 +3,16 @@ import time, datetime
 import os, random, re
 from dotmap import DotMap
 from typing import Union
-from .cloud.gcp.helpers_launch_gcp import (gcp_generate_startup_file,
-                                           gcp_get_submission_cmd,
-                                           gcp_delete_vm_instance)
+from .cloud.gcp.helpers_launch import (gcp_generate_startup_file,
+                                       gcp_get_submission_cmd,
+                                       gcp_delete_vm_instance)
 from mle_toolbox import mle_config
 from mle_toolbox.remote.gcloud_transfer import (delete_gcs_dir,
                                                 download_gcs_dir)
 
 # TODO:
-# 2. Refactor everything into sub dirs: local, cluster, cloud
-# 3. Differentiate between conda and venv setup
-# 4. Add Q/A option to upload and delete code dir or not
-# 5. Replace initial code copy to GCP with rsync?
+# 1. Differentiate between conda and venv setup
+# 2. Replace initial code copy to GCP with rsync?
 
 
 def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
