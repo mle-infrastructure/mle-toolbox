@@ -46,8 +46,8 @@ def gcp_get_submission_cmd(vm_name: str,
         job_gcp_args = tpu_gcp_args
     else:
         job_gcp_args = base_gcp_args
-        job_gcp_args.MACHINE_TYPE = cores_to_machine_type[
-                                        job_args.num_logical_cores]
+        # job_gcp_args.MACHINE_TYPE = cores_to_machine_type[
+        #                                 job_args.num_logical_cores]
         if job_args.num_gpus > 0:
             job_gcp_args.ACCELERATOR_TYPE = "nvidia-tesla-v100"
             job_gcp_args.ACCELERATOR_COUNT = job_args.num_gpus
@@ -71,7 +71,10 @@ def gcp_get_submission_cmd(vm_name: str,
             f'{vm_name}',
             f'--preemptible',
             f'--zone={job_gcp_args.ZONE}',
-            f'--machine-type={job_gcp_args.MACHINE_TYPE}',
+            #f'--machine-type={job_gcp_args.MACHINE_TYPE}',
+            f'--custom-cpu={2*job_args.num_logical_cores}',
+            f'--custom-memory={2048*job_args.num_logical_cores}MB',
+            f'--custom-vm-type=n1',
             f'--image={job_gcp_args.IMAGE_NAME}',
             f'--image-project={job_gcp_args.IMAGE_PROJECT}',
             f'--metadata-from-file=startup-script={startup_fname}',
