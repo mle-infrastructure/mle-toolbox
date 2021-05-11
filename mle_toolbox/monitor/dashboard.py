@@ -11,8 +11,11 @@ from mle_toolbox.monitor.components import (Header,
                                             make_last_experiment,
                                             make_est_completion,
                                             make_help_commands,
+                                            make_gcp_util,
                                             make_cpu_util_plot,
                                             make_memory_util_plot)
+
+from mle_toolbox.monitor.monitor_gcp import get_gcp_data
 from mle_toolbox.monitor.monitor_sge import get_sge_data
 from mle_toolbox.monitor.monitor_slurm import get_slurm_data
 from mle_toolbox.monitor.monitor_local import get_local_data
@@ -65,7 +68,8 @@ def layout_mle_dashboard(resource) -> Layout:
     layout["footer"].split(
         Layout(name="f-box1", ratio=0.5),
         Layout(name="f-box2", ratio=0.5),
-        Layout(name="f-box3", ratio=1),
+        Layout(name="f-box3", ratio=0.45),
+        Layout(name="f-box4", ratio=0.55),
         direction="horizontal"
     )
 
@@ -82,10 +86,11 @@ def update_mle_dashboard(layout, resource, util_hist,
         user_data, host_data, util_data = get_sge_data()
     elif resource == "slurm-cluster":
         user_data, host_data, util_data = get_slurm_data()
-    elif resource == "gcp":
-        raise NotImplementedError
     else:  # Local!
         proc_data, device_data, util_data = get_local_data()
+
+    # Get GCP Cloud data
+    gcp_data = get_gcp_data()
 
     # Get resource independent data
     total_data, last_data, time_data = get_db_data(db, all_experiment_ids)
@@ -141,7 +146,10 @@ def update_mle_dashboard(layout, resource, util_hist,
                            + f" - Total: {int(util_data['mem_util'])}/"
                            + f"{int(util_data['mem'])}G"),
                     border_style="red"))
-    layout["f-box3"].update(Panel(make_help_commands(),
+    layout["f-box3"].update(Panel(make_gcp_util(gcp_data),
+                    title=(f"Google Cloud Platform"),
+                    border_style="red"))
+    layout["f-box4"].update(Panel(make_help_commands(),
                                   border_style="white",
-                title="[b white]Help: Core MLE-Toolbox CLI Commands",))
+                title="[b white]Core MLE-Toolbox CLI",))
     return layout, util_hist

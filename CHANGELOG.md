@@ -2,6 +2,8 @@
 
 ##### Added
 
+- Adds monitoring panel for GCP in `mle monitor` dashboard.
+
 ##### Changed
 
 - Adds support for additional setup bash files when launching GCP VM in `single_job_args`.

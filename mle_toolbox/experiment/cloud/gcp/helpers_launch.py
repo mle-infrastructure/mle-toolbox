@@ -6,10 +6,13 @@ from .startup_script import *
 
 
 cores_to_machine_type = {1: "n2-highcpu-2",
-                         2: "c2-standard-4",
-                         4: "c2-standard-8",
-                         8: "c2-standard-16",
-                         15: "c2-standard-30"}
+                         2: "n2-highcpu-4",
+                         4: "n2-highcpu-8",
+                         8: "n2-highcpu-16",
+                         16: "n2-highcpu-32",
+                         24: "n2-highcpu-48",
+                         32: "n2-highcpu-64",
+                         40: "n2-highcpu-80"}
 
 gpu_types = ["nvidia-tesla-p100",
              "nvidia-tesla-v100",

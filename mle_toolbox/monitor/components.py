@@ -329,33 +329,51 @@ def make_help_commands() -> Align:
     table = Table(show_header=True, show_footer=False, border_style="white",
                   header_style="bold magenta", box=box.SIMPLE_HEAD)
     table.add_column("Command", style="white", justify="left")
-    table.add_column("Options", )
+    #table.add_column("Options", )
     table.add_column("Function", )
     table.add_row(
         "mle run",
-        "[b blue]-np, -nw, -resource, -purpose",
-        "[b red] Start experiment with .yaml config",
+        #"[b blue]-np, -nw, -resource, -purpose",
+        "[b red] Experiment w. config .yaml",
     )
     table.add_row(
         "mle retrieve",
-        "[b blue]-e_id, -fig_dir, -exp_dir",
-        "[b red] Retrieve results from cluster/GCS",
+        #"[b blue]-e_id, -fig_dir, -exp_dir",
+        "[b red] Retrieve from cluster/GCS",
     )
     table.add_row(
         "mle report",
-        "[b blue]--experiment_id",
-        "[b red] Generate results .md, .html report",
+        #"[b blue]--experiment_id",
+        "[b red] Generate results .md report",
     )
     table.add_row(
         "mle monitor",
-        "[b blue]None",
-        "[b red] Monitor resource usage on cluster",
+        #"[b blue]None",
+        "[b red] Monitor resource usage",
     )
     table.add_row(
         "mle init",
-        "[b blue]None",
-        "[b red] Initialize credentials/default setup",
+        #"[b blue]None",
+        "[b red] Init creds/default setup",
     )
+    return table
+
+
+def make_gcp_util(gcp_data) -> Align:
+    """ Generate rich table summarizing running GCP VM machines. """
+    table = Table(show_header=True, show_footer=False, border_style="white",
+                  header_style="bold magenta", box=box.SIMPLE_HEAD)
+    table.add_column("Machine", style="white", justify="left")
+    table.add_column("Run", justify="center")
+    table.add_column("Stage", justify="center")
+    table.add_column("Stop", justify="center")
+    for m_id in range(len(gcp_data["job_type"])):
+        table.add_row(
+            str(gcp_data["job_type"][m_id]),
+            str(gcp_data["run"][m_id]),
+            str(gcp_data["stage"][m_id]),
+            str(gcp_data["stop"][m_id])
+        )
     return table
 
 

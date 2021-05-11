@@ -98,6 +98,9 @@ def run(cmd_args):
                                       purpose)
                 # After successful completion on remote resource - BREAK
                 return
+    
+    if resource_to_run is None:
+        resource_to_run = current_resource
     logger.info(f"Run on resource: {resource_to_run}")
 
     # 4. Check that job config to complies with/includes necessary ingredients
