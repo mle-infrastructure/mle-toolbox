@@ -42,7 +42,7 @@ param_search_args:
 single_job_args:
     job_name: "ode"
     num_gpus: 0
-    num_logical_cores: 2
+    num_logical_cores: 1
     log_file: "log"
     err_file: "err"
     env_name: "mle-toolbox"

@@ -8,7 +8,7 @@
 
 - Adds support for additional setup bash files when launching GCP VM in `single_job_args`.
 - Adds Q/A for upload/deletion of directory to GCS bucket.
-- All GCP-CPU resources are now queried via [custom machine types](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#gcloud). 
+- All GCP-CPU resources are now queried via [custom machine types](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#gcloud) - Default cheap n1. 
 
 ##### Fixed
 

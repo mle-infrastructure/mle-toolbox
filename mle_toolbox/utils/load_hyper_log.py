@@ -4,6 +4,12 @@ import numpy as np
 from typing import Union, List
 
 
+# Set pandas printing option (print more columns!)
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+
 class HyperLog(object):
     """ Class wrapper for hyper_log dataframe w. additional functionality. """
     def __init__(self, hyper_df: pd.DataFrame):

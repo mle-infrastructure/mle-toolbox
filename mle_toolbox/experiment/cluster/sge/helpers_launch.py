@@ -15,15 +15,13 @@ def sge_generate_startup_file(job_arguments: dict) -> str:
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:
         base_template += ('#$ -l hostname=' + '&'.join((f'!'
-                          + mle_config.sge.info.node_reg_exp[0]
-                          + f'{x:02}' + mle_config.sge.info.node_extension
+                          + f'{x}' + mle_config.sge.info.node_extension
                           for x in job_arguments['exclude_nodes'])) + '\n')
 
     # Only run on specific nodes from the queue
     if "include_nodes" in job_arguments:
         base_template += ('#$ -l hostname=' + '&'.join((
-                          mle_config.sge.info.node_reg_exp[0]
-                          + '{x:02}' + mle_config.sge.info.node_extension
+                          + f'{x}' + mle_config.sge.info.node_extension
                           for x in job_arguments['include_nodes'])) + '\n')
 
     # Set the max required memory per job in MB - standardization Slurm
