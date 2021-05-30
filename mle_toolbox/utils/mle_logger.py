@@ -97,6 +97,12 @@ class MLE_Logger(object):
         # Start stop-watch/clock of experiment
         self.start_time = time.time()
 
+    def extend_tracking(self, add_track_vars: List[str]):
+        """ Add string names of variables to track. """
+        assert self.log_update_counter == 0
+        self.what_to_track += add_track_vars
+        self.stats_to_track = pd.DataFrame(columns=self.what_to_track)
+
     def setup_experiment_dir(self,
                              base_exp_dir: str,
                              config_fname: Union[str, None],
@@ -346,10 +352,19 @@ class MLE_Logger(object):
             data_to_store = self.stats_to_track[o_name].to_numpy()
             if type(data_to_store[0]) == np.ndarray:
                 data_to_store = np.stack(data_to_store)
+            if type(data_to_store[0]) in [np.str_, str]:
+                data_to_store =[t.encode("ascii", "ignore") for t
+                                in data_to_store]
+            if type(data_to_store[0]) in [bytes, np.str_]:
+                data_type = np.dtype('S200')
+            elif type(data_to_store[0]) == int:
+                data_type = np.dtype('int32')
+            else:
+                data_type = np.dtype('float32')
             h5f.create_dataset(name=self.seed_id + "/stats/" + o_name,
-                               data=data_to_store,
+                               data=np.array(data_to_store).astype(data_type),
                                compression='gzip', compression_opts=4,
-                               dtype='float32')
+                               dtype=data_type)
 
         # Store data on stored checkpoints - stored every k updates
         if self.save_every_k_ckpt is not None:
@@ -520,10 +535,16 @@ class MLE_Logger(object):
 
     def save_to_extra_dir(self, obj, fname):
         """ Helper fct. to save object (dict/etc.) as .pkl in exp. subdir. """
+        filename, file_extension = os.path.splitext(fname)
         extra_dir = os.path.join(self.experiment_dir, "extra/")
         path_to_store = os.path.join(extra_dir, fname)
         # Create a new empty directory for the experiment
         if not os.path.exists(extra_dir):
             try: os.makedirs(extra_dir)
             except: pass
-        save_pkl_object(obj, path_to_store)
+
+        # Differentiate between .npy and .pkl storage
+        if file_extension == ".npy":
+            np.save(path_to_store, obj)
+        else:
+            save_pkl_object(obj, path_to_store)

@@ -20,6 +20,7 @@ requires = [
             'commentjson',
             'pickledb',
             'gitpython',
+            'pycrypto',
             'scp',
             'paramiko',
             'sshtunnel',

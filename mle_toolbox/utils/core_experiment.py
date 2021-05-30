@@ -121,7 +121,10 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
         train_config.seed_id = int(cmd_args.seed_id)
         log_config.seed_id = "seed_" + str(cmd_args.seed_id)
     else:
-        log_config.seed_id = "seed_" + str(train_config.seed_id)
+        try:
+            log_config.seed_id = "seed_" + str(train_config.seed_id)
+        except:
+            log_config.seed_id = "seed_default"
     return train_config, net_config, log_config, extra_args
 
 
