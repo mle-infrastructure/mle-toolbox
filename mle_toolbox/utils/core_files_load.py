@@ -23,7 +23,7 @@ def load_mle_toolbox_config():
     if mle_config.general.use_credential_encryption:
         # Import decrypt functionality - requires pycrypto!
         try:
-            from mle_toolbox.initialize import decrypt_ssh_credentials
+            from mle_toolbox.initialize.crypto_credentials import decrypt_ssh_credentials
         except ModuleNotFoundError as err:
             raise ModuleNotFoundError(f"{err}. You need to"
                                       "install `pycrypto` to use "
@@ -81,3 +81,17 @@ def load_result_logs(experiment_dir: str,
                                  meta_log.stats_vars,
                                  meta_log.time_vars)
     return meta_log, hyper_log
+
+
+def load_run_log(experiment_dir: str, mean_seeds: bool=False):
+    """ Load a single .hdf5 log from <experiment_dir>/logs. """
+    log_dir = os.path.join(experiment_dir, "logs/")
+    log_paths = []
+    for file in os.listdir(log_dir):
+        if file.endswith(".hdf5"):
+            log_paths.append(os.path.join(log_dir, file))
+    if len(log_paths) > 1:
+        print(f"Multiple .hdf5 files available: {log_paths}")
+        print(f"Continue using: {log_paths[0]}")
+    run_log = load_meta_log(log_paths[0], mean_seeds)
+    return run_log

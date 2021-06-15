@@ -19,11 +19,11 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                       target_to_plot: str="target",
                       plot_title: str = "Temp Title",
                       plot_subtitle: Union[None, str] = None,
-                      xy_labels: list = [],
+                      xy_labels: Union[None, List[str]] = ["x-label", "y-label"],
                       variable_name: Union[None, str] = "Var Label",
                       every_nth_tick: int = 1,
                       plot_colorbar: bool = True,
-                      text_in_cell: bool = True,
+                      text_in_cell: bool = False,
                       max_heat: Union[None, float] = None,
                       min_heat: Union[None, float] = None,
                       norm_cols: bool = False,
@@ -38,10 +38,16 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
 
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = params_to_plot + [target_to_plot]
-    sub_log = hyper_df.hyper_log.copy()
+    try:
+        sub_log = hyper_df.hyper_log.copy()
+    except:
+        sub_log = hyper_df.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
-            sub_log = sub_log[sub_log[k].astype(float) == v]
+            if type(v) == float:
+                sub_log = sub_log[sub_log[k].astype(float) == v]
+            elif type(v) == str:
+                sub_log = sub_log[sub_log[k].astype(str) == v]
 
     # Subselect the desired params from the pd df
     temp_df = sub_log[p_to_plot]
@@ -52,7 +58,7 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
                                    norm_cols, norm_rows)
 
     if return_array:
-        return heat_array
+        return heat_array, range_x, range_y
     else:
         # Construct the plot
         fig, ax = plot_2D_heatmap(range_x, range_y, heat_array,

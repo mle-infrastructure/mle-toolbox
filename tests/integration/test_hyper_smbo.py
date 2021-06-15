@@ -18,28 +18,12 @@ class TestHyperSMBO(unittest.TestCase):
                                 }
                             }
 
-    elif test_case == "ppo":
-        job_filename = "examples/ppo/run_ppo.py"
-        config_filename = "examples/ppo/base_ppo_config.json"
-        eval_score_type = "rew_median"
-        params_to_search = {"real":
-                                {"l_rate":
-                                      {"begin": 1e-5,
-                                       "end": 1e-2,
-                                       "prior": "log-uniform"}
-                                },
-                            "categorical":
-                                {
-                                 "opt_type": ["Adam", "RMSprop", "SGD"]
-                                }
-                            }
-
     smbo_config = {"base_estimator": "GP",
                    "acq_function": "gp_hedge",
                    "n_initial_points": 6}
     job_arguments = None
     experiment_dir = "examples/experiments/"
-    hyperlog_fname = "hyperlog.hdf5"
+    hyperlog_fname = "hyper_log.hdf5"
 
     def test_smbo_search(self):
         """ Test spawning a single experiment - locally/remote. """

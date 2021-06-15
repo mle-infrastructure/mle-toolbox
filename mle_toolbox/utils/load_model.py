@@ -1,7 +1,7 @@
 from .core_files_load import load_pkl_object
 
 
-def load_model_ckpt(ckpt_path: str, model_type: str, model=None):
+def load_model(ckpt_path: str, model_type: str, model=None):
     """ Helper to reload stored checkpoint/pkl & return trained model. """
     if model_type == "torch":
         try:

@@ -10,9 +10,6 @@ class TestExperiment(unittest.TestCase):
     elif test_case == "mnist":
         job_filename = "examples/mnist/run_mnist_cnn.py"
         config_filename = "examples/mnist/mnist_cnn_config_1.json"
-    elif test_case == "ppo":
-        job_filename = "examples/ppo/run_ppo.py"
-        config_filename = "examples/ppo/base_ppo_config.json"
 
     job_arguments = None
     experiment_dir = "examples/experiments/"

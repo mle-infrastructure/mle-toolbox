@@ -8,16 +8,22 @@ class MetaLog(object):
     """ Class wrapper for meta_log dictionary w. additional functionality. """
     def __init__(self, meta_log: DotMap):
         self.meta_log = meta_log
-        placeholder_run = list(meta_log.keys())[0]
 
+        # Return shallow log if there is only a single experiment stored
+        self.num_configs = len(list(meta_log.keys()))
+        placeholder_run = list(meta_log.keys())[0]
         # Extract different variable names from meta log
         self.meta_vars = list(meta_log[placeholder_run].meta.keys())
         self.stats_vars = list(meta_log[placeholder_run].stats.keys())
         self.time_vars = list(meta_log[placeholder_run].time.keys())
 
-        # Make it possible that all runs are accessible via attribute as in pd
-        for key in meta_log:
-            setattr(self, key, meta_log[key])
+        # Make log shallow if there is only a single experiment stored
+        if self.num_configs == 1:
+            self.meta_log = self.meta_log[placeholder_run]
+
+        # Make possible that all runs are accessible via attribute as in pd
+        for key in self.meta_log:
+            setattr(self, key, self.meta_log[key])
 
     def filter(self, run_ids: List[str]):
         """ Subselect the meta log dict based on a list of run ids. """
@@ -144,10 +150,14 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
             if ds in ["time", "stats"]:
                 mean_dict = {key: {} for key in data_items[ds]}
                 for i, o_name in enumerate(data_items[ds]):
-                    mean_tol, std_tol = tolerant_mean(
-                        new_results_dict[eval][ds][o_name])
-                    mean_dict[o_name]["mean"] = mean_tol
-                    mean_dict[o_name]["std"] = std_tol
+                    if (type(new_results_dict[eval][ds][o_name][0][0]) not
+                        in [str, bytes, np.bytes_, np.str_]):
+                        mean_tol, std_tol = tolerant_mean(
+                            new_results_dict[eval][ds][o_name])
+                        mean_dict[o_name]["mean"] = mean_tol
+                        mean_dict[o_name]["std"] = std_tol
+                    else:
+                        mean_dict[o_name] = new_results_dict[eval][ds][o_name]
             # Append over all meta data (strings, seeds nothing to mean)
             elif ds == "meta":
                 mean_dict = {}

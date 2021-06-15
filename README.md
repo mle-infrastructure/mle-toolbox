@@ -29,6 +29,9 @@ cd mle-toolbox
 pip install -e .
 ```
 
+By default this will only install the minimal dependencies (not including specialized packages such as `scikit-optimize`, `statsmodels`, etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/).
+
+
 #### Setting Up Your Remote Credentials :see_no_evil:
 
 By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:

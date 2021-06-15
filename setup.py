@@ -3,30 +3,17 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-import re
-from os import path
-this_directory = path.abspath(path.dirname(__file__))
+import re, os
 
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
+with open(os.path.join(CURRENT_DIR, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-requires = [
-            'numpy',
-            'pandas',
-            'dotmap',
-            'h5py',
-            'toml',
-            'pyyaml',
-            'commentjson',
-            'pickledb',
-            'gitpython',
-            'pycrypto',
-            'scp',
-            'paramiko',
-            'sshtunnel',
-            'plotext',
-            'rich==9.13.0',
-            ]
+
+def parse_requirements(path):
+  with open(os.path.join(_CURRENT_DIR, path)) as f:
+    return [l.rstrip() for l in f if not (l.isspace() or l.startswith('#'))]
 
 
 VERSIONFILE="mle_toolbox/_version.py"
@@ -51,16 +38,20 @@ setup(
      url="https://github.com/RobertTLange/mle-toolbox",
      download_url=git_tar,
      classifiers=[
-         "Programming Language :: Python :: 3.6",
-         "Programming Language :: Python :: 3.7",
+         "Programming Language :: Python :: 3",
          "License :: OSI Approved :: MIT License",
-         "Operating System :: OS Independent"],
+         "Operating System :: OS Independent",
+         "Topic :: Scientific/Engineering :: Artificial Intelligence"
+         ],
      packages=find_packages(),
      include_package_data=True,
      zip_safe=False,
      platforms='any',
      python_requires=">=3.6",
-     install_requires=requires,
+     install_requires=parse_requirements(
+        os.path.join(CURRENT_DIR, 'requirements', 'requirements.txt')),
+     tests_require=parse_requirements(
+        os.path.join(CURRENT_DIR, 'requirements', 'requirements-tests.txt')),
      entry_points={
         'console_scripts': [
             'mle=mle_toolbox.toolbox:main',

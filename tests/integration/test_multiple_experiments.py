@@ -14,9 +14,6 @@ class TestMultipleExperiments(unittest.TestCase):
         job_filename = "examples/mnist/run_mnist_cnn.py"
         config_filenames = ["examples/mnist/mnist_cnn_config_1.json",
                             "examples/mnist/mnist_cnn_config_2.json"]
-    elif test_case == "ppo":
-        job_filename = "examples/ppo/run_ppo.py"
-        config_filenames = ["examples/ppo/base_ppo_config.json"]
 
     job_arguments = None
     experiment_dir = "examples/experiments/"

@@ -1,0 +1,9 @@
+torch
+scikit-optimize
+statsmodels
+matplotlib
+jax
+jaxlib
+optax
+tensorflow_datasets
+sklearn

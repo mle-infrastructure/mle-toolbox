@@ -294,9 +294,9 @@ def evaluate_best_score(eval_logs, measure_keys=["train_loss"],
         for run in run_ids:
             if max_objective:
                 int_out[run] = np.max(
-                    eval_logs[run_ids[i]]["stats"][metric]["mean"])
+                    eval_logs[run]["stats"][metric]["mean"])
             else:
                 int_out[run] = np.min(
-                    eval_logs[run_ids[i]]["stats"][metric]["mean"])
+                    eval_logs[run]["stats"][metric]["mean"])
         perf_per_metric[metric] = int_out
     return perf_per_metric

@@ -1,0 +1,14 @@
+numpy
+pandas
+dotmap
+h5py
+toml
+pyyaml
+commentjson
+pickledb
+gitpython
+scp
+paramiko
+sshtunnel
+plotext
+rich==9.13.0

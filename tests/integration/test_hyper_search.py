@@ -32,25 +32,9 @@ class TestHyperSearch(unittest.TestCase):
                                 }
                             }
 
-    elif test_case == "ppo":
-        job_filename = "examples/ppo/run_ppo.py"
-        config_filename = "examples/ppo/base_ppo_config.json"
-        eval_score_type = "rew_mean"
-        params_to_search = {"real":
-                                {"l_rate":
-                                      {"begin": 1e-5,
-                                       "end": 1e-2,
-                                       "bins": 6}
-                                },
-                            "categorical":
-                                {
-                                 "opt_type": ["Adam", "RMSprop", "SGD"]
-                                }
-                            }
-
     job_arguments = None
     experiment_dir = "examples/experiments/"
-    hyperlog_fname = "hyperlog.hdf5"
+    hyperlog_fname = "hyper_log.hdf5"
 
     def test_1_grid_search(self):
         """ Test spawning a single experiment - locally/remote. """

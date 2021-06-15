@@ -75,6 +75,13 @@ def initialize(cmd_args):
                                     pass
                         if (sk == "credentials" and
                             mle_config["general"]["use_credential_encryption"]):
+                            # Import decrypt functionality - requires pycrypto!
+                            try:
+                                from mle_toolbox.initialize.crypto_credentials import decrypt_ssh_credentials
+                            except ModuleNotFoundError as err:
+                                raise ModuleNotFoundError(f"{err}. You need to"
+                                                          "install `pycrypto` to use "
+                                                          "`decrypt_ssh_credentials`.")
                             aes, enc_user, enc_pass = encrypt_ssh_credentials(
                                                 mle_config[k][sk]["user_name"],
                                                 mle_config[k][sk]["password"])
