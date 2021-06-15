@@ -53,20 +53,19 @@ single_job_args:
 ```json
 {
 # Training configuration: Adapted by hyperparameter search
-"train_config": {"x_0": 100,
-                 "t_max": 1000,
-                 "dt": 0.1,
-                 "log_every_steps": 1000},
+"train_config": {"learning_rate": 3e-04,
+                 "num_steps": 1000,
+                 "log_every_steps": 10},
 # Net construction configuration: Layer info (if there was a net to train)
 "net_config": {},
 # Logging configuration: What to log/print & tensorboard file name
-"log_config": {"time_to_track": ["step_counter"],
-               "what_to_track": ["integral"],
-               "tboard_fname": "ode_fun",
-               "time_to_print": ["step_counter"],
-               "what_to_print": ["integral"],
+"log_config": {"time_to_track": ["timestamp1"],
+               "what_to_track": ["metric1"],
+               "tboard_fname": "tb",
+               "time_to_print": ["timestamp1"],
+               "what_to_print": ["metric1"],
                "print_every_k_updates": 10,
-               "overwrite_experiment_dir": 0}
+               "overwrite_experiment_dir": 1}
 }
 
 ```
@@ -74,39 +73,24 @@ single_job_args:
 ### The `.py` training script
 
 ```Python
-import numpy as np
-# Import the command line input processor & the experiment logger
-from mle_toolbox.utils import get_configs_ready, DeepLogger
+# Import MLE wrapper processing cmd inputs and logging
+from mle_toolbox import MLExperiment
 
-def main(train_config, net_config, log_config):
-    """ Euler integrate a simple ODE. """
-    # Instantiate the logger object for the experiment
-    log = DeepLogger(**log_config)
-
-    # Define function to integrate & run the integration
-    def func(x):
-        return -0.1*x
-
-    x_t = [train_config.x_0 + train_config.seed_id]
-    t_seq = np.arange(train_config.dt, train_config.t_max,
-                      train_config.dt).tolist()
-
-    for i, t in enumerate(t_seq):
-        # Perform the one-step Euler update
-        x_t.append(x_t[-1] + func(x_t[-1])*train_config.dt)
-
+def main(mle):
+    """ Main Training Loop Function. """
+    # Setup your experiment - e.g. build a network with `mle.net_config`
+    for t in range(mle.train_config.num_steps):
+        # Perform the one-step optimization update
+        ...
         # Update & save the newest log
         if (i % train_config.log_every_steps) == 0:
-            time_tick = [i+1]
-            stats_tick = [x_t[-1]]
-            log.update_log(time_tick, stats_tick)
-            log.save_log()
+            time_tick = {"timestamp1": t+1}
+            stats_tick = {"metrix": t*mle.train_config.learning_rate}
+            log.update_log(time_tick, stats_tick, save=True)
     return
 
 if __name__ == "__main__":
-    # Load in the configuration for the experiment & unpack
-    configs = get_configs_ready(default_config_fname="ode_int_config_1.json")
-    train_config, net_config, log_config = configs
-    # Run the simulation/Experiment
-    main(train_config, net_config, log_config)
+    # Load in config for the experiment & run the simulation
+    mle = MLExperiment()
+    main(mle)
 ```

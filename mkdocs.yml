@@ -21,8 +21,8 @@ nav:
     - setup/configuration.md
     - setup/infrastructure.md
   - Experiment Types:
-    - experiments/multi_config.md
-    - experiments/hyper_search.md
+    - experiment_types/multi_config.md
+    - experiment_types/hyper_search.md
   - Development:
     - dev/notes.md
 

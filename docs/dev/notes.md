@@ -58,3 +58,10 @@ srun --job-name "InteractiveJob" --cpus-per-task 1 --mem-per-cpu 1500 --time 01:
 ## Where to run examples & tests from
 - Examples from the `mle_toolbox/examples/` directory.
 - Tests from the `mle_toolbox/` directory
+
+## Update docs homepage
+
+```
+pip install mkdocs-material
+mkdocs gh-deploy --force
+```
