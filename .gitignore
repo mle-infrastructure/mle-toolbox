@@ -15,7 +15,6 @@ tboards/
 *.hdf5
 *.ckpt
 .pytest_cache/
-dev_notes.md
 experiments/
 mle-toolbox-c5bf62b88eee.json
 rob_cluster_config.py

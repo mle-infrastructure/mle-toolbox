@@ -1,4 +1,4 @@
-![MLE_Toolbox_Banner](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/mle_thumbnail.png?raw=true)
+![MLE_Toolbox_Banner](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/thumbnails/mle_thumbnail.png?raw=true)
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
@@ -84,7 +84,7 @@ To cite this repository:
 }
 ```
 
-Much of the `mle-toolbox` design has been inspired by discussions with [Jonathan Frankle](http://www.jfrankle.com/) and [Nandan Rao](https://twitter.com/nandanrao) about the quest for empirically sound and supported claims in Machine Learning. Finally, parts of the `mle <subcommands>` were inspired by Tudor Berariu's [Liftoff package](https://github.com/tudor-berariu/liftoff).
+Much of the `mle-toolbox` design has been inspired by discussions with [Jonathan Frankle](http://www.jfrankle.com/) and [Nandan Rao](https://twitter.com/nandanrao) about the quest for empirically sound and supported claims in Machine Learning. Finally, parts of the `mle <subcommands>` were inspired by Tudor Berariu's [Liftoff package](https://github.com/tudor-berariu/liftoff) and parts of the philosophy by wanting to provide a light-weight version of IDISA's [sacred package](https://github.com/IDSIA/sacred).
 
 ## Notes, Development & Questions :question:
 

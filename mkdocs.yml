@@ -1,0 +1,48 @@
+site_name: Machine Learning Experiment (MLE) Toolbox
+site_url: https://roberttlange.github.io/mle-toolbox/
+site_description: 'Remote ML experiments with Google Cloud Storage logging.'
+site_author: Robert Tjarko Lange
+
+repo_name: 'RobertTLange/mle-toolbox'
+repo_url: 'https://github.com/RobertTLange/mle-toolbox'
+
+copyright: Copyright &copy; 2021 - Robert Tjarko Lange
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.tabs
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - setup/installation.md
+    - setup/configuration.md
+    - setup/infrastructure.md
+  - Experiment Types:
+    - experiments/multi_config.md
+    - experiments/hyper_search.md
+  - Development:
+    - dev/notes.md
+
+markdown_extensions:
+  - codehilite:
+      linenums: true
+  - admonition
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
