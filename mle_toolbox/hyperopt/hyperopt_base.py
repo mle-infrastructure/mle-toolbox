@@ -176,6 +176,14 @@ class BaseHyperOptimisation(object):
             for param_name, param_value in proposals[s_id].items():
                 sample_config.train_config[param_name] = param_value
 
+            # # TODO: Differentiate between network and train config variable?!
+            # for param_name, param_value in proposals[s_id].items():
+            #     config_id, param = param_name.split(":")
+            #     if config_id == "train":
+            #         sample_config.train_config[param] = param_value
+            #     elif config_id == "network":
+            #         sample_config.network_config[param] = param_value
+
             # Add param configs to batch lists
             config_params_batch.append(sample_config)
         return config_params_batch

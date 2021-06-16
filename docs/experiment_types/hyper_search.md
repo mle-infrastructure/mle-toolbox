@@ -1,8 +1,8 @@
-# Hyperparameter Search
+# Hyperparameter Searches
 
 Given a fixed training configuration file and the Python training script the only thing that has to be adapted for the different types of experiments is the meta configuration file.
 
-#### Random/grid search over parameters
+## Random/Grid Search Over Parameters
 
 ```yaml
 # Meta Arguments: What job? What train .py file?
@@ -43,7 +43,7 @@ single_job_args:
     env_name: "mle-toolbox"
 ```
 
-#### Sequential model-based optimization
+## Sequential Model-Based Optimization (SMBO)
 
 ```yaml
 # Meta Arguments: What job? What train .py file? Base config? Where to store?

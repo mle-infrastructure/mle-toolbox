@@ -17,13 +17,17 @@ theme:
 nav:
   - Home: index.md
   - Getting Started:
+    - setup/video_tutorials.md
     - setup/installation.md
     - setup/configuration.md
     - setup/infrastructure.md
   - Experiment Types:
     - experiment_types/multi_config.md
     - experiment_types/hyper_search.md
+    - experiment_types/pbt.md
   - Development:
+    - dev/future_plans.md
+    - dev/remote_backends.md
     - dev/notes.md
 
 markdown_extensions:
