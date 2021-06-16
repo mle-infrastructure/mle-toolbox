@@ -1,0 +1,71 @@
+site_name: Machine Learning Experiment Toolbox
+site_url: https://roberttlange.github.io/mle-toolbox/
+site_description: 'Remote ML experiments with Google Cloud Storage logging.'
+site_author: Robert Tjarko Lange
+
+repo_name: 'RobertTLange/mle-toolbox'
+repo_url: 'https://github.com/RobertTLange/mle-toolbox'
+
+copyright: Copyright &copy; 2021 - Robert Tjarko Lange
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.tabs
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: thumbnails/favicon.ico
+  logo: thumbnails/favicon.png
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - setup/video_tutorials.md
+    - setup/installation.md
+    - setup/configuration.md
+    - setup/infrastructure.md
+  - Experiment Types:
+    - experiment_types/multi_config.md
+    - experiment_types/hyper_search.md
+    - experiment_types/pbt.md
+  - Development:
+    - dev/future_plans.md
+    - dev/remote_backends.md
+    - dev/testing.md
+    - dev/notes.md
+
+markdown_extensions:
+  - codehilite:
+      linenums: true
+  - admonition
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/roberttlange
+    # - icon: fontawesome/brands/docker
+    #   link: https://hub.docker.com/r/squidfunk/mkdocs-material/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/roberttlange
+    # - icon: fontawesome/brands/linkedin
+    #   link: https://linkedin.com/in/squidfunk/
