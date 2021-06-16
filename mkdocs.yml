@@ -13,6 +13,8 @@ theme:
   features:
     - navigation.sections
     - navigation.tabs
+  favicon: thumbnails/favicon.png
+  logo: thumbnails/favicon.png
 
 nav:
   - Home: index.md
