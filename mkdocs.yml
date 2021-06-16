@@ -1,4 +1,4 @@
-site_name: Machine Learning Experiment (MLE) Toolbox
+site_name: Machine Learning Experiment Toolbox
 site_url: https://roberttlange.github.io/mle-toolbox/
 site_description: 'Remote ML experiments with Google Cloud Storage logging.'
 site_author: Robert Tjarko Lange
@@ -13,7 +13,10 @@ theme:
   features:
     - navigation.sections
     - navigation.tabs
-  favicon: thumbnails/favicon.png
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: thumbnails/favicon.ico
   logo: thumbnails/favicon.png
 
 nav:
@@ -30,6 +33,7 @@ nav:
   - Development:
     - dev/future_plans.md
     - dev/remote_backends.md
+    - dev/testing.md
     - dev/notes.md
 
 markdown_extensions:
@@ -52,3 +56,16 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/roberttlange
+    # - icon: fontawesome/brands/docker
+    #   link: https://hub.docker.com/r/squidfunk/mkdocs-material/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/roberttlange
+    # - icon: fontawesome/brands/linkedin
+    #   link: https://linkedin.com/in/squidfunk/

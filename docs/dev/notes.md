@@ -61,7 +61,15 @@ srun --job-name "InteractiveJob" --cpus-per-task 1 --mem-per-cpu 1500 --time 01:
 
 ## Update docs homepage
 
+- https://squidfunk.github.io/mkdocs-material/creating-your-site/
+- https://github.com/squidfunk/mkdocs-material
+
 ```
 pip install mkdocs-material
+mkdocs serve
 mkdocs gh-deploy --force
 ```
+
+## Nice visualization tools
+
+- https://favicon.io/favicon-generator/

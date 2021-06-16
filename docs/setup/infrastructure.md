@@ -9,18 +9,14 @@ In this document you can learn everything about how to run experiments with the 
 <a href="toolbox-schematic.png"><img src="toolbox-schematic.png" width=900 align="center" /></a>
 
 
-## Running an `mle-toolbox` experiment
-
-The only things you have to do is specify your desired experiment protocol.
-
-It automatically detects whether you start an experiment with access to multiple compute nodes.
+The only things you have to do is specify your desired experiment. The toolbox automatically detects whether you start an experiment with access to multiple compute nodes.
 
 - `train.py` takes three arguments: `-config`, `-seed`, `-exp_dir`
 - This includes the standard inputs to the training function (`net_config`, `train_config`, `log_config`) but can be otherwise generalised to your applications.
 
 <a href="toolbox-inputs.png"><img src="toolbox-inputs.png" width=900 align="center" /></a>
 
-### The `.yaml` experiment configuration file
+### `.yaml` experiment configuration
 
 ```yaml
 # Meta Arguments: What job? What train .py file?
@@ -48,7 +44,7 @@ single_job_args:
 
 ```
 
-### The `.json` training configuration file
+### `.json` training configuration
 
 ```json
 {
@@ -70,7 +66,7 @@ single_job_args:
 
 ```
 
-### The `.py` training script
+### `.py` training script file
 
 ```Python
 # Import MLE wrapper processing cmd inputs and logging
@@ -94,3 +90,7 @@ if __name__ == "__main__":
     mle = MLExperiment()
     main(mle)
 ```
+
+### `.sh` training script file
+
+*Note*: This content is still work in progress!
