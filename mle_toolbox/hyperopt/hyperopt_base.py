@@ -62,28 +62,98 @@ class BaseHyperOptimisation(object):
             shutil.copy(config_fname, config_copy)
 
         # Key Input: Specify which params to optimize & in which ranges (dict)
-        self.search_params = search_params
-        self.search_type = search_type
-        self.search_schedule = search_schedule
-        self.current_iter = len(hyper_log)            # get prev its
-
+        self.search_params = search_params            # param space specs
+        self.search_type = search_type                # random/grid/smbo
+        self.search_schedule = search_schedule        # sync vs async jobs
+        self.current_iter = len(hyper_log)            # get previous number its
 
     def run_search(self,
-                   num_search_batches: int,
-                   num_evals_per_batch: int,
-                   num_seeds_per_eval: Union[None, int] = None):
-        """ Run the search for a number of batch iterations. """
+                   num_search_batches: Union[None, int] = None,
+                   num_evals_per_batch: Union[None, int] = None,
+                   num_total_evals: Union[None, int] = None,
+                   num_running_evals: Union[None, int] = None,
+                   num_seeds_per_eval: Union[None, int] = 1):
+        """
+        Run a hyperparameter search: Random, Grid, SMBO
+        Differentiate between synchronous and asynchronous launching of jobs
+        - Sync: Run batches of evaluations. Only spawn new jobs once batch done
+                => Num Batches X Evals/Batch X Seed/Eval
+        - Async: Run constant number of jobs at all times. Respawn once 'slot'
+                 becomes available. Benefit of constant resource utilisation
+                => Num Total Evals - Constrain: Running Evals X Seed/Eval
+        """
+        # Check that right inputs provided for sync vs async job scheduling
+        if self.search_schedule == "sync":
+            assert type(num_search_batches) == int, "Provide valid 'sync' input"
+            assert type(num_evals_per_batch) == int, "Provide valid 'sync' input"
+        elif self.search_schedule == "async":
+            assert type(num_total_evals) == int, "Provide valid 'async' input"
+            assert type(num_running_evals) == int, "Provide valid 'async' input"
+        else:
+            raise ValueError("Provide valid schedule type ('sync', 'async')"
+                             + " for search.")
+
         # Log the beginning of multiple config experiments
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
-        self.logger.info("Hyperoptimisation Run - Range of Parameters:")
+        self.logger.info(f"Hyperoptimisation ({self.search_schedule} - " +
+                         f"{self.search_type}) Run - Range of Parameters:")
         for line in pformat(self.search_params.toDict()).split('\n'):
             self.logger.info(line)
-        self.logger.info(f"Total No. Search Batches: {num_search_batches} |" \
-                         f" Batchsize: {num_evals_per_batch} |" \
-                         f" Evaluations: {num_seeds_per_eval}")
-        print_framed(f"START HYPEROPT RUNS")
 
+        # Start Launching Jobs Depending on the Scheduling Setup
+        if self.search_schedule == "sync":
+            self.logger.info(f"Total Search Batches: {num_search_batches} |" \
+                             f" Batchsize: {num_evals_per_batch} |" \
+                             f" Seeds/Eval: {num_seeds_per_eval}")
+            print_framed(f"START HYPEROPT RUNS")
+            if self.hyper_log.no_results_logging:
+                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
+            self.run_sync_search(num_search_batches,
+                                 num_evals_per_batch,
+                                 num_seeds_per_eval)
+        else:
+            self.logger.info(f"Total Search Jobs: {num_total_evals} |" \
+                             f" Running Job Limit: {num_running_evals} |" \
+                             f" Seeds/Eval: {num_seeds_per_eval}")
+            print_framed(f"START HYPEROPT RUNS")
+            if self.hyper_log.no_results_logging:
+                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
+            self.run_async_search(num_total_evals,
+                                  num_running_evals,
+                                  num_seeds_per_eval)
+
+    def run_async_search(self,
+                        num_total_evals: int,
+                        num_running_evals: int,
+                        num_seeds_per_eval: Union[None, int] = 1):
+        """ Run jobs asynchronously - launch whenever resource available. """
+        raise NotImplementedError
+        """
+        completed_jobs, running_jobs = 0, 0
+        # Run experiment until all jobs are completed
+        while completed_jobs < num_total_evals:
+            # Spawn jobs until limit of allowed resource usage is reached
+            while running_jobs < num_running_evals:
+                proposal = self.get_hyperparam_proposal(1)
+                eval_config = self.gen_hyperparam_configs(proposal)
+                fname, run_id = self.write_configs_to_json(eval_config)
+                job_id = spawn_jobs(fname)
+                running_jobs += 1
+            # Once budget is fully allocated - start monitor running jobs
+            while running_jobs == num_running_evals:
+                status = monitor(job_id)
+                if status == 0:
+                    completed_jobs += 1
+                    break
+            # Once budget becomes available again - go back to launching jobs
+        """
+
+    def run_sync_search(self,
+                        num_search_batches: int,
+                        num_evals_per_batch: int,
+                        num_seeds_per_eval: Union[None, int] = 1):
+        """ Run synchronous batches of jobs in a loop. """
         # Only run the batch loop for the remaining iterations
         self.current_iter = int(self.current_iter/num_evals_per_batch)
         for search_iter in range(num_search_batches - self.current_iter):
@@ -95,9 +165,6 @@ class BaseHyperOptimisation(object):
             batch_proposals = self.get_hyperparam_proposal(num_evals_per_batch)
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
-
-            if self.hyper_log.no_results_logging:
-                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
 
             self.logger.info(f"START - {self.current_iter}/" \
                              f"{num_search_batches} batch of" \

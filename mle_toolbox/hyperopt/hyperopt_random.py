@@ -21,20 +21,26 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
                                        search_type, search_schedule)
         self.param_range = construct_hyperparam_range(self.search_params,
                                                       self.search_type)
-        self.num_param_configs = len(self.param_range)
         self.eval_counter = len(hyper_log)
 
-    def get_hyperparam_proposal(self, num_iter_per_batch: int):
+    def get_hyperparam_proposal(self, num_evals_per_batch: int):
         """ Get proposals to eval next (in batches) - Random Sampling. """
         param_batch = []
         # Sample a new configuration for each eval in the batch
-        while (len(param_batch) < num_iter_per_batch
-               and self.eval_counter < self.num_param_configs):
+        while len(param_batch) < num_evals_per_batch:
             proposal_params = {}
             # Sample the parameters individually at random from the ranges
             for p_name, p_range in self.param_range.items():
-                proposal_params[p_name] = np.random.choice(p_range)
-            if not proposal_params in self.hyper_log.all_evaluated_params:
+                if p_range["value_type"] in ["integer", "categorical"]:
+                    eval_param = np.random.choice(p_range["values"])
+                    if type(eval_param) == np.int64:
+                        eval_param = int(eval_param)
+                elif p_range["value_type"] == "real":
+                    eval_param = np.random.uniform(*p_range["values"])
+                proposal_params[p_name] = eval_param
+
+            if not proposal_params in (self.hyper_log.all_evaluated_params
+                                       + param_batch):
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)
                 self.eval_counter += 1

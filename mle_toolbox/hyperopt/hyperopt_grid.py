@@ -39,7 +39,8 @@ class GridHyperoptimisation(BaseHyperOptimisation):
                and self.eval_counter < self.num_param_configs):
             # Get parameter batch from the grid
             proposal_params = self.param_grid[self.eval_counter]
-            if not proposal_params in self.hyper_log.all_evaluated_params:
+            if not proposal_params in (self.hyper_log.all_evaluated_params
+                                       + param_batch):
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)
                 self.eval_counter += 1

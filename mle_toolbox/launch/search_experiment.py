@@ -25,44 +25,21 @@ def run_hyperparameter_search(resource_to_run: str,
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
     if param_search_args.search_config.search_type == "random":
-        hyper_opt = RandomHyperoptimisation(
-                            hyper_log,
-                            resource_to_run,
-                            single_job_args,
-                            meta_job_args.base_train_config,
-                            meta_job_args.base_train_fname,
-                            meta_job_args.experiment_dir,
-                            param_search_args.search_config.search_params,
-                            param_search_args.search_config.search_type,
-                            param_search_args.search_config.search_schedule)
-
+        hyper_opt = RandomHyperoptimisation
     elif param_search_args.search_config.search_type == "grid":
-        hyper_opt = GridHyperoptimisation(
-                            hyper_log,
-                            resource_to_run,
-                            single_job_args,
-                            meta_job_args.base_train_config,
-                            meta_job_args.base_train_fname,
-                            meta_job_args.experiment_dir,
-                            param_search_args.search_config.search_params,
-                            param_search_args.search_config.search_type,
-                            param_search_args.search_config.search_schedule)
-
+        hyper_opt = GridHyperoptimisation
     elif param_search_args.search_config.search_type == "smbo":
-        hyper_opt = SMBOHyperoptimisation(
-                            hyper_log,
-                            resource_to_run,
-                            single_job_args,
-                            meta_job_args.base_train_config,
-                            meta_job_args.base_train_fname,
-                            meta_job_args.experiment_dir,
-                            param_search_args.search_config.search_params,
-                            param_search_args.search_config.search_type,
-                            param_search_args.search_config.search_schedule,
-                            param_search_args.search_config.smbo_config)
+        hyper_opt = SMBOHyperoptimisation
     else:
         raise ValueError("Please provide a valid \
                           hyperparam search type: {}.".format(search_types))
 
     # 4. Run the jobs
-    hyper_opt.run_search(**param_search_args.search_resources)
+    hyper_opt_instance = hyper_opt(hyper_log,
+                                   resource_to_run,
+                                   single_job_args,
+                                   meta_job_args.base_train_config,
+                                   meta_job_args.base_train_fname,
+                                   meta_job_args.experiment_dir,
+                                   **param_search_args.search_config)
+    hyper_opt_instance.run_search(**param_search_args.search_resources)
