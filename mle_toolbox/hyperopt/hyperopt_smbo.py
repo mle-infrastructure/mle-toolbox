@@ -48,7 +48,10 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         for prop in proposals:
             proposal_params = {}
             for i, p_name in enumerate(self.param_range.keys()):
-                proposal_params[p_name] = prop[i]
+                if type(prop[i]) == np.int64:
+                    proposal_params[p_name] = int(prop[i])
+                else:
+                    proposal_params[p_name] = prop[i]
             param_batch.append(proposal_params)
         return param_batch
 
@@ -56,14 +59,15 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         """ Perform post-iteration clean-up by updating surrogate model. """
         x, y = [], []
         # First key of all metrics is used to update the surrogate!
-        to_model = perf_measures.keys()[0]
+        to_model = list(perf_measures.keys())[0]
+        eval_ids = list(perf_measures[to_model].keys())
         # TODO: Do multi-objective SMBO?!
         for i, prop in enumerate(batch_proposals):
             x.append(list(prop.values()))
             # skopt assumes we want to minimize surrogate model
             # Make performance negative if we maximize
-            effective_perf = (-1*perf_measures[to_model][i]
-                              if self.hyper_log.max_target
-                              else perf_measures[to_model][i])
+            effective_perf = (-1*perf_measures[to_model][eval_ids[i]]
+                              if self.hyper_log.max_objective
+                              else perf_measures[to_model][eval_ids[i]])
             y.append(effective_perf)
         self.hyper_optimizer.tell(x, y)

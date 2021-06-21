@@ -5,8 +5,6 @@ meta_job_args:
     base_train_fname: "jax_vae/haiku_vae.py"
     base_train_config: "jax_vae/vae_config.json"
     experiment_dir: "experiments/vae/"
-    remote_exec_dir: "mle-toolbox/examples/"
-    report_generation: false
 
 # Parameters specific to the hyperparameter search
 param_search_args:
