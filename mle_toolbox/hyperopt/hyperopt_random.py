@@ -12,15 +12,14 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
                  config_fname: str,
                  job_fname: str,
                  experiment_dir: str,
-                 params_to_search: dict,
-                 problem_type: str,
-                 eval_score_type: str):
+                 search_params: dict,
+                 search_type: str="random",
+                 search_schedule: str="sync"):
         BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
                                        job_arguments, config_fname, job_fname,
-                                       experiment_dir, params_to_search,
-                                       problem_type, eval_score_type)
-        self.search_type = "random"
-        self.param_range = construct_hyperparam_range(self.params_to_search,
+                                       experiment_dir, search_params,
+                                       search_type, search_schedule)
+        self.param_range = construct_hyperparam_range(self.search_params,
                                                       self.search_type)
         self.num_param_configs = len(self.param_range)
         self.eval_counter = len(hyper_log)

@@ -12,10 +12,12 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
                  config_fname: str,
                  job_fname: str,
                  experiment_dir: str,
-                 params_to_search: dict,
-                 problem_type: str,
-                 eval_score_type: str,
-                 smbo_config: dict):
+                 search_params: dict,
+                 search_type: str="smbo",
+                 search_schedule: str="sync",
+                 smbo_config: dict={"base_estimator": "GP",
+                                    "acq_function": "gp_hedge",
+                                    "n_initial_points": 5}):
         try:
             from skopt import Optimizer
         except ModuleNotFoundError as err:
@@ -25,18 +27,18 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
 
         BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
                                        job_arguments, config_fname, job_fname,
-                                       experiment_dir, params_to_search,
-                                       problem_type, eval_score_type)
-        self.search_type = "smbo"
-        self.param_range = construct_hyperparam_range(self.params_to_search,
+                                       experiment_dir, search_params,
+                                       search_type, search_schedule)
+        self.param_range = construct_hyperparam_range(self.search_params,
                                                       self.search_type)
 
         # Initialize the surrogate model/hyperparam config proposer
-        self.hyper_optimizer = Optimizer(dimensions=list(self.param_range.values()),
-                                random_state=1,
-                                base_estimator=smbo_config["base_estimator"],
-                                acq_func=smbo_config["acq_function"],
-                                n_initial_points=smbo_config["n_initial_points"])
+        self.hyper_optimizer = Optimizer(
+                            dimensions=list(self.param_range.values()),
+                            random_state=1,
+                            base_estimator=smbo_config["base_estimator"],
+                            acq_func=smbo_config["acq_function"],
+                            n_initial_points=smbo_config["n_initial_points"])
 
     def get_hyperparam_proposal(self, num_iter_per_batch: int):
         """ Get proposals to eval next (in batches) - Random Sampling. """

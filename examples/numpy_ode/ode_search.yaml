@@ -10,33 +10,35 @@ meta_job_args:
 
 # Parameters specific to the hyperparameter search
 param_search_args:
-    search_type: "grid"
-    hyperlog_fname: "hyper_log.pkl"
-    no_results_logging: False
-    reload_log: False
-    verbose_logging: True
-    maximize_objective: True
-    problem_type: "final"
-    eval_metrics:
-        - "integral"
-        - "noise"
-    num_search_batches: 2
-    num_iter_per_batch: 10
-    num_evals_per_iter: 1
-    params_to_search:
-        real:
-            x_0:
-                begin: 1
-                end: 10
-                bins: 3
-            noise_mean:
-                begin: 0
-                end: 0.01
-                bins: 3
-        categorical:
-            r_var:
-                - 0
-                - 1
+    search_logging:
+        reload_log: False
+        verbose_log: True
+        max_objective: True
+        problem_type: "final"
+        eval_metrics:
+            - "integral"
+            - "noise"
+    search_resources:
+        num_search_batches: 2
+        num_evals_per_batch: 10
+        num_seeds_per_eval: 1
+    search_config:
+        search_type: "grid"
+        search_schedule: "sync"
+        search_params:
+            real:
+                x_0:
+                    begin: 1
+                    end: 10
+                    bins: 3
+                noise_mean:
+                    begin: 0
+                    end: 0.01
+                    bins: 3
+            categorical:
+                r_var:
+                    - 0
+                    - 1
 
 # Parameters specific to an individual job
 single_job_args:

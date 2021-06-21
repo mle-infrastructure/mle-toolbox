@@ -76,6 +76,17 @@ def check_job_config(job_config: dict):
         if nec_ing not in job_config.keys():
             raise ValueError("Provide additional input: {}".format(nec_ing))
 
+    # TODO: Make this more robust by asserting existence of required keys
+    # Differentiate between required and not - check types and file existence
+    """
+    meta_job_args: project_name, job_type, base_train_fname,  base_train_config,
+                   experiment_dir, (remote_exec_dir) = all strings, check files
+    single_job_args: job_name, num_logical_cores, log_file, err_file, env_name,
+                     extra_cmd_line_input (all optional - except env_name?)
+    multi_experiment_args: config_fnames, num_seeds
+    param_search_args: search_logging, search_resources, search_config
+    """
+
 
 def ask_for_experiment_id(repeated_question: bool=False):
     """ Helper function asking user for experiment id from protocol log. """

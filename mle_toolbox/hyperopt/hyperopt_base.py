@@ -26,7 +26,7 @@ class BaseHyperOptimisation(object):
     - Note that the combination of the two inputs depends on your computational
       ressouces. I.e. 4 RTX 2080 might fit 3 models per GPU (12 total) = 3 evals
       + 4 batch size/parallel configs might be a good usage
-    - The input "params_to_search" provides a dict with parameters and their
+    - The input "search_params" provides a dict with parameters and their
       ranges to search over - construct space in specific hyperopt instance
     - The input "problem_type" specifies how to evaluate the training run
     """
@@ -37,9 +37,9 @@ class BaseHyperOptimisation(object):
                  config_fname: str,
                  job_fname: str,
                  experiment_dir: str,
-                 params_to_search: dict,
-                 problem_type: str,
-                 eval_metrics: Union[str, List[str]]):
+                 search_params: dict,
+                 search_type: str="grid",
+                 search_schedule: str="sync"):
         # Set up the random hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run        # Compute resource to run
@@ -62,46 +62,37 @@ class BaseHyperOptimisation(object):
             shutil.copy(config_fname, config_copy)
 
         # Key Input: Specify which params to optimize & in which ranges (dict)
-        self.params_to_search = params_to_search
+        self.search_params = search_params
+        self.search_type = search_type
+        self.search_schedule = search_schedule
+        self.current_iter = len(hyper_log)            # get prev its
 
-        # If desired don't use hyper_log! - Don't rely on meta-log aggregation
-        if hyper_log is not None:
-            self.current_iter = len(hyper_log)            # get prev its
-
-            # Problem - set up eval: {"best", "final"}
-            self.problem_type = problem_type
-            self.eval_metrics = eval_metrics
-            if type(self.eval_metrics) == str:
-                self.eval_metrics = [self.eval_metrics]
-            self.log_hyper_results = True
-        else:
-            self.log_hyper_results = False
 
     def run_search(self,
                    num_search_batches: int,
-                   num_iter_per_batch: int,
-                   num_evals_per_iter: Union[None, int] = None):
+                   num_evals_per_batch: int,
+                   num_seeds_per_eval: Union[None, int] = None):
         """ Run the search for a number of batch iterations. """
         # Log the beginning of multiple config experiments
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.info("Hyperoptimisation Run - Range of Parameters:")
-        for line in pformat(self.params_to_search.toDict()).split('\n'):
+        for line in pformat(self.search_params.toDict()).split('\n'):
             self.logger.info(line)
         self.logger.info(f"Total No. Search Batches: {num_search_batches} |" \
-                         f" Batchsize: {num_iter_per_batch} |" \
-                         f" Evaluations: {num_evals_per_iter}")
+                         f" Batchsize: {num_evals_per_batch} |" \
+                         f" Evaluations: {num_seeds_per_eval}")
         print_framed(f"START HYPEROPT RUNS")
 
         # Only run the batch loop for the remaining iterations
-        self.current_iter = int(self.current_iter/num_iter_per_batch)
+        self.current_iter = int(self.current_iter/num_evals_per_batch)
         for search_iter in range(num_search_batches - self.current_iter):
             start_t = time.time()
             # Update the hyperopt iteration counter
             self.current_iter += 1
 
             # Get a set of hyperparameters & plug them into config dicts
-            batch_proposals = self.get_hyperparam_proposal(num_iter_per_batch)
+            batch_proposals = self.get_hyperparam_proposal(num_evals_per_batch)
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
@@ -110,15 +101,15 @@ class BaseHyperOptimisation(object):
 
             self.logger.info(f"START - {self.current_iter}/" \
                              f"{num_search_batches} batch of" \
-                             f" hyperparameters - {num_evals_per_iter} seeds")
+                             f" hyperparameters - {num_seeds_per_eval} seeds")
 
             # Training w. prev. specified hyperparams & evaluate, get time taken
             batch_results_dirs = self.train_hyperparams(batch_fnames,
-                                                        num_evals_per_iter)
+                                                        num_seeds_per_eval)
 
             self.logger.info(f"DONE - {self.current_iter}/" \
                              f"{num_search_batches} batch of" \
-                             f" hyperparameters - {num_evals_per_iter} seeds")
+                             f" hyperparameters - {num_seeds_per_eval} seeds")
             time_elapsed = time.time() - start_t
 
             # Attempt merging of hyperlogs - until successful!
@@ -133,16 +124,15 @@ class BaseHyperOptimisation(object):
                         time.sleep(1)
                         continue
 
-                perf_measures = self.evaluate_hyperparams(meta_eval_log,
-                                                          run_ids)
-
                 self.logger.info(f"MERGE - {self.current_iter}/" \
                                  f"{num_search_batches} batch of " \
-                                 f"hyperparameters - {num_evals_per_iter} seeds")
+                                 f"hyperparameters - {num_seeds_per_eval} seeds")
 
-                # Update & save the Hyperparam Optimisation Log
-                self.hyper_log.update_log(batch_proposals, meta_eval_log,
-                                          perf_measures, time_elapsed, run_ids)
+                # Get performance score, update & save hypersearch log
+                perf_measures = self.hyper_log.update_log(batch_proposals,
+                                                          meta_eval_log,
+                                                          time_elapsed,
+                                                          run_ids)
                 self.clean_up_after_batch_iteration(batch_proposals,
                                                     perf_measures)
             else:
@@ -151,7 +141,7 @@ class BaseHyperOptimisation(object):
                                           None, time_elapsed, run_ids)
                 self.logger.info(f"UPDATE - {self.current_iter}/" \
                                  f"{num_search_batches} batch of " \
-                                 f"hyperparameters - {num_evals_per_iter} seeds")
+                                 f"hyperparameters - {num_seeds_per_eval} seeds")
 
             self.hyper_log.save_log()
             print_framed(f"COMPLETED BATCH {self.current_iter}/" \
@@ -210,7 +200,7 @@ class BaseHyperOptimisation(object):
         return config_fnames_batch, all_run_ids
 
     def train_hyperparams(self, batch_fnames: list,
-                          num_evals_per_iter: Union[None, int] = None):
+                          num_seeds_per_eval: Union[None, int] = None):
         """ Train the network for a batch of hyperparam configs """
         # Spawn the batch of synchronous evaluations
         spawn_multiple_configs(resource_to_run=self.resource_to_run,
@@ -218,7 +208,7 @@ class BaseHyperOptimisation(object):
                                config_filenames=batch_fnames,
                                job_arguments=self.job_arguments,
                                experiment_dir=self.experiment_dir,
-                               num_seeds=num_evals_per_iter,
+                               num_seeds=num_seeds_per_eval,
                                logger_level=logging.WARNING)
 
         # Clean up config files (redundant see experiment sub-folder)
@@ -257,54 +247,3 @@ class BaseHyperOptimisation(object):
         # Load in meta-results log with values meaned over seeds
         meta_eval_logs = load_meta_log(meta_log_fname, mean_seeds=True)
         return meta_eval_logs
-
-    def evaluate_hyperparams(self, eval_logs, run_ids):
-        """ Run the search for a number of iterations """
-        if self.problem_type == "final":
-            # Get final training loss as performance score
-            perf_scores = evaluate_final_score(eval_logs,
-                                               measure_keys=self.eval_metrics,
-                                               run_ids=run_ids)
-        elif self.problem_type == "best":
-            # Get final training loss as performance score
-            perf_scores = evaluate_best_score(eval_logs,
-                                              measure_keys=self.eval_metrics,
-                                              run_ids=run_ids)
-        else:
-            raise ValueError
-        return perf_scores
-
-
-def evaluate_final_score(eval_logs, measure_keys=["train_loss"],
-                         run_ids=None):
-    """
-    IN: Evaluation df of evaluation, what key to use for evaluation
-    OUT: dict of final scores at end of training for all metrics
-    """
-    perf_per_metric = {}
-    for metric in measure_keys:
-        int_out = {}
-        for run in run_ids:
-            int_out[run] = eval_logs[run]["stats"][metric]["mean"][-1]
-        perf_per_metric[metric] = int_out
-    return perf_per_metric
-
-
-def evaluate_best_score(eval_logs, measure_keys=["train_loss"],
-                        run_ids=None, max_objective=True):
-    """
-    IN: Evaluation df of evaluation, what key to use for evaluation
-    OUT: dict of best scores during course of training for all metrics
-    """
-    perf_per_metric = {}
-    for metric in measure_keys:
-        int_out = {}
-        for run in run_ids:
-            if max_objective:
-                int_out[run] = np.max(
-                    eval_logs[run]["stats"][metric]["mean"])
-            else:
-                int_out[run] = np.min(
-                    eval_logs[run]["stats"][metric]["mean"])
-        perf_per_metric[metric] = int_out
-    return perf_per_metric

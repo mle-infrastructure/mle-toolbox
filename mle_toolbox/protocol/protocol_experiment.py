@@ -85,7 +85,7 @@ def protocol_experiment(job_config: dict,
 
     # Add the number of seeds over which experiment is run
     if job_config.meta_job_args["job_type"] == "hyperparameter-search":
-        num_seeds = job_config.param_search_args["num_evals_per_iter"]
+        num_seeds = job_config.param_search_args.search_resources["num_seeds_per_eval"]
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
         num_seeds = job_config.multi_experiment_args["num_seeds"]
     else:

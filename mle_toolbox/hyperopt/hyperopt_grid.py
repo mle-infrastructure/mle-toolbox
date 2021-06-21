@@ -16,17 +16,16 @@ class GridHyperoptimisation(BaseHyperOptimisation):
                  config_fname: str,
                  job_fname: str,
                  experiment_dir: str,
-                 params_to_search: dict,
-                 problem_type: str,
-                 eval_score_type: str):
+                 search_params: dict,
+                 search_type: str="grid",
+                 search_schedule: str="sync"):
         BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
                                        job_arguments, config_fname, job_fname,
-                                       experiment_dir, params_to_search,
-                                       problem_type, eval_score_type)
+                                       experiment_dir, search_params,
+                                       search_type, search_schedule)
         # Generate all possible combinations of param configs in list & loop
         # over the list when doing the grid search
-        self.search_type = "grid"
-        self.param_range = construct_hyperparam_range(self.params_to_search,
+        self.param_range = construct_hyperparam_range(self.search_params,
                                                       self.search_type)
         self.param_grid = self.generate_search_grid()
         self.num_param_configs = len(self.param_grid)
