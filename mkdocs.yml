@@ -26,6 +26,7 @@ nav:
     - setup/installation.md
     - setup/configuration.md
     - setup/infrastructure.md
+  - Examples: examples.md
   - Experiment Types:
     - experiment_types/multi_config.md
     - experiment_types/hyper_search.md

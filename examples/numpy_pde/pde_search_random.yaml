@@ -2,9 +2,9 @@
 meta_job_args:
     project_name: "examples"
     job_type: "hyperparameter-search"
-    base_train_fname: "numpy_ode/run_ode_int.py"
-    base_train_config: "numpy_ode/ode_int_config_1.json"
-    experiment_dir: "experiments/smbo/"
+    base_train_fname: "numpy_pde/run_pde_int.py"
+    base_train_config: "numpy_pde/pde_int_config_1.json"
+    experiment_dir: "experiments/pde/"
 
 # Parameters specific to the hyperparameter search
 param_search_args:
@@ -17,29 +17,24 @@ param_search_args:
         num_evals_per_batch: 10
         num_seeds_per_eval: 1
     search_config:
-        search_type: "smbo"
+        search_type: "random"
         search_params:
             real:
                 x_0:
                     begin: 1
                     end: 10
-                    prior: "log-uniform"    # "uniform", "log-uniform"
+                    bins: 3
                 noise_mean:
                     begin: 0
                     end: 0.01
-                    prior: "uniform"
+                    bins: 3
             categorical:
                 r_var:
                     - 0
                     - 1
-        smbo_config:
-            base_estimator: "GP"            # "GP", "RF", "ET", "GBRT"
-            acq_function: "gp_hedge"        # "LCB", "EI", "PI", "gp_hedge"
-            # Number init points have to be larger than batch size!
-            n_initial_points: 11
 
 # Parameters specific to an individual job
 single_job_args:
-    job_name: "ode"
-    num_logical_cores: 1
     env_name: "mle-toolbox"
+    extra_cmd_line_input:
+        some_random_var: 1

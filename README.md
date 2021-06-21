@@ -62,7 +62,7 @@ You are now ready to dive deeper into the specifics of [job configuration](docs/
 
 ## Examples :school_satchel:
 
-* :page_facing_up: [Euler ODE](examples/ode) - Integrate an ODE using forward Euler for different initial conditions.
+* :page_facing_up: [Euler PDE](examples/numpy_pde) - Integrate a PDE using forward Euler for different initial conditions.
 * :page_facing_up: [MNIST CNN](examples/mnist) - Train CNNs on multiple random seeds & different training configs.
 * :page_facing_up: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
 * :page_facing_up: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.

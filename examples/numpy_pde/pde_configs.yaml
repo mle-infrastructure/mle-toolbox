@@ -2,22 +2,22 @@
 meta_job_args:
     project_name: "examples"
     job_type: "multiple-experiments"
-    base_train_fname: "numpy_ode/run_ode_int.py"
-    base_train_config: "numpy_ode/ode_int_config_1.json"
+    base_train_fname: "numpy_pde/run_pde_int.py"
+    base_train_config: "numpy_pde/pde_int_config_1.json"
     experiment_dir: "experiments/"
     remote_exec_dir: "mle-toolbox/examples/"
 
 multi_experiment_args:
     config_fnames:
-        - "numpy_ode/ode_int_config_1.json"
-        - "numpy_ode/ode_int_config_2.json"
+        - "numpy_pde/pde_int_config_1.json"
+        - "numpy_pde/pde_int_config_2.json"
     num_seeds: 10
 
 
 # Parameters specific to an individual job
 single_job_args:
-    job_name: "ode"
+    job_name: "pde"
     num_logical_cores: 2
-    log_file: "l-ode"
-    err_file: "e-ode"
+    log_file: "l-pde"
+    err_file: "e-pde"
     env_name: "mle-toolbox"

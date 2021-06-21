@@ -2,13 +2,19 @@
 meta_job_args:
     project_name: "examples"
     job_type: "hyperparameter-search"
-    base_train_fname: "numpy_ode/run_ode_int.py"
-    base_train_config: "numpy_ode/ode_int_config_1.json"
-    experiment_dir: "experiments/ode/"
+    base_train_fname: "numpy_pde/run_pde_int.py"
+    base_train_config: "numpy_pde/pde_int_config_1.json"
+    experiment_dir: "experiments/pde/"
+    remote_exec_dir: "mle-toolbox/examples/"
+    report_generation: true
 
 # Parameters specific to the hyperparameter search
 param_search_args:
     search_logging:
+        reload_log: False
+        verbose_log: True
+        max_objective: True
+        problem_type: "final"
         eval_metrics:
             - "integral"
             - "noise"
@@ -17,7 +23,8 @@ param_search_args:
         num_evals_per_batch: 10
         num_seeds_per_eval: 1
     search_config:
-        search_type: "random"
+        search_type: "grid"
+        search_schedule: "sync"
         search_params:
             real:
                 x_0:
@@ -35,6 +42,12 @@ param_search_args:
 
 # Parameters specific to an individual job
 single_job_args:
+    job_name: "pde"
+    num_gpus: 0
+    num_logical_cores: 1
+    log_file: "log"
+    err_file: "err"
     env_name: "mle-toolbox"
+    time_per_job: "00:00:05"
     extra_cmd_line_input:
         some_random_var: 1
