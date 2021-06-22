@@ -4,9 +4,19 @@ import datetime as dt
 
 def get_db_data(db, all_e_ids):
     """ Helper to get all data from pickledb database. """
-    total_data = get_total_experiments(db, all_e_ids)
-    last_data = get_last_experiment(db, all_e_ids[-1])
-    time_data = get_time_experiment(db, all_e_ids[-1])
+    if len(all_e_ids) > 0:
+        total_data = get_total_experiments(db, all_e_ids)
+        last_data = get_last_experiment(db, all_e_ids[-1])
+        time_data = get_time_experiment(db, all_e_ids[-1])
+    else:
+        total_data = {"total": "0", "run": "0", "done": "0", "aborted": "0",
+                      "sge": "0", "slurm": "0", "gcp": "0", "local": "0",
+                      "report_gen": "0", "gcs_stored": "0","retrieved": "0"}
+        last_data = {"e_id": "-", "e_dir": "-", "e_type": "-",
+                     "e_script": "-", "e_config": "-", "report_gen": "-"}
+        time_data = {"total_jobs": "-", "total_batches": "-",
+                     "jobs_per_batch": "-", "time_per_batch": "-",
+                     "start_time": "-", "stop_time": "-", "est_duration": "-"}
     return total_data, last_data, time_data
 
 
@@ -49,12 +59,13 @@ def get_time_experiment(db, last_experiment_id):
     single_job_args = db.dget(last_experiment_id, "single_job_args")
 
     if meta_args["job_type"] == "hyperparameter-search":
-        total_jobs = (job_spec_args["num_search_batches"]
-                      * job_spec_args["num_iter_per_batch"]
-                      * job_spec_args["num_evals_per_iter"])
-        total_batches = job_spec_args["num_search_batches"]
-        jobs_per_batch = (job_spec_args["num_iter_per_batch"]
-                          * job_spec_args["num_evals_per_iter"])
+        search_resources = job_spec_args["search_resources"]
+        total_jobs = (search_resources["num_search_batches"]
+                      * search_resources["num_evals_per_batch"]
+                      * search_resources["num_seeds_per_eval"])
+        total_batches = search_resources["num_search_batches"]
+        jobs_per_batch = (search_resources["num_evals_per_batch"]
+                          * search_resources["num_seeds_per_eval"])
     elif meta_args["job_type"] == "multiple-experiments":
         total_jobs = (len(job_spec_args["config_fnames"])*
                       job_spec_args["num_seeds"])
@@ -129,9 +140,9 @@ def get_last_experiment(db, last_experiment_id):
 
     # Add additional data based on the experiment type
     if e_type == "hyperparameter-search":
-        results["search_type"] = job_spec_args["search_type"]
-        results["eval_metrics"] = job_spec_args["eval_metrics"]
-        results["params_to_search"] = job_spec_args["params_to_search"]
+        results["search_type"] = job_spec_args["search_config"]["search_type"]
+        results["eval_metrics"] = job_spec_args["search_logging"]["eval_metrics"]
+        results["params_to_search"] = job_spec_args["search_config"]["search_params"]
     elif e_type == "multiple-experiments":
         results["config_fnames"] = job_spec_args["config_fnames"]
     return results

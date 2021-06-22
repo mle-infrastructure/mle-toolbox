@@ -15,6 +15,7 @@ from ..protocol.protocol_table import generate_protocol_table
 
 def load_local_protocol_db():
     """ Load local database from config name & reconstruct experiment id. """
+    # Attempt loading local protocol database - otherwise return clean one
     db = pickledb.load(mle_config.general.local_protocol_fname, False)
     # Get the most recent experiment id
     all_experiment_ids = list(db.getall())
@@ -78,9 +79,10 @@ def protocol_summary(tail: int=5, verbose: bool=True):
             # Get number of jobs in experiement
             job_spec_args = db.dget(e_id, "job_spec_args")
             if meta_args["job_type"] == "hyperparameter-search":
-                total_jobs.append(job_spec_args["num_search_batches"]
-                                  * job_spec_args["num_iter_per_batch"]
-                                  * job_spec_args["num_evals_per_iter"])
+                search_resources = job_spec_args["search_resources"]
+                total_jobs.append(search_resources["num_search_batches"]
+                                  * search_resources["num_evals_per_batch"]
+                                  * search_resources["num_seeds_per_eval"])
             elif meta_args["job_type"] == "multiple-experiments":
                 total_jobs.append(len(job_spec_args["config_fnames"])*
                                   job_spec_args["num_seeds"])

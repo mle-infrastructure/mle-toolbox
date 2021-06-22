@@ -23,32 +23,36 @@ def generate_protocol_table(df, full=True):
         table.add_column("#GPU", justify="center")
         table.add_column("[yellow]:recycle:", justify="center")
 
-    for index in reversed(df.index):
-        row = df.iloc[index]
-        if row["Resource"] == "sge-cluster":
-            resource = "SGE"
-        elif row["Resource"] == "slurm-cluster":
-            resource = "Slurm"
-        elif row["Resource"] == "gcp-cloud":
-            resource = "GCP"
-        else:
-            resource = "Local"
+    # Add rows of info if dataframe exists (previously recorded experiments)
+    if df is not None:
+        for index in reversed(df.index):
+            row = df.iloc[index]
+            if row["Resource"] == "sge-cluster":
+                resource = "SGE"
+            elif row["Resource"] == "slurm-cluster":
+                resource = "Slurm"
+            elif row["Resource"] == "gcp-cloud":
+                resource = "GCP"
+            else:
+                resource = "Local"
 
-        if row["Status"] == "running":
-            status = Spinner('dots', style="magenta")
-        elif row["Status"] == "completed":
-            status = "[green]:heavy_check_mark:"
-        else:
-            status = "[red]:heavy_multiplication_x:"
+            if row["Status"] == "running":
+                status = Spinner('dots', style="magenta")
+            elif row["Status"] == "completed":
+                status = "[green]:heavy_check_mark:"
+            else:
+                status = "[red]:heavy_multiplication_x:"
 
-        if full:
-            table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
-                          row["Purpose"][:25], row["Type"],
-                          resource, str(row["Jobs"]), str(row["CPUs"]),
-                          str(row["GPUs"]), str(row["Seeds"]))
-        else:
-            table.add_row(status, row["ID"], row["Date"], row["Project"][:20],
-                          row["Purpose"][:25], row["Type"], resource)
+            if full:
+                table.add_row(status, row["ID"], row["Date"],
+                              row["Project"][:20], row["Purpose"][:25],
+                              row["Type"], resource, str(row["Jobs"]),
+                              str(row["CPUs"]), str(row["GPUs"]),
+                              str(row["Seeds"]))
+            else:
+                table.add_row(status, row["ID"], row["Date"],
+                              row["Project"][:20],
+                              row["Purpose"][:25], row["Type"], resource)
 
     table.border_style = "blue"
     table.box = box.SIMPLE_HEAD

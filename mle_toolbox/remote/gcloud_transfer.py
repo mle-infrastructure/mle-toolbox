@@ -36,6 +36,8 @@ def get_gcloud_db(number_of_connect_tries: int=5):
                         f"{mle_config.gcp.protocol_fname}")
             return 1
         except Exception as ex:
+            # Remove empty file - causes error otherwise when trying to load
+            os.remove(expanduser(mle_config.general.local_protocol_fname))
             if type(ex).__name__ == "NotFound":
                 logger.info(f"No DB found in GCloud Storage"
                             f" - {mle_config.gcp.protocol_fname}")
