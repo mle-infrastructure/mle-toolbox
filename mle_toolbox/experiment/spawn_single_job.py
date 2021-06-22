@@ -35,7 +35,11 @@ def spawn_post_processing_job(resource_to_run: str,
                               job_arguments: Union[None, dict],
                               experiment_dir: str,
                               extra_cmd_line_input: Union[None, dict]):
-    """ Spawn a single experiment locally/remote to generate figures, etc. """
+    """
+    Spawn a single experiment locally/remote to generate figures, etc.
+    No configuration file required here!
+    TODO: Rename since this can also be a preprocessing job
+    """
     # 1. Instantiate the experiment class
     experiment = Experiment(resource_to_run=resource_to_run,
                             job_filename=job_filename,

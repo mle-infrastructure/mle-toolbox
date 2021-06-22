@@ -118,7 +118,7 @@ class Experiment(object):
         # Schedule job, create success boolean and job identifier
         job_id = self.schedule()
         # Monitor status of job based on identifier
-        status_out = self.monitor(job_id)
+        status_out = self.monitor(job_id, continuous=True)
         # If they exist - remove log & error file
         self.clean_up(job_id)
         return status_out
@@ -152,10 +152,13 @@ class Experiment(object):
         # Return sge/slurm - job_id (qstat/squeue), gcp - vm_name, local - proc
         return job_id
 
-    def monitor(self, job_id: str):
-        """ Monitor on cluster (sge/slurm), cloud (gcp) or locally via id. """
+    def monitor(self, job_id: str, continuous: bool=True):
+        """
+        Monitor on cluster (sge/slurm), cloud (gcp) or locally via id.
+        If 'continuous' bool is true, then monitor until experiment status 0.
+        """
         if self.resource_to_run in cluster_resources:
-            status_out = self.monitor_cluster(job_id)
+            status_out = self.monitor_cluster(job_id, continuous)
             if status_out == 0:
                 self.logger.info(f"Job ID: {job_id} - Cluster job successfully " \
                                  f"completed - {self.config_filename}")
@@ -163,7 +166,7 @@ class Experiment(object):
                 self.logger.info(f"Job ID: {job_id} - Error when running " \
                                  f"cluster job - {self.config_filename}")
         elif self.resource_to_run in cloud_resources:
-            status_out = self.monitor_cloud(job_id)
+            status_out = self.monitor_cloud(job_id, continuous)
             if status_out == 0:
                 self.logger.info(f"VM Name: {job_id} - Cloud job successfully " \
                                  f"completed - {self.config_filename}")
@@ -171,7 +174,7 @@ class Experiment(object):
                 self.logger.info(f"VM Name: {job_id} - Error when running " \
                                  f"cloud job - {self.config_filename}")
         else:
-            status_out = self.monitor_local(job_id)
+            status_out = self.monitor_local(job_id, continuous)
             if status_out == 0:
                 self.logger.info("PID: {job_id.pid} - Local job successfully " \
                                  f"completed - { self.config_filename}")
@@ -228,46 +231,65 @@ class Experiment(object):
         else: self.job_status = 1
         return job_id
 
-    def monitor_local(self, proc):
+    def monitor_local(self, proc, continuous: bool=True):
         """ Monitors experiment locally on your machine. """
         # Poll status of local process & change status when done
-        while self.job_status:
+        if continuous:
+            while self.job_status:
+                poll = proc.poll()
+                if poll is None:
+                    continue
+                else:
+                    self.job_status = 0
+                # Sleep until next status check
+                time.sleep(1)
+
+            # Get output & error messages (if there is an error)
+            out, err = proc.communicate()
+            # Return -1 if job failed & 0 otherwise
+            if proc.returncode != 0:
+                print(out, err)
+                return -1
+            else:
+                return 0
+        else:
             poll = proc.poll()
             if poll is None:
-                continue
+                return 1
             else:
-                self.job_status = 0
-            # Sleep until next status check
-            time.sleep(1)
+                return 0
 
-        # Get output & error messages (if there is an error)
-        out, err = proc.communicate()
-        # Return -1 if job failed & 0 otherwise
-        if proc.returncode != 0:
-            print(out, err)
-            return -1
-        else:
-            return 0
 
-    def monitor_cluster(self, job_id):
+    def monitor_cluster(self, job_id: str, continuous: bool=True)):
         """ Monitors experiment remotely on SGE or Slurm clusters. """
-        while self.job_status:
+        if continuous:
+            while self.job_status:
+                if self.resource_to_run == "sge-cluster":
+                    self.job_status = sge_monitor_job(job_id)
+                elif self.resource_to_run == "slurm-cluster":
+                    self.job_status = slurm_monitor_job(job_id)
+                time.sleep(1)
+            return 0
+        else:
             if self.resource_to_run == "sge-cluster":
-                self.job_status = sge_monitor_job(job_id)
+                return sge_monitor_job(job_id)
             elif self.resource_to_run == "slurm-cluster":
-                self.job_status = slurm_monitor_job(job_id)
-            time.sleep(1)
-        return 0
+                return slurm_monitor_job(job_id)
 
-    def monitor_cloud(self, job_id):
+    def monitor_cloud(self, job_id: str, continuous: bool=True)):
         """ Monitors experiment remotely on GCP cloud. """
-        while self.job_status:
+        if continuous:
+            while self.job_status:
+                if self.resource_to_run == "gcp-cloud":
+                    self.job_status = gcp_monitor_job(job_id,
+                                                      self.job_arguments)
+                time.sleep(10)
+            return 0
+        else:
             if self.resource_to_run == "gcp-cloud":
-                self.job_status = gcp_monitor_job(job_id, self.job_arguments)
-            time.sleep(10)
-        return 0
+                return gcp_monitor_job(job_id, self.job_arguments)
 
-    def clean_up(self, job_id):
+    def clean_up(self, job_id: str):
         """ Remove error and log files at end of training. """
         # Clean up if not development!
         if not mle_config.general.development:
