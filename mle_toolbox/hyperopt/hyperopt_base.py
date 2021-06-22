@@ -9,8 +9,7 @@ from typing import Union, List
 from pprint import pformat
 
 from .hyperlogger import HyperoptLogger
-from ..experiment import (spawn_multiple_configs,
-                          spawn_multiple_seeds_experiment)
+from ..experiment import spawn_multiple_configs
 from ..utils import (load_json_config,
                      load_meta_log,
                      print_framed,
@@ -129,17 +128,18 @@ class BaseHyperOptimisation(object):
                         num_running_evals: int,
                         num_seeds_per_eval: Union[None, int] = 1):
         """ Run jobs asynchronously - launch whenever resource available. """
+        '''
         # Does not work with Batch SMBO since proposals rely on GP!
         assert self.search_type != "smbo", "Async scheduling does not support SMBO"
-        '''
-        completed_jobs, running_jobs = 0, 0
-        running_job_ids = []
+        completed_evals, running_evals = 0, 0
+        running_eval_ids = []
 
-        # Spawn 1st batch of jobs until limit of allowed usage is reached
-        while running_jobs < min(num_running_evals, num_total_evals):
+        # Spawn 1st batch of evals until limit of allowed usage is reached
+        while running_evals < min(num_running_evals, num_total_evals):
             proposal = self.get_hyperparam_proposal(1)
             eval_config = self.gen_hyperparam_configs(proposal)
-            fname, run_id = self.write_configs_to_json(eval_config)
+            fname, eval_id = self.write_configs_to_json(eval_config)
+            # Note that we only control evals and not individual jobs!
             job_ids = spawn_multiple_seeds_experiment(
                                    resource_to_run=self.resource_to_run,
                                    job_filename=self.job_fname,
@@ -148,29 +148,29 @@ class BaseHyperOptimisation(object):
                                    experiment_dir=self.experiment_dir,
                                    num_seeds=num_seeds_per_eval,
                                    logger_level=logging.WARNING)
-            running_job_ids.append(job_id)
-            running_jobs += 1
+            running_eval_ids.append(job_id)
+            running_evals += 1
 
         # Run experiment until num_total_evals jobs are completed
         while completed_jobs < num_total_evals:
             # Once budget is fully allocated - start monitor running jobs
-            while running_jobs == num_running_evals:
-                for job_id in running_job_ids:
+            while running_evals == num_running_evals:
+                for job_id in running_eval_ids:
                     status = monitor(job_ids)
                     if status == 0:
-                        completed_jobs += 1
-                        running_jobs -= 1
+                        completed_evals += 1
+                        running_evals -= 1
                         running_job_ids.remove(job_id)
 
                 # Once budget becomes available again - fill up with new jobs
-                while running_jobs < min(num_running_evals,
-                                         num_total_evals - completed_jobs):
+                while running_evals < min(num_running_evals,
+                                          num_total_evals - completed_jobs):
                     proposal = self.get_hyperparam_proposal(1)
                     eval_config = self.gen_hyperparam_configs(proposal)
-                    fname, run_id = self.write_configs_to_json(eval_config)
+                    fname, eval_id = self.write_configs_to_json(eval_config)
                     job_id = spawn_jobs(fname)
-                    running_job_ids.append(job_id)
-                    running_jobs += 1
+                    running_eval_ids.append(job_id)
+                    running_evals += 1
         '''
 
     def run_sync_search(self,

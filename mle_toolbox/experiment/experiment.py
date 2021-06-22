@@ -260,7 +260,7 @@ class Experiment(object):
                 return 0
 
 
-    def monitor_cluster(self, job_id: str, continuous: bool=True)):
+    def monitor_cluster(self, job_id: str, continuous: bool=True):
         """ Monitors experiment remotely on SGE or Slurm clusters. """
         if continuous:
             while self.job_status:
@@ -276,7 +276,7 @@ class Experiment(object):
             elif self.resource_to_run == "slurm-cluster":
                 return slurm_monitor_job(job_id)
 
-    def monitor_cloud(self, job_id: str, continuous: bool=True)):
+    def monitor_cloud(self, job_id: str, continuous: bool=True):
         """ Monitors experiment remotely on GCP cloud. """
         if continuous:
             while self.job_status:
