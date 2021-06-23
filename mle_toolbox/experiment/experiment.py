@@ -85,8 +85,8 @@ class Experiment(object):
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
 
-        # Check if all required args are given - otw. add default
-        self.job_arguments = self.check_job_args(job_arguments)
+        # Check if all required args are given - otw. add default to copy
+        self.job_arguments = self.check_job_args(job_arguments.copy())
 
         # Create command line arguments for job to schedule (passed to .py)
         self.cmd_line_args = self.generate_cmd_line_args(cmd_line_input)

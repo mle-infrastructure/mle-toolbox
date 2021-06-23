@@ -1,8 +1,10 @@
-### v0.2.9 - TBC
+### v0.2.9 - 06/23/2021
 
 ##### Added
 
 - Adds monitoring panel for GCP in `mle monitor` dashboard.
+- Adds asynchronous job launching via new `ExperimentQueue` and monitoring based on `max_running_jobs` budget. This release changes the previous job launching infrastructure. We no longer rely on one process per job, but monitor all scheduled jobs passively in a for-loop.
+- Adds GitHub Pages hosted documentation using mkdocs and the Material framework. The documentation is hosted under roberttlange.github.io/mle-toolbox. It is still very much work in progress.
 
 ##### Changed
 
@@ -10,8 +12,10 @@
 - Adds Q/A for upload/deletion of directory to GCS bucket.
 - All GCP-CPU resources are now queried via [custom machine types](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#gcloud) - Default cheap n1.
 - Separate different `requirements.txt` for minimal installation, examples and testing.
-
-##### Fixed
+- Restructures the search experiment API in the `.yaml` file. We now differentiate between 3 pillars:
+    1. `search_logging`: General options such as reloading of previous log, verbosity, metrics in `.hdf5` log to monitor and how to do so.
+    2. `search_resources`: How many jobs, batches, maximum number of simultaneously running jobs, etc..
+    3. `search_config`: Options regarding the search type (random, grid, smbo) and the parameters to search over (spaces, resolution, etc.).
 
 
 ### v0.2.8 - 05/06/2021

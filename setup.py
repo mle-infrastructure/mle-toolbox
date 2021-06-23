@@ -12,7 +12,7 @@ with open(os.path.join(CURRENT_DIR, 'README.md'), encoding='utf-8') as f:
 
 
 def parse_requirements(path):
-  with open(os.path.join(_CURRENT_DIR, path)) as f:
+  with open(os.path.join(CURRENT_DIR, path)) as f:
     return [l.rstrip() for l in f if not (l.isspace() or l.startswith('#'))]
 
 
