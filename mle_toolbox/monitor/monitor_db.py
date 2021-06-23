@@ -60,12 +60,18 @@ def get_time_experiment(db, last_experiment_id):
 
     if meta_args["job_type"] == "hyperparameter-search":
         search_resources = job_spec_args["search_resources"]
-        total_jobs = (search_resources["num_search_batches"]
-                      * search_resources["num_evals_per_batch"]
-                      * search_resources["num_seeds_per_eval"])
-        total_batches = search_resources["num_search_batches"]
-        jobs_per_batch = (search_resources["num_evals_per_batch"]
+        if job_spec_args["search_config"]["search_schedule"] == "sync":
+            total_jobs = (search_resources["num_search_batches"]
+                          * search_resources["num_evals_per_batch"]
                           * search_resources["num_seeds_per_eval"])
+            total_batches = search_resources["num_search_batches"]
+            jobs_per_batch = (search_resources["num_evals_per_batch"]
+                              * search_resources["num_seeds_per_eval"])
+        else:
+            total_jobs = (search_resources["num_total_evals"]
+                          * search_resources["num_seeds_per_eval"])
+            total_batches = total_jobs/search_resources["max_running_jobs"]
+            jobs_per_batch = search_resources["max_running_jobs"]
     elif meta_args["job_type"] == "multiple-experiments":
         total_jobs = (len(job_spec_args["config_fnames"])*
                       job_spec_args["num_seeds"])

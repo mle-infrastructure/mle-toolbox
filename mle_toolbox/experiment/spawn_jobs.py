@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, List
 from .experiment import Experiment
 from .experiment_queue import ExperimentQueue
 
