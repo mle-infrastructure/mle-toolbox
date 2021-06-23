@@ -17,21 +17,7 @@ def spawn_multiple_configs(resource_to_run: str,
     """ Spawn processes to running diff. training configs over diff. seeds. """
     if num_seeds is None:
         num_seeds = 1
-    spawn_multiple_configs_experiment(resource_to_run, job_filename,
-                                      config_filenames,
-                                      job_arguments, experiment_dir,
-                                      num_seeds, logger_level)
-    return 1
 
-
-def spawn_multiple_configs_experiment(resource_to_run: str,
-                                      job_filename: str,
-                                      config_filenames: Union[List[str], str],
-                                      job_arguments: Union[None, dict],
-                                      experiment_dir: str,
-                                      num_seeds: Union[None, int] = None,
-                                      logger_level: int=logging.WARNING):
-    """ Spawn multi experiments w. diff. configs/seeds locally/remote. """
     # Ensure that config filenames is a list
     if type(config_filenames) is not list:
         config_filenames = [config_filenames]

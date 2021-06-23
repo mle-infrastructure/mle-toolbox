@@ -10,6 +10,10 @@ from ..utils import merge_hdf5_files
 
 
 class MultiSeedExperiment(object):
+    """
+    Multi-Seed Experiment Class: This is essentially a for-loop handler for
+    the `Experiment` class when running multiple random seeds.
+    """
     def __init__(self,
                  resource_to_run: str,
                  job_filename: str,
@@ -18,7 +22,7 @@ class MultiSeedExperiment(object):
                  experiment_dir: str,
                  num_seeds: int,
                  default_seed: int=0,
-                 logger_level: str=logging.WARNING):
+                 logger_level: int=logging.WARNING):
         # Init experiment class with relevant info
         self.resource_to_run = resource_to_run     # compute resource for job
         self.job_filename = job_filename           # path to train script

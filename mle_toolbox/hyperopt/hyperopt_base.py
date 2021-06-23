@@ -9,7 +9,7 @@ from typing import Union, List
 from pprint import pformat
 
 from .hyperlogger import HyperoptLogger
-from ..experiment import spawn_multiple_configs
+from ..experiment import spawn_multiple_configs, ExperimentQueue
 from ..utils import (load_json_config,
                      load_meta_log,
                      print_framed,
@@ -71,7 +71,7 @@ class BaseHyperOptimisation(object):
                    num_search_batches: Union[None, int] = None,
                    num_evals_per_batch: Union[None, int] = None,
                    num_total_evals: Union[None, int] = None,
-                   num_running_evals: Union[None, int] = None,
+                   max_running_jobs: Union[None, int] = None,
                    num_seeds_per_eval: Union[None, int] = 1):
         """
         Run a hyperparameter search: Random, Grid, SMBO
@@ -88,7 +88,7 @@ class BaseHyperOptimisation(object):
             assert type(num_evals_per_batch) == int, "Provide valid 'sync' input"
         elif self.search_schedule == "async":
             assert type(num_total_evals) == int, "Provide valid 'async' input"
-            assert type(num_running_evals) == int, "Provide valid 'async' input"
+            assert type(max_running_jobs) == int, "Provide valid 'async' input"
         else:
             raise ValueError("Provide valid schedule type ('sync', 'async')"
                              + " for search.")
@@ -113,65 +113,58 @@ class BaseHyperOptimisation(object):
                                  num_evals_per_batch,
                                  num_seeds_per_eval)
         else:
-            self.logger.info(f"Total Search Jobs: {num_total_evals} |" \
-                             f" Running Job Limit: {num_running_evals} |" \
+            self.logger.info(f"Total Search Evals: {num_total_evals} |" \
+                             f" Running Job Limit: {max_running_jobs} |" \
                              f" Seeds/Eval: {num_seeds_per_eval}")
             print_framed(f"START HYPEROPT RUNS")
             if self.hyper_log.no_results_logging:
                 self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
             self.run_async_search(num_total_evals,
-                                  num_running_evals,
+                                  max_running_jobs,
                                   num_seeds_per_eval)
 
     def run_async_search(self,
-                        num_total_evals: int,
-                        num_running_evals: int,
-                        num_seeds_per_eval: Union[None, int] = 1):
+                         num_total_evals: int,
+                         max_running_jobs: int,
+                         num_seeds_per_eval: Union[None, int] = 1):
         """ Run jobs asynchronously - launch whenever resource available. """
-        '''
         # Does not work with Batch SMBO since proposals rely on GP!
         assert self.search_type != "smbo", "Async scheduling does not support SMBO"
-        completed_evals, running_evals = 0, 0
-        running_eval_ids = []
+        # Get all hyperparameters & plug them into config dicts, store jsons
+        batch_proposals = self.get_hyperparam_proposal(num_total_evals)
+        batch_configs = self.gen_hyperparam_configs(batch_proposals)
+        batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
-        # Spawn 1st batch of evals until limit of allowed usage is reached
-        while running_evals < min(num_running_evals, num_total_evals):
-            proposal = self.get_hyperparam_proposal(1)
-            eval_config = self.gen_hyperparam_configs(proposal)
-            fname, eval_id = self.write_configs_to_json(eval_config)
-            # Note that we only control evals and not individual jobs!
-            job_ids = spawn_multiple_seeds_experiment(
-                                   resource_to_run=self.resource_to_run,
-                                   job_filename=self.job_fname,
-                                   config_filenames=fname,
-                                   job_arguments=self.job_arguments,
-                                   experiment_dir=self.experiment_dir,
-                                   num_seeds=num_seeds_per_eval,
-                                   logger_level=logging.WARNING)
-            running_eval_ids.append(job_id)
-            running_evals += 1
+        # Generate a queue of jobs to launch and work through them
+        # Different seed logs are merged within queue whenever all completed
+        self.logger.info(f"START - {num_total_evals} Eval Configs - " \
+                         f"{max_running_jobs} Jobs at a Time -" \
+                         f" {num_seeds_per_eval} Seeds")
+        start_t = time.time()
+        experiment_queue = ExperimentQueue(self.resource_to_run,
+                                           self.job_fname,
+                                           batch_fnames,
+                                           self.job_arguments,
+                                           self.experiment_dir,
+                                           num_seeds_per_eval,
+                                           max_running_jobs=max_running_jobs)
+        experiment_queue.run()
+        time_elapsed = time.time() - start_t
 
-        # Run experiment until num_total_evals jobs are completed
-        while completed_jobs < num_total_evals:
-            # Once budget is fully allocated - start monitor running jobs
-            while running_evals == num_running_evals:
-                for job_id in running_eval_ids:
-                    status = monitor(job_ids)
-                    if status == 0:
-                        completed_evals += 1
-                        running_evals -= 1
-                        running_job_ids.remove(job_id)
+        self.logger.info(f"DONE - {num_total_evals} Eval Configs - " \
+                         f"{max_running_jobs} Jobs at a Time -" \
+                         f" {num_seeds_per_eval} Seeds")
 
-                # Once budget becomes available again - fill up with new jobs
-                while running_evals < min(num_running_evals,
-                                          num_total_evals - completed_jobs):
-                    proposal = self.get_hyperparam_proposal(1)
-                    eval_config = self.gen_hyperparam_configs(proposal)
-                    fname, eval_id = self.write_configs_to_json(eval_config)
-                    job_id = spawn_jobs(fname)
-                    running_eval_ids.append(job_id)
-                    running_evals += 1
-        '''
+        # Update + save hyperlog after merging eval log .hdf5 files
+        perf_measures = self.update_hyper_log(batch_proposals, run_ids,
+                                              time_elapsed,
+                                              num_seeds_per_eval)
+        self.hyper_log.save_log()
+
+        # Clean up after search batch iteration
+        self.clean_up_after_batch_iteration(batch_proposals,
+                                            perf_measures)
+        print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
 
     def run_sync_search(self,
                         num_search_batches: int,
@@ -191,52 +184,63 @@ class BaseHyperOptimisation(object):
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
             self.logger.info(f"START - {self.current_iter}/" \
-                             f"{num_search_batches} batch of" \
-                             f" hyperparameters - {num_seeds_per_eval} seeds")
+                             f"{num_search_batches} Batch of" \
+                             f" Hyperparameters - {num_seeds_per_eval} Seeds")
 
             # Training w. prev. specified hyperparams & evaluate, get time taken
             batch_results_dirs = self.train_hyperparams(batch_fnames,
                                                         num_seeds_per_eval)
 
             self.logger.info(f"DONE - {self.current_iter}/" \
-                             f"{num_search_batches} batch of" \
-                             f" hyperparameters - {num_seeds_per_eval} seeds")
+                             f"{num_search_batches} Batch of" \
+                             f" Hyperparameters - {num_seeds_per_eval} Seeds")
             time_elapsed = time.time() - start_t
 
-            # Attempt merging of hyperlogs - until successful!
-            if not self.hyper_log.no_results_logging:
-                while True:
-                    try:
-                        meta_eval_log = self.get_meta_eval_log(
-                                            self.hyper_log.all_run_ids
-                                            + run_ids)
-                        break
-                    except:
-                        time.sleep(1)
-                        continue
-
-                self.logger.info(f"MERGE - {self.current_iter}/" \
-                                 f"{num_search_batches} batch of " \
-                                 f"hyperparameters - {num_seeds_per_eval} seeds")
-
-                # Get performance score, update & save hypersearch log
-                perf_measures = self.hyper_log.update_log(batch_proposals,
-                                                          meta_eval_log,
-                                                          time_elapsed,
-                                                          run_ids)
-                self.clean_up_after_batch_iteration(batch_proposals,
-                                                    perf_measures)
-            else:
-                # Log without collected results
-                self.hyper_log.update_log(batch_proposals, None,
-                                          None, time_elapsed, run_ids)
-                self.logger.info(f"UPDATE - {self.current_iter}/" \
-                                 f"{num_search_batches} batch of " \
-                                 f"hyperparameters - {num_seeds_per_eval} seeds")
-
+            # Update + save hyperlog after merging eval log .hdf5 files
+            perf_measures = self.update_hyper_log(batch_proposals, run_ids,
+                                                  time_elapsed,
+                                                  num_seeds_per_eval)
             self.hyper_log.save_log()
-            print_framed(f"COMPLETED BATCH {self.current_iter}/" \
+
+            # Clean up after search batch iteration - delete redundant configs
+            self.clean_up_after_batch_iteration(batch_proposals,
+                                                perf_measures)
+            for f in batch_fnames:
+                os.remove(f)
+            print_framed(f"COMPLETED BATCH CLEAN-UP {self.current_iter}/" \
                          f"{num_search_batches}")
+
+    def update_hyper_log(self, batch_proposals, run_ids, time_elapsed,
+                         num_seeds_per_eval):
+        """ Merge eval log .hdf5 files & update hyperlogger w. performance. """
+        # Attempt merging of hyperlogs - until successful!
+        if not self.hyper_log.no_results_logging:
+            while True:
+                try:
+                    meta_eval_log = self.get_meta_eval_log(
+                                        self.hyper_log.all_run_ids
+                                        + run_ids)
+                    break
+                except:
+                    time.sleep(1)
+                    continue
+
+            self.logger.info(f"MERGE - {len(run_ids)} Eval Configs of " \
+                             f"Hyperparameters - {num_seeds_per_eval} Seeds")
+
+            # Get performance score, update & save hypersearch log
+            perf_measures = self.hyper_log.update_log(batch_proposals,
+                                                      meta_eval_log,
+                                                      time_elapsed,
+                                                      run_ids)
+        else:
+            # Log without collected results - perf_measures None output
+            perf_measures = self.hyper_log.update_log(batch_proposals, None,
+                                                      None, time_elapsed,
+                                                      run_ids)
+            self.logger.info(f"UPDATE - {len(run_ids)} Eval Configs of " \
+                             f"Hyperparameters - {num_seeds_per_eval} Seeds")
+        return perf_measures
 
     def get_hyperparam_proposal(self, num_iter_batch: int):
         """ Get proposals to eval - implemented by specific hyperopt algo"""

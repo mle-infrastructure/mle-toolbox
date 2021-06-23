@@ -11,6 +11,7 @@ def spawn_multiple_seeds_experiment(resource_to_run: str,
                                     num_seeds: int,
                                     default_seed: int=0,
                                     logger_level: int=logging.WARNING):
+    """ Spawn same experiment w. diff. seeds multiple times locally/remote. """
     multi_experiment = MultiSeedExperiment(resource_to_run, job_filename,
                                            config_filename, job_arguments,
                                            experiment_dir, num_seeds)
