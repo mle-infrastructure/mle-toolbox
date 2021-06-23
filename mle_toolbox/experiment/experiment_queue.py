@@ -96,12 +96,14 @@ class ExperimentQueue(object):
             self.queue[self.queue_counter]["job_id"] = job_id
             self.num_running_jobs += 1
             self.queue_counter += 1
+            time.sleep(0.1)
         self.logger.info("LAUNCH - FIRST {}/{} SET OF JOBS".format(
                                                         self.num_running_jobs,
                                                         self.num_total_jobs))
 
         # 2. Set up Progress Bar Counter of completed jobs
-        self.pbar = tqdm(total=self.num_total_jobs)
+        self.pbar = tqdm(total=self.num_total_jobs,
+                         bar_format='{l_bar}{bar:45}{r_bar}{bar:-45b}')
 
         # 3. Monitor & launch new waiting jobs when resource available
         while self.num_completed_jobs < self.num_total_jobs:
@@ -126,6 +128,7 @@ class ExperimentQueue(object):
                                     completed_seeds += 1
                         if completed_seeds == self.num_seeds:
                             self.merge_logs(job["log_dir"], job["base_str"])
+                time.sleep(0.1)
 
             # Once budget becomes available again - fill up with new jobs
             while self.num_running_jobs < min(self.max_running_jobs,
@@ -138,6 +141,7 @@ class ExperimentQueue(object):
                 self.queue[self.queue_counter]["job_id"] = job_id
                 self.num_running_jobs += 1
                 self.queue_counter += 1
+                time.sleep(0.1)
         self.pbar.close()
 
     def launch(self, queue_counter):

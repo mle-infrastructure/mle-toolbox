@@ -164,6 +164,8 @@ class BaseHyperOptimisation(object):
         # Clean up after search batch iteration
         self.clean_up_after_batch_iteration(batch_proposals,
                                             perf_measures)
+        for f in batch_fnames:
+            os.remove(f)
         print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
 
     def run_sync_search(self,
@@ -174,7 +176,6 @@ class BaseHyperOptimisation(object):
         # Only run the batch loop for the remaining iterations
         self.current_iter = int(self.current_iter/num_evals_per_batch)
         for search_iter in range(num_search_batches - self.current_iter):
-            start_t = time.time()
             # Update the hyperopt iteration counter
             self.current_iter += 1
 
@@ -187,9 +188,18 @@ class BaseHyperOptimisation(object):
                              f"{num_search_batches} Batch of" \
                              f" Hyperparameters - {num_seeds_per_eval} Seeds")
 
-            # Training w. prev. specified hyperparams & evaluate, get time taken
-            batch_results_dirs = self.train_hyperparams(batch_fnames,
-                                                        num_seeds_per_eval)
+            # Training w. prev. specified hyperparams & eval, get time taken
+            max_jobs = num_seeds_per_eval * num_evals_per_batch
+            start_t = time.time()
+            experiment_queue = ExperimentQueue(self.resource_to_run,
+                                               self.job_fname,
+                                               batch_fnames,
+                                               self.job_arguments,
+                                               self.experiment_dir,
+                                               num_seeds_per_eval,
+                                               max_running_jobs=max_jobs)
+            experiment_queue.run()
+            time_elapsed = time.time() - start_t
 
             self.logger.info(f"DONE - {self.current_iter}/" \
                              f"{num_search_batches} Batch of" \
@@ -293,22 +303,6 @@ class BaseHyperOptimisation(object):
             all_run_ids.append(run_id)
 
         return config_fnames_batch, all_run_ids
-
-    def train_hyperparams(self, batch_fnames: list,
-                          num_seeds_per_eval: Union[None, int] = None):
-        """ Train the network for a batch of hyperparam configs """
-        # Spawn the batch of synchronous evaluations
-        spawn_multiple_configs(resource_to_run=self.resource_to_run,
-                               job_filename=self.job_fname,
-                               config_filenames=batch_fnames,
-                               job_arguments=self.job_arguments,
-                               experiment_dir=self.experiment_dir,
-                               num_seeds=num_seeds_per_eval,
-                               logger_level=logging.WARNING)
-
-        # Clean up config files (redundant see experiment sub-folder)
-        for f in batch_fnames:
-            os.remove(f)
 
     def get_meta_eval_log(self, all_run_ids):
         """ Scavenge the experiment dictonaries & load in logs. """
