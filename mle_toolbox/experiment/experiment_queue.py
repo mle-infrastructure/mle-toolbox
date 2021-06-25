@@ -185,7 +185,6 @@ class ExperimentQueue(object):
             while True:
                 log_paths = [os.path.join(log_dir, l)
                              for l in os.listdir(log_dir)]
-                # print(len(log_paths))
                 if len(log_paths) == self.num_seeds:
                     # Delete joined log if at some point over-eagerly merged
                     if collected_log_path in log_paths:

@@ -28,7 +28,7 @@ from mle_toolbox.remote.ssh_execute import (SSH_Manager,
 # Import different experiment executers & setup tools (log, config, etc.)
 from mle_toolbox.launch import (run_single_experiment,
                                 run_multiple_experiments,
-                                run_post_processing,
+                                run_processing_job,
                                 welcome_to_mle_toolbox,
                                 prepare_logger,
                                 check_job_config)
@@ -98,7 +98,7 @@ def run(cmd_args):
                                       purpose)
                 # After successful completion on remote resource - BREAK
                 return
-    
+
     if resource_to_run is None:
         resource_to_run = current_resource
     logger.info(f"Run on resource: {resource_to_run}")
@@ -161,6 +161,15 @@ def run(cmd_args):
             logger.info(f"Continue with {local_code_dir} previously stored " +
                         f"in GCP bucket: {mle_config.gcp.code_dir}")
 
+    # 8. Perform pre-processing if arguments are provided
+    if "pre_processing_args" in job_config.keys():
+        print_framed("PRE-PROCESSING")
+        logger.info(f"Pre-processing job for experiment - STARTING: {new_experiment_id}")
+        run_processing_job(resource_to_run,
+                           job_config.pre_processing_args,
+                           job_config.meta_job_args["experiment_dir"])
+        logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
+
     # 8. Run the experiment
     print_framed("RUN EXPERIMENT")
     experiment_types = ["single-experiment",
@@ -198,12 +207,12 @@ def run(cmd_args):
         raise ValueError(f"Job type has to be in {experiment_types}.")
 
     # 9. Perform post-processing of results if arguments are provided
-    if "post_process_args" in job_config.keys():
+    if "post_processing_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING: {new_experiment_id}")
-        run_post_processing(resource_to_run,
-                            job_config.post_process_args,
-                            job_config.meta_job_args["experiment_dir"])
+        run_processing_job(resource_to_run,
+                           job_config.post_processing_args,
+                           job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED: {new_experiment_id}")
 
     # 10. Generate .md, and .html report w. figures for e_id - inherit logger

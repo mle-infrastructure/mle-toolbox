@@ -32,15 +32,14 @@ def spawn_single_experiment(resource_to_run: str,
     return status_out
 
 
-def spawn_post_processing_job(resource_to_run: str,
-                              job_filename: str,
-                              job_arguments: Union[None, dict],
-                              experiment_dir: str,
-                              extra_cmd_line_input: Union[None, dict]):
+def spawn_processing_job(resource_to_run: str,
+                         job_filename: str,
+                         job_arguments: Union[None, dict],
+                         experiment_dir: str,
+                         extra_cmd_line_input: Union[None, dict]):
     """
-    Spawn a single experiment locally/remote to generate figures, etc.
-    No configuration file required here!
-    TODO: Rename since this can also be a preprocessing job
+    Spawn a single experiment locally/remote to generate figures, or preprocess
+    data, etc.. No .json configuration file required here!
     """
     # 1. Instantiate the experiment class
     experiment = Experiment(resource_to_run=resource_to_run,
@@ -50,7 +49,7 @@ def spawn_post_processing_job(resource_to_run: str,
                             experiment_dir=experiment_dir,
                             cmd_line_input={},
                             extra_cmd_line_input=extra_cmd_line_input)
-    # 2. Run the single post-processing job
+    # 2. Run the single pre/post-processing job
     status_out = experiment.run()
     return status_out
 

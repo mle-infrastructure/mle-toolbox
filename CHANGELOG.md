@@ -1,3 +1,13 @@
+### v0.3.0 - TBD
+
+##### Added
+- Adds general processing job, which generalizes the post-processing job and enables 'shared'/centralized data pre-processing before a (search) experiment and results post-processing/figure generation afterwards.
+
+##### Changed
+
+##### Fixed
+
+
 ### v0.2.9 - 06/23/2021
 
 ##### Added

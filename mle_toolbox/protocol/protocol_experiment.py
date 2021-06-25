@@ -108,12 +108,6 @@ def protocol_experiment(job_config: dict,
     experiment_hash = hash_object.hexdigest()
     db.dadd(new_experiment_id, ("e-hash", experiment_hash))
 
-    # Add path to generated figures if postprocessing is done in the end
-    # TODO: Make more general - must not always create a figure dir!
-    if "post_process_args" in job_config.keys():
-        figure_path = job_config.post_process_args["extra_cmd_line_input"]["figures_dir"]
-        db.dadd(new_experiment_id, ("figures_dir", figure_path))
-
     # Set a boolean to indicate if results were previously retrieved
     db.dadd(new_experiment_id, ("retrieved_results", False))
 
