@@ -8,24 +8,29 @@ meta_job_args:
 
 # Parameters specific to the hyperparameter search
 param_search_args:
-    search_type: "grid"
-    hyperlog_fname: "hyper_log.pkl"
-    maximize_objective: True
-    problem_type: "final"
-    eval_score_type: "test_loss"
-    num_search_batches: 2
-    num_iter_per_batch: 2
-    num_evals_per_iter: 1
-    params_to_search:
-        categorical:
-            opt_type:
-                - "Adam"
-                - "RMSprop"
-        real:
-            l_rate:
-                begin: 1e-5
-                end: 1e-2
-                bins: 4
+    search_logging:
+        reload_log: False
+        verbose_log: True
+        max_objective: True
+        problem_type: "final"
+        eval_metrics: "test_loss"
+    search_resources:
+        num_search_batches: 2
+        num_evals_per_batch: 2
+        num_seeds_per_eval: 1
+    search_config:
+        search_type: "grid"
+        search_schedule: "sync"
+        search_params:
+            categorical:
+                opt_type:
+                    - "Adam"
+                    - "RMSprop"
+            real:
+                l_rate:
+                    begin: 1e-5
+                    end: 1e-2
+                    bins: 2
 
 # Parameters specific to an individual job
 single_job_args:

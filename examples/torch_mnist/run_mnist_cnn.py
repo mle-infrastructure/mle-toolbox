@@ -33,10 +33,10 @@ def main(mle):
         num_workers=5, pin_memory=True, shuffle=True)
 
     # Define the network architecture, loss function, optimizer & logger
-    if train_config.net_type == "CNN":
+    if mle.train_config.net_type == "CNN":
         mnist_net = MNIST_CNN(mle.net_config.dropout_prob,
                               mle.net_config.hidden_fc_dim).to(device)
-    elif train_config.net_type == "MLP":
+    elif mle.train_config.net_type == "MLP":
         mnist_net = MNIST_MLP(mle.net_config.dropout_prob,
                               mle.net_config.hidden_fc_dim).to(device)
 
@@ -52,7 +52,6 @@ def main(mle):
                     device=device,
                     train_loader=train_loader,
                     test_loader=test_loader,
-                    train_log=run_log,
                     test_batches=mle.train_config.test_batches)
     return
 
@@ -120,7 +119,8 @@ def train_mnist_cnn(mle, model, optimizer, criterion, device,
                 test_loss = evaluate_network(update_counter, model,
                                              test_loader, test_batches,
                                              device, criterion)
-                time_tick = {"epoch": update_counter}
+                time_tick = {"num_updates": update_counter,
+                             "epoch": epoch}
                 stats_tick = {"train_loss": np.mean(train_losses),
                               "test_loss": test_loss}
                 mle.update_log(time_tick, stats_tick, model=model, save=True)

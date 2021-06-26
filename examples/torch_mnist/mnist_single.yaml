@@ -2,15 +2,36 @@
 meta_job_args:
     project_name: "examples"
     job_type: "single-experiment"
-    base_train_fname: "mnist/run_mnist_cnn.py"
-    base_train_config: "mnist/mnist_cnn_config_1.json"
+    base_train_fname: "torch_mnist/run_mnist_cnn.py"
+    base_train_config: "torch_mnist/mnist_cnn_config_1.json"
     experiment_dir: "experiments/"
 
 
 # Parameters specific to an individual job
 single_job_args:
     job_name: "mnist"
-    num_logical_cores: 2
+    num_logical_cores: 4
+    num_gpus: 1
     log_file: "l-mnist"
     err_file: "e-mnist"
     env_name: "mle-toolbox"
+
+
+# # Parameters for the pre-processing job
+# pre_processing_args:
+#     processing_fname: "run_mnist_preprocessing.py"
+#     processing_job_args:
+#         num_logical_cores: 2
+#         time_per_job: "00:01:00"
+#     extra_cmd_line_input:
+#         figures_dir: "figures_25"
+#
+#
+# # Parameters for the post-processing job
+# post_processing_args:
+#     processing_fname: "run_mnist_postprocessing.py"
+#     processing_job_args:
+#         num_logical_cores: 2
+#         time_per_job: "00:01:00"
+#     extra_cmd_line_input:
+#         figures_dir: "figures_25"

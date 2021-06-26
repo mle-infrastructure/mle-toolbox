@@ -5,7 +5,7 @@ import numpy as np
 import platform
 import re
 import sys, select
-from typing import Union
+from typing import Union, Tuple
 from dotmap import DotMap
 from datetime import datetime
 from .core_files_load import load_json_config, load_mle_toolbox_config
@@ -72,10 +72,10 @@ def set_random_seeds(seed_id: Union[int, None],
         print("Please provide seed_id that is not None. Using package default.")
 
 
-def get_configs_ready(default_config_fname: str="configs/base_config.json",
-                      default_seed: Union[None, int] = None,
-                      default_experiment_dir: str="experiments/"):
-    """ Prepare job config files for experiment run (add seed id, etc.). """
+def parse_experiment_args(default_config_fname: str="configs/base_config.json",
+                          default_seed: Union[None, int] = None,
+                          default_experiment_dir: str="experiments/"):
+    """ Helper function to parse experiment args given to MLExperiment. """
     parser = argparse.ArgumentParser()
     # Standard inputs for all training runs
     parser.add_argument('-config', '--config_fname', action="store",
@@ -87,14 +87,20 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
 
     # Command line input for the random seed to replicate experiment
     parser.add_argument('-seed', '--seed_id', action="store",
-                        default=default_seed,
+                        default=default_seed, type=int,
                         help='Seed id on which to train')
     cmd_args, extra_args = parser.parse_known_args()
+    return cmd_args, extra_args
 
+
+def load_experiment_config(config_fname: str, experiment_dir: str,
+                           seed_id: Union[None, int]) -> Tuple[DotMap, DotMap,
+                                                               DotMap]:
+    """ Prepare job config files for experiment run (add seed id, etc.). """
     # Load .json config file + add config fname to clone + add experiment dir
-    config = load_json_config(cmd_args.config_fname)
-    config.log_config.config_fname = cmd_args.config_fname
-    config.log_config.experiment_dir = cmd_args.experiment_dir
+    config = load_json_config(config_fname)
+    config.log_config.config_fname = config_fname
+    config.log_config.experiment_dir = experiment_dir
 
     # Subdivide experiment/job config into net, train and log configs
     net_config = DotMap(config["net_config"], _dynamic=False)
@@ -109,23 +115,24 @@ def get_configs_ready(default_config_fname: str="configs/base_config.json",
                 device_name = "cuda"
         train_config.device_name = device_name
 
+    # Add tensorboard usage to logging config if desired
     if "tboard_fname" not in log_config.keys():
         if "use_tboard" in log_config.keys():
             if log_config.use_tboard:
-                tboard_temp = os.path.split(cmd_args.config_fname)[1]
+                tboard_temp = os.path.split(config_fname)[1]
                 tboard_base = os.path.splitext(tboard_temp)[0]
                 log_config.tboard_fname = tboard_base
 
     # Set seed for run of your choice - has to be done via command line
-    if cmd_args.seed_id is not None:
-        train_config.seed_id = int(cmd_args.seed_id)
-        log_config.seed_id = "seed_" + str(cmd_args.seed_id)
+    if seed_id is not None:
+        train_config.seed_id = int(seed_id)
+        log_config.seed_id = "seed_" + str(seed_id)
     else:
         try:
             log_config.seed_id = "seed_" + str(train_config.seed_id)
         except:
             log_config.seed_id = "seed_default"
-    return train_config, net_config, log_config, extra_args
+    return train_config, net_config, log_config
 
 
 def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):

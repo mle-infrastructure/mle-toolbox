@@ -2,6 +2,7 @@
     WE PARALLELIZE DATA-GENERATION OVER NETWORKS IN EXP DIR. """
 from mle_toolbox.utils import load_hyper_log
 import torch.multiprocessing as mp
+import argparse
 
 
 def multi_proc_inner(config_fname, chkpt_fname, add_args):
@@ -74,9 +75,9 @@ if __name__ == "__main__":
          cmd_args.figures_directory)
 
 # # Parameters for the post processing job
-# post_process_args:
-#     process_fname: "template_post_proc.py"
-#     process_job_args:
+# post_processing_args:
+#     processing_fname: "template_post_proc.py"
+#     processing_job_args:
 #         num_logical_cores: 15
 #         time_per_job: "00:05:00"
 #     extra_cmd_line_input:
