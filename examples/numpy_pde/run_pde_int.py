@@ -30,23 +30,20 @@ def main(mle):
             mle.update_log(time_tick, stats_tick, save=True)
 
     # Generate a sample plot and store it
-    fig = sample_plot()
-    mle.log.save_plot(fig, "_sin_curve.png")
+    fig = plot_pde(x_t)
+    mle.log.save_plot(fig, "_pde_integral.png")
     return
 
 
-def sample_plot():
-    # Data for plotting
-    t = np.arange(0.0, 2.0, 0.01)
-    s = 1 + np.sin(2 * np.pi * t)
-
+def plot_pde(x_t):
+    """ Mini Example Plot of the PDE. """
+    t = np.arange(len(x_t))
     fig, ax = plt.subplots()
-    ax.plot(t, s)
-
-    ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-           title='About as simple as it gets, folks')
+    ax.plot(t, x_t)
+    ax.set(xlabel=r'Time ($\Delta t$)', ylabel='PDE Value', title='PDE Trace')
     ax.grid()
     return fig
+
 
 
 if __name__ == "__main__":

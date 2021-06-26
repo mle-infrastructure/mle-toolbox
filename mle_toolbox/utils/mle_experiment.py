@@ -18,7 +18,7 @@ class MLExperiment(object):
         # Parse experiment command line arguments
         cmd_args, extra_args = parse_experiment_args(default_config_fname,
                                                      default_seed,
-                                                     default_experiment)
+                                                     default_experiment_dir)
         # Load the different configurations for the experiment.
         loaded_configs = load_experiment_config(cmd_args.config_fname,
                                                 cmd_args.experiment_dir,
