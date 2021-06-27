@@ -11,7 +11,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](docs/how_to_toolbox.md) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/numpy_ode), training [PyTorch MNIST-CNNs](examples/pytorch_mnist) or [VAEs in JAX](examples/jax_vae).
+3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/numpy_ode), training [PyTorch MNIST-CNNs](examples/torch_mnist) or [VAEs in JAX](examples/jax_vae).
 4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
 
 

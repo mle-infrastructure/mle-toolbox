@@ -8,7 +8,7 @@ import logging
 from typing import Union, List
 from pprint import pformat
 
-from .hyperlogger import HyperoptLogger
+from .hyper_logger import HyperoptLogger
 from ..experiment import spawn_multiple_configs, ExperimentQueue
 from ..utils import (load_json_config,
                      load_meta_log,
@@ -40,7 +40,7 @@ class BaseHyperOptimisation(object):
                  search_params: dict,
                  search_type: str="grid",
                  search_schedule: str="sync"):
-        # Set up the random hyperparameter search run
+        # Set up the hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run        # Compute resource to run
         self.config_fname = config_fname              # Fname base config file
