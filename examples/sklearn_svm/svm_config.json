@@ -1,7 +1,6 @@
 {
-"train_config": {"svm_gamma": 0.001,
-                 "seed_id": 0},
-"net_config": {},
+"train_config": {"seed_id": 0},
+"model_config": {"svm_gamma": 0.001},
 "log_config": {"time_to_track": ["step_counter"],
                "what_to_track": ["train_acc", "test_acc"],
                "model_type": "sklearn",

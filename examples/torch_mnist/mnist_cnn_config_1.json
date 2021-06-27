@@ -1,6 +1,6 @@
 {
-"net_config": {"dropout_prob": 0.5,
-               "hidden_fc_dim": 128},
+"model_config": {"dropout_prob": 0.5,
+                 "hidden_fc_dim": 128},
 "log_config": {"time_to_track": ["epoch", "num_updates"],
                "what_to_track": ["train_loss", "test_loss"],
                "tboard_fname": "config_1",

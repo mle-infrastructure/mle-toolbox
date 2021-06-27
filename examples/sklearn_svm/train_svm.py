@@ -15,7 +15,7 @@ def main(mle):
         data, digits.target, test_size=0.5, shuffle=False)
 
     # Create a classifier: a support vector classifier
-    clf = svm.SVC(gamma=mle.train_config.svm_gamma)
+    clf = svm.SVC(gamma=mle.model_config.svm_gamma)
 
     # Learn the digits on the train subset
     clf.fit(X_train, y_train)

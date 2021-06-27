@@ -108,8 +108,14 @@ def load_experiment_config(config_fname: str,
     config.log_config.config_fname = config_fname
     config.log_config.experiment_dir = experiment_dir
 
-    # Subdivide experiment/job config into net, train and log configs
-    net_config = DotMap(config["net_config"], _dynamic=False)
+    # Subdivide experiment/job config into model, train and log configs
+    # Important change in v0.3.0 - Model/Net config not required!
+    if "net_config" in config.keys():
+        model_config = DotMap(config["net_config"], _dynamic=False)
+    elif "model_config" in config.keys():
+        model_config = DotMap(config["model_config"], _dynamic=False)
+    else:
+        model_config = None
     train_config = DotMap(config["train_config"], _dynamic=False)
     log_config = DotMap(config["log_config"], _dynamic=False)
 
@@ -142,7 +148,7 @@ def load_experiment_config(config_fname: str,
     # Add model checkpoint string to train configuration
     if model_ckpt is not None:
         train_config.model_ckpt = model_ckpt
-    return train_config, net_config, log_config
+    return train_config, model_config, log_config
 
 
 def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):

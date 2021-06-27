@@ -34,11 +34,11 @@ def main(mle):
 
     # Define the network architecture, loss function, optimizer & logger
     if mle.train_config.net_type == "CNN":
-        mnist_net = MNIST_CNN(mle.net_config.dropout_prob,
-                              mle.net_config.hidden_fc_dim).to(device)
+        mnist_net = MNIST_CNN(mle.model_config.dropout_prob,
+                              mle.model_config.hidden_fc_dim).to(device)
     elif mle.train_config.net_type == "MLP":
-        mnist_net = MNIST_MLP(mle.net_config.dropout_prob,
-                              mle.net_config.hidden_fc_dim).to(device)
+        mnist_net = MNIST_MLP(mle.model_config.dropout_prob,
+                              mle.model_config.hidden_fc_dim).to(device)
 
     nll_loss = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(mnist_net.parameters(),

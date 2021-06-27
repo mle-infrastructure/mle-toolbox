@@ -30,7 +30,7 @@ class MLExperiment(object):
 
         # Add experiment configuration to experiment instance
         self.train_config = loaded_configs[0]
-        self.net_config = loaded_configs[1]
+        self.model_config = loaded_configs[1]
         self.log_config = loaded_configs[2]
         self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng

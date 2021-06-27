@@ -20,7 +20,7 @@ class BaseHyperOptimisation(object):
     """
     Base Class for Running Hyperparameter Optimisation Searches
     - Assumes that func_to_eval takes 3 inputs:
-        1. "net_config": Dict with relevant network details (see BodyBuilder)
+        1. "model_config": Dict with relevant model details
         2. "train_config": Dict with relevant training details
         3. "log_config": Dict with relevant logging details
     - Note that the combination of the two inputs depends on your computational

@@ -1,5 +1,4 @@
 {
-"net_config": {},
 "log_config": {"time_to_track": ["step_counter"],
                "what_to_track": ["integral", "noise"],
                "tboard_fname": "pde_fun",

@@ -146,7 +146,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
     """ Generate MD report from experiment meta data. """
     # Special treatment of dict keys/individual vars in report_data
     job_keys = ["meta_job_args", "single_job_args", "job_spec_args"]
-    config_keys = ["train_config", "log_config", "net_config"]
+    config_keys = ["train_config", "log_config", "model_config"]
     single_keys = ["purpose", "project_name"]
 
     md_generator = MarkdownGenerator(filename=md_report_fname,
@@ -190,9 +190,9 @@ def generate_markdown(e_id, md_report_fname, report_data):
         train_table = construct_markdown_table(report_data["train_config"])
         doc.addTable(dictionary_list=train_table)
 
-        doc.addHeader(3, "Network Configuration.")
-        net_table = construct_markdown_table(report_data["net_config"])
-        doc.addTable(dictionary_list=net_table)
+        doc.addHeader(3, "Model Configuration.")
+        model_table = construct_markdown_table(report_data["model_config"])
+        doc.addTable(dictionary_list=model_table)
 
         doc.addHeader(3, "Logging Configuration.")
         log_table = construct_markdown_table(report_data["log_config"])
