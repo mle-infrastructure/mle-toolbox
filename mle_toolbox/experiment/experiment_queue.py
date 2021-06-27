@@ -4,7 +4,6 @@ import time
 import datetime
 from tqdm import tqdm
 
-import logging
 from typing import Union
 import numpy as np
 from .experiment import Experiment

@@ -1,0 +1,17 @@
+{
+"model_config": {"dropout_prob": 0.5,
+                 "hidden_fc_dim": 128},
+"log_config": {"time_to_track": ["num_updates"],
+               "what_to_track": ["train_loss", "test_loss"],
+               "tboard_fname": "config_1",
+               "model_type": "torch",
+               "time_to_print": ["num_updates"],
+               "what_to_print": ["train_loss", "test_loss"],
+               "print_every_k_updates": 1,
+               "overwrite_experiment_dir": 1},
+"train_config": {"seed_id": 0,
+                 "torch_num_threads": 3,
+                 "train_batch_size": 256,
+                 "test_batch_size": 256,
+                 "l_rate": 0.001}
+}

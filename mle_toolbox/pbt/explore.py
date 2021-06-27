@@ -1,15 +1,40 @@
+import numpy as np
 
 
 class ExplorationStrategy(object):
-    def __init__(self, exploration_type):
+    def __init__(self, strategy: str, pbt_params: dict):
         """ Exploration Strategies for PBT (Jaderberg et al. 17). """
-        self.exploration_type = exploration_type
+        assert strategy in ["perturb", "resample"]
+        self.strategy = strategy
+        self.pbt_params = pbt_params
 
-    def perturb(self):
+    def perturb(self, hyperparams: dict):
         """ Multiply hyperparam independently by random factor of 0.8/1.2. """
+        return hyperparams
 
     def resample(self):
         """ Resample hyperparam from original prior distribution. """
+        hyperparams = {}
+        variable_types = list(self.pbt_params.keys())
+        for var_type in variable_types:
+            for param_name in self.pbt_params[var_type]:
+                param_dict = self.pbt_params[var_type][param_name]
+                if var_type == "real":
+                    param_value = np.random.uniform(float(param_dict.begin),
+                                                    float(param_dict.end))
+                elif var_type == "categorical":
+                    param_value = np.random.choice(param_dict)
+                elif var_type == "integer":
+                    param_range = np.arange(int(param_dict.begin),
+                                            int(param_dict.end)).tolist()
+                    param_value = np.random.choice(param_range)
+                hyperparams[param_name] = param_value
+        return hyperparams
 
-    def explore(self):
-        return
+    def explore(self, hyperparams: dict):
+        """ Perform an exploration step. """
+        if self.strategy == "perturb":
+            hyperparams = self.perturb(hyperparams)
+        elif self.strategy == "resample":
+            hyperparams = self.resample()
+        return hyperparams
