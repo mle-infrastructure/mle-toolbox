@@ -1,6 +1,7 @@
 import os
 import copy
 import json
+import math
 import shutil
 import logging
 from typing import Union
@@ -50,33 +51,76 @@ class PBT_Manager(object):
         self.logger.setLevel(logger_level)
 
         # PBT-specific arguments
-        self.pbt_resources = pbt_resources
         self.pbt_config = pbt_config
-        #self.num_pbt_step
+        self.num_population_members = pbt_resources.num_population_members
+        self.num_total_update_steps = pbt_resources.num_total_update_steps
+        self.num_steps_until_ready = pbt_resources.num_steps_until_ready
+        self.num_steps_until_eval = pbt_resources.num_steps_until_eval
+        self.num_pbt_steps = math.ceil(self.num_total_update_steps/
+                                       self.num_steps_until_eval)
 
         # Setup the exploration and selection strategies
+        self.selection = SelectionStrategy(pbt_config.selection.strategy)
         self.exploration = ExplorationStrategy(pbt_config.exploration.strategy,
                                                pbt_config.pbt_params)
-        self.selection = SelectionStrategy(pbt_config.selection.strategy)
 
     def run(self):
         """ Run the PBT Hyperparameter Search. """
-        self.num_running_jobs = 0     # No. concurrently running jobs/workers
         self.pbt_queue = []
         # Launch a first set of jobs - sample from prior distribution
-        for worker_id in range(self.pbt_resources.num_population_members):
+        for worker_id in range(self.num_population_members):
             hyperparams = self.exploration.resample()
-            print(hyperparams)
             seed_id = np.random.randint(1000, 9999)
             config_fname = self.save_config(worker_id, 0, hyperparams)
-            #experiment, job_id = self.launch(config_fname, seed_id)
-            # self.pbt_queue.append({"worker_id": worker_id,
-            #                        "pbt_step_id": 0,
-            #                        "experiment": experiment,
-            #                        "job_id": job_id,
-            #                        "seed_id": seed_id,
-            #                        "hyperparams": hyperparams})
-            self.num_running_jobs += 1
+            experiment, job_id = self.launch(config_fname, seed_id)
+            self.pbt_queue.append({"worker_id": worker_id,
+                                   "pbt_step_id": 0,
+                                   "experiment": experiment,
+                                   "job_id": job_id,
+                                   "seed_id": seed_id,
+                                   "hyperparams": hyperparams})
+            time.sleep(0.1)
+            os.remove(config_fname)
+
+        # Monitor - exploit, explore
+        while True:
+            for worker in self.pbt_queue:
+                status = self.monitor(worker["experiment"], worker["job_id"])
+
+                if status == 0:
+                    # 1. Load log & checkpoint path + update log
+                    self.pbt_log.update_log(worker)
+
+                    if worker["pbt_step_id"] < self.num_pbt_steps:
+                        # 2. Exploit/Selection step
+                        copy_bool, hyperparams, ckpt = self.selection.select(self.pbt_logger)
+
+                        # 3. Exploration if previous exploitation update
+                        if copy_bool:
+                            hyperparams = self.exploration.explore(hyperparams)
+
+                        # 4. Spawn a new job
+                        seed_id = np.random.randint(1000, 9999)
+                        config_fname = self.save_config(
+                                            worker_id,
+                                            worker["pbt_step_id"] + 1,
+                                            hyperparams)
+                        experiment, job_id = self.launch(config_fname, seed_id)
+                        worker = {"worker_id": worker["worker_id"],
+                                  "pbt_step_id": worker["pbt_step_id"] + 1,
+                                  "experiment": experiment,
+                                  "job_id": job_id,
+                                  "seed_id": seed_id,
+                                  "hyperparams": hyperparams})
+                        time.sleep(0.1)
+                        os.remove(config_fname)
+
+            # Break out of while loop once all workers done
+            completed_pbt = 0
+            for worker in self.pbt_queue:
+                completed_pbt += (worker["pbt_step_id"] == self.num_pbt_steps)
+            if completed_pbt == self.num_population_members:
+                break
         return
 
     def launch(self, config_fname: str, seed_id: int,
@@ -87,7 +131,7 @@ class PBT_Manager(object):
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
         experiment = Experiment(self.resource_to_run,
-                                self.job_filename,
+                                self.job_fname,
                                 config_fname,
                                 self.job_arguments,
                                 self.experiment_dir,
@@ -107,6 +151,10 @@ class PBT_Manager(object):
     def save_config(self, worker_id: int, pbt_step_id: int, hyperparams: dict):
         """ Generate config file for a specific proposal to evaluate """
         sample_config = copy.deepcopy(self.base_config)
+
+        # Add amount of steps until eval/ready to train config
+        sample_config.train_config["num_steps_until_ready"] = self.num_steps_until_ready
+        sample_config.train_config["num_steps_until_eval"] = self.num_steps_until_eval
 
         # Construct config dicts individually - set params in train config
         for param_name, param_value in hyperparams.items():

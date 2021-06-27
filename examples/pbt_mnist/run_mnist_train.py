@@ -33,6 +33,9 @@ def main(mle):
     mnist_net = MNIST_MLP(mle.model_config.dropout_prob,
                           mle.model_config.hidden_fc_dim).to(device)
 
+    if mle.model_ckpt is not None:
+        model.load_state_dict(mle.model_ckpt)
+
     nll_loss = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(mnist_net.parameters(),
                                  lr=mle.train_config.l_rate)
