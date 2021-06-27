@@ -4,14 +4,15 @@ from .core_experiment import (load_experiment_config,
                               get_extra_cmd_line_input,
                               set_random_seeds)
 from .mle_logger import MLE_Logger
+from .load_model import load_model
 from .helpers import print_framed
 
 
 class MLExperiment(object):
     def __init__(self,
                  default_config_fname: str="configs/base_config.json",
-                 default_seed: int=0,
                  default_experiment_dir: str="experiments/",
+                 default_seed: int=0,
                  auto_setup: bool=True,
                  create_jax_prng: bool=False):
         ''' Load the job configs for the MLE experiment. '''
@@ -22,7 +23,8 @@ class MLExperiment(object):
         # Load the different configurations for the experiment.
         loaded_configs = load_experiment_config(cmd_args.config_fname,
                                                 cmd_args.experiment_dir,
-                                                cmd_args.seed_id)
+                                                cmd_args.seed_id,
+                                                cmd_args.model_ckpt)
         # Optional addition of more command line inputs
         extra_config = get_extra_cmd_line_input(extra_args)
 
@@ -33,13 +35,14 @@ class MLExperiment(object):
         self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng
         self.default_seed = default_seed
+        self.model_ckpt = cmd_args.model_ckpt
 
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
             self.setup()
 
     def setup(self):
-        ''' Set the random seed & initialize the logger. '''
+        ''' Set the random seed, initialize logger & reload a model. '''
         # If no seed is provided in train_config - set it to default
         if "seed_id" not in self.train_config.keys():
             self.train_config.seed_id = self.default_seed
@@ -56,6 +59,11 @@ class MLExperiment(object):
 
         # Initialize the logger for the experiment
         self.log = MLE_Logger(**self.log_config)
+
+        # Load model if checkpoint is provided
+        if self.model_ckpt is not None:
+            self.model_ckpt = load_model(self.model_ckpt,
+                                         self.log_config.model_type)
 
     def update_log(self,
                    clock_tick: dict,

@@ -1,5 +1,7 @@
 import os
 import shutil
+from .explore import ExplorationStrategy
+from .exploit import SelectionStrategy
 
 
 class PBT_Manager(object):
@@ -34,6 +36,10 @@ class PBT_Manager(object):
 
         # Key Input: Specify which params to optimize & in which ranges (dict)
         self.pbt_params = pbt_params            # exploration/exploitation
+
+        # Setup the exploration and selection strategies
+        self.exploration_strategy = ExplorationStrategy()
+        sefl.selection_strategy = SelectionStrategy()
 
     def run(self):
         return

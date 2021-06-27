@@ -77,10 +77,10 @@ def parse_experiment_args(default_config_fname: str="configs/base_config.json",
                           default_experiment_dir: str="experiments/"):
     """ Helper function to parse experiment args given to MLExperiment. """
     parser = argparse.ArgumentParser()
-    # Standard inputs for all training runs
+    # Standard inputs for training runs (config to load & experiment directory)
     parser.add_argument('-config', '--config_fname', action="store",
                         default=default_config_fname, type=str,
-                        help='Filename from which to load config')
+                        help='Filename from which to load configuration.')
     parser.add_argument('-exp_dir', '--experiment_dir', action="store",
                         default=default_experiment_dir, type=str,
                         help='Directory to store logs in.')
@@ -88,14 +88,20 @@ def parse_experiment_args(default_config_fname: str="configs/base_config.json",
     # Command line input for the random seed to replicate experiment
     parser.add_argument('-seed', '--seed_id', action="store",
                         default=default_seed, type=int,
-                        help='Seed id on which to train')
+                        help='Seed id on which to train.')
+
+    # Optional: Checkpoint path to potentially reload model
+    parser.add_argument('-model_ckpt', '--model_ckpt', action="store",
+                        default=None, help='Model checkpoint to reload.')
     cmd_args, extra_args = parser.parse_known_args()
     return cmd_args, extra_args
 
 
-def load_experiment_config(config_fname: str, experiment_dir: str,
-                           seed_id: Union[None, int]) -> Tuple[DotMap, DotMap,
-                                                               DotMap]:
+def load_experiment_config(config_fname: str,
+                           experiment_dir: str,
+                           seed_id: Union[None, int],
+                           model_ckpt: Union[None, str]
+                           ) -> Tuple[DotMap, DotMap, DotMap]:
     """ Prepare job config files for experiment run (add seed id, etc.). """
     # Load .json config file + add config fname to clone + add experiment dir
     config = load_json_config(config_fname)
@@ -132,6 +138,10 @@ def load_experiment_config(config_fname: str, experiment_dir: str,
             log_config.seed_id = "seed_" + str(train_config.seed_id)
         except:
             log_config.seed_id = "seed_default"
+
+    # Add model checkpoint string to train configuration
+    if model_ckpt is not None:
+        train_config.model_ckpt = model_ckpt
     return train_config, net_config, log_config
 
 

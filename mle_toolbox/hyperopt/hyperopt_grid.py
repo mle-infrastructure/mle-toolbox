@@ -4,7 +4,7 @@ import operator
 from itertools import product
 import numpy as np
 from .hyperopt_base import BaseHyperOptimisation
-from .hyperlogger import HyperoptLogger
+from .hyper_logger import HyperoptLogger
 from .hyperspace import construct_hyperparam_range
 
 

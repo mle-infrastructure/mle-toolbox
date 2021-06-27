@@ -103,7 +103,7 @@ def run(cmd_args):
         resource_to_run = current_resource
     logger.info(f"Run on resource: {resource_to_run}")
 
-    # 4. Check that job config to complies with/includes necessary ingredients
+    # 4. Check that experiment config to complies/includes necessary ingredients
     check_job_config(job_config)
 
     # 5. Protocol experiment if desired (can also only be locally)!
@@ -170,7 +170,7 @@ def run(cmd_args):
                            job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED")
 
-    # 8. Run the experiment
+    # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
     experiment_types = ["single-experiment",
                         "multiple-experiments",
@@ -198,15 +198,17 @@ def run(cmd_args):
                                   job_config.meta_job_args,
                                   job_config.single_job_args,
                                   job_config.param_search_args)
-
-    # TODO: (d) Experiment: Run population-based-training for NN training
+    # (d) Experiment: Run population-based-training for NN training
     elif job_config.meta_job_args["job_type"] == "population-based-training":
-        raise NotImplementedError
-
+        from ..launch import run_population_based_training
+        run_population_based_training(resource_to_run,
+                                      job_config.meta_job_args,
+                                      job_config.single_job_args,
+                                      job_config.pbt_args)
     else:
         raise ValueError(f"Job type has to be in {experiment_types}.")
 
-    # 9. Perform post-processing of results if arguments are provided
+    # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():
         print_framed("POST-PROCESSING")
         logger.info(f"Post-processing experiment results - STARTING")
@@ -215,7 +217,7 @@ def run(cmd_args):
                            job_config.meta_job_args["experiment_dir"])
         logger.info(f"Post-processing experiment results - COMPLETED")
 
-    # 10. Generate .md, and .html report w. figures for e_id - inherit logger
+    # 11. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
@@ -227,20 +229,20 @@ def run(cmd_args):
                 report_generated = True
                 print_framed("REPORT GENERATION")
 
-    # 11. Update the experiment protocol & send back to GCS (if desired)
+    # 12. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
-        # 11a. Get most recent/up-to-date experiment DB to GCS
+        # (a) Get most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
 
-        # 11b. Store experiment directory in GCS bucket under hash
+        # (b) Store experiment directory in GCS bucket under hash
         if (mle_config.general.use_gcloud_results_storage
             and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
 
-        # 11c. Update the experiment protocol status
+        # (c) Update the experiment protocol status
         logger.info(f'Updated protocol - COMPLETED: {new_experiment_id}')
         time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
         update_protocol_var(new_experiment_id,
@@ -249,11 +251,11 @@ def run(cmd_args):
                             db_var_value=["completed", time_t,
                                           report_generated])
 
-        # 9d. Send most recent/up-to-date experiment DB to GCS
+        # (d) Send most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             send_gcloud_db()
 
-    # 12. If job ran on GCP: Clean up & delete local code dir form GCS bucket
+    # 13. If job ran on GCP: Clean up & delete local code dir form GCS bucket
     if resource_to_run == "gcp-cloud":
         if delete_code_dir:
             delete_gcs_dir(mle_config.gcp.code_dir)

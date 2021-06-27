@@ -70,6 +70,8 @@ def check_job_config(job_config: dict):
         necessary_ingredients += ["multi_experiment_args"]
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         necessary_ingredients += ["param_search_args"]
+    elif job_config.meta_job_args["job_type"] == "population-based-training":
+        necessary_ingredients += ["pbt_args"]
 
     # Check if ingredients are in config keys
     for nec_ing in necessary_ingredients:

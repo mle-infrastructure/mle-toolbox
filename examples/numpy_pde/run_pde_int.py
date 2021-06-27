@@ -48,5 +48,5 @@ def plot_pde(x_t):
 
 if __name__ == "__main__":
     # Run the simulation/Experiment
-    mle = MLExperiment()
+    mle = MLExperiment(default_config_fname="numpy_pde/pde_int_config_1.json")
     main(mle)
