@@ -4,7 +4,6 @@
                  "training_steps": 1001,
                  "eval_freq": 500,
                  "seed_id": 0},
-"net_config": {},
 "log_config": {"time_to_track": ["step_counter"],
                "what_to_track": ["val_loss"],
                "time_to_print": ["step_counter"],

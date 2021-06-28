@@ -10,10 +10,17 @@ def load_model(ckpt_path: str, model_type: str, model=None):
             raise ModuleNotFoundError(f"{err}. You need to install "
                                       "`torch` if you want to save a model "
                                       "checkpoint.")
-        if model is None:
-            raise ValueError("Please provide a torch model instance.")
+
         checkpoint = torch.load(ckpt_path, map_location='cpu')
-        model.load_state_dict(checkpoint)
+        if model is not None:
+            #raise ValueError("Please provide a torch model instance.")
+            model.load_state_dict(checkpoint)
+            return model
+        else:
+            return checkpoint
     elif model_type in ["jax", "sklearn"]:
         model = load_pkl_object(ckpt_path)
-    return model
+        return model
+    else:
+        raise ValueError("Please provide a valid model "
+                         + "type ('torch', 'jax', 'sklearn').")

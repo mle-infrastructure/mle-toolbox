@@ -8,7 +8,7 @@ import logging
 from typing import Union, List
 from pprint import pformat
 
-from .hyperlogger import HyperoptLogger
+from .hyper_logger import HyperoptLogger
 from ..experiment import spawn_multiple_configs, ExperimentQueue
 from ..utils import (load_json_config,
                      load_meta_log,
@@ -20,7 +20,7 @@ class BaseHyperOptimisation(object):
     """
     Base Class for Running Hyperparameter Optimisation Searches
     - Assumes that func_to_eval takes 3 inputs:
-        1. "net_config": Dict with relevant network details (see BodyBuilder)
+        1. "model_config": Dict with relevant model details
         2. "train_config": Dict with relevant training details
         3. "log_config": Dict with relevant logging details
     - Note that the combination of the two inputs depends on your computational
@@ -40,7 +40,7 @@ class BaseHyperOptimisation(object):
                  search_params: dict,
                  search_type: str="grid",
                  search_schedule: str="sync"):
-        # Set up the random hyperparameter search run
+        # Set up the hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run        # Compute resource to run
         self.config_fname = config_fname              # Fname base config file
@@ -269,16 +269,15 @@ class BaseHyperOptimisation(object):
 
             # Construct config dicts individually - set params in train config
             for param_name, param_value in proposals[s_id].items():
-                sample_config.train_config[param_name] = param_value
-
-            # # TODO: Differentiate between network and train config variable?!
-            # for param_name, param_value in proposals[s_id].items():
-            #     config_id, param = param_name.split(":")
-            #     if config_id == "train":
-            #         sample_config.train_config[param] = param_value
-            #     elif config_id == "network":
-            #         sample_config.network_config[param] = param_value
-
+                # Differentiate between model_config & train_config params
+                try:
+                    config_id, param = param_name.split(":")
+                    if config_id == "train":
+                        sample_config.train_config[param] = param_value
+                    elif config_id == "model":
+                        sample_config.model_config[param] = param_value
+                except:
+                    sample_config.train_config[param_name] = param_value
             # Add param configs to batch lists
             config_params_batch.append(sample_config)
         return config_params_batch
