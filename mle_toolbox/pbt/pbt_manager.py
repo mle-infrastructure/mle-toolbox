@@ -90,7 +90,7 @@ class PBT_Manager(object):
                                    "run_id": run_id,
                                    "seed_id": seed_id,
                                    "hyperparams": hyperparams})
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         self.logger.info(f"LAUNCH - First PBT Batch: {self.num_population_members}")
         population_bars = [tqdm(total=self.num_pbt_steps, position=i,
@@ -114,7 +114,7 @@ class PBT_Manager(object):
 
                     # 1. Load logs & checkpoint paths + update pbt log
                     worker_logs = self.get_pbt_log_data()
-                    self.pbt_log.update_log(w_id, worker_logs)
+                    self.pbt_log.update_log(worker["worker_id"], worker_logs)
 
                     if worker["pbt_step_id"] < self.num_pbt_steps - 1:
                         # 2. Exploit/Selection step
@@ -141,7 +141,7 @@ class PBT_Manager(object):
                                       "run_id": run_id,
                                       "seed_id": seed_id,
                                       "hyperparams": hyperparams}
-                        time.sleep(0.1)
+                        time.sleep(0.2)
 
                         # Replace old worker by new one
                         self.pbt_queue[w_id] = new_worker
