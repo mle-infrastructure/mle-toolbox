@@ -7,16 +7,22 @@ class ExplorationStrategy(object):
         assert strategy in ["perturb", "resample"]
         self.strategy = strategy
         self.pbt_params = pbt_params
+        self.variable_types = list(self.pbt_params.keys())
 
     def perturb(self, hyperparams: dict):
         """ Multiply hyperparam independently by random factor of 0.8/1.2. """
-        return hyperparams
+        new_hyperparams = {}
+        for param_name, param_value in hyperparams.items():
+            new_hyperparams[param_name] = (np.random.choice([0.8, 1.2])
+                                           * param_value)
+        return new_hyperparams
 
     def resample(self):
         """ Resample hyperparam from original prior distribution. """
+        # TODO: Allow different prior distributions (uniform, log-uniform, etc.)
         hyperparams = {}
-        variable_types = list(self.pbt_params.keys())
-        for var_type in variable_types:
+        # Loop over categorical, real and integer-valued vars and sample
+        for var_type in self.variable_types:
             for param_name in self.pbt_params[var_type]:
                 param_dict = self.pbt_params[var_type][param_name]
                 if var_type == "real":

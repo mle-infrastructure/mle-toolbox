@@ -76,30 +76,31 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
     train_losses = []
 
     model.train() # prep model for training
-    for data, target in train_loader:
-        optimizer.zero_grad()
-        data, target = data.to(device), target.to(device)
-        output = model(data)
-        loss = criterion(output, target)
-        loss.backward()
-        optimizer.step()
+    while True:
+        for data, target in train_loader:
+            optimizer.zero_grad()
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
 
-        train_losses.append(loss.item())
-        update_counter += 1
+            train_losses.append(loss.item())
+            update_counter += 1
 
-        # Update log with latest evaluation results
-        if update_counter % mle.train_config.num_steps_until_eval == 0:
-            test_loss = evaluate_network(model, test_loader,
-                                         device, criterion)
-            time_tick = {"num_updates": update_counter}
-            stats_tick = {"train_loss": np.mean(train_losses),
-                          "test_loss": test_loss}
-            mle.update_log(time_tick, stats_tick, model=model, save=True)
-            train_losses = []
+            # Update log with latest evaluation results
+            if update_counter % mle.train_config.num_steps_until_eval == 0:
+                test_loss = evaluate_network(model, test_loader,
+                                             device, criterion)
+                time_tick = {"num_updates": update_counter}
+                stats_tick = {"train_loss": np.mean(train_losses),
+                              "test_loss": test_loss}
+                mle.update_log(time_tick, stats_tick, model=model, save=True)
+                train_losses = []
 
-        # Stop training if number of steps is 'ready' number reached!
-        if update_counter == mle.train_config.num_steps_until_ready:
-            break
+            # Stop training if number of steps is 'ready' number reached!
+            if update_counter == mle.train_config.num_steps_until_ready:
+                return
 
 
 def evaluate_network(model, test_loader, device, criterion):

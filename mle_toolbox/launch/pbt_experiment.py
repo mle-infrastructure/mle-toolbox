@@ -22,6 +22,7 @@ def run_population_based_training(resource_to_run: str,
                                    meta_job_args.base_train_config,
                                    meta_job_args.base_train_fname,
                                    meta_job_args.experiment_dir,
+                                   pbt_args.pbt_logging,
                                    pbt_args.pbt_resources,
                                    pbt_args.pbt_config)
     pbt_opt_instance.run()
