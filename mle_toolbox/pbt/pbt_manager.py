@@ -7,6 +7,7 @@ import shutil
 import logging
 from typing import Union
 import numpy as np
+from tqdm import tqdm
 
 from mle_toolbox.experiment import Experiment
 from ..utils import load_json_config, load_run_log
@@ -25,8 +26,7 @@ class PBT_Manager(object):
                  experiment_dir: str,
                  pbt_logging: dict,
                  pbt_resources: dict,
-                 pbt_config: dict,
-                 logger_level: int=logging.WARNING):
+                 pbt_config: dict):
         """ Manger orchestrating PBT experiment """
         # Set up the PBT search run
         self.pbt_log = pbt_log                        # Hyperopt. Log Instance
@@ -50,7 +50,7 @@ class PBT_Manager(object):
 
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logger_level)
+        self.logger.setLevel(logging.INFO)
 
         # PBT-specific arguments
         self.pbt_config = pbt_config
@@ -70,6 +70,12 @@ class PBT_Manager(object):
     def run(self):
         """ Run the PBT Hyperparameter Search. """
         self.pbt_queue = []
+        self.logger.info(f"START - PBT Members: {self.num_population_members}"
+                         + f" - Updates: {self.num_pbt_steps}"
+                         + f" - Train Updates: {self.num_total_update_steps}")
+        self.logger.info(f"-> Steps Until PBT 'Ready': {self.num_steps_until_ready}"
+                         + f" - Steps Until PBT 'Eval': {self.num_steps_until_eval}")
+
         # Launch a first set of jobs - sample from prior distribution
         for worker_id in range(self.num_population_members):
             hyperparams = self.exploration.resample()
@@ -86,8 +92,14 @@ class PBT_Manager(object):
                                    "hyperparams": hyperparams})
             time.sleep(0.1)
 
+        self.logger.info(f"LAUNCH - First PBT Batch: {self.num_population_members}")
+        population_bars = [tqdm(total=self.num_pbt_steps, position=i,
+                                bar_format='{l_bar}{bar:45}{r_bar}{bar:-45b}')
+                           for i in range(self.num_population_members)]
+
         # Monitor - exploit, explore
         while True:
+            completed_pbt = 0
             for w_id in range(self.num_population_members):
                 worker = self.pbt_queue[w_id]
                 status = self.monitor(worker["experiment"], worker["job_id"])
@@ -97,17 +109,18 @@ class PBT_Manager(object):
                         os.remove(worker["config_fname"])
                     except:
                         pass
+                    # 0. Update progress bar for worker
+                    population_bars[worker["worker_id"]].update(1)
+
                     # 1. Load logs & checkpoint paths + update pbt log
                     worker_logs = self.get_pbt_log_data()
-                    self.pbt_log.update_log(worker_logs)
+                    self.pbt_log.update_log(w_id, worker_logs)
 
-                    if worker["pbt_step_id"] < self.num_pbt_steps:
+                    if worker["pbt_step_id"] < self.num_pbt_steps - 1:
                         # 2. Exploit/Selection step
                         copy_bool, hyperparams, ckpt = self.selection.select(
                                                             worker["worker_id"],
                                                             self.pbt_log)
-                        print(worker["worker_id"], worker["pbt_step_id"],
-                              copy_bool, hyperparams, ckpt)
                         # 3. Exploration if previous exploitation update
                         if copy_bool:
                             hyperparams = self.exploration.explore(hyperparams)
@@ -118,7 +131,8 @@ class PBT_Manager(object):
                                             worker["worker_id"],
                                             worker["pbt_step_id"] + 1,
                                             hyperparams)
-                        experiment, job_id = self.launch(config_fname, seed_id)
+                        experiment, job_id = self.launch(config_fname, seed_id,
+                                                         ckpt)
                         new_worker = {"worker_id": worker["worker_id"],
                                       "pbt_step_id": worker["pbt_step_id"] + 1,
                                       "experiment": experiment,
@@ -127,17 +141,24 @@ class PBT_Manager(object):
                                       "run_id": run_id,
                                       "seed_id": seed_id,
                                       "hyperparams": hyperparams}
-                        time.sleep(1)
+                        time.sleep(0.1)
 
                         # Replace old worker by new one
                         self.pbt_queue[w_id] = new_worker
+                    else:
+                        population_bars[w_id].close()
 
-            # Break out of while loop once all workers done
-            completed_pbt = 0
-            for worker in self.pbt_queue:
-                completed_pbt += (worker["pbt_step_id"] == self.num_pbt_steps)
+                    completed_pbt += 1
+                # Break out of while loop once all workers done
             if completed_pbt == self.num_population_members:
                 break
+
+        # Finally remove remaining config files
+        for worker in self.pbt_queue:
+            try:
+                os.remove(worker["config_fname"])
+            except:
+                pass
         return
 
     def launch(self, config_fname: str, seed_id: int,
@@ -180,7 +201,6 @@ class PBT_Manager(object):
         # Write hyperparams to config .json
         run_id = "worker_" + str(worker_id) + "_step_" + str(pbt_step_id)
         s_config_fname = os.path.join(self.experiment_dir, run_id + '.json')
-
         with open(s_config_fname, 'w') as f:
             json.dump(sample_config, f)
         return run_id, s_config_fname
@@ -206,7 +226,7 @@ class PBT_Manager(object):
                     perf = perf_log.meta_log.stats[self.pbt_logging.eval_metric][-1]
                     num_updates = perf_log.meta_log.time["num_updates"][-1]
                 else:
-                    perf, num_updates = None, None
+                    continue
 
                 # Get network checkpoint filename - TODO: general - .pt/.npy/etc.
                 model_files = [os.path.join(model_dir, f) for f in os.listdir(model_dir)

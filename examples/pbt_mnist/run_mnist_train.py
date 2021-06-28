@@ -34,7 +34,7 @@ def main(mle):
                           mle.model_config.hidden_fc_dim).to(device)
 
     if mle.model_ckpt is not None:
-        model.load_state_dict(mle.model_ckpt)
+        mnist_net.load_state_dict(mle.model_ckpt)
 
     nll_loss = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(mnist_net.parameters(),

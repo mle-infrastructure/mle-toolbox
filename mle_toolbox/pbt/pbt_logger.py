@@ -23,15 +23,21 @@ class PBT_Logger(object):
         self.num_steps_until_ready = num_steps_until_ready
         self.num_steps_until_eval = num_steps_until_eval
 
-    def update_log(self, worker_logs: list, save: bool=True):
+    def update_log(self, worker_id: int, worker_logs: list, save: bool=True):
         """ Update the trace/log of the PBT. """
         self.recent_log = pd.DataFrame(worker_logs)
+        worker_df = pd.DataFrame(worker_logs)
+        worker_df = worker_df[worker_df["worker_id"] == worker_id]
+        current_worker = worker_df.loc[worker_df['num_updates'].idxmax()]
         if self.log_update_counter == 0:
-            self.pbt_log = pd.DataFrame(worker_logs)
+            self.pbt_log = pd.DataFrame()
+            self.pbt_log = self.pbt_log.append(current_worker, ignore_index=True)
         else:
-            self.pbt_log.append(pd.DataFrame(worker_logs))
-        self.pbt_log = self.pbt_log.drop_duplicates(subset=["worker_id",
-                                                            "pbt_step_id"])
+            self.pbt_log = self.pbt_log.append(current_worker, ignore_index=True)
+            #print(self.pbt_log)
+            self.pbt_log = self.pbt_log.drop_duplicates(subset=["worker_id",
+                                                                "pbt_step_id",
+                                                                "num_updates"])
         self.log_update_counter += 1
 
         if save:

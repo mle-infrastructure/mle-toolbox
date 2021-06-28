@@ -4,7 +4,7 @@ meta_job_args:
     job_type: "population-based-training"
     base_train_fname: "pbt_mnist/run_mnist_train.py"
     base_train_config: "pbt_mnist/mnist_config.json"
-    experiment_dir: "experiments/"
+    experiment_dir: "experiments/pbt_mnist"
 
 # Parameters specific to the hyperparameter search
 pbt_args:
@@ -13,7 +13,7 @@ pbt_args:
         eval_metric: "test_loss"
     pbt_resources:
         num_population_members: 10
-        num_total_update_steps: 5000
+        num_total_update_steps: 2000
         num_steps_until_ready: 500
         num_steps_until_eval: 100
     pbt_config:

@@ -321,6 +321,8 @@ class Experiment(object):
                 # Update the job argument details with the seed-job-id
                 self.job_arguments["job_name"] += "-" + str(
                                                 cmd_line_input["seed_id"])
+            if "model_ckpt" in cmd_line_input.keys():
+                cmd_line_args += " -model_ckpt " + str(cmd_line_input["model_ckpt"])
         return cmd_line_args
 
     def generate_extra_cmd_line_args(self,
