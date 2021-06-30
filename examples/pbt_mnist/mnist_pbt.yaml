@@ -12,8 +12,8 @@ pbt_args:
         max_objective: False
         eval_metric: "test_loss"
     pbt_resources:
-        num_population_members: 15
-        num_total_update_steps: 5000
+        num_population_members: 10
+        num_total_update_steps: 2000
         num_steps_until_ready: 500
         num_steps_until_eval: 100
     pbt_config:

@@ -96,6 +96,6 @@ def load_run_log(experiment_dir: str, mean_seeds: bool=False):
         if len(log_paths) > 1:
             print(f"Multiple .hdf5 files available: {log_paths}")
             print(f"Continue using: {log_paths[0]}")
-            log_path = log_paths[0]
+        log_path = log_paths[0]
     run_log = load_meta_log(log_path, mean_seeds)
     return run_log

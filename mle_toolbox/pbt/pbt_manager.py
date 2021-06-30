@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from mle_toolbox.experiment import Experiment
 from ..utils import load_json_config, load_run_log
-from .pbt_logger import PBT_Logger
+from .pbt_logger import PBT_Logger, Population_Logger
 from .explore import ExplorationStrategy
 from .exploit import SelectionStrategy
 
@@ -63,6 +63,9 @@ class PBT_Manager(object):
                                        self.num_steps_until_ready)
 
         # Setup the exploration and selection strategies
+        self.gen_logger = Population_Logger(pbt_logging.eval_metric,
+                                            pbt_logging.max_objective,
+                                            self.num_population_members)
         self.selection = SelectionStrategy(pbt_config.selection.strategy)
         self.exploration = ExplorationStrategy(pbt_config.exploration.strategy,
                                                pbt_config.pbt_params)
@@ -93,7 +96,7 @@ class PBT_Manager(object):
             time.sleep(0.1)
 
         self.logger.info(f"LAUNCH - First PBT Batch: {self.num_population_members}")
-        population_bars = [tqdm(total=self.num_pbt_steps, position=i,
+        population_bars = [tqdm(total=self.num_pbt_steps, position=i, leave=True,
                                 bar_format='{l_bar}{bar:45}{r_bar}{bar:-45b}')
                            for i in range(self.num_population_members)]
 
@@ -110,19 +113,19 @@ class PBT_Manager(object):
                     except:
                         pass
                     # 0. Update progress bar for worker
-                    population_bars[worker["worker_id"]].update(1)
+                    #population_bars[worker["worker_id"]].update(1)
 
                     # 1. Load logs & checkpoint paths + update pbt log
                     worker_logs = self.get_pbt_log_data()
-                    self.pbt_log.update_log(worker["worker_id"], worker_logs)
+                    self.gen_logger.update_log(worker_logs)
 
                     if worker["pbt_step_id"] < self.num_pbt_steps - 1:
                         # 2. Exploit/Selection step
-                        copy_bool, hyperparams, ckpt = self.selection.select(
+                        copy_info, hyperparams, ckpt = self.selection.select(
                                                             worker["worker_id"],
-                                                            self.pbt_log)
+                                                            self.gen_logger)
                         # 3. Exploration if previous exploitation update
-                        if copy_bool:
+                        if copy_info["copy_bool"]:
                             hyperparams = self.exploration.explore(hyperparams)
 
                         # 4. Spawn a new job
@@ -146,9 +149,22 @@ class PBT_Manager(object):
                         # Replace old worker by new one
                         self.pbt_queue[worker["worker_id"]] = new_worker
                     else:
-                        population_bars[w_id].close()
+                        population_bars[worker["worker_id"]].close()
 
-                    completed_pbt += 1
+                    num_updates, performance = self.gen_logger.get_worker_data(
+                                                worker["worker_id"])
+
+                    log_data = {"worker_id": worker["worker_id"],
+                                "pbt_step_id": worker["pbt_step_id"],
+                                "num_updates": num_updates,
+                                "performance": performance,
+                                "hyperparams": worker["hyperparams"]}
+                    for k, v in copy_info.items():
+                        log_data[k] = v
+
+                    self.pbt_log.update_log(log_data)
+                    completed_pbt += (worker["pbt_step_id"]
+                                      == self.num_pbt_steps - 1)
                 # Break out of while loop once all workers done
             if completed_pbt == self.num_population_members:
                 break

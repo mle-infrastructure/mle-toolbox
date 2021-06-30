@@ -4,48 +4,46 @@ import pandas as pd
 
 
 class PBT_Logger(object):
-    def __init__(self,
-                 pbt_log_fname: str,
-                 max_objective: bool,
-                 eval_metric: str,
-                 num_population_members: int,
-                 num_total_update_steps: int,
-                 num_steps_until_ready: int,
-                 num_steps_until_eval: int):
+    def __init__(self, pbt_log_fname: str):
         """ Logging Class for PBT (Jaderberg et al. 17). """
         self.pbt_log_fname = pbt_log_fname
-        self.max_objective = max_objective
-        self.eval_metric = eval_metric
-        self.log_update_counter = 0
+        self.pbt_log = []
 
-        self.num_population_members = num_population_members
-        self.num_total_update_steps = num_total_update_steps
-        self.num_steps_until_ready = num_steps_until_ready
-        self.num_steps_until_eval = num_steps_until_eval
-
-    def update_log(self, worker_id: int, worker_logs: list, save: bool=True):
+    def update_log(self, update_log: dict, save: bool=True):
         """ Update the trace/log of the PBT. """
-        self.recent_log = pd.DataFrame(worker_logs)
-        worker_df = pd.DataFrame(worker_logs)
-        worker_df = worker_df[worker_df["worker_id"] == worker_id]
-        current_worker = worker_df.loc[worker_df['num_updates'].idxmax()]
-        if self.log_update_counter == 0:
-            self.pbt_log = pd.DataFrame()
-            self.pbt_log = self.pbt_log.append(current_worker, ignore_index=True)
-        else:
-            self.pbt_log = self.pbt_log.append(current_worker, ignore_index=True)
-            #print(self.pbt_log)
-            self.pbt_log = self.pbt_log.drop_duplicates(subset=["worker_id",
-                                                                "pbt_step_id",
-                                                                "num_updates"])
-        self.log_update_counter += 1
-
+        self.pbt_log.append(update_log)
         if save:
             self.save_log()
 
     def save_log(self):
         """ Save the trace/log of the PBT. """
-        save_pkl_object(self.pbt_log, self.pbt_log_fname)
+        pbt_df = pd.DataFrame(self.pbt_log).drop_duplicates(
+                                              subset=["worker_id",
+                                                      "pbt_step_id",
+                                                      "num_updates"])
+        save_pkl_object(pbt_df, self.pbt_log_fname)
+
+
+class Population_Logger(object):
+    def __init__(self,
+                 eval_metric: str,
+                 max_objective: bool,
+                 num_population_members: int):
+        """ Logging class for a running population. """
+        self.eval_metric = eval_metric
+        self.max_objective = max_objective
+        self.num_population_members = num_population_members
+
+    def update_log(self, worker_logs: list):
+        """ Store the results of the most recent generation. """
+        self.recent_log = pd.DataFrame(worker_logs)
+
+    def get_worker_data(self, worker_id: int):
+        """ Select the number of updates & performance for selected worker. """
+        worker_data = self.recent_log[self.recent_log.worker_id == worker_id]
+        num_updates = worker_data.num_updates.values[0]
+        performance = worker_data[self.eval_metric].values[0]
+        return num_updates, performance
 
     def get_top_and_bottom(self, truncation_percent):
         """ Get top and bottom of performance distribution. """
