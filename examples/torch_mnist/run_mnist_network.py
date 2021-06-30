@@ -45,14 +45,13 @@ def main(mle):
                                  lr=mle.train_config.l_rate)
 
     # Train the MNIST Network using the training loop
-    train_mnist_cnn(mle,
-                    model=mnist_net,
-                    optimizer=optimizer,
-                    criterion=nll_loss,
-                    device=device,
-                    train_loader=train_loader,
-                    test_loader=test_loader,
-                    test_batches=mle.train_config.test_batches)
+    train_mnist_network(mle,
+                        model=mnist_net,
+                        optimizer=optimizer,
+                        criterion=nll_loss,
+                        device=device,
+                        train_loader=train_loader,
+                        test_loader=test_loader)
     return
 
 
@@ -97,12 +96,12 @@ class MNIST_MLP(nn.Module):
         return x
 
 
-def train_mnist_cnn(mle, model, optimizer, criterion, device,
-                    train_loader, test_loader, test_batches):
+def train_mnist_network(mle, model, optimizer, criterion, device,
+                        train_loader, test_loader):
     """ Run the training loop over a set of epochs. """
     update_counter = 0
     train_losses = []
-    for epoch in range(1, mle.train_config.num_epochs + 1):
+    while True:
         model.train() # prep model for training
         for data, target in train_loader:
             optimizer.zero_grad()
@@ -116,31 +115,28 @@ def train_mnist_cnn(mle, model, optimizer, criterion, device,
             update_counter += 1
 
             if update_counter % 50 == 0 or update_counter == 1:
-                test_loss = evaluate_network(update_counter, model,
-                                             test_loader, test_batches,
+                test_loss = evaluate_network(model,
+                                             test_loader,
                                              device, criterion)
-                time_tick = {"num_updates": update_counter,
-                             "epoch": epoch}
+                time_tick = {"num_updates": update_counter}
                 stats_tick = {"train_loss": np.mean(train_losses),
                               "test_loss": test_loss}
                 mle.update_log(time_tick, stats_tick, model=model, save=True)
-    return  model
+
+            # Stop training if number of steps is 'ready' number reached!
+            if update_counter == mle.train_config.total_num_updates:
+                return
 
 
-def evaluate_network(update_counter, model, test_loader, test_batches,
-                     device, criterion):
+def evaluate_network(model, test_loader, device, criterion):
     # Evaluate the model performance at end of epoch
     model.eval() # prep model for evaluation
-    evals = 0
     eval_loss = []
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         output = model(data)
         loss = criterion(output, target)
         eval_loss.append(loss.item())
-        evals += 1
-        if evals >= test_batches:
-            break
     # Log average epoch losses
     test_loss = np.mean(eval_loss)
     # Put network back into training mode

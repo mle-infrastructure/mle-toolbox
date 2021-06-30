@@ -245,7 +245,7 @@ class BaseHyperOptimisation(object):
                                                       run_ids)
         else:
             # Log without collected results - perf_measures None output
-            perf_measures = self.hyper_log.update_log(batch_proposals, None,
+            perf_measures = self.hyper_log.update_log(batch_proposals,
                                                       None, time_elapsed,
                                                       run_ids)
             self.logger.info(f"UPDATE - {len(run_ids)} Eval Configs of " \

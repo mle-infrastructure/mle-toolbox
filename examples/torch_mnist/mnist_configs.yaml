@@ -2,15 +2,15 @@
 meta_job_args:
     project_name: "examples"
     job_type: "multiple-experiments"
-    base_train_fname: "mnist/run_mnist_cnn.py"
-    base_train_config: "mnist/mnist_cnn_config_1.json"
-    experiment_dir: "experiments/"
+    base_train_fname: "mnist/run_mnist_network.py"
+    base_train_config: "mnist/mnist_cnn_config.json"
+    experiment_dir: "experiments/mnist_configs"
 
 # Parameters specific to the experiment type
 multi_experiment_args:
     config_fnames:
-        - "mnist_cnn_config_1.json"
-        - "mnist_cnn_config_2.json"
+        - "mnist_mlp_config.json"
+        - "mnist_cnn_config.json"
     num_seeds: 2
 
 # Parameters specific to an individual job

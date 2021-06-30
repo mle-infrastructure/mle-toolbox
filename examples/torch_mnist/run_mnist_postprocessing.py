@@ -8,14 +8,14 @@ def mnist_postprocessing(experiment_dir, figures_dir):
     """ Some postprocessing - E.g. generate a learning curve plot. """
     # Find directory in which experiment results are stored + load log
     sub_dirs = [f.path for f in os.scandir(experiment_dir) if f.is_dir()]
-    result_dir = [d for d in sub_dirs if d.endswith("mnist_cnn_config_1")][0]
+    result_dir = [d for d in sub_dirs if d.endswith("mnist_mlp_config")][0]
     loaded_log = load_run_log(result_dir)
     fig, ax = plt.subplots()
     ax.plot(loaded_log.meta_log.time.num_updates,
             loaded_log.meta_log.stats.test_loss)
     ax.set_xlabel("Number of Batch Updates")
     ax.set_ylabel("Test Loss")
-    ax.set_title("MNIST CNN Test Loss")
+    ax.set_title("MNIST MLP Test Loss")
     fig.savefig(os.path.join(figures_dir,
                              "mnist_learning_curve.png"), dpi=300)
 

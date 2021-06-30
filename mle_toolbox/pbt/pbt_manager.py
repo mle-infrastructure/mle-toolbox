@@ -90,7 +90,7 @@ class PBT_Manager(object):
                                    "run_id": run_id,
                                    "seed_id": seed_id,
                                    "hyperparams": hyperparams})
-            time.sleep(0.2)
+            time.sleep(0.1)
 
         self.logger.info(f"LAUNCH - First PBT Batch: {self.num_population_members}")
         population_bars = [tqdm(total=self.num_pbt_steps, position=i,
@@ -141,10 +141,10 @@ class PBT_Manager(object):
                                       "run_id": run_id,
                                       "seed_id": seed_id,
                                       "hyperparams": hyperparams}
-                        time.sleep(0.2)
+                        time.sleep(0.1)
 
                         # Replace old worker by new one
-                        self.pbt_queue[w_id] = new_worker
+                        self.pbt_queue[worker["worker_id"]] = new_worker
                     else:
                         population_bars[w_id].close()
 
@@ -211,7 +211,8 @@ class PBT_Manager(object):
         for worker in self.pbt_queue:
             # Get path to experiment storage directory
             try:
-                subdirs = [f.path for f in os.scandir(self.experiment_dir) if f.is_dir()]
+                subdirs = [f.path for f in
+                           os.scandir(self.experiment_dir) if f.is_dir()]
                 exp_dir = [f for f in subdirs if f.endswith(worker["run_id"])][0]
                 log_dir = os.path.join(exp_dir, "logs")
                 model_dir = os.path.join(exp_dir, "models", "final")

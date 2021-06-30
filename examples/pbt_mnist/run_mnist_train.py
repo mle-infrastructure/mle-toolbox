@@ -106,14 +106,12 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
 def evaluate_network(model, test_loader, device, criterion):
     # Evaluate the model performance at end of epoch
     model.eval() # prep model for evaluation
-    evals = 0
     eval_loss = []
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         output = model(data)
         loss = criterion(output, target)
         eval_loss.append(loss.item())
-        evals += 1
     # Log average epoch losses
     test_loss = np.mean(eval_loss)
     # Put network back into training mode
