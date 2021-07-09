@@ -172,24 +172,17 @@ def run(cmd_args):
 
     # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
-    experiment_types = ["single-experiment",
-                        "multiple-experiments",
-                        "hyperparameter-search",
-                        "population-based-training"]
-
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["job_type"] == "single-experiment":
         run_single_experiment(resource_to_run,
                               job_config.meta_job_args,
                               job_config.single_job_args)
-
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
         run_multiple_experiments(resource_to_run,
                                  job_config.meta_job_args,
                                  job_config.single_job_args,
                                  job_config.multi_experiment_args)
-
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         # Import only if needed since this has a optional dependency on scikit-optimize
@@ -205,8 +198,6 @@ def run(cmd_args):
                                       job_config.meta_job_args,
                                       job_config.single_job_args,
                                       job_config.pbt_args)
-    else:
-        raise ValueError(f"Job type has to be in {experiment_types}.")
 
     # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():

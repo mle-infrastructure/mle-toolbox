@@ -3,7 +3,8 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
-import re, os
+import re
+import os
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -12,11 +13,12 @@ with open(os.path.join(CURRENT_DIR, 'README.md'), encoding='utf-8') as f:
 
 
 def parse_requirements(path):
-  with open(os.path.join(CURRENT_DIR, path)) as f:
-    return [l.rstrip() for l in f if not (l.isspace() or l.startswith('#'))]
+    with open(os.path.join(CURRENT_DIR, path)) as f:
+        return [line.rstrip() for line in f if
+                not (line.isspace() or line.startswith('#'))]
 
 
-VERSIONFILE="mle_toolbox/_version.py"
+VERSIONFILE = "mle_toolbox/_version.py"
 verstrline = open(VERSIONFILE, "rt").read()
 VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
 mo = re.search(VSRE, verstrline, re.M)

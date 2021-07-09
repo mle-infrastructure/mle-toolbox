@@ -77,10 +77,14 @@ def protocol_experiment(job_config: dict,
         db.dadd(new_experiment_id,
                 ("job_spec_args", job_config.param_search_args))
 
-    # Add the base config - train, net, log
+    # Add the base config - train, model, log
     base_config = load_json_config(job_config.meta_job_args["base_train_config"])
     db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
-    db.dadd(new_experiment_id, ("model_config", base_config["model_config"]))
+    # Model/Network config is not required!
+    try:
+        db.dadd(new_experiment_id, ("model_config", base_config["model_config"]))
+    except:
+        pass
     db.dadd(new_experiment_id, ("log_config", base_config["log_config"]))
 
     # Add the number of seeds over which experiment is run

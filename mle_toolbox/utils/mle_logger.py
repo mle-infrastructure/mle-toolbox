@@ -414,7 +414,7 @@ class MLE_Logger(object):
         # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
         if self.model_type == "torch":
             # Torch model case - save model state dict as .pt checkpoint
-            self.store_torch_model(self.final_model_save_fname, model)
+            self.save_torch_model(self.final_model_save_fname, model)
         elif self.model_type in ["jax", "sklearn"]:
             # JAX/sklearn save parameter dict/model as dictionary
             save_pkl_object(model, self.final_model_save_fname)
@@ -427,7 +427,7 @@ class MLE_Logger(object):
                 if self.model_type == "torch":
                     ckpt_path = (self.every_k_model_save_fname +
                                  str(self.model_save_counter) + ".pt")
-                    self.store_torch_model(ckpt_path, model)
+                    self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.every_k_model_save_fname +
                                  str(self.model_save_counter) + ".pkl")
@@ -448,7 +448,7 @@ class MLE_Logger(object):
                 if self.model_type == "torch":
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(len(self.top_k_performance)) + ".pt")
-                    self.store_torch_model(ckpt_path, model)
+                    self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(len(self.top_k_performance)) + ".pkl")
@@ -467,7 +467,7 @@ class MLE_Logger(object):
                 if self.model_type == "torch":
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(id_to_replace) + ".pt")
-                    self.store_torch_model(ckpt_path, model)
+                    self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname +
                                  str(id_to_replace) + ".pkl")
@@ -485,14 +485,14 @@ class MLE_Logger(object):
                 if self.model_type == "torch":
                     ckpt_path = (self.top_k_model_save_fname + "_top_" +
                                  str(id_to_replace) + ".pt")
-                    self.store_torch_model(ckpt_path, model)
+                    self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
                     ckpt_path = (self.top_k_model_save_fname + "_top_" +
                                  str(id_to_replace) + ".pkl")
                     save_pkl_object(model, ckpt_path)
                 updated_top_k = True
 
-    def store_torch_model(self, path_to_store, model):
+    def save_torch_model(self, path_to_store, model):
         """ Store a torch checkpoint for a model. """
         try:
             import torch

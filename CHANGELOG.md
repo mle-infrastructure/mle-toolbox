@@ -5,6 +5,7 @@
 - Adds population-based training experiment type. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist).
 
 ##### Changed
+- Allow logging of array data in meta log `.hdf5` file by making `tolerant_mean` work for matrices.
 
 ##### Fixed
 

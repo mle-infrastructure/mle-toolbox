@@ -46,6 +46,28 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
     with open(cmd_args.config_fname) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
+    # Check that meta_job_args and single_job_args given in yaml config
+    for k in ['meta_job_args', 'single_job_args']:
+        assert k in config.keys(), f"Please provide {k} in .yaml config."
+
+    # Check that job-specific arguments are given in yaml config
+    experiment_type = config['meta_job_args']['job_type']
+    all_experiment_types = ["single-experiment",
+                            "multiple-experiments",
+                            "hyperparameter-search",
+                            "population-based-training"]
+    assert (experiment_type in all_experiment_types,
+            "Job type has to be in {all_experiment_types}.")
+
+    if experiment_type == "single-experiment":
+        assert "single_job_args" in config.keys()
+    elif experiment_type == "multiple-experiments":
+        assert "multi_experiment_args" in config.keys()
+    elif experiment_type == "hyperparameter-search":
+        assert "param_search_args" in config.keys()
+    elif experiment_type == "population-based-training":
+        assert "pbt_args" in config.keys()
+
     # Update job config with specific cmd args (if provided)
     if cmd_args.base_train_fname is not None:
         config["meta_job_args"]["base_train_fname"] = cmd_args.base_train_fname
@@ -53,6 +75,10 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
         config["meta_job_args"]["base_train_config"] = cmd_args.base_train_config
     if cmd_args.experiment_dir is not None:
         config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
+
+    # Check that base_train_fname, base_train_config do exist
+    assert os.path.isfile(config["meta_job_args"]["base_train_fname"])
+    assert os.path.isfile(config["meta_job_args"]["base_train_config"])
     return DotMap(config, _dynamic=False)
 
 

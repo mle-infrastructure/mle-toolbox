@@ -184,10 +184,16 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
 def tolerant_mean(arrs: list):
     """ Helper function for case where data to mean has different lengths. """
     lens = [len(i) for i in arrs]
-    arr = np.ma.empty((np.max(lens),len(arrs)))
-    arr.mask = True
-    for idx, l in enumerate(arrs):
-        arr[:len(l),idx] = l
+    if len(arrs[0].shape) == 1:
+        arr = np.ma.empty((np.max(lens), len(arrs)))
+        arr.mask = True
+        for idx, l in enumerate(arrs):
+            arr[:len(l),  idx] = l
+    else:
+        arr = np.ma.empty((np.max(lens), arrs[0].shape[1], len(arrs)))
+        arr.mask = True
+        for idx, l in enumerate(arrs):
+            arr[:len(l), :, idx] = l
     return arr.mean(axis = -1), arr.std(axis=-1)
 
 

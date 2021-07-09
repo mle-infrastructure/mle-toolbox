@@ -147,7 +147,11 @@ def get_last_experiment(db, last_experiment_id):
     # Add additional data based on the experiment type
     if e_type == "hyperparameter-search":
         results["search_type"] = job_spec_args["search_config"]["search_type"]
-        results["eval_metrics"] = job_spec_args["search_logging"]["eval_metrics"]
+        try:
+            results["eval_metrics"] = job_spec_args["search_logging"]["eval_metrics"]
+        except:
+            # No eval metric provided (case of no .hdf5 logging) - leave blank
+            results["eval_metrics"] = "-"
         results["params_to_search"] = job_spec_args["search_config"]["search_params"]
     elif e_type == "multiple-experiments":
         results["config_fnames"] = job_spec_args["config_fnames"]
