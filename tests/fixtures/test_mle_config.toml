@@ -1,0 +1,117 @@
+# MLE-Toolbox Configuration File - Credentials & Cluster Info
+# Modify this file depending on your cluster configuration
+title = "mle-toolbox-config"
+#------------------------------------------------------------------------------#
+# 1. General Toolbox Configuration - Verbosity + Whether to use GCS Storage
+#------------------------------------------------------------------------------#
+[general]
+# Store a full log of every experiment run in .txt file
+development = false
+
+# Local filename to store protocol DB in
+local_protocol_fname = '~/local_robs_mle_protocol.db'
+
+# Syncing of protocol with GCloud
+use_gcloud_protocol_sync = true
+
+# Storing of experiment results in bucket
+use_gcloud_results_storage = true
+
+# Storing of encrypted ssh credentials
+use_credential_encryption = true
+
+# Whether to use conda or venv for experiment virtual environment
+use_conda_virtual_env = true
+
+# Set remote experiment submission environment name
+remote_env_name = 'mle-toolbox'
+
+
+#------------------------------------------------------------------------------#
+# 2. Configuration for Slurm Cluster
+#------------------------------------------------------------------------------#
+[slurm]
+    # Slurm credentials - Only if you want to retrieve results from cluster
+    [slurm.credentials]
+    user_name = '<slurm-user-name>'
+    password = '<slurm-password>'
+    aes_key = '<aes-key>'
+
+    # Slurm cluster information - Job scheduling, monitoring & retrieval
+    [slurm.info]
+    # Headnode name & partitions to monitor/run jobs on
+    head_names = ['<headnode1>']
+    node_reg_exp = ['<nodes-to-monitor1>']
+    partitions = ['<partition1>']
+
+    # Info for results retrieval & internet tunneling
+    main_server_name = '<main-server-ip>'
+    jump_server_name = '<jump-host-ip>'
+    ssh_port = 22
+    # Add proxy server for internet connection if needed!
+    http_proxy = "http://<slurm_headnode>:3128/"
+    https_proxy = "http://<slurm_headnode>:3128/"
+
+    # Default Slurm job arguments (if not supplied in job .yaml config)
+    [slurm.default_job_args]
+    num_logical_cores = 2
+    partition = '<partition1>'
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+    env_name = '<mle-default-env>'
+
+#------------------------------------------------------------------------------#
+# 3. Configuration for SunGridEngine Cluster
+#------------------------------------------------------------------------------#
+[sge]
+    # SGE credentials - Needed only if you want to retrieve results from cluster
+    [sge.credentials]
+    user_name = '<sge-user-name>'
+    password = '<sge-password>'
+    aes_key = '<aes-key>'
+
+    # SGE cluster information - Job scheduling, monitoring & retrieval
+    [sge.info]
+    # Headnode name & queues to monitor/run jobs on
+    head_names = ['<headnode1>']
+    node_reg_exp = ['<nodes-to-monitor2>']
+    node_extension = '<ip-extension>'
+    node_ids = ['00']
+    queue = '<sge-queue-name>'
+    spare = '<sge-spare-name>'
+    queue_base = '<sge-base-queue>'
+
+    # Cluster-specific info for results retrieval & internet tunneling
+    main_server_name = '<main-server-ip>'
+    jump_server_name = '<jump-host-ip>'
+    ssh_port = 22
+    # Add proxy server for internet connection if needed!
+    http_proxy = "http://<sge_headnode>:3128/"
+    https_proxy = "http://<sge_headnode>:3128/"
+
+    # Default SGE job arguments (if not differently supplied)
+    [sge.default_job_arguments]
+    num_logical_cores = 2
+    queue = '<sge-queue-name>'
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+    env_name = '<mle-default-env>'
+
+
+#------------------------------------------------------------------------------#
+# 4. GCP Config - Credentials, Project + Buffer for Meta-Experiment Protocol
+# OPTIONAL: Only required if you want to sync protocol with GCS
+#------------------------------------------------------------------------------#
+[gcp]
+# Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
+slurm_credentials_path = "~/<slurm_path_to_gcloud_credentials>.json"
+sge_credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
+
+# Set GCloud project and bucket name for storage/compute instances
+project_name = "<gcloud_project_name>"
+bucket_name = "<gcloud_bucket_name>"
+
+# Filename to retrieve from gcloud bucket & where to store
+protocol_fname = "gcloud_mle_protocol.db"

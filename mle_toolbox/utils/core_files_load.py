@@ -10,11 +10,11 @@ from .load_meta_log import load_meta_log
 from .load_hyper_log import load_hyper_log
 
 
-def load_mle_toolbox_config():
+def load_mle_toolbox_config(config_fname="~/mle_config.toml"):
     """ Load cluster config from the .toml file. See docs for more info. """
     # This assumes that the config file is always named the same way!
     try:
-        mle_config = DotMap(toml.load(os.path.expanduser("~/mle_config.toml")),
+        mle_config = DotMap(toml.load(os.path.expanduser(config_fname)),
                                       _dynamic=False)
     except:
         return None
@@ -29,6 +29,12 @@ def load_mle_toolbox_config():
                                       "install `pycrypto` to use "
                                       "`decrypt_ssh_credentials`.")
         # Decrypt for slurm and sge independently - if key provided!
+        assert ("aes_key" in mle_config["slurm"].credentials.keys() or
+                "aes_key" in mle_config["sge"].credentials.keys(),
+                "If you want to use encrypted credentials, please provide " +
+                "the aes_key in your mle_config.toml file.")
+        # TODO: Load aes_key from separate file in encrypted form
+        # Assert that the key has the right shape
         for resource in ["slurm", "sge"]:
             if "aes_key" in mle_config[resource].credentials.keys():
                 dec_user, dec_pass = decrypt_ssh_credentials(
@@ -37,6 +43,7 @@ def load_mle_toolbox_config():
                                 mle_config[resource].credentials.password)
                 mle_config[resource].credentials.user_name = dec_user
                 mle_config[resource].credentials.password = dec_pass
+
         return mle_config
 
 
