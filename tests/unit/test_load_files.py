@@ -1,19 +1,28 @@
 import unittest
 from dotmap import DotMap
-from mle_toolbox.utils import load_yaml_config
+from mle_toolbox.utils import (load_yaml_config,
+                               load_json_config)
+
 
 cmd_args_proxy = DotMap({
-                "config_fname": "tests/assets/test_yaml_config.yaml",
-                "base_train_fname": "tests/assets/test_python_script.py",
-                "base_train_config": "tests/assets/test_json_config.json",
+                "config_fname": "tests/fixtures/test_yaml_config.yaml",
+                "base_train_fname": "tests/fixtures/test_python_script.py",
+                "base_train_config": "tests/fixtures/test_json_config.json",
                 "experiment_dir": "experiments/"})
 
 
-def test_load_yaml_config():
-    experiment_config = load_yaml_config(cmd_args_proxy)
-    assert (experiment_config.meta_job_args.base_train_fname ==
-            cmd_args_proxy.base_train_fname)
-    assert (experiment_config.meta_job_args.base_train_config ==
-            cmd_args_proxy.base_train_config)
-    assert (experiment_config.meta_job_args.experiment_dir ==
-            cmd_args_proxy.experiment_dir)
+class TestFileLoading(unittest.TestCase):
+    def test_load_json_config(self):
+        """ Make sure that assert is raised since no `log_config` is given. """
+        with self.assertRaises(AssertionError):
+            json_config = load_json_config(cmd_args_proxy.base_train_config)
+
+    def test_load_yaml_config(self):
+        """ Assert manual inputs are written to experiment configuration. """
+        experiment_config = load_yaml_config(cmd_args_proxy)
+        assert (experiment_config.meta_job_args.base_train_fname ==
+                cmd_args_proxy.base_train_fname)
+        assert (experiment_config.meta_job_args.base_train_config ==
+                cmd_args_proxy.base_train_config)
+        assert (experiment_config.meta_job_args.experiment_dir ==
+                cmd_args_proxy.experiment_dir)

@@ -86,6 +86,11 @@ def load_json_config(config_fname: str) -> DotMap:
     """ Load in a config JSON file and return as a dictionary """
     json_config = commentjson.loads(open(config_fname, 'r').read())
     dict_config = DotMap(json_config, _dynamic=False)
+
+    # Check that train_config/log_config are provided.
+    # Note that model_config is left optional.
+    assert "train_config" in dict_config.keys(), "Provide train_config key."
+    assert "log_config" in dict_config.keys(), "Provide log_config key."
     return dict_config
 
 
