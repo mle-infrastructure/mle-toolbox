@@ -2,11 +2,11 @@
 
 name: make_docs
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: 
+    branches:
        - main
 
   # Allows you to run this workflow manually from the Actions tab
@@ -27,4 +27,6 @@ jobs:
         with:
           python-version: 3.x
       - run: pip install mkdocs-material
+      - run: pip install mkdocs-jupyter
+      - run: cp -R notebooks docs/notebooks/
       - run: mkdocs gh-deploy --force
