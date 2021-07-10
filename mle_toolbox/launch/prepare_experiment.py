@@ -10,7 +10,7 @@ from ..remote.gcloud_transfer import get_gcloud_db
 
 def welcome_to_mle_toolbox(verbose=False):
     """ Let's friendly greet the next user of the MLE-Toolbox! """
-    print(85*"=")
+    print(85 * "=")
     welcome_ascii = """
             __  _____    ______   ______            ____
            /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
@@ -19,8 +19,8 @@ def welcome_to_mle_toolbox(verbose=False):
         /_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
     """
     print(welcome_ascii)
-    print(72*" " + "@RobertTLange")
-    print(85*"=")
+    print(72 * " " + "@RobertTLange")
+    print(85 * "=")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     print(time_t, f"Thx for using MLE-Toolbox {__version__}"
                   f" Locally, on Clusters or Cloud.")
@@ -31,8 +31,8 @@ def welcome_to_mle_toolbox(verbose=False):
         print("  - hyperparameter-search: Run a hyperparameter search.")
 
 
-def prepare_logger(experiment_dir: Union[str, None]=None,
-                   debug_mode: bool=False):
+def prepare_logger(experiment_dir: Union[str, None] = None,
+                   debug_mode: bool = False):
     """ Setup up the verbose/file logging of the experiment. """
     logger = logging.getLogger()
     if logger.handlers:
@@ -41,11 +41,12 @@ def prepare_logger(experiment_dir: Union[str, None]=None,
 
     file_path = (os.path.join(experiment_dir, "exp_debug.log")
                  if debug_mode else os.path.expanduser("~/full_debug.log"))
-    logging.basicConfig(filename=file_path,
-                        filemode='a',
-                        format='%(asctime)s %(name)s %(levelname)s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p',
-                        level=logging.DEBUG)
+    logging.basicConfig(
+        filename=file_path,
+        filemode='a',
+        format='%(asctime)s %(name)s %(levelname)s %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.DEBUG)
     logging.getLogger("git").setLevel(logging.ERROR)
     logging.getLogger("google").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
@@ -81,7 +82,7 @@ def check_job_config(job_config: dict):
     # TODO: Make this more robust by asserting existence of required keys
     # Differentiate between required and not - check types and file existence
     """
-    meta_job_args: project_name, job_type, base_train_fname,  base_train_config,
+    meta_job_args: project_name, job_type, base_train_fname, base_train_config,
                    experiment_dir, (remote_exec_dir) = all strings, check files
     single_job_args: job_name, num_logical_cores, log_file, err_file, env_name,
                      extra_cmd_line_input (all optional - except env_name?)
@@ -90,7 +91,7 @@ def check_job_config(job_config: dict):
     """
 
 
-def ask_for_experiment_id(repeated_question: bool=False):
+def ask_for_experiment_id(repeated_question: bool = False):
     """ Helper function asking user for experiment id from protocol log. """
     # Get most recent/up-to-date experiment DB from Google Cloud Storage
     if not repeated_question:
@@ -100,8 +101,9 @@ def ask_for_experiment_id(repeated_question: bool=False):
             accessed_remote_db = False
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
         if accessed_remote_db:
-            print(time_t,
-                  "Successfully pulled latest experiment protocol from gcloud.")
+            print(
+                time_t,
+                "Successfully pulled latest experiment protocol from gcloud.")
         else:
             print(time_t, "Careful - you are using local experiment protocol.")
     else:

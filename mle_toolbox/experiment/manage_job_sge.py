@@ -21,7 +21,8 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
     if "time_per_job" in job_arguments.keys():
         days, hours, minutes = job_arguments["time_per_job"].split(":")
         hours_sge = str(int(days) * 24 + int(hours))
-        if len(hours_sge) < 2: hours_sge = "0" + hours_sge
+        if len(hours_sge) < 2:
+            hours_sge = "0" + hours_sge
         sge_time = hours_sge + ":" + minutes + ":00"
         job_arguments["time_per_job"] = sge_time
     return job_arguments
@@ -30,7 +31,7 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
 def sge_submit_job(filename: str,
                    cmd_line_arguments: str,
                    job_arguments: dict,
-                   clean_up: bool=True) -> str:
+                   clean_up: bool = True) -> str:
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
@@ -85,6 +86,7 @@ def sge_submit_job(filename: str,
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(0.5)
 
     # Finally delete all the unnemle_configessary log files
@@ -103,6 +105,7 @@ def sge_monitor_job(job_id: Union[list, int]) -> bool:
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(0.5)
 
     job_info = out.split(b'\n')[2:]

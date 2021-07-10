@@ -13,11 +13,11 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
                  job_fname: str,
                  experiment_dir: str,
                  search_params: dict,
-                 search_type: str="smbo",
-                 search_schedule: str="sync",
-                 smbo_config: dict={"base_estimator": "GP",
-                                    "acq_function": "gp_hedge",
-                                    "n_initial_points": 5}):
+                 search_type: str = "smbo",
+                 search_schedule: str = "sync",
+                 smbo_config: dict = {"base_estimator": "GP",
+                                      "acq_function": "gp_hedge",
+                                      "n_initial_points": 5}):
         try:
             from skopt import Optimizer
         except ModuleNotFoundError as err:
@@ -34,11 +34,11 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
 
         # Initialize the surrogate model/hyperparam config proposer
         self.hyper_optimizer = Optimizer(
-                            dimensions=list(self.param_range.values()),
-                            random_state=1,
-                            base_estimator=smbo_config["base_estimator"],
-                            acq_func=smbo_config["acq_function"],
-                            n_initial_points=smbo_config["n_initial_points"])
+            dimensions=list(self.param_range.values()),
+            random_state=1,
+            base_estimator=smbo_config["base_estimator"],
+            acq_func=smbo_config["acq_function"],
+            n_initial_points=smbo_config["n_initial_points"])
 
     def get_hyperparam_proposal(self, num_iter_per_batch: int):
         """ Get proposals to eval next (in batches) - Random Sampling. """
@@ -66,7 +66,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
             x.append(list(prop.values()))
             # skopt assumes we want to minimize surrogate model
             # Make performance negative if we maximize
-            effective_perf = (-1*perf_measures[to_model][eval_ids[i]]
+            effective_perf = (-1 * perf_measures[to_model][eval_ids[i]]
                               if self.hyper_log.max_objective
                               else perf_measures[to_model][eval_ids[i]])
             y.append(effective_perf)

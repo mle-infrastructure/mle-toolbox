@@ -20,8 +20,7 @@ from .helpers import (print_framed,
                       get_jax_os_ready,
                       save_pkl_object)
 
-__all__ = [
-           'load_mle_toolbox_config',
+__all__ = ['load_mle_toolbox_config',
            'load_yaml_config',
            'load_json_config',
            'load_pkl_object',
@@ -35,9 +34,10 @@ __all__ = [
            'parse_experiment_args',
            'get_extra_cmd_line_input',
            'set_random_seeds',
+           'merge_hdf5_files',
+           'save_pkl_object',
            'load_result_logs',
            'load_run_log',
            'load_meta_log',
            'load_hyper_log',
-           'load_model'
-           ]
+           'load_model']

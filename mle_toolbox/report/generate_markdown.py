@@ -1,7 +1,6 @@
 import tempfile
 from pathlib import Path
 from os import linesep
-from typing import List
 from html import escape
 from string import punctuation
 
@@ -20,6 +19,7 @@ TOC_LINE_POSITION = 2
 # python-markdown-generator: github.com/Nicceboy/python-markdown-generator
 # And adapts it for the purposes of the mle-toolbox - directly returns md/html
 
+
 class MarkdownGenerator:
     """ Generating GitHub flavored Markdown. Init by using 'with' statement."""
     def __init__(self, document=None, filename=None,
@@ -32,13 +32,14 @@ class MarkdownGenerator:
         :param document: existing opened document file, defaults to None
         :param filename: File to be opened, defaults to None
         :param syntax: Markdown syntax flavor (GitHub vs GitLab)
-        :param root_object: Whether the instance of this class is root object, defaults to None
-        :param tmp_dir: Path of temporal directory. NOTE: not in user, defaults to None
+        :param root_object: Whether instance of class is root object
+        :param tmp_dir: Path of temporal directory. NOTE: not in user,
         """
-        # Attribute for determining if object is first instance of Markdowngenerator
+        # Attribute to determine if object is first instance of generator
         self.root_object = root_object
         self.document = document
-        self.document_data_array = document_data_array if document_data_array else []
+        self.document_data_array = (document_data_array
+                                    if document_data_array else [])
         self.enable_write = enable_write
         self.enable_TOC = enable_TOC
 
@@ -99,14 +100,15 @@ class MarkdownGenerator:
                         level = prevLevel + 2
 
                     tableofcontents.append(
-                        f"{level * padding}* {self.generateHrefNotation(name, href)}{linesep}"
+                        f"{level * padding}*"
+                        f" {self.generateHrefNotation(name, href)}{linesep}"
                     )
                 prevLevel = level
         tableofcontents.append(f"  {linesep}")
         self.document_data_array = (
             self.document_data_array[: linenumber - 1]
             + tableofcontents
-            + self.document_data_array[linenumber - 1 :]
+            + self.document_data_array[linenumber - 1:]
         )
         if self.enable_write:
             self.document.close()
@@ -141,19 +143,21 @@ class MarkdownGenerator:
         if self.enable_write:
             self.document.write(str(text) + "" + linesep)
 
-    def writeAttributeValuePairLine(self, key_value_pair: tuple, total_padding=30):
+    def writeAttributeValuePairLine(self, key_value_pair: tuple,
+                                    total_padding: int = 30):
 
         if len(key_value_pair) == 2:
             required_padding = total_padding - len(key_value_pair[0])
             self.writeTextLine(
-                f"{self.addBoldedAndItalicizedText(key_value_pair[0])}{HTML_SPACE*required_padding}{key_value_pair[1]}"
+                f"{self.addBoldedAndItalicizedText(key_value_pair[0])}"
+                f"{HTML_SPACE*required_padding}{key_value_pair[1]}"
             )
         else:
             return
 
     def addHeader(self, level: int, text):
         """ Method for adding named headers for the document. """
-        # Text for lowercase, remove punctuation, replace whitespace with dashesh
+        # Text for lowercase, remove punctuation, replace whitespace with dash
         anchor = "#" + text.lower().translate(
             str.maketrans("", "", punctuation.replace("-", ""))
         ).replace(" ", "-")
@@ -191,7 +195,8 @@ class MarkdownGenerator:
             self.writeTextLine(italicized)
         return italicized
 
-    def addBoldedAndItalicizedText(self, text, write_as_line: bool = False) -> str:
+    def addBoldedAndItalicizedText(self, text,
+                                   write_as_line: bool = False) -> str:
         bolded_italicized = f"***{text.strip()}***"
         if write_as_line:
             self.writeTextLine(bolded_italicized)
@@ -211,7 +216,8 @@ class MarkdownGenerator:
             return f'[{text}]({url} "{title}")'
         return f"[{text}]({url})"
 
-    def generateImageHrefNotation(self, image_uri: str, alt_text, title=None) -> str:
+    def generateImageHrefNotation(self, image_uri: str,
+                                  alt_text, title=None) -> str:
         if title:
             return f'![{alt_text}]({image_uri} "{title}")'
         return f"![{alt_text}]({image_uri})"
@@ -219,10 +225,10 @@ class MarkdownGenerator:
     def addHorizontalRule(self):
         self.writeTextLine(f"{linesep}{HORIZONTAL_RULE}{linesep}")
 
-    def addCodeBlock(self, text, syntax: str = None, escape_html: bool = False):
+    def addCodeBlock(self, text, syntax: str = None,
+                     escape_html: bool = False):
         # Escape backtics/grave accents in attempt to deny codeblock escape
-        grave_accent_escape = "\`"
-
+        grave_accent_escape = "\`"  # noqa: W605
         text = text.replace("`", grave_accent_escape)
 
         if escape_html:
@@ -233,21 +239,10 @@ class MarkdownGenerator:
                 f"{CODE_BLOCK}{syntax}{linesep}{text}{linesep}{CODE_BLOCK}",
                 html_escape=False,)
 
-    def addInlineCodeBlock(self, text, escape_html=False, write=False):
-        """ Method for adding highlighted code in inline style in Markdown. """
-        inline_hl = f"{INLINE_CODE_HIGHLIGHT}{text}{INLINE_CODE_HIGHLIGHT}"
-        if write:
-            if escape_html:
-                self.writeText(inline_hl)
-            else:
-                self.writeText(inline_hl, html_escape=False)
-        else:
-            return inline_hl
-
     def addSinglelineBlockQuote(self, text):
         """ Method for adding single line blockquote. """
-        self.writeTextLine(
-        f"{SINGLE_LINE_BLOCKQUOTE}{escape(text.strip())}", html_escape=False)
+        self.writeTextLine(f"{SINGLE_LINE_BLOCKQUOTE}{escape(text.strip())}",
+                           html_escape=False)
 
     def addUnorderedList(self, iterableStringList):
         """ Method from constructing unordered list. """
@@ -255,7 +250,7 @@ class MarkdownGenerator:
             self.writeText(f"  * {item}{linesep}")
         self.writeTextLine()
 
-    def addTable(self, header_names = None, row_elements=None,
+    def addTable(self, header_names=None, row_elements=None,
                  alignment="center", dictionary_list=None,
                  html_escape=True, capitalize_headers=False):
         """ Method for generating Markdown table with centered cells. """
@@ -265,8 +260,8 @@ class MarkdownGenerator:
         if row_elements is None:
             if dictionary_list is None:
                 raise TypeError(
-                    f"Invalid paramaters for generating new table. \
-                     Use either dictionary list or row_elements.")
+                    "Invalid paramaters for generating new table."
+                    " Use either dictionary list or row_elements.")
             else:
                 useDictionaryList = True
 
@@ -277,7 +272,7 @@ class MarkdownGenerator:
         if not useProvidedHeadernames and dictionary_list:
             try:
                 header_names = dictionary_list[0].keys()
-            except AttributeError as e:
+            except AttributeError:
                 return
         try:
             for header in header_names:
@@ -286,10 +281,10 @@ class MarkdownGenerator:
                     self.writeText(f"| {header.capitalize()} ")
                 else:
                     self.writeText(f"| {header} ")
-        except TypeError as e:
+        except TypeError:
             return
         # Write ending vertical bar
-        self.writeTextLine(f"|")
+        self.writeTextLine("|")
         # Write dashes to separate headers
         if alignment == "left":
             self.writeTextLine("".join(["|", ":---|" * len(header_names)]))
@@ -315,7 +310,7 @@ class MarkdownGenerator:
                     else:
                         self.writeText(f"| {element}", html_escape)
 
-                self.writeTextLine(f"|")
+                self.writeTextLine("|")
         else:
             # Iterate over list of dictionaries
             for row in dictionary_list:
@@ -327,7 +322,7 @@ class MarkdownGenerator:
                             self.writeText("<br>", html_escape=False)
                     else:
                         self.writeText(f"| {row.get(key)}", html_escape)
-                self.writeTextLine(f"|")
+                self.writeTextLine("|")
         self.writeTextLine()
 
     def insertDetailsAndSummary(self, summary_name="Click to collapse/fold.",

@@ -1,4 +1,3 @@
-from typing import Union, List
 from .core_experiment import (load_experiment_config,
                               parse_experiment_args,
                               get_extra_cmd_line_input,
@@ -10,11 +9,11 @@ from .helpers import print_framed
 
 class MLExperiment(object):
     def __init__(self,
-                 default_config_fname: str="configs/base_config.json",
-                 default_experiment_dir: str="experiments/",
-                 default_seed: int=0,
-                 auto_setup: bool=True,
-                 create_jax_prng: bool=False):
+                 default_config_fname: str = "configs/base_config.json",
+                 default_experiment_dir: str = "experiments/",
+                 default_seed: int = 0,
+                 auto_setup: bool = True,
+                 create_jax_prng: bool = False):
         ''' Load the job configs for the MLE experiment. '''
         # Parse experiment command line arguments
         cmd_args, extra_args = parse_experiment_args(default_config_fname,

@@ -1,4 +1,5 @@
-import random, string
+import random
+import string
 from typing import Union
 import base64
 from Crypto.Cipher import AES
@@ -7,6 +8,7 @@ from Crypto import Random
 
 # Credential encryption based on Stack Overflow discussion:
 # stackoverflow.com/questions/42568262/how-to-encrypt-text-with-a-password-in-python
+
 
 def get_random_string(length):
     """ Sample a random string. """
@@ -17,7 +19,7 @@ def get_random_string(length):
 
 def encrypt(key: Union[str, bytes],
             source: Union[str, bytes],
-            encode: bool=True):
+            encode: bool = True):
     """ Encrypt ssh credentials based on CBC mode including PKCS#7 padding. """
     # Make sure key and source data are in bytes format
     if type(key) is not bytes:
@@ -27,7 +29,7 @@ def encrypt(key: Union[str, bytes],
     key = SHA256.new(key).digest()  # use SHA-256 over key - proper-sized AES k
     IV = Random.new().read(AES.block_size)  # generate IV
     encryptor = AES.new(key, AES.MODE_CBC, IV)
-    padding = AES.block_size - len(source) % AES.block_size  #calculate padding
+    padding = AES.block_size - len(source) % AES.block_size  # calculate pad
     source += bytes([padding]) * padding
     data = IV + encryptor.encrypt(source)  # store IV at beginning and encrypt
     return base64.b64encode(data).decode("latin-1") if encode else data
@@ -35,7 +37,7 @@ def encrypt(key: Union[str, bytes],
 
 def decrypt(key: Union[str, bytes],
             source: Union[str, bytes],
-            decode: bool=True):
+            decode: bool = True):
     """ Decrypt ssh credentials based on CBC mode including PKCS#7 padding. """
     # Make sure key and source data are in bytes format
     if type(key) is not bytes:

@@ -9,7 +9,7 @@ def spawn_single_experiment(resource_to_run: str,
                             config_filename: str,
                             job_arguments: Union[None, dict],
                             experiment_dir: str,
-                            cmd_line_input: Union[None, dict]=None):
+                            cmd_line_input: Union[None, dict] = None):
     """ Spawn a single experiment locally/remote. """
     # 0. Extract extra_cmd_line_input from job_arguments
     if job_arguments is not None:
@@ -60,8 +60,8 @@ def spawn_multiple_seeds(resource_to_run: str,
                          job_arguments: Union[None, dict],
                          experiment_dir: str,
                          num_seeds: int,
-                         default_seed: int=0,
-                         logger_level: int=logging.WARNING):
+                         default_seed: int = 0,
+                         logger_level: int = logging.WARNING):
     """ Spawn same experiment w. diff. seeds multiple times locally/remote. """
     multi_experiment = ExperimentQueue(resource_to_run, job_filename,
                                        [config_filename], job_arguments,
@@ -76,7 +76,7 @@ def spawn_multiple_configs(resource_to_run: str,
                            job_arguments: Union[None, dict],
                            experiment_dir: str,
                            num_seeds: Union[None, int] = None,
-                           logger_level: int=logging.WARNING):
+                           logger_level: int = logging.WARNING):
     """ Spawn processes to running diff. training configs over diff. seeds. """
     if num_seeds is None:
         num_seeds = 1
@@ -90,15 +90,15 @@ def spawn_multiple_configs(resource_to_run: str,
     logger = logging.getLogger(__name__)
     logger.setLevel(logger_level)
 
-    logger.info("START - {} configurations " \
+    logger.info("START - {} configurations "
                 "& {} random seeds".format(num_configs, num_seeds))
 
     # Run Experiment Jobs in Batch mode!
     multi_experiment = ExperimentQueue(resource_to_run, job_filename,
-                                       config_filename, job_arguments,
-                                       experiment_dir, num_seeds,
-                                       max_running_jobs=num_seeds*num_configs)
+                                       config_filenames, job_arguments,
+                                       experiment_dir, num_seeds, 0,
+                                       num_seeds * num_configs)
     multi_experiment.run()
 
-    logger.info("DONE  - different {} configurations " \
+    logger.info("DONE  - different {} configurations "
                 "& {} random seeds".format(num_configs, num_seeds))

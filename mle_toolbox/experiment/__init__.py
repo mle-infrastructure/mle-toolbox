@@ -6,12 +6,9 @@ from .spawn_jobs import (spawn_single_experiment,
                          spawn_multiple_configs)
 
 
-
-__all__ = [
-           'Experiment',
+__all__ = ['Experiment',
            'ExperimentQueue',
            "spawn_single_experiment",
            "spawn_processing_job",
            "spawn_multiple_seeds",
-           "spawn_multiple_configs"
-           ]
+           "spawn_multiple_configs"]

@@ -11,7 +11,7 @@ def get_db_data(db, all_e_ids):
     else:
         total_data = {"total": "0", "run": "0", "done": "0", "aborted": "0",
                       "sge": "0", "slurm": "0", "gcp": "0", "local": "0",
-                      "report_gen": "0", "gcs_stored": "0","retrieved": "0"}
+                      "report_gen": "0", "gcs_stored": "0", "retrieved": "0"}
         last_data = {"e_id": "-", "e_dir": "-", "e_type": "-",
                      "e_script": "-", "e_config": "-", "report_gen": "-"}
         time_data = {"total_jobs": "-", "total_batches": "-",
@@ -41,14 +41,14 @@ def get_total_experiments(db, all_experiment_ids):
             report_gen += db.dget(e_id, "report_generated")
             gcs_stored += db.dget(e_id, "stored_in_gcloud")
             retrieved += db.dget(e_id, "retrieved_results")
-        except:
+        except Exception:
             pass
     # Return results dictionary
     results = {"total": str(len(all_experiment_ids)),
                "run": str(run), "done": str(done), "aborted": str(aborted),
                "sge": str(sge), "slurm": str(slurm), "gcp": str(gcp),
                "local": str(local), "report_gen": str(report_gen),
-               "gcs_stored": str(gcs_stored),"retrieved": str(retrieved)}
+               "gcs_stored": str(gcs_stored), "retrieved": str(retrieved)}
     return results
 
 
@@ -70,10 +70,10 @@ def get_time_experiment(db, last_experiment_id):
         else:
             total_jobs = (search_resources["num_total_evals"]
                           * search_resources["num_seeds_per_eval"])
-            total_batches = total_jobs/search_resources["max_running_jobs"]
+            total_batches = total_jobs / search_resources["max_running_jobs"]
             jobs_per_batch = search_resources["max_running_jobs"]
     elif meta_args["job_type"] == "multiple-experiments":
-        total_jobs = (len(job_spec_args["config_fnames"])*
+        total_jobs = (len(job_spec_args["config_fnames"]) *
                       job_spec_args["num_seeds"])
         total_batches = 1
         jobs_per_batch = "-"
@@ -88,19 +88,23 @@ def get_time_experiment(db, last_experiment_id):
         time_per_batch = single_job_args["time_per_job"]
         days, hours, minutes = time_per_batch.split(":")
         hours_add, tot_mins = divmod(total_batches * int(minutes), 60)
-        days_add, tot_hours = divmod(total_batches * int(hours)+hours_add, 24)
+        days_add, tot_hours = divmod(total_batches * int(hours) + hours_add,
+                                     24)
         tot_days = total_batches * int(days) + days_add
         tot_days, tot_hours, tot_mins = (str(tot_days), str(tot_hours),
                                          str(tot_mins))
-        if len(tot_days) < 2: tot_days = "0" + tot_days
-        if len(tot_hours) < 2: tot_hours = "0" + tot_hours
-        if len(tot_mins) < 2: tot_mins = "0" + tot_mins
+        if len(tot_days) < 2:
+            tot_days = "0" + tot_days
+        if len(tot_hours) < 2:
+            tot_hours = "0" + tot_hours
+        if len(tot_mins) < 2:
+            tot_mins = "0" + tot_mins
         est_duration = tot_days + ":" + tot_hours + ":" + tot_mins
 
         # Check if last experiment has already terminated!
         try:
             stop_time = db.dget(last_experiment_id, "stop_time")
-        except:
+        except Exception:
             start_date = dt.datetime.strptime(start_time, "%m/%d/%Y %H:%M:%S")
             end_date = start_date + dt.timedelta(days=int(tot_days),
                                                  hours=int(tot_hours),
@@ -110,7 +114,6 @@ def get_time_experiment(db, last_experiment_id):
         start_time = "-"
         stop_time = "-"
         time_per_batch = "-"
-        est_stop_time = "-"
         est_duration = "-"
 
     results = {"total_jobs": total_jobs,
@@ -126,7 +129,7 @@ def get_time_experiment(db, last_experiment_id):
 def get_last_experiment(db, last_experiment_id):
     """ Get data from db to show in 'last_experiments' panel. """
     # Return results dictionary
-    e_path = db.dget(last_experiment_id, "exp_retrieval_path")
+    # e_path = db.dget(last_experiment_id, "exp_retrieval_path")
     meta_args = db.dget(last_experiment_id, "meta_job_args")
     job_spec_args = db.dget(last_experiment_id, "job_spec_args")
     e_type = meta_args["job_type"]
@@ -135,7 +138,7 @@ def get_last_experiment(db, last_experiment_id):
     e_config = os.path.split(meta_args["base_train_config"])[1]
     try:
         e_report = meta_args["report_generation"]
-    except:
+    except Exception:
         e_report = False
     results = {"e_id": str(last_experiment_id),
                "e_dir": e_dir,
@@ -148,11 +151,11 @@ def get_last_experiment(db, last_experiment_id):
     if e_type == "hyperparameter-search":
         results["search_type"] = job_spec_args["search_config"]["search_type"]
         try:
-            results["eval_metrics"] = job_spec_args["search_logging"]["eval_metrics"]
-        except:
+            results["eval_metrics"] = job_spec_args["search_logging"]["eval_metrics"]  # noqa: E501
+        except Exception:
             # No eval metric provided (case of no .hdf5 logging) - leave blank
             results["eval_metrics"] = "-"
-        results["params_to_search"] = job_spec_args["search_config"]["search_params"]
+        results["params_to_search"] = job_spec_args["search_config"]["search_params"]  # noqa: E501
     elif e_type == "multiple-experiments":
         results["config_fnames"] = job_spec_args["config_fnames"]
     return results

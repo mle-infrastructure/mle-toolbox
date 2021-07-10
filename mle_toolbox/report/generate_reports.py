@@ -1,11 +1,21 @@
 import os
-import logging
-import pdfkit
-import markdown2
 from dotmap import DotMap
 from .generate_markdown import MarkdownGenerator
 from .generate_figures import FigureGenerator
 from ..launch.prepare_experiment import prepare_logger
+
+
+try:
+    import pdfkit
+except ModuleNotFoundError as err:
+    raise ModuleNotFoundError(f"{err}. You need to install `pdfkit` "
+                              "to use the `mle_toolbox.report` module.")
+
+try:
+    import markdown2
+except ModuleNotFoundError as err:
+    raise ModuleNotFoundError(f"{err}. You need to install `markdown2` "
+                              "to use the `mle_toolbox.report` module.")
 
 
 class ReportGenerator():
@@ -23,8 +33,10 @@ class ReportGenerator():
         # Create a directory for the reports to be stored in
         self.reports_dir = os.path.join(self.experiment_dir, "reports")
         if not os.path.exists(self.reports_dir):
-            try: os.makedirs(self.reports_dir)
-            except: pass
+            try:
+                os.makedirs(self.reports_dir)
+            except Exception:
+                pass
 
         # Setup logger for report generation
         if logger is None:
@@ -37,7 +49,7 @@ class ReportGenerator():
 
     def generate_reports(self):
         """ Generate reports + generate included figures: .md, .html, .pdf. """
-        self.logger.info(f'Report - BASE REPORT DIRECTORY:')
+        self.logger.info('Report - BASE REPORT DIRECTORY:')
         self.logger.info(f'{self.experiment_dir}')
         # 1. Write the relevant data to the markdown report file
         self.md_report_fname = os.path.join(self.reports_dir,
@@ -49,13 +61,13 @@ class ReportGenerator():
 
         # 2a. Generate all 1D figures to show in report
         self.fig_generator = FigureGenerator(self.experiment_dir)
-        figure_fnames_1D = self.fig_generator.generate_all_1D_figures()
+        _ = self.fig_generator.generate_all_1D_figures()
 
         # 2b. If search experiment generate all 2D figures to show in report
         search_vars, search_targets = self.get_hypersearch_data()
         if len(search_vars) > 1:
-            figure_fnames_2D = self.fig_generator.generate_all_2D_figures(
-                                        search_vars, search_targets)
+            _ = self.fig_generator.generate_all_2D_figures(
+                search_vars, search_targets)
 
         self.figure_fnames = abs_figure_paths(self.fig_generator.figures_dir)
         self.logger.info(f'Report - GENERATED - figures - total:'
@@ -71,14 +83,14 @@ class ReportGenerator():
 
         # 4. Also add figures to the markdown text to render
         add_figures_to_markdown(self.md_report_fname, self.figure_fnames)
-        self.logger.info(f'Report - UPDATED - .md with figures.')
+        self.logger.info('Report - UPDATED - .md with figures.')
 
         # 5. Generate the PDF file.
         if self.pdf_gen:
             self.pdf_report_fname = os.path.join(self.reports_dir,
                                                  self.e_id + ".pdf")
             generate_pdf(self.pdf_report_fname, self.html_text)
-            self.logger.info(f'Report - GENERATED - .pdf: {self.e_id + ".pdf"}')
+            self.logger.info(f'Report - .pdf GENERATED: {self.e_id + ".pdf"}')
 
     def get_hypersearch_data(self):
         """ Get hypersearch variables + targets for 2D visualization loop. """
@@ -99,13 +111,13 @@ def construct_markdown_table(data_dict, exclude_keys=[],
     for k, value in data_dict.items():
         # Only add to table row if not excluded in given list
         if k not in exclude_keys:
-            current_row["Param C" + str(entry_counter+1)] = "`" + str(k) + "`"
+            current_row["Param C" + str(entry_counter + 1)] = "`" + str(k) + "`"  # noqa: E501
             if type(value) == list:
                 v_temp = [str(x) for x in value]
                 v = ', '.join(v_temp)
             else:
                 v = str(value)
-            current_row["Value C" + str(entry_counter+1)] = "`" + str(v) + "`"
+            current_row["Value C" + str(entry_counter + 1)] = "`" + str(v) + "`"  # noqa: E501
             entry_counter += 1
 
             # reset the row dictionary and append to table list
@@ -122,7 +134,7 @@ def construct_markdown_table(data_dict, exclude_keys=[],
 
 def construct_hypersearch_table(params_to_search):
     """ Construct a markdown table for the hyperparameter search ranges. """
-    table, current_row, entry_counter = [], {}, 0
+    table, current_row = [], {}
     for type, var_dict in params_to_search.items():
         for var_name, var_range in var_dict.items():
             current_row["Var. Type"] = "`" + str(type) + "`"
@@ -132,7 +144,7 @@ def construct_hypersearch_table(params_to_search):
                 v_temp = []
                 for k_r, v_r in var_range.items():
                     v_temp.append(str(k_r) + ": " + str(v_r))
-            except:
+            except Exception:
                 v_temp = [str(x) for x in var_range]
             v = ', '.join(v_temp)
             current_row["Var. Range"] = "`" + str(v) + "`"
@@ -157,7 +169,8 @@ def generate_markdown(e_id, md_report_fname, report_data):
 
         # Meta-Data of the Experiment
         doc.addHeader(2, "Experiment Meta-Data.")
-        doc.writeTextLine(f'{doc.addBoldedText("Purpose:")} ' + report_data["purpose"])
+        doc.writeTextLine(f'{doc.addBoldedText("Purpose:")} '
+                          + report_data["purpose"])
 
         doc.addHeader(3, "General Job Settings.")
         hyper_table = construct_markdown_table(report_data,
@@ -181,7 +194,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addTable(dictionary_list=specific_table)
         if report_data["meta_job_args"]["job_type"] == "hyperparameter-search":
             search_table = construct_hypersearch_table(
-                            report_data["job_spec_args"]["params_to_search"])
+                report_data["job_spec_args"]["params_to_search"])
             doc.addTable(dictionary_list=search_table)
 
         # Base Configuration Hyperparameters used in the Experiment
@@ -213,7 +226,7 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
         # By default: 2 Figures per row - 45% width
         for fig in figure_fnames:
             html_text += (f'<img src="{fig}" width="45%"'
-                            + 'style="margin-right:20px">')
+                          + 'style="margin-right:20px">')
         output_file.write(html_text)
     return html_text
 
@@ -242,7 +255,7 @@ def add_figures_to_markdown(md_report_fname, figure_fnames):
 def abs_figure_paths(directory):
     """ Return all absolute figure paths to include in report. """
     abs_paths = []
-    for dirpath,_,filenames in os.walk(directory):
+    for dirpath, _, filenames in os.walk(directory):
         for f in filenames:
             if f.endswith(".png"):
                 abs_paths.append(os.path.abspath(os.path.join(dirpath, f)))

@@ -13,7 +13,7 @@ def load_model(ckpt_path: str, model_type: str, model=None):
 
         checkpoint = torch.load(ckpt_path, map_location='cpu')
         if model is not None:
-            #raise ValueError("Please provide a torch model instance.")
+            # raise ValueError("Please provide a torch model instance.")
             model.load_state_dict(checkpoint)
             return model
         else:

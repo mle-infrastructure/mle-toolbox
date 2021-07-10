@@ -11,8 +11,7 @@ import numpy as np
 import plotext as plt
 
 from mle_toolbox import mle_config
-from mle_toolbox.utils import (load_mle_toolbox_config,
-                               determine_resource)
+from mle_toolbox.utils import determine_resource
 from mle_toolbox.protocol import (protocol_summary,
                                   generate_protocol_table)
 
@@ -25,6 +24,7 @@ class Header:
          / /  / / /___/ /__/_____/ / / /_/ / /_/ / / /_/ / /_/ />  <
         /_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
     """.splitlines()
+
     def __rich__(self) -> Panel:
         grid = Table.grid(expand=True)
         grid.add_column(justify="left")
@@ -41,7 +41,7 @@ class Header:
             Header.welcome_ascii[1],
             "Author: @RobertTLange :bird:",
             # TODO: Figure out why link won't work if we use text != url
-            #[u white link=https://twitter.com/RobertTLange]
+            # [u white link=https://twitter.com/RobertTLange]
         )
         resource = determine_resource()
         if resource == "sge-cluster":
@@ -119,7 +119,8 @@ def make_node_jobs_cluster(host_data) -> Align:
     table = Table(show_header=True, show_footer=True,
                   header_style="bold red", row_styles=["none", "dim"],
                   border_style="red", box=box.SIMPLE)
-    table.add_column("NODE/PART", Text.from_markup("[b]Total", justify="right"),
+    table.add_column("NODE/PART", Text.from_markup("[b]Total",
+                                                   justify="right"),
                      style="white", justify="left")
     table.add_column("ALL", sum_all, justify="center")
     table.add_column("RUN", sum_running, justify="center")
@@ -148,11 +149,13 @@ def make_device_panel_local(device_data) -> Align:
 
     # Add row for each individual core
     num_cores = len(device_data["core_id"])
-    for i in range(int(num_cores/2)):
+    for i in range(int(num_cores / 2)):
         t1.add_row("C-" + str(device_data["core_id"][i]),
                    str(device_data["percent_util"][i]),
-                   "C-" + str(device_data["core_id"][int(i+num_cores/2-1)]),
-                   str(device_data["percent_util"][int(i+num_cores/2-1)]))
+                   "C-"
+                   + str(device_data["core_id"][int(i + num_cores / 2 - 1)]),
+                   str(device_data["percent_util"][int(i + num_cores / 2 - 1)])
+                   )
 
     t2 = Table(show_header=True, show_footer=False, box=box.SIMPLE,
                border_style="red", header_style="bold red")
@@ -187,7 +190,7 @@ def make_process_panel_local(proc_data) -> Align:
     t1.add_column("MEM-MB", str(round(proc_data["total_mem_util"], 1)),
                   justify="center")
 
-    for i in range(int(num_procs/2)):
+    for i in range(int(num_procs / 2)):
         t1.add_row(str(proc_data["pid"][i]),
                    str(proc_data["p_name"][i][:6]),
                    str(round(proc_data["cpu_util"][i], 1)),
@@ -200,7 +203,7 @@ def make_process_panel_local(proc_data) -> Align:
     t2.add_column("CPU-%", justify="center")
     t2.add_column("MEM-MB", justify="center")
 
-    for i in range(int(num_procs/2), num_procs):
+    for i in range(int(num_procs / 2), num_procs):
         t2.add_row(str(proc_data["pid"][i]),
                    str(proc_data["p_name"][i][:6]),
                    str(round(proc_data["cpu_util"][i], 1)),
@@ -282,7 +285,7 @@ def make_last_experiment(last_data) -> Align:
                                last_data["params_to_search"][k][var]["begin"],
                                last_data["params_to_search"][k][var]["end"],
                                last_data["params_to_search"][k][var]["bins"]]
-                    except:
+                    except Exception:
                         row = [var,
                                last_data["params_to_search"][k][var]["begin"],
                                last_data["params_to_search"][k][var]["end"],
@@ -303,7 +306,7 @@ def make_last_experiment(last_data) -> Align:
 
 def make_est_completion(time_data) -> Align:
     """ Generate rich table summarizing estim. time of experim. completion. """
-    table = Table(show_header=False, show_footer=False, box = box.SIMPLE_HEAD,
+    table = Table(show_header=False, show_footer=False, box=box.SIMPLE_HEAD,
                   header_style="bold yellow", border_style="yellow")
     table.add_column()
     table.add_column()
@@ -329,31 +332,25 @@ def make_help_commands() -> Align:
     table = Table(show_header=True, show_footer=False, border_style="white",
                   header_style="bold magenta", box=box.SIMPLE_HEAD)
     table.add_column("Command", style="white", justify="left")
-    #table.add_column("Options", )
     table.add_column("Function", )
     table.add_row(
         "mle run",
-        #"[b blue]-np, -nw, -resource, -purpose",
         "[b red] Experiment w. config .yaml",
     )
     table.add_row(
         "mle retrieve",
-        #"[b blue]-e_id, -fig_dir, -exp_dir",
         "[b red] Retrieve from cluster/GCS",
     )
     table.add_row(
         "mle report",
-        #"[b blue]--experiment_id",
         "[b red] Generate results .md report",
     )
     table.add_row(
         "mle monitor",
-        #"[b blue]None",
         "[b red] Monitor resource usage",
     )
     table.add_row(
         "mle init",
-        #"[b blue]None",
         "[b red] Init creds/default setup",
     )
     return table
@@ -392,7 +389,7 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     plt.ylim(0, 1)
 
     # Get time points start and end of monitored period
-    xticks = [0, len(cpu_hist["times_hour"])-1]
+    xticks = [0, len(cpu_hist["times_hour"]) - 1]
     xlabels = [cpu_hist["times_date"][i][:5] + "-" +
                cpu_hist["times_hour"][i] for i in xticks]
     plt.ticks(0, 3)
@@ -404,8 +401,8 @@ def make_cpu_util_plot(cpu_hist) -> Align:
     # Build the rich table graph
     message = Table.grid()
     message.add_column()
-    for l in lines:
-        message.add_row(l)
+    for line in lines:
+        message.add_row(line)
     return Align.center(message)
 
 
@@ -424,7 +421,7 @@ def make_memory_util_plot(mem_hist) -> Align:
     plt.ylim(0, 1)
 
     # Get time points start and end of monitored period
-    xticks = [0, len(mem_hist["times_hour"])-1]
+    xticks = [0, len(mem_hist["times_hour"]) - 1]
     xlabels = [mem_hist["times_date"][i][:5] + "-" +
                mem_hist["times_hour"][i] for i in xticks]
     plt.ticks(0, 3)
@@ -436,8 +433,8 @@ def make_memory_util_plot(mem_hist) -> Align:
     # Build the rich table graph
     message = Table.grid()
     message.add_column()
-    for l in lines:
-        message.add_row(l)
+    for line in lines:
+        message.add_row(line)
     return Align.center(message)
 
 

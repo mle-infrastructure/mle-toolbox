@@ -4,7 +4,8 @@ import random
 import numpy as np
 import platform
 import re
-import sys, select
+import sys
+import select
 from typing import Union, Tuple
 from dotmap import DotMap
 from datetime import datetime
@@ -38,8 +39,8 @@ mle_config = load_mle_toolbox_config()
 
 
 def set_random_seeds(seed_id: Union[int, None],
-                     return_key: bool=False,
-                     verbose: bool=False):
+                     return_key: bool = False,
+                     verbose: bool = False):
     """ Set random seed (random, npy, torch, gym) for reproduction """
     if seed_id is not None:
         os.environ['PYTHONHASHSEED'] = str(seed_id)
@@ -61,20 +62,21 @@ def set_random_seeds(seed_id: Union[int, None],
             seeds_set.append('gym')
 
         if verbose:
-            print(f"-- Random seeds ({', '.join(seeds_set)}) were set to {seed_id}")
+            print(f"-- Random seeds ({', '.join(seeds_set)}) set to {seed_id}")
 
         if return_key:
             if not __jax_installed:
-                raise ValueError("You need to install jax to return a PRNG key.")
+                raise ValueError("You need to install jax to return PRNG key.")
             key = jax.random.PRNGKey(seed_id)
             return key
     else:
-        print("Please provide seed_id that is not None. Using package default.")
+        print("Please provide seed_id that isn't None. Using package default.")
 
 
-def parse_experiment_args(default_config_fname: str="configs/base_config.json",
-                          default_seed: Union[None, int] = None,
-                          default_experiment_dir: str="experiments/"):
+def parse_experiment_args(
+    default_config_fname: str = "configs/base_config.json",
+    default_seed: Union[None, int] = None,
+        default_experiment_dir: str = "experiments/"):
     """ Helper function to parse experiment args given to MLExperiment. """
     parser = argparse.ArgumentParser()
     # Standard inputs for training runs (config to load & experiment directory)
@@ -142,7 +144,7 @@ def load_experiment_config(config_fname: str,
     else:
         try:
             log_config.seed_id = "seed_" + str(train_config.seed_id)
-        except:
+        except Exception:
             log_config.seed_id = "seed_default"
 
     # Add model checkpoint string to train configuration
@@ -151,19 +153,19 @@ def load_experiment_config(config_fname: str,
     return train_config, model_config, log_config
 
 
-def get_extra_cmd_line_input(extra_cmd_args: Union[list, None]=None):
+def get_extra_cmd_line_input(extra_cmd_args: Union[list, None] = None):
     """ Parse additional command line inputs & return them as dotmap. """
     # extra_cmd_args is a sequential list of command line keys & arguments
     if extra_cmd_args is not None:
         # Unpack the command line data into a dotmap dict
         extra_input = {}
-        num_extra_args = int(len(extra_cmd_args)/2)
+        num_extra_args = int(len(extra_cmd_args) / 2)
         counter = 0
         for i in range(num_extra_args):
-            cmd_val = extra_cmd_args[counter+1]
+            cmd_val = extra_cmd_args[counter + 1]
             try:
                 cmd_val = float(cmd_val)
-            except:
+            except Exception:
                 pass
             extra_input[extra_cmd_args[counter]] = cmd_val
             counter += 2
@@ -191,7 +193,7 @@ def ask_for_resource_to_run():
     return resource_to_run
 
 
-def ask_for_binary_input(question: str, default_answer: str="N"):
+def ask_for_binary_input(question: str, default_answer: str = "N"):
     """ Ask user if they want to exec on remote resource. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     q_str = f"{time_t} {question} [Y/N]"

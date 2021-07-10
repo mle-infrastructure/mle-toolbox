@@ -1,5 +1,4 @@
 from datetime import datetime
-import subprocess as sp
 import numpy as np
 
 
@@ -32,9 +31,9 @@ def get_local_process_data():
                  "mem_util": [],
                  "cpu_util": [],
                  "cmdline": [],
-                 "total_cpu_util":  psutil.cpu_count()*psutil.cpu_percent(),
+                 "total_cpu_util": psutil.cpu_count() * psutil.cpu_percent(),
                  "total_mem_util": (psutil.virtual_memory()._asdict()["used"]
-                              /1000000)}
+                                    / 1000000)}
 
     # Get top 5 most memory/cpu demanding processes on local machine
     mem_sort, cpu_sort = get_cpu_processes()
@@ -55,7 +54,7 @@ def get_local_process_data():
     return proc_data
 
 
-def get_cpu_processes(top_k: int=3):
+def get_cpu_processes(top_k: int = 3):
     ''' Get list of process sorted by Memory (MB)/CPU Usage (CPU%). '''
     listOfProcObjects = []
     # Iterate over the list
@@ -67,8 +66,9 @@ def get_cpu_processes(top_k: int=3):
             pinfo['vms'] = proc.memory_info().vms / (1024 * 1024 * 1000)
             pinfo['cpu_percent'] = proc.cpu_percent()
             # Append dict to list
-            listOfProcObjects.append(pinfo);
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            listOfProcObjects.append(pinfo)
+        except (psutil.NoSuchProcess, psutil.AccessDenied,
+                psutil.ZombieProcess):
             pass
 
     # Sort list of dict by key vms i.e. memory usage
@@ -83,7 +83,7 @@ def get_cpu_processes(top_k: int=3):
 
 def get_local_device_data():
     """ Get utilization per core. """
-    device_data = {"core_id": np.arange(1, psutil.cpu_count()+1),
+    device_data = {"core_id": np.arange(1, psutil.cpu_count() + 1),
                    "percent_util": [round(e, 1) for e in
                                     psutil.cpu_percent(interval=1,
                                                        percpu=True)],
@@ -110,21 +110,21 @@ def get_nvidia_gpu_data():
         gpu_data["gpu_id"].append(gp.id),
         gpu_data["gpu_name"].append(gp.name)
         # Load and memory usage in %
-        gpu_data["gpu_load"].append(round(gp.load*100, 1))
-        gpu_data["gpu_mem_util"].append(round(gp.memoryUtil*100, 1))
+        gpu_data["gpu_load"].append(round(gp.load * 100, 1))
+        gpu_data["gpu_mem_util"].append(round(gp.memoryUtil * 100, 1))
         # Memory in GB
-        gpu_data["gpu_mem_total"].append(round(gp.memoryTotal/1000, 1))
-        gpu_data["gpu_mem_used"].append(round(gp.memoryUsed/1000, 1))
+        gpu_data["gpu_mem_total"].append(round(gp.memoryTotal / 1000, 1))
+        gpu_data["gpu_mem_used"].append(round(gp.memoryUsed / 1000, 1))
     return gpu_data
 
 
 def get_util_local_data():
     """ Get memory and CPU utilisation for specific local machine. """
     num_cpus = psutil.cpu_count()
-    total_mem = psutil.virtual_memory()._asdict()["total"]/1000000000
-    used_mem = psutil.virtual_memory()._asdict()["used"]/1000000000
+    total_mem = psutil.virtual_memory()._asdict()["total"] / 1000000000
+    used_mem = psutil.virtual_memory()._asdict()["used"] / 1000000000
     util_data = {"cores": num_cpus,
-                 "cores_util": num_cpus*psutil.cpu_percent()/100,
+                 "cores_util": num_cpus * psutil.cpu_percent() / 100,
                  "mem": total_mem,
                  "mem_util": used_mem,
                  "time_date": datetime.now().strftime("%m/%d/%y"),

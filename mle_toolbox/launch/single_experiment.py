@@ -12,4 +12,4 @@ def run_single_experiment(resource_to_run: str,
                             single_job_args,
                             meta_job_args.experiment_dir)
     # 2. Run the single experiment
-    status_out = experiment.run()
+    _ = experiment.run()

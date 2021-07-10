@@ -1,0 +1,7 @@
+[flake8]
+ignore = C901, W503, W504, W605
+max-complexity = 12
+per-file-ignores =
+    ./mle_toolbox/experiment/cloud/gcp/startup_script.py:E501
+exclude =
+    ./mle_toolbox/initialize/config_description.py

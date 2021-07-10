@@ -1,7 +1,6 @@
 import os
 from typing import List, Union
 import h5py
-import copy
 import numpy as np
 
 
@@ -12,7 +11,7 @@ def merge_hdf5_files(new_filename: str,
     """ Merges a set of hdf5 files into a new hdf5 file with more groups. """
     file_to = h5py.File(new_filename, 'w')
     for i, log_p in enumerate(log_paths):
-        file_from = h5py.File(log_p,'r')
+        file_from = h5py.File(log_p, 'r')
         datasets = get_datasets('/', file_from)
         if file_ids is None:
             write_data_to_file(file_to, file_from, datasets)
@@ -30,7 +29,8 @@ def merge_hdf5_files(new_filename: str,
 def get_datasets(key: str,
                  archive: h5py.File):
     """ Collects different paths to datasets in recursive fashion. """
-    if key[-1] != '/': key += '/'
+    if key[-1] != '/':
+        key += '/'
     out = []
     for name in archive[key]:
         path = key + name
@@ -53,7 +53,7 @@ def write_data_to_file(file_to: h5py.File,
     else:
         groups = [i[0] + file_id + "_" + i[1:] for i in groups if len(i) > 0]
     # sort groups based on depth
-    idx    = np.argsort(np.array([len(i.split('/')) for i in groups]))
+    idx = np.argsort(np.array([len(i.split('/')) for i in groups]))
     groups = [groups[i] for i in idx]
 
     # create all groups that contain dataset that will be copied
@@ -63,8 +63,9 @@ def write_data_to_file(file_to: h5py.File,
     # copy datasets
     for path in datasets:
         # - get group name // - minimum group name // - copy data
-        group = path[::-1].split('/',1)[1][::-1]
-        if len(group) == 0: group = '/'
+        group = path[::-1].split('/', 1)[1][::-1]
+        if len(group) == 0:
+            group = '/'
         if file_id is not None:
             group_to_index = group[0] + file_id + "_" + group[1:]
         else:

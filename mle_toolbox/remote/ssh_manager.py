@@ -11,14 +11,14 @@ def setup_proxy_server():
     """ Set Gcloud creds & port to tunnel for internet connection. """
     if determine_resource() == "slurm-cluster":
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-                    mle_config.slurm.credentials.gcp_credentials_path)
-        if mle_config.slurm.info.http_proxy is not "":
+            mle_config.slurm.credentials.gcp_credentials_path)
+        if mle_config.slurm.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.slurm.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.slurm.info.https_proxy
     elif determine_resource() == "sge-cluster":
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-                    mle_config.sge.credentials.gcp_credentials_path)
-        if mle_config.sge.info.http_proxy is not "":
+            mle_config.sge.credentials.gcp_credentials_path)
+        if mle_config.sge.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.sge.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.sge.info.https_proxy
 
@@ -68,7 +68,7 @@ class SSH_Manager(object):
                                username=self.user, password=self.password,
                                timeout=100)
                 break
-            except:
+            except Exception:
                 continue
         return client
 
@@ -87,8 +87,8 @@ class SSH_Manager(object):
             with self.generate_tunnel() as tunnel:
                 client = self.connect(tunnel)
                 stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
-                for l in stderr:
-                    print(l)
+                for line in stderr:
+                    print(line)
                 client.close()
         return
 

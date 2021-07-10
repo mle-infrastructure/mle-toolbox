@@ -32,7 +32,7 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
 def slurm_submit_job(filename: str,
                      cmd_line_arguments: str,
                      job_arguments: dict,
-                     clean_up: bool=True) -> str:
+                     clean_up: bool = True) -> str:
     """ Create a qsub job & submit it based on provided file to execute. """
     # Create base string of job id
     base = "submit_{0}".format(random_id())
@@ -87,6 +87,7 @@ def slurm_submit_job(filename: str,
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(0.5)
 
     # Finally delete all the unneccessary log files
@@ -106,6 +107,7 @@ def slurm_monitor_job(job_id: Union[list, int]) -> bool:
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(0.5)
 
     job_info = out.split(b'\n')[1:]

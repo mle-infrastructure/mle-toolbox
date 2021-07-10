@@ -3,8 +3,8 @@ import logging
 import time
 import datetime
 from tqdm import tqdm
-
 from typing import Union
+from typing import List
 import numpy as np
 from .experiment import Experiment
 from ..utils import merge_hdf5_files
@@ -18,13 +18,13 @@ class ExperimentQueue(object):
     def __init__(self,
                  resource_to_run: str,
                  job_filename: str,
-                 config_filenames: Union[None, str],
+                 config_filenames: Union[str, List[str]],
                  job_arguments: Union[None, dict],
                  experiment_dir: str,
                  num_seeds: int,
-                 default_seed: int=0,
-                 max_running_jobs: int=10,
-                 logger_level: int=logging.WARNING):
+                 default_seed: int = 0,
+                 max_running_jobs: int = 10,
+                 logger_level: int = logging.WARNING):
         # Init experiment class with relevant info
         self.resource_to_run = resource_to_run     # compute resource for job
         self.job_filename = job_filename           # path to train script
@@ -50,10 +50,14 @@ class ExperimentQueue(object):
         # Extract extra_cmd_line_input from job_arguments
         if self.job_arguments is not None:
             if "extra_cmd_line_input" in self.job_arguments.keys():
-                self.extra_cmd_line_input = self.job_arguments["extra_cmd_line_input"]
+                self.extra_cmd_line_input = self.job_arguments["extra_cmd_line_input"]  # noqa: 501
                 del self.job_arguments["extra_cmd_line_input"]
             else:
                 self.extra_cmd_line_input = None
+
+        # Make sure that config_filenames is list of strings to loop over
+        if type(self.config_filenames) != list:
+            self.config_filenames = list(self.config_filenames)
 
         # Generate a list of jobs to be queued/executed on the resource
         # Recreate directory in which the results are stored - later merge
@@ -80,9 +84,9 @@ class ExperimentQueue(object):
         self.num_total_jobs = len(self.queue)
 
         self.logger.info("QUEUED - {} random seeds - {} configs".format(
-                                                    self.num_seeds,
-                                                    len(self.config_filenames)))
-        self.logger.info("TOTAL JOBS TO EXECUTE - {}".format(self.num_total_jobs))
+            self.num_seeds, len(self.config_filenames)))
+        self.logger.info("TOTAL JOBS TO EXECUTE - {}".format(
+            self.num_total_jobs))
 
     def run(self):
         """ Launch -> Monitor -> Merge individual logs. """
@@ -97,8 +101,7 @@ class ExperimentQueue(object):
             self.queue_counter += 1
             time.sleep(0.1)
         self.logger.info("LAUNCH - FIRST {}/{} SET OF JOBS".format(
-                                                        self.num_running_jobs,
-                                                        self.num_total_jobs))
+            self.num_running_jobs, self.num_total_jobs))
 
         # 2. Set up Progress Bar Counter of completed jobs
         self.pbar = tqdm(total=self.num_total_jobs,
@@ -122,7 +125,8 @@ class ExperimentQueue(object):
                         # Merge seeds of one eval/config if all jobs done!
                         completed_seeds = 0
                         for other_job in self.queue:
-                            if other_job["config_fname"] == job["config_fname"]:
+                            if (other_job["config_fname"]
+                               == job["config_fname"]):
                                 if other_job["status"] == 0:
                                     completed_seeds += 1
                         if completed_seeds == self.num_seeds:
@@ -162,11 +166,11 @@ class ExperimentQueue(object):
         return experiment, job_id
 
     def monitor(self, experiment: Experiment, job_id: str,
-                continuous: bool=True):
+                continuous: bool = True):
         """ Monitor all seed-specific jobs for one eval configuration. """
         if continuous:
             while True:
-                status = experiment.monitor(all_job_ids[i], False)
+                status = experiment.monitor(job_id, False)
                 if status == 0:
                     return 0
         else:
@@ -174,22 +178,23 @@ class ExperimentQueue(object):
             return status
 
     def merge_logs(self, log_dir: str, base_str: str):
-        """ Collect all seed-specific seeds into single <eval_id>.hdf5 file. """
+        """ Collect all seed-specific seeds into single <eval_id>.hdf5 file."""
         # Only merge logs if experiment is based on python experiment!
         # Otherwise .hdf5 file system is not used and there is nothing to merge
         filename, file_extension = os.path.splitext(self.job_filename)
         if file_extension == ".py":
-            # Merge all resulting .hdf5 files for different seeds into single log
+            # Merge all .hdf5 files for different seeds into single log
             collected_log_path = os.path.join(log_dir, base_str + ".hdf5")
             while True:
-                log_paths = [os.path.join(log_dir, l)
-                             for l in os.listdir(log_dir)]
+                log_paths = [os.path.join(log_dir, log)
+                             for log in os.listdir(log_dir)]
                 if len(log_paths) == self.num_seeds:
                     # Delete joined log if at some point over-eagerly merged
                     if collected_log_path in log_paths:
                         os.remove(collected_log_path)
                     break
-                else: time.sleep(1)
+                else:
+                    time.sleep(1)
 
             merge_hdf5_files(collected_log_path, log_paths,
                              delete_files=True)

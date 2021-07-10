@@ -2,15 +2,16 @@ import os
 import hashlib
 import json
 from datetime import datetime
-import sys, select
+import sys
+import select
 from typing import Union
-from ..utils import load_json_config, determine_resource
+from ..utils import load_json_config
 from .protocol_helpers import load_local_protocol_db
 
 
 def protocol_experiment(job_config: dict,
                         resource_to_run: str,
-                        cmd_purpose: Union[None, str]=None):
+                        cmd_purpose: Union[None, str] = None):
     """ Protocol the new experiment. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -22,7 +23,7 @@ def protocol_experiment(job_config: dict,
     # Add purpose of experiment - cmd args or timeout input after 30 secs
     if cmd_purpose is None:
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        print(f"{time_t} Purpose of experiment?", end= ' '),
+        print(f"{time_t} Purpose of experiment?", end=' '),
         sys.stdout.flush()
         i, o, e = select.select([sys.stdin], [], [], 60)
 
@@ -45,23 +46,22 @@ def protocol_experiment(job_config: dict,
     # Add the git latest commit hash
     try:
         import git
-        repo = git.Repo(search_parent_directories=True)
-        git_hash = repo.head.object.hexsha
-    except:
+        g = git.Repo(search_parent_directories=True)
+        git_hash = g.head.object.hexsha
+    except Exception:
         git_hash = "no-git-repo"
     db.dadd(new_experiment_id, ("git_hash", git_hash))
 
     # Add remote URL to clone repository
     try:
         git_remote = g.remote(verbose=True).split("\t")[1].split(" (fetch)")[0]
-    except:
+    except Exception:
         git_remote = "no-git-remote"
     db.dadd(new_experiment_id, ("git_remote", git_remote))
 
     # Add the absolute path for retrieving the experiment
     exp_retrieval_path = os.path.join(
-                                os.getcwd(),
-                                job_config.meta_job_args["experiment_dir"])
+        os.getcwd(), job_config.meta_job_args["experiment_dir"])
     db.dadd(new_experiment_id, ("exp_retrieval_path", exp_retrieval_path))
 
     # Add the meta experiment config
@@ -69,7 +69,7 @@ def protocol_experiment(job_config: dict,
     db.dadd(new_experiment_id, ("single_job_args", job_config.single_job_args))
 
     if (db.dget(new_experiment_id, "meta_job_args")["job_type"]
-        == "multiple-experiments"):
+            == "multiple-experiments"):
         db.dadd(new_experiment_id,
                 ("job_spec_args", job_config.multi_experiment_args))
     elif (db.dget(new_experiment_id, "meta_job_args")["job_type"]
@@ -78,18 +78,20 @@ def protocol_experiment(job_config: dict,
                 ("job_spec_args", job_config.param_search_args))
 
     # Add the base config - train, model, log
-    base_config = load_json_config(job_config.meta_job_args["base_train_config"])
+    base_config = load_json_config(
+        job_config.meta_job_args["base_train_config"])
     db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
     # Model/Network config is not required!
     try:
-        db.dadd(new_experiment_id, ("model_config", base_config["model_config"]))
-    except:
+        db.dadd(new_experiment_id,
+                ("model_config", base_config["model_config"]))
+    except Exception:
         pass
     db.dadd(new_experiment_id, ("log_config", base_config["log_config"]))
 
     # Add the number of seeds over which experiment is run
     if job_config.meta_job_args["job_type"] == "hyperparameter-search":
-        num_seeds = job_config.param_search_args.search_resources["num_seeds_per_eval"]
+        num_seeds = job_config.param_search_args.search_resources["num_seeds_per_eval"]     # noqa: disable=E501
     elif job_config.meta_job_args["job_type"] == "multiple-experiments":
         num_seeds = job_config.multi_experiment_args["num_seeds"]
     else:

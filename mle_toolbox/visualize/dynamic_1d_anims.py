@@ -24,7 +24,7 @@ class AnimatedLine(object):
         self.num_lines = data.shape[1]
         sns.set_palette(sns.color_palette("coolwarm", self.num_lines))
 
-        self.data = data #np.vstack([data, np.zeros((10, data.shape[1]))])
+        self.data = data  # np.vstack([data, np.zeros((10, data.shape[1]))])
         self.t = 0
         self.dt = dt
         self.title = title
@@ -60,24 +60,24 @@ class AnimatedLine(object):
                 label = self.base_label + " " + str(self.line_labels[l_id])
             else:
                 label = self.base_label + " " + str(l_id + 1)
-            self.line.append(self.ax.plot(np.arange(0, self.dt*y.shape[0],
+            self.line.append(self.ax.plot(np.arange(0, self.dt * y.shape[0],
                                                     self.dt),
                                           y[0, l_id], label=label)[0])
 
         self.ax.legend(fontsize=15, loc=2)
-        self.ax.axis([0, self.dt*self.num_steps,
-                      np.min(self.data)-0.5,
-                      np.max(self.data)+0.5])
-        self.ax.set_title(self.title + r": $t={}$".format(self.t+1),
+        self.ax.axis([0, self.dt * self.num_steps,
+                      np.min(self.data) - 0.5,
+                      np.max(self.data) + 0.5])
+        self.ax.set_title(self.title + r": $t={}$".format(self.t + 1),
                           fontsize=15)
         # For FuncAnimation's sake, we need to return the artist we'll be using
         # Note that it expects a sequence of artists, thus the trailing comma.
         return self.line,
 
     def update(self, i):
-        sub_data = self.data[:(i+1), :]
+        sub_data = self.data[:(i + 1), :]
         for l_id, l in enumerate(self.line):
-            l.set_data(np.arange(0, self.dt*sub_data.shape[0], self.dt),
+            l.set_data(np.arange(0, self.dt * sub_data.shape[0], self.dt),
                        sub_data[:, l_id])
         self.t = self.t + self.dt
         self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t),

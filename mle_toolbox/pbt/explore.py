@@ -14,12 +14,12 @@ class ExplorationStrategy(object):
         new_hyperparams = {}
         for param_name, param_value in hyperparams.items():
             new_hyperparams[param_name] = (np.random.choice([0.8, 1.2])
-                                           * param_value)
+                                           * param_value)   # noqa: W503
         return new_hyperparams
 
     def resample(self):
         """ Resample hyperparam from original prior distribution. """
-        # TODO: Allow different prior distributions (uniform, log-uniform, etc.)
+        # TODO: Allow various prior distributions (uniform, log-uniform, etc.)
         hyperparams = {}
         # Loop over categorical, real and integer-valued vars and sample
         for var_type in self.variable_types:

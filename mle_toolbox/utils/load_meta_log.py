@@ -30,7 +30,7 @@ class MetaLog(object):
         sub_dict = subselect_meta_log(self.meta_log, run_ids)
         return MetaLog(sub_dict)
 
-    def plot(self, target_to_plot: str, iter_to_plot: Union[str, None]=None,
+    def plot(self, target_to_plot: str, iter_to_plot: Union[str, None] = None,
              fig=None, ax=None):
         """ Plot all runs in meta-log for variable 'target_to_plot'. """
         from mle_toolbox.visualize import visualize_1D_lcurves
@@ -60,14 +60,14 @@ class MetaLog(object):
         return self.meta_log[item]
 
 
-def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
+def load_meta_log(log_fname: str, mean_seeds: bool = True) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
     # Get all ids of all runs (b_1_eval_0_seed_0)
     run_names = list(h5f.keys())
     # Get only stem of ids (b_1_eval_0)
-    run_ids = list(set([r_n.split("_seed")[0] for r_n in run_names]))
+    # run_ids = list(set([r_n.split("_seed")[0] for r_n in run_names]))
     # Get all main data source keys ("meta", "stats", "time")
     data_sources = list(h5f[run_names[0]].keys())
     # Get all variables within the data sources
@@ -82,7 +82,6 @@ def load_meta_log(log_fname: str, mean_seeds: bool=True) -> DotMap:
         run = h5f[rn]
         source_to_store = {key: {} for key in data_sources}
         for ds in data_sources:
-            run_source = run[ds]
             data_to_store = {key: {} for key in data_items[ds]}
             for i, o_name in enumerate(data_items[ds]):
                 data_to_store[o_name] = run[ds][o_name][:]
@@ -151,7 +150,7 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
                 mean_dict = {key: {} for key in data_items[ds]}
                 for i, o_name in enumerate(data_items[ds]):
                     if (type(new_results_dict[eval][ds][o_name][0][0]) not
-                        in [str, bytes, np.bytes_, np.str_]):
+                       in [str, bytes, np.bytes_, np.str_]):
                         mean_tol, std_tol = tolerant_mean(
                             new_results_dict[eval][ds][o_name])
                         mean_dict[o_name]["mean"] = mean_tol
@@ -163,7 +162,8 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
                 mean_dict = {}
                 for i, o_name in enumerate(data_items[ds]):
                     temp = np.array(
-                    new_results_dict[eval][ds][o_name]).squeeze().astype('U200')
+                        new_results_dict[eval][ds][o_name]
+                    ).squeeze().astype('U200')
                     # Get rid of duplicate experiment dir strings
                     if o_name in ["experiment_dir", "eval_id", "config_fname",
                                   "model_type"]:
@@ -188,13 +188,13 @@ def tolerant_mean(arrs: list):
         arr = np.ma.empty((np.max(lens), len(arrs)))
         arr.mask = True
         for idx, l in enumerate(arrs):
-            arr[:len(l),  idx] = l
+            arr[:len(l), idx] = l
     else:
         arr = np.ma.empty((np.max(lens), arrs[0].shape[1], len(arrs)))
         arr.mask = True
         for idx, l in enumerate(arrs):
             arr[:len(l), :, idx] = l
-    return arr.mean(axis = -1), arr.std(axis=-1)
+    return arr.mean(axis=-1), arr.std(axis=-1)
 
 
 def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):

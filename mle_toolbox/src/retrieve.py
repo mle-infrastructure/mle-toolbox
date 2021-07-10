@@ -29,14 +29,14 @@ def retrieve(cmd_args):
         while True:
             # If no id given show last experiments & ask for input
             if experiment_id == "no-id-given" and retrieval_counter == 0:
-                experiment_id, db, all_e_ids, accessed_remote_db = ask_for_experiment_id()
+                experiment_id, db, all_e_ids, accessed_db = ask_for_experiment_id()  # noqa: 501
                 if cmd_args.retrieve_local:
                     retrieve_single_experiment(db, experiment_id,
                                                get_dir_or_fig)
                 else:
                     if cmd_args.local_dir_name is None:
-                        local_dir_name = input(time_t +
-                                         " Local results directory name:  ")
+                        local_dir_name = input(
+                            time_t + " Local results directory name:  ")
                     else:
                         local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
@@ -52,8 +52,8 @@ def retrieve(cmd_args):
                                                get_dir_or_fig)
                 else:
                     if cmd_args.local_dir_name is None:
-                        local_dir_name = input(time_t +
-                                         " Local results directory name:  ")
+                        local_dir_name = input(
+                            time_t + " Local results directory name:  ")
                     else:
                         local_dir_name = cmd_args.local_dir_name
                     get_gcloud_zip_experiment(db, experiment_id,
@@ -72,7 +72,7 @@ def retrieve(cmd_args):
         for i, experiment_id in enumerate(list_of_new_e_ids):
             try:
                 stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
-            except:
+            except Exception:
                 stored_in_gcloud = False
             # Pull either from remote machine or gcloud bucket
             if cmd_args.retrieve_local and not stored_in_gcloud:
@@ -88,7 +88,7 @@ def retrieve(cmd_args):
                                           all_e_ids)
             print_framed(f'COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}')
 
-    if accessed_remote_db:
+    if accessed_db:
         send_gcloud_db()
         print(time_t, "Updated retrieval protocol status & "
               "send to gcloud storage.")
@@ -96,6 +96,8 @@ def retrieve(cmd_args):
 
 def retrieve_single_experiment(db, experiment_id: str,
                                get_dir_or_fig: str):
+    """ Retrieve a single experiment from remote resource. """
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Try to retrieve experiment path from protocol db
     while True:
         if get_dir_or_fig == "exp-dir":
@@ -114,21 +116,22 @@ def retrieve_single_experiment(db, experiment_id: str,
 
     remote_resource = db.dget(experiment_id, "exec_resource")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(time_t, "{} - Started retrieving {} - from {}".format(experiment_id,
-                                                file_path, remote_resource))
+    print(time_t, "{} - Started retrieving {} - from {}".format(
+        experiment_id, file_path, remote_resource))
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource in ["sge-cluster", "slurm-cluster"]:
         ssh_manager = SSH_Manager(remote_resource)
         ssh_manager.get_file(file_path, experiment_id)
     else:
-        raise ValueError("{} - Please provide valid remote resource. {}".format(
-                    experiment_id, remote_resource))
+        raise ValueError("{} - Provide valid remote resource. {}".format(
+                         experiment_id, remote_resource))
 
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Goodbye message if successful
-    print(time_t, "Successfully retrieved {} - from {}".format(file_path,
-                                                               remote_resource))
+    print(time_t,
+          "Successfully retrieved {} - from {}".format(file_path,
+                                                       remote_resource))
 
     # Update protocol retrieval status of the experiment
     db.dadd(experiment_id, ("retrieved_results", True))

@@ -60,6 +60,7 @@ def construct_hyperparam_range(params_to_search: dict,
                 param_range[k] = Real(float(v["begin"]), float(v["end"]),
                                       prior=v["prior"], name=k)
         if "integer" in params_to_search.keys():
+            for k, v in params_to_search["integer"].items():
                 param_range[k] = Integer(int(v["begin"]), int(v["end"]),
                                          prior=v["prior"], name=k)
     else:

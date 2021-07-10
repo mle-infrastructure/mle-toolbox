@@ -13,8 +13,8 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
                  job_fname: str,
                  experiment_dir: str,
                  search_params: dict,
-                 search_type: str="random",
-                 search_schedule: str="sync"):
+                 search_type: str = "random",
+                 search_schedule: str = "sync"):
         BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
                                        job_arguments, config_fname, job_fname,
                                        experiment_dir, search_params,
@@ -39,7 +39,7 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
                     eval_param = np.random.uniform(*p_range["values"])
                 proposal_params[p_name] = eval_param
 
-            if not proposal_params in (self.hyper_log.all_evaluated_params
+            if proposal_params not in (self.hyper_log.all_evaluated_params
                                        + param_batch):
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)

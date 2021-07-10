@@ -31,10 +31,8 @@ def whether_update_config(var_name):
 def how_update_config(var_name, var_type):
     """ Ask how variable should be updated - get string/int. """
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print("{} How do you want to update {} - {}: ".format(time_t,
-                                                     var_name,
-                                                     str(var_type)),
-          end=' ')
+    print("{} How do you want to update {} - {}: ".format(
+        time_t, var_name, str(var_type)), end=' ')
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given or timeout after 60 secs
     i, o, e = select.select([sys.stdin], [], [], 60)
@@ -53,7 +51,7 @@ def store_mle_config(config_dict,
                      config_fname=os.path.expanduser("~/mle_config.toml")):
     """ Write the toml dictionary to a file. """
     with open(config_fname, 'w') as f:
-        new_toml_string = toml.dump(config_dict, f)
+        _ = toml.dump(config_dict, f)
 
 
 def print_mle_config(mle_config):
@@ -72,18 +70,16 @@ def print_mle_config(mle_config):
             if k != sk:
                 for var in description_mle_config[k][sk]["variables"].keys():
                     table.add_row(
-                        k, sk, var,
-                        str(mle_config[k][sk][var]),
-                        description_mle_config[k][sk]["variables"][var]["description"],
-                        str(description_mle_config[k][sk]["variables"][var]["type"])
+                        k, sk, var, str(mle_config[k][sk][var]),
+                        description_mle_config[k][sk]["variables"][var]["description"],  # noqa: E501
+                        str(description_mle_config[k][sk]["variables"][var]["type"])  # noqa: E501
                     )
             else:
                 for var in description_mle_config[k][sk]["variables"].keys():
                     table.add_row(
-                        k, "---", var,
-                        str(mle_config[k][var]),
-                        description_mle_config[k][sk]["variables"][var]["description"],
-                        str(description_mle_config[k][sk]["variables"][var]["type"])
+                        k, "---", var, str(mle_config[k][var]),
+                        description_mle_config[k][sk]["variables"][var]["description"],  # noqa: E501
+                        str(description_mle_config[k][sk]["variables"][var]["type"])  # noqa: E501
                     )
     table.row_styles = ["none", "dim"]
     table.border_style = "magenta"

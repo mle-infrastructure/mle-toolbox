@@ -10,6 +10,7 @@ cmd_args_proxy = DotMap({
                 "base_train_fname": "tests/fixtures/test_python_script.py",
                 "base_train_config": "tests/fixtures/test_json_config.json",
                 "experiment_dir": "experiments/"})
+mle_config_fname = "tests/test_mle_config.toml"
 
 
 class TestFileLoading(unittest.TestCase):
@@ -30,8 +31,7 @@ class TestFileLoading(unittest.TestCase):
 
     def test_load_mle_config(self):
         """ Assert correct loading of mle config .toml file. """
-        config_fname = "tests/test_mle_config.toml"
-        mle_config = load_mle_toolbox_config(config_fname)
+        mle_config = load_mle_toolbox_config(mle_config_fname)
 
     def test_load_meta_log(self):
         return

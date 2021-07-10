@@ -9,7 +9,7 @@ class PBT_Logger(object):
         self.pbt_log_fname = pbt_log_fname
         self.pbt_log = []
 
-    def update_log(self, update_log: dict, save: bool=True):
+    def update_log(self, update_log: dict, save: bool = True):
         """ Update the trace/log of the PBT. """
         self.pbt_log.append(update_log)
         if save:
@@ -18,9 +18,7 @@ class PBT_Logger(object):
     def save_log(self):
         """ Save the trace/log of the PBT. """
         pbt_df = pd.DataFrame(self.pbt_log).drop_duplicates(
-                                              subset=["worker_id",
-                                                      "pbt_step_id",
-                                                      "num_updates"])
+            subset=["worker_id", "pbt_step_id", "num_updates"])
         save_pkl_object(pbt_df, self.pbt_log_fname)
 
 

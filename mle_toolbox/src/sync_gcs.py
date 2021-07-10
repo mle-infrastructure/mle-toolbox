@@ -7,7 +7,7 @@ from mle_toolbox.remote.gcloud_transfer import (get_gcloud_db,
 
 
 def sync_gcs():
-    """ Download experiments in GCS bucket onto drive + delete remote files. """
+    """ Download experiments in GCS bucket onto drive + delete remote files."""
     # Download the current state of the protocol db and load it in
     get_gcloud_db()
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -16,7 +16,7 @@ def sync_gcs():
         try:
             stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
             not_retrieved_yet = not db.dget(e_id, "retrieve_results")
-        except:
+        except Exception:
             stored_in_gcloud = False
         # Pull either from remote machine or gcloud bucket
         if stored_in_gcloud:
@@ -25,8 +25,7 @@ def sync_gcs():
             if not_retrieved_yet:
                 print_framed(f'RETRIEVE E-ID {e_id}')
                 gcloud_hash_fname = get_gcloud_zip_experiment(
-                                            db, e_id, all_experiment_ids
-                                                              )
+                    db, e_id, all_experiment_ids)
                 print_framed(f'DELETE E-ID {e_id}')
                 delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f'COMPLETED E-ID {e_id}')

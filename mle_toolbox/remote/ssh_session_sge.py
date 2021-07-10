@@ -29,7 +29,7 @@ def generate_remote_sge_cmd(exec_config: str,
     session_name, ext = os.path.splitext(fname_and_ext)
 
     # Purpose string to add to experiment
-    purpose_str = f"-p {purpose}" if purpose is not None else f"-np"
+    purpose_str = f"-p {purpose}" if purpose is not None else "-np"
 
     # Copy the exec string over into home directory
     if mle_config.general.use_conda_virtual_env:

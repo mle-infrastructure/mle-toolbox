@@ -1,9 +1,9 @@
-import os
 import re
 import pickledb
 import pandas as pd
 from datetime import datetime
-import sys, select
+import sys
+import select
 from typing import Union, List
 
 from rich.console import Console
@@ -35,7 +35,7 @@ def load_local_protocol_db():
     return db, all_experiment_ids, last_experiment_id
 
 
-def protocol_summary(tail: int=5, verbose: bool=True):
+def protocol_summary(tail: int = 5, verbose: bool = True):
     """ Construct a summary dataframe of previous experiments. """
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -58,13 +58,13 @@ def protocol_summary(tail: int=5, verbose: bool=True):
             resource.append(db.dget(e_id, "exec_resource"))
             try:
                 num_seeds.append(db.dget(e_id, "num_seeds"))
-            except:
+            except Exception:
                 num_seeds.append("-")
             job_args = db.dget(e_id, "single_job_args")
             num_cpus.append(job_args["num_logical_cores"])
             try:
                 num_gpus.append(job_args["num_gpus"])
-            except:
+            except Exception:
                 num_gpus.append(0)
 
             # Get job type data
@@ -88,7 +88,7 @@ def protocol_summary(tail: int=5, verbose: bool=True):
                     total_jobs.append(search_resources["num_total_evals"]
                                       * search_resources["num_seeds_per_eval"])
             elif meta_args["job_type"] == "multiple-experiments":
-                total_jobs.append(len(job_spec_args["config_fnames"])*
+                total_jobs.append(len(job_spec_args["config_fnames"]) *
                                   job_spec_args["num_seeds"])
             else:
                 total_jobs.append(1)
@@ -167,8 +167,8 @@ def delete_protocol_from_input():
             db.dump()
             print("{} Another one? - state the next id: [e_id/N]".format(
                 time_t), end=' ')
-        except:
-            print("\n{} The e_id is not in the protocol db. " \
+        except Exception:
+            print("\n{} The e_id is not in the protocol db. "
                   "Please try again: [e_id/N]".format(time_t), end=' ')
         sys.stdout.flush()
 
@@ -201,7 +201,7 @@ def abort_protocol_from_input():
             db.dump()
             print("{} Another one? - state the next id: [e_id/N]".format(
                 time_t), end=' ')
-        except:
-            print("\n{} The e_id is not in the protocol db. " \
+        except Exception:
+            print("\n{} The e_id is not in the protocol db. "
                   "Please try again: [e_id/N]".format(time_t), end=' ')
         sys.stdout.flush()

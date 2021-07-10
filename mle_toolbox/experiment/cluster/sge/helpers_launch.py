@@ -14,7 +14,7 @@ def sge_generate_startup_file(job_arguments: dict) -> str:
 
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:
-        base_template += ('#$ -l hostname=' + '&'.join((f'!'
+        base_template += ('#$ -l hostname=' + '&'.join(('!'
                           + f'{x}' + mle_config.sge.info.node_extension
                           for x in job_arguments['exclude_nodes'])) + '\n')
 

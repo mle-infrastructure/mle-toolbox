@@ -1,6 +1,5 @@
 import time
 from rich.live import Live
-from rich.console import Console
 from mle_toolbox import mle_config
 from mle_toolbox.utils import determine_resource
 from mle_toolbox.protocol import load_local_protocol_db
@@ -23,8 +22,8 @@ def monitor():
         try:
             # Import of helpers for GCloud storage of results/protocol
             from mle_toolbox.remote.gcloud_transfer import get_gcloud_db
-            accessed_remote_db = get_gcloud_db()
-        except ImportError as err:
+            _ = get_gcloud_db()
+        except ImportError:
             raise ImportError("You need to install `google-cloud-storage` to "
                               "synchronize protocols with GCloud. Or set "
                               "`use_glcoud_protocol_sync = False` in your "
@@ -42,9 +41,6 @@ def monitor():
     timer_gcs = time.time()
     timer_db = time.time()
 
-    # console = Console()
-    # console.print(layout)
-
     # Run the live updating of the dashboard
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
@@ -54,14 +50,14 @@ def monitor():
                                                          all_e_ids, last_e_id)
 
                 # Every 10 seconds reload local database file
-                if time.time() - timer_gcs > 10:
+                if time.time() - timer_db > 10:
                     db, all_e_ids, last_e_id = load_local_protocol_db()
                     timer_db = time.time()
 
                 # Every 10 minutes pull the newest DB from GCS
                 if time.time() - timer_gcs > 600:
                     if mle_config.general.use_gcloud_protocol_sync:
-                        accessed_remote_db = get_gcloud_db()
+                        _ = get_gcloud_db()
                     timer_gcs = time.time()
 
                 # Limit memory to approx. last 27 hours
@@ -72,5 +68,5 @@ def monitor():
 
                 # Wait a second
                 time.sleep(1)
-            except:
+            except Exception:
                 pass

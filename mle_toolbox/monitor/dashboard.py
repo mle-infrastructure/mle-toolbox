@@ -99,9 +99,10 @@ def update_mle_dashboard(layout, resource, util_hist,
     util_hist["times_date"].append(util_data["time_date"])
     util_hist["times_hour"].append(util_data["time_hour"])
     util_hist["total_mem"] = util_data["mem"]
-    util_hist["rel_mem_util"].append(util_data["mem_util"]/util_data["mem"])
+    util_hist["rel_mem_util"].append(util_data["mem_util"] / util_data["mem"])
     util_hist["total_cpu"] = util_data["cores"]
-    util_hist["rel_cpu_util"].append(util_data["cores_util"]/util_data["cores"])
+    util_hist["rel_cpu_util"].append(util_data["cores_util"]
+                                     / util_data["cores"])
 
     # Fill the left-main with life!
     if resource in ["sge-cluster", "slurm-cluster"]:
@@ -137,19 +138,19 @@ def update_mle_dashboard(layout, resource, util_hist,
 
     # Fill the footer with life!
     layout["f-box1"].update(Panel(make_cpu_util_plot(util_hist),
-                    title=(f"CPU Utilization"
-                           + f" - Total: {int(util_data['cores_util'])}/"
-                           + f"{int(util_data['cores'])}T"),
-                    border_style="red"),)
+                            title=("CPU Utilization"
+                                   f" - Total: {int(util_data['cores_util'])}/"
+                                   f"{int(util_data['cores'])}T"),
+                            border_style="red"),)
     layout["f-box2"].update(Panel(make_memory_util_plot(util_hist),
-                    title=(f"Memory Utilization"
-                           + f" - Total: {int(util_data['mem_util'])}/"
-                           + f"{int(util_data['mem'])}G"),
-                    border_style="red"))
+                            title=("Memory Utilization"
+                                   f" - Total: {int(util_data['mem_util'])}/"
+                                   f"{int(util_data['mem'])}G"),
+                            border_style="red"))
     layout["f-box3"].update(Panel(make_gcp_util(gcp_data),
-                    title=(f"Google Cloud Platform"),
-                    border_style="red"))
+                            title=("Google Cloud Platform"),
+                            border_style="red"))
     layout["f-box4"].update(Panel(make_help_commands(),
                                   border_style="white",
-                title="[b white]Core MLE-Toolbox CLI",))
+                            title="[b white]Core MLE-Toolbox CLI",))
     return layout, util_hist

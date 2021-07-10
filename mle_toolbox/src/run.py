@@ -1,6 +1,5 @@
 import os
 import shutil
-import numpy as np
 from datetime import datetime
 
 # Import the MLE-Toolbox configuration
@@ -58,7 +57,7 @@ def run(cmd_args):
             from ..remote.gcloud_transfer import (get_gcloud_db,
                                                   send_gcloud_db,
                                                   send_gcloud_zip_experiment)
-        except ImportError as err:
+        except ImportError:
             raise ImportError("You need to install `google-cloud-storage` to "
                               "synchronize protocols with GCloud. Or set "
                               "`use_glcoud_protocol_sync = False` in your "
@@ -103,7 +102,7 @@ def run(cmd_args):
         resource_to_run = current_resource
     logger.info(f"Run on resource: {resource_to_run}")
 
-    # 4. Check that experiment config to complies/includes necessary ingredients
+    # 4. Check experiment config to comply/include necessary ingredients
     check_job_config(job_config)
 
     # 5. Protocol experiment if desired (can also only be locally)!
@@ -132,8 +131,10 @@ def run(cmd_args):
 
     # 6. Copy over the experiment config .yaml file for easy re-running
     if not os.path.exists(job_config.meta_job_args.experiment_dir):
-        try: os.makedirs(job_config.meta_job_args.experiment_dir)
-        except: pass
+        try:
+            os.makedirs(job_config.meta_job_args.experiment_dir)
+        except Exception:
+            pass
     config_copy = os.path.join(job_config.meta_job_args.experiment_dir,
                                "experiment_config.yaml")
     if not os.path.exists(config_copy):
@@ -155,8 +156,8 @@ def run(cmd_args):
                         f" {mle_config.gcp.code_dir}")
             upload_local_dir_to_gcs(local_path=local_code_dir,
                                     gcs_path=mle_config.gcp.code_dir)
-            logger.info(f"Completed uploading {local_code_dir} to GCP bucket:" +
-                        f" {mle_config.gcp.code_dir}")
+            logger.info(f"Completed uploading {local_code_dir} to GCP " +
+                        f"bucket: {mle_config.gcp.code_dir}")
         else:
             logger.info(f"Continue with {local_code_dir} previously stored " +
                         f"in GCP bucket: {mle_config.gcp.code_dir}")
@@ -164,11 +165,11 @@ def run(cmd_args):
     # 8. Perform pre-processing if arguments are provided
     if "pre_processing_args" in job_config.keys():
         print_framed("PRE-PROCESSING")
-        logger.info(f"Pre-processing job for experiment - STARTING")
+        logger.info("Pre-processing job for experiment - STARTING")
         run_processing_job(resource_to_run,
                            job_config.pre_processing_args,
                            job_config.meta_job_args["experiment_dir"])
-        logger.info(f"Post-processing experiment results - COMPLETED")
+        logger.info("Post-processing experiment results - COMPLETED")
 
     # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
@@ -185,7 +186,7 @@ def run(cmd_args):
                                  job_config.multi_experiment_args)
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
-        # Import only if needed since this has a optional dependency on scikit-optimize
+        # Import only if needed due to optional dependency on scikit-optimize
         from ..launch import run_hyperparameter_search
         run_hyperparameter_search(resource_to_run,
                                   job_config.meta_job_args,
@@ -202,11 +203,11 @@ def run(cmd_args):
     # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():
         print_framed("POST-PROCESSING")
-        logger.info(f"Post-processing experiment results - STARTING")
+        logger.info("Post-processing experiment results - STARTING")
         run_processing_job(resource_to_run,
                            job_config.post_processing_args,
                            job_config.meta_job_args["experiment_dir"])
-        logger.info(f"Post-processing experiment results - COMPLETED")
+        logger.info("Post-processing experiment results - COMPLETED")
 
     # 11. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
@@ -215,8 +216,8 @@ def run(cmd_args):
             if job_config.meta_job_args.report_generation:
                 # Import for report generating after experiment finished
                 from .report import auto_generate_reports
-                reporter = auto_generate_reports(new_experiment_id, logger,
-                                                 pdf_gen=False)
+                auto_generate_reports(new_experiment_id, logger,
+                                      pdf_gen=False)
                 report_generated = True
                 print_framed("REPORT GENERATION")
 
@@ -228,7 +229,7 @@ def run(cmd_args):
 
         # (b) Store experiment directory in GCS bucket under hash
         if (mle_config.general.use_gcloud_results_storage
-            and mle_config.general.use_gcloud_protocol_sync):
+           and mle_config.general.use_gcloud_protocol_sync):
             send_gcloud_zip_experiment(
                 job_config.meta_job_args["experiment_dir"],
                 new_experiment_id, cmd_args.delete_after_upload)
@@ -251,7 +252,3 @@ def run(cmd_args):
         if delete_code_dir:
             delete_gcs_dir(mle_config.gcp.code_dir)
     print_framed("EXPERIMENT FINISHED")
-
-
-if __name__ == "__main__":
-    main()

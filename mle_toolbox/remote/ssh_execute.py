@@ -1,10 +1,10 @@
-import paramiko
-import random
 import time
 import logging
 from datetime import datetime
 from typing import Union
-import os, sys, select
+import os
+import sys
+import select
 from .ssh_manager import SSH_Manager
 from .ssh_session_sge import generate_remote_sge_cmd
 from .ssh_session_slurm import generate_remote_slurm_cmd
@@ -21,7 +21,7 @@ def run_remote_experiment(remote_resource: str,
 
     # 1. Rsync over the current working dir into remote_exec_dir
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(f"{time_t} Do you want to sync the remote dir? [Y/N]", end= ' ')
+    print(f"{time_t} Do you want to sync the remote dir? [Y/N]", end=' ')
     sys.stdout.flush()
     i, o, e = select.select([sys.stdin], [], [], 30)
     if (i):
@@ -36,12 +36,12 @@ def run_remote_experiment(remote_resource: str,
     # 2. Generate and execute bash qsub file
     if remote_resource == "sge-cluster":
         session_name, exec_cmds = generate_remote_sge_cmd(exec_config,
-                                                         remote_exec_dir,
-                                                         purpose)
+                                                          remote_exec_dir,
+                                                          purpose)
     elif remote_resource == "slurm-cluster":
         session_name, exec_cmds = generate_remote_slurm_cmd(exec_config,
-                                                           remote_exec_dir,
-                                                           purpose)
+                                                            remote_exec_dir,
+                                                            purpose)
 
     ssh_manager.execute_command(exec_cmds)
     logger.info(f"Generated & executed remote job on {remote_resource}.")
@@ -59,7 +59,7 @@ def monitor_remote_session(ssh_manager: SSH_Manager,
     logger = logging.getLogger(__name__)
 
     # Monitor the experiment
-    terminal_print = 31*"=" + "  EXPERIMENT FINISHED  " + 31*"="
+    terminal_print = 31 * "=" + "  EXPERIMENT FINISHED  " + 31 * "="
     file_length, fail_counter = 0, 0
     while True:
         try:
@@ -67,7 +67,7 @@ def monitor_remote_session(ssh_manager: SSH_Manager,
                                  f"{session_name}.txt")
             temp = open(f'{session_name}.txt', 'r')
             all_lines = temp.readlines()
-        except Exception as e:
+        except Exception:
             if fail_counter == 0:
                 print("Couldn't open log .txt file")
             fail_counter += 1
@@ -77,7 +77,7 @@ def monitor_remote_session(ssh_manager: SSH_Manager,
         line_diff = len(all_lines) - file_length
         if line_diff > 0:
             for line in all_lines[-line_diff:]:
-                print(line, end = '')
+                print(line, end='')
             file_length += line_diff
         # Pause a little between monitoring steps
         time.sleep(3)

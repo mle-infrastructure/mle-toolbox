@@ -1,7 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def animate_2D_scatter(data, dt=1,

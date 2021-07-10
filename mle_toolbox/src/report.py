@@ -14,10 +14,10 @@ def report(cmd_args):
         if experiment_id[:5] != "e-id-":
             experiment_id = "e-id-" + experiment_id
     # 2. Create 'reporter' instance and write reports
-    reporter = auto_generate_reports(experiment_id)
+    auto_generate_reports(experiment_id)
 
 
-def auto_generate_reports(e_id: str, logger=None, pdf_gen: bool=False):
+def auto_generate_reports(e_id: str, logger=None, pdf_gen: bool = False):
     """ Default auto-generation of reports for latest experiment. """
     # Load in experiment protocol db
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()

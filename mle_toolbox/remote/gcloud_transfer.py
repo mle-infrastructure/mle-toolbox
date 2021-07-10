@@ -1,4 +1,4 @@
-import os
+import os  # noqa: E902
 import glob
 from google.cloud import storage
 from os.path import expanduser
@@ -17,7 +17,7 @@ from .ssh_manager import setup_proxy_server
 setup_proxy_server()
 
 
-def get_gcloud_db(number_of_connect_tries: int=5):
+def get_gcloud_db(number_of_connect_tries: int = 5):
     """ Pull latest experiment database from gcloud storage. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -53,7 +53,7 @@ def get_gcloud_db(number_of_connect_tries: int=5):
     return 0
 
 
-def send_gcloud_db(number_of_connect_tries: int=5):
+def send_gcloud_db(number_of_connect_tries: int = 5):
     """ Send updated database back to gcloud storage. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -68,7 +68,7 @@ def send_gcloud_db(number_of_connect_tries: int=5):
             logger.info(f"Send to GCloud Storage - "
                         f"{mle_config.gcp.protocol_fname}")
             return 1
-        except:
+        except Exception:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
                         f" - Failed sending to GCloud Storage")
     # If after 5 pulls no successful connection established - return failure
@@ -76,7 +76,7 @@ def send_gcloud_db(number_of_connect_tries: int=5):
 
 
 def delete_gcs_dir(gcs_path: str,
-                   number_of_connect_tries: int=5):
+                   number_of_connect_tries: int = 5):
     """ Delete a directory in a GCS bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -84,22 +84,22 @@ def delete_gcs_dir(gcs_path: str,
         try:
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-        except:
+        except Exception:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        + f" - Failed sending to GCloud Storage")
+                        " - Failed sending to GCloud Storage")
 
     # Delete all files in directory
     blobs = bucket.list_blobs(prefix=gcs_path)
     for blob in blobs:
         try:
             blob.delete()
-        except:
+        except Exception:
             pass
 
 
 def upload_local_dir_to_gcs(local_path: str,
                             gcs_path: str,
-                            number_of_connect_tries: int=5):
+                            number_of_connect_tries: int = 5):
     """ Send entire dir (recursively) to Google Cloud Storage Bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -107,23 +107,24 @@ def upload_local_dir_to_gcs(local_path: str,
         try:
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-        except:
+        except Exception:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        f" - Failed sending to GCloud Storage")
+                        " - Failed sending to GCloud Storage")
 
     def upload_single_file(local_path, gcs_path, bucket):
         # Recursively upload the folder structure
         if os.path.isdir(local_path):
             for local_file in glob.glob(os.path.join(local_path, '**')):
                 if not os.path.isfile(local_file):
-                   upload_single_file(local_file,
-                                      os.path.join(
-                                        gcs_path,
-                                        os.path.basename(local_file)),
-                                      bucket)
+                    upload_single_file(local_file,
+                                       os.path.join(gcs_path,
+                                                    os.path.basename(
+                                                        local_file)),
+                                       bucket)
                 else:
-                   remote_path = os.path.join(gcs_path,
-                                              local_file[1 + len(local_path):])
+                    remote_path = os.path.join(gcs_path,
+                                               local_file[1 +
+                                                          len(local_path):])
                    blob = bucket.blob(remote_path)
                    blob.upload_from_filename(local_file)
         # Only upload single file - e.g. zip compressed experiment
@@ -190,7 +191,7 @@ def zipdir(path: str, zip_fname: str):
 
 def send_gcloud_zip_experiment(experiment_dir: str,
                                experiment_id: str,
-                               delete_after_upload: bool=False):
+                               delete_after_upload: bool = False):
     """ Zip & upload experiment dir to Gcloud storage. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)

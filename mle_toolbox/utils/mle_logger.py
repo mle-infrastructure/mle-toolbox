@@ -107,56 +107,64 @@ class MLE_Logger(object):
                              base_exp_dir: str,
                              config_fname: Union[str, None],
                              seed_id: Union[str, None],
-                             use_tboard: bool=False,
-                             tboard_fname: Union[str, None]=None,
+                             use_tboard: bool = False,
+                             tboard_fname: Union[str, None] = None,
                              overwrite_experiment_dir: bool = False):
         """ Setup a directory for experiment & copy over config. """
         # Get timestamp of experiment & create new directories
         timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
         base_str = os.path.split(config_fname)[1].split(".")[0]
         self.base_str = base_str
-        self.experiment_dir = os.path.join(base_exp_dir, timestr + base_str + "/")
+        self.experiment_dir = os.path.join(base_exp_dir, timestr
+                                           + base_str + "/")
 
         # Create a new empty directory for the experiment
         if not os.path.exists(self.experiment_dir):
-            try: os.makedirs(self.experiment_dir)
-            except: pass
+            try:
+                os.makedirs(self.experiment_dir)
+            except Exception:
+                pass
 
         if not os.path.exists(os.path.join(self.experiment_dir, "logs/")):
-            try: os.makedirs(os.path.join(self.experiment_dir, "logs/"))
-            except: pass
+            try:
+                os.makedirs(os.path.join(self.experiment_dir, "logs/"))
+            except Exception:
+                pass
 
         if not os.path.exists(os.path.join(self.experiment_dir, "models/")):
-            try: os.makedirs(os.path.join(self.experiment_dir, "models/"))
-            except: pass
+            try:
+                os.makedirs(os.path.join(self.experiment_dir, "models/"))
+            except Exception:
+                pass
 
         # Create separate sub-dirs for checkpoints & final trained model
         if not os.path.exists(os.path.join(self.experiment_dir,
                                            "models/final/")):
-            try: os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
-            except: pass
+            try:
+                os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
+            except Exception:
+                pass
         if self.save_every_k_ckpt is not None:
             if not os.path.exists(os.path.join(self.experiment_dir,
                                                "models/every_k/")):
-                try: os.mkdir(os.path.join(self.experiment_dir,
-                                           "models/every_k/"))
-                except: pass
+                try:
+                    os.mkdir(os.path.join(self.experiment_dir,
+                                          "models/every_k/"))
+                except Exception:
+                    pass
         if self.save_top_k_ckpt is not None:
             if not os.path.exists(os.path.join(self.experiment_dir,
                                                "models/top_k/")):
-                try: os.mkdir(os.path.join(self.experiment_dir,
-                                           "models/top_k/"))
-                except: pass
+                try:
+                    os.mkdir(os.path.join(self.experiment_dir,
+                                          "models/top_k/"))
+                except Exception:
+                    pass
 
         exp_time_base = self.experiment_dir + timestr + base_str
         self.config_copy = exp_time_base + ".json"
         if not os.path.exists(self.config_copy):
             shutil.copy(config_fname, self.config_copy)
-
-        if seed_id is None:
-            exp_time_base_ext = exp_time_base
-        else:
-            exp_time_base_ext = exp_time_base + "_" + seed_id
 
         # Set where to log to (Stats - .hdf5, model - .ckpth)
         self.log_save_fname = (self.experiment_dir + "logs/" +
@@ -222,7 +230,7 @@ class MLE_Logger(object):
         # Transform clock_tick, stats_tick lists into pd arrays
         c_tick = pd.DataFrame(columns=self.time_to_track)
         c_tick.loc[0] = ([clock_tick[k] for k in self.time_to_track[:-1]]
-                          + [time.time() - self.start_time])
+                         + [time.time() - self.start_time])
         s_tick = pd.DataFrame(columns=self.what_to_track)
         s_tick.loc[0] = [stats_tick[k] for k in self.stats_to_track]
 
@@ -253,8 +261,8 @@ class MLE_Logger(object):
     def update_tboard(self,
                       clock_tick: dict,
                       stats_tick: dict,
-                      model = None,
-                      plot_to_tboard = None):
+                      model=None,
+                      plot_to_tboard=None):
         """ Update the tensorboard with the newest events """
         # Set the x-axis time variable to first key provided in time key dict
         time_var_id = clock_tick[self.time_to_track.keys()[0]]
@@ -272,22 +280,25 @@ class MLE_Logger(object):
                     self.writer.add_histogram('weights/' + name,
                                               param.clone().cpu().data.numpy(),
                                               time_var_id)
-                    self.writer.add_histogram('gradients/' + name,
-                                        param.grad.clone().cpu().data.numpy(),
-                                        time_var_id)
+                    self.writer.add_histogram(
+                        'gradients/' + name,
+                        param.grad.clone().cpu().data.numpy(),
+                        time_var_id)
             elif self.model_type == "jax":
                 # Try to add parameters from nested dict first - then simple
                 # TODO: Add gradient tracking for JAX models
-                for l in model.keys():
+                for layer in model.keys():
                     try:
-                        for w in model[l].keys():
-                            self.writer.add_histogram('weights/' + l + '/' + w,
-                                                       np.array(model[l][w]),
-                                                       time_var_id)
-                    except:
-                        self.writer.add_histogram('weights/' + l,
-                                                  np.array(model[l]),
-                                                  time_var_id)
+                        for w in model[layer].keys():
+                            self.writer.add_histogram(
+                                'weights/' + layer + '/' + w,
+                                np.array(model[layer][w]),
+                                time_var_id)
+                    except Exception:
+                        self.writer.add_histogram(
+                            'weights/' + layer,
+                            np.array(model[layer]),
+                            time_var_id)
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
@@ -303,24 +314,30 @@ class MLE_Logger(object):
         # Create "datasets" to store in the hdf5 file [time, stats]
         # Store all relevant meta data (log filename, checkpoint filename)
         if self.log_save_counter == 0:
-            h5f.create_dataset(name=self.seed_id + "/meta/model_ckpt",
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/model_ckpt",
                 data=[self.final_model_save_fname.encode("ascii", "ignore")],
                 compression='gzip', compression_opts=4, dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/log_paths",
-                        data=[self.log_save_fname.encode("ascii", "ignore")],
-                        compression='gzip', compression_opts=4, dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/experiment_dir",
-                        data=[self.experiment_dir.encode("ascii", "ignore")],
-                        compression='gzip', compression_opts=4, dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/config_fname",
-                        data=[self.config_copy.encode("ascii", "ignore")],
-                        compression='gzip', compression_opts=4, dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/eval_id",
-                        data=[self.base_str.encode("ascii", "ignore")],
-                        compression='gzip', compression_opts=4, dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/model_type",
-                        data=[self.model_type.encode("ascii", "ignore")],
-                        compression='gzip', compression_opts=4, dtype='S200')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/log_paths",
+                data=[self.log_save_fname.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/experiment_dir",
+                data=[self.experiment_dir.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/config_fname",
+                data=[self.config_copy.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/eval_id",
+                data=[self.base_str.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/model_type",
+                data=[self.model_type.encode("ascii", "ignore")],
+                compression='gzip', compression_opts=4, dtype='S200')
 
             if self.save_top_k_ckpt or self.save_every_k_ckpt:
                 h5f.create_dataset(
@@ -353,8 +370,8 @@ class MLE_Logger(object):
             if type(data_to_store[0]) == np.ndarray:
                 data_to_store = np.stack(data_to_store)
             if type(data_to_store[0]) in [np.str_, str]:
-                data_to_store =[t.encode("ascii", "ignore") for t
-                                in data_to_store]
+                data_to_store = [t.encode("ascii", "ignore") for t
+                                 in data_to_store]
             if type(data_to_store[0]) in [bytes, np.str_]:
                 data_type = np.dtype('S200')
             elif type(data_to_store[0]) == int:
@@ -372,10 +389,11 @@ class MLE_Logger(object):
                 for o_name in ["every_k_storage_time", "every_k_ckpt_list"]:
                     if h5f.get(self.seed_id + "/meta/" + o_name):
                         del h5f[self.seed_id + "/meta/" + o_name]
-            h5f.create_dataset(name=self.seed_id + "/meta/every_k_storage_time",
-                               data=np.array(self.every_k_storage_time),
-                               compression='gzip', compression_opts=4,
-                               dtype='float32')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/every_k_storage_time",
+                data=np.array(self.every_k_storage_time),
+                compression='gzip', compression_opts=4,
+                dtype='float32')
             h5f.create_dataset(name=self.seed_id + "/meta/every_k_ckpt_list",
                                data=[t.encode("ascii", "ignore") for t
                                      in self.every_k_ckpt_list],
@@ -434,7 +452,7 @@ class MLE_Logger(object):
                     save_pkl_object(model, ckpt_path)
                 # Update model save count & time point of storage
                 self.model_save_counter += 1
-                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
+                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]  # noqa: E501
                 self.every_k_storage_time.append(time)
                 self.every_k_ckpt_list.append(ckpt_path)
 
@@ -460,7 +478,7 @@ class MLE_Logger(object):
 
             # If minimize = replace worst performing model (max score)
             if (self.top_k_minimize_metric and
-                max(self.top_k_performance) > score and not updated_top_k):
+               max(self.top_k_performance) > score and not updated_top_k):
                 id_to_replace = np.argmax(self.top_k_performance)
                 self.top_k_performance[id_to_replace] = score
                 self.top_k_storage_time[id_to_replace] = time
@@ -476,7 +494,7 @@ class MLE_Logger(object):
 
             # If minimize = replace worst performing model (max score)
             if (not self.top_k_minimize_metric and
-                min(self.top_k_performance) > score and not updated_top_k):
+               min(self.top_k_performance) > score and not updated_top_k):
                 id_to_replace = np.argmin(self.top_k_performance)
                 self.top_k_performance[id_to_replace] = score
                 self.top_k_storage_time[id_to_replace] = (
@@ -508,8 +526,10 @@ class MLE_Logger(object):
         # Create new directory to store figures - if it doesn't exist yet
         figures_dir = os.path.join(self.experiment_dir, "figures/")
         if not os.path.exists(figures_dir):
-            try: os.makedirs(figures_dir)
-            except: pass
+            try:
+                os.makedirs(figures_dir)
+            except Exception:
+                pass
 
         # Tick up counter, save figure, store new path to figure
         self.fig_save_counter += 1
@@ -540,8 +560,10 @@ class MLE_Logger(object):
         path_to_store = os.path.join(extra_dir, fname)
         # Create a new empty directory for the experiment
         if not os.path.exists(extra_dir):
-            try: os.makedirs(extra_dir)
-            except: pass
+            try:
+                os.makedirs(extra_dir)
+            except Exception:
+                pass
 
         # Differentiate between .npy and .pkl storage
         if file_extension == ".npy":

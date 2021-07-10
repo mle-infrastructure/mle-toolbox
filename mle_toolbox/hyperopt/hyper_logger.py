@@ -1,5 +1,4 @@
 import os
-import time
 import numpy as np
 import logging
 from typing import Union
@@ -9,17 +8,17 @@ from ..utils import load_pkl_object, save_pkl_object, print_framed
 
 class HyperoptLogger(object):
     def __init__(self,
-                 hyperlog_fname: str="hyper_log.pkl",   # .pkl name to store log
-                 max_objective: bool=True,              # Max/min all metrics
-                 problem_type: str="final",             # "final"/"best" score logging
-                 eval_metrics: Union[str, list]=[],     # Metric names to store
-                 verbose_log: bool=True,                # Print at new update
-                 reload_log: bool=False,                # Reload previous log
-                 no_results_logging: bool=False):       # No .hdf5 run logging
+                 hyperlog_fname: str = "hyper_log.pkl",   # .pkl to store log
+                 max_objective: bool = True,              # Max/min all metrics
+                 problem_type: str = "final",             # "final"/"best" log
+                 eval_metrics: Union[str, list] = [],     # Metric names stored
+                 verbose_log: bool = True,                # Print at new update
+                 reload_log: bool = False,                # Reload previous log
+                 no_results_logging: bool = False):       # .hdf5 run logging
         """ Mini-class to log the  """
         self.hyperlog_fname = hyperlog_fname    # Where to save the log to
         self.max_objective = max_objective      # Max/min target (reward/loss)
-        self.problem_type = problem_type        # Timepoint to consider (final/best)
+        self.problem_type = problem_type        # Time log ckpt (final/best)
         self.eval_metrics = eval_metrics        # Vars to compare across runs
         if type(self.eval_metrics) == str:
             self.eval_metrics = [self.eval_metrics]
@@ -67,7 +66,7 @@ class HyperoptLogger(object):
             self.iter_id += 1
             current_iter = {"params": params[iter],
                             "time_elapsed": time_elapsed,
-                            "run_id": run_ids[iter],}
+                            "run_id": run_ids[iter]}
             if not self.no_results_logging:
                 # Add all of the individual tracked metrics
                 for k, v in perf_measures.items():
@@ -76,7 +75,7 @@ class HyperoptLogger(object):
                 for k in meta_keys_to_track:
                     try:
                         current_iter[k] = meta_eval_log[run_ids[iter]].meta[k]
-                    except:
+                    except Exception:
                         continue
 
                 # Add collected log path (after merging seeds)
@@ -96,7 +95,7 @@ class HyperoptLogger(object):
         if not self.no_results_logging:
             # Update best performance tracker
             self.best_per_metric = self.get_best_performances(
-                                        perf_measures.keys())
+                perf_measures.keys())
 
             # Print currently best evaluation
             if self.verbose_log:
@@ -109,8 +108,9 @@ class HyperoptLogger(object):
             for i, m in enumerate(self.best_per_metric.keys()):
                 print_framed(m, frame_str="-")
                 self.logger.info(
-            r"METRIC: {} | BEST SCORE: {:.4f} | ITER: {}/{} | PARAMS:".format(
-                        m, self.best_per_metric[m]["score"],
+                    "METRIC: {} | ".format(m) +
+                    r"BEST SCORE: {:.4f} | ITER: {}/{} | PARAMS:".format(
+                        self.best_per_metric[m]["score"],
                         self.best_per_metric[m]["run_id"],
                         self.iter_id))
                 for line in pformat(self.best_per_metric[m]["params"]
@@ -131,7 +131,7 @@ class HyperoptLogger(object):
                 self.all_evaluated_params.append(eval_iter["params"])
                 self.all_run_ids.append(eval_iter["run_id"])
             self.iter_id = len(self.opt_log)
-        except:
+        except Exception:
             self.opt_log = {}
             self.iter_id = 0
             self.all_evaluated_params = []
@@ -139,7 +139,8 @@ class HyperoptLogger(object):
 
         # Get best performing params for each eval metric
         if not self.no_results_logging:
-            self.best_per_metric = self.get_best_performances(self.eval_metrics)
+            self.best_per_metric = self.get_best_performances(
+                self.eval_metrics)
 
     def get_best_performances(self, eval_metrics):
         """ Get best performing hyperparam configuration up to current iter """

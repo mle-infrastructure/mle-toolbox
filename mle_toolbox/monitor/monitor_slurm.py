@@ -26,10 +26,9 @@ def get_user_slurm_data():
                                      '"%.20P %.20u %.2t %.10M %.6D %C %m %N"'])
         all_job_infos = processes.split(b'\n')[1:-1]
         all_job_infos = [j.decode() for j in all_job_infos]
-    except:
+    except Exception:
         pass
 
-    total_jobs = len(all_job_infos)
     job_df = {"user": [],
               "partition": [],
               "status": [],
@@ -97,8 +96,8 @@ def get_util_slurm_data():
         processes = sp.check_output(['sinfo', '--Node', '-o',
                                      '"%.20P %N %c %O %m %e"'])
         all_node_infos = processes.split(b'\n')[1:-1]
-        all_node_infos = [j.decode() for j in all_job_infos]
-    except:
+        all_node_infos = [j.decode() for j in all_node_infos]
+    except Exception:
         pass
 
     total_cores, used_cores, total_mem, used_mem = 0, 0, 0, 0
@@ -107,12 +106,12 @@ def get_util_slurm_data():
         try:
             # Cores in threads and memory in GB
             total_cores += int(node_clean[2])
-            used_cores += float(node_clean[2]) * float(node_clean[3])/100
-            total_mem += float(node_clean[4])/1000
+            used_cores += float(node_clean[2]) * float(node_clean[3]) / 100
+            total_mem += float(node_clean[4]) / 1000
             # Total memory - free memory
-            used_mem += (float(node_clean[4])/1000 -
-                         float(node_clean[5][:-1])/1000)
-        except:
+            used_mem += (float(node_clean[4]) / 1000 -
+                         float(node_clean[5][:-1]) / 1000)
+        except Exception:
             pass
 
     util_data = {"cores": total_cores,
@@ -125,6 +124,7 @@ def get_util_slurm_data():
 
 # squeue -p partition_name
 # sacct -j job_id (get resource!)
+
 
 if __name__ == "__main__":
     print(get_slurm_data())

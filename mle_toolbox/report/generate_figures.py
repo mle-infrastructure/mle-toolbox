@@ -1,4 +1,5 @@
-import os, itertools
+import os
+import itertools
 from mle_toolbox import load_result_logs
 from mle_toolbox.visualize import visualize_1D_lcurves, visualize_2D_grid
 
@@ -21,8 +22,10 @@ class FigureGenerator():
         # Create a directory for the figures to be generated
         self.figures_dir = os.path.join(experiment_dir, "figures")
         if not os.path.exists(self.figures_dir):
-            try: os.makedirs(self.figures_dir)
-            except: pass
+            try:
+                os.makedirs(self.figures_dir)
+            except Exception:
+                pass
 
         # Set default settings for all plots (resolution, etc.)
         self.dpi = dpi
@@ -35,12 +38,12 @@ class FigureGenerator():
                                        target_to_plot=stat_to_plot,
                                        smooth_window=1,
                                        plot_title=stat_to_plot,
-                                       xy_labels = [time_to_plot,
-                                                    stat_to_plot],
+                                       xy_labels=[time_to_plot,
+                                                  stat_to_plot],
                                        base_label=r"{}",
                                        curve_labels=[],
-                                       every_nth_tick= 5,
-                                       plot_std_bar= True)
+                                       every_nth_tick=5,
+                                       plot_std_bar=True)
         ax.legend(ncol=4, fontsize=8)
 
         # Save the figure to path name constructed from var name
@@ -81,7 +84,7 @@ class FigureGenerator():
                         fix_values[k] = self.hyper_log[k].unique().tolist()
                     # Create a mesh of all fix combinations of unique vals
                     all_fix_combos = list(
-                                    itertools.product(*fix_values.values()))
+                        itertools.product(*fix_values.values()))
                     for combo in all_fix_combos:
                         fixed_params = {k: combo[i] for i, k
                                         in enumerate(fix_values)}

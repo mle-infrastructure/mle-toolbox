@@ -1,7 +1,6 @@
 import time
 import subprocess as sp
 import pandas as pd
-from mle_toolbox import mle_config
 
 
 def get_gcp_data():
@@ -12,7 +11,7 @@ def get_gcp_data():
                          "list", "--verbosity", "error"]
             out = sp.check_output(check_cmd)
             break
-        except sp.CalledProcessError as e:
+        except sp.CalledProcessError:
             time.sleep(1)
 
     # Clean up and check if vm_name is in list of all jobs

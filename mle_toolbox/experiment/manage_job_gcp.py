@@ -1,18 +1,16 @@
 import subprocess as sp
-import time, datetime
-import os, random, re
+import time
+import datetime
+import os
+import random
+import re
 from dotmap import DotMap
 from typing import Union
 from .cloud.gcp.helpers_launch import (gcp_generate_startup_file,
                                        gcp_get_submission_cmd,
                                        gcp_delete_vm_instance)
 from mle_toolbox import mle_config
-from mle_toolbox.remote.gcloud_transfer import (delete_gcs_dir,
-                                                download_gcs_dir)
-
-# TODO:
-# 1. Differentiate between conda and venv setup
-# 2. Replace initial code copy to GCP with rsync?
+from mle_toolbox.remote.gcloud_transfer import download_gcs_dir
 
 
 def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
@@ -35,7 +33,7 @@ def gcp_submit_job(filename: str,
                    cmd_line_arguments: str,
                    job_arguments: dict,
                    experiment_dir: str,
-                   clean_up: bool=True):
+                   clean_up: bool = True):
     """ Create a GCP VM job & submit it based on provided file to execute. """
     # 0. Create VM Name - Timestamp + Random 4 digit id
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -63,8 +61,7 @@ def gcp_submit_job(filename: str,
 
     # 2. Generate GCP submission command (`gcloud compute instance create ...`)
     gcp_launch_cmd, job_gcp_args = gcp_get_submission_cmd(
-                                            vm_name, job_arguments,
-                                            startup_fname)
+        vm_name, job_arguments, startup_fname)
 
     # 3. Launch GCP VM Instance - Everything handled by startup file
     sp.run(gcp_launch_cmd)
@@ -77,14 +74,14 @@ def gcp_submit_job(filename: str,
                 # Delete statup bash file
                 try:
                     os.remove(startup_fname)
-                    gcp_logger.log(f"Deleted Startup File: {startup_fname}")
-                except:
+                except Exception:
                     pass
                 return vm_name
             time.sleep(10)
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(2)
 
     # Return -1 if job was not listed as starting/running within 100 seconds!
@@ -106,6 +103,7 @@ def gcp_monitor_job(vm_name: str, job_arguments: dict):
         except sp.CalledProcessError as e:
             stderr = e.stderr
             return_code = e.returncode
+            print(stderr, return_code)
             time.sleep(1)
 
     # Clean up and check if vm_name is in list of all jobs

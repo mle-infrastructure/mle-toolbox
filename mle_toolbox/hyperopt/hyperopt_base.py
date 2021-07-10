@@ -3,13 +3,12 @@ import os
 import shutil
 import json
 import copy
-import numpy as np
 import logging
-from typing import Union, List
+from typing import Union
 from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
-from ..experiment import spawn_multiple_configs, ExperimentQueue
+from ..experiment import ExperimentQueue
 from ..utils import (load_json_config,
                      load_meta_log,
                      print_framed,
@@ -23,9 +22,6 @@ class BaseHyperOptimisation(object):
         1. "model_config": Dict with relevant model details
         2. "train_config": Dict with relevant training details
         3. "log_config": Dict with relevant logging details
-    - Note that the combination of the two inputs depends on your computational
-      ressouces. I.e. 4 RTX 2080 might fit 3 models per GPU (12 total) = 3 evals
-      + 4 batch size/parallel configs might be a good usage
     - The input "search_params" provides a dict with parameters and their
       ranges to search over - construct space in specific hyperopt instance
     - The input "problem_type" specifies how to evaluate the training run
@@ -38,8 +34,8 @@ class BaseHyperOptimisation(object):
                  job_fname: str,
                  experiment_dir: str,
                  search_params: dict,
-                 search_type: str="grid",
-                 search_schedule: str="sync"):
+                 search_type: str = "grid",
+                 search_schedule: str = "sync"):
         # Set up the hyperparameter search run
         self.hyper_log = hyper_log                    # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run        # Compute resource to run
@@ -84,8 +80,8 @@ class BaseHyperOptimisation(object):
         """
         # Check that right inputs provided for sync vs async job scheduling
         if self.search_schedule == "sync":
-            assert type(num_search_batches) == int, "Provide valid 'sync' input"
-            assert type(num_evals_per_batch) == int, "Provide valid 'sync' input"
+            assert type(num_search_batches) == int, "Provide valid sync input"
+            assert type(num_evals_per_batch) == int, "Provide valid sync input"
         elif self.search_schedule == "async":
             assert type(num_total_evals) == int, "Provide valid 'async' input"
             assert type(max_running_jobs) == int, "Provide valid 'async' input"
@@ -103,22 +99,22 @@ class BaseHyperOptimisation(object):
 
         # Start Launching Jobs Depending on the Scheduling Setup
         if self.search_schedule == "sync":
-            self.logger.info(f"Total Search Batches: {num_search_batches} |" \
-                             f" Batchsize: {num_evals_per_batch} |" \
+            self.logger.info(f"Total Search Batches: {num_search_batches} |"
+                             f" Batchsize: {num_evals_per_batch} |"
                              f" Seeds/Eval: {num_seeds_per_eval}")
-            print_framed(f"START HYPEROPT RUNS")
+            print_framed("START HYPEROPT RUNS")
             if self.hyper_log.no_results_logging:
-                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
+                self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
             self.run_sync_search(num_search_batches,
                                  num_evals_per_batch,
                                  num_seeds_per_eval)
         else:
-            self.logger.info(f"Total Search Evals: {num_total_evals} |" \
-                             f" Running Job Limit: {max_running_jobs} |" \
+            self.logger.info(f"Total Search Evals: {num_total_evals} |"
+                             f" Running Job Limit: {max_running_jobs} |"
                              f" Seeds/Eval: {num_seeds_per_eval}")
-            print_framed(f"START HYPEROPT RUNS")
+            print_framed("START HYPEROPT RUNS")
             if self.hyper_log.no_results_logging:
-                self.logger.info(f"!!!WARNING!!!: No metrics hyperopt logging!")
+                self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
             self.run_async_search(num_total_evals,
                                   max_running_jobs,
                                   num_seeds_per_eval)
@@ -129,7 +125,7 @@ class BaseHyperOptimisation(object):
                          num_seeds_per_eval: Union[None, int] = 1):
         """ Run jobs asynchronously - launch whenever resource available. """
         # Does not work with Batch SMBO since proposals rely on GP!
-        assert self.search_type != "smbo", "Async scheduling does not support SMBO"
+        assert self.search_type != "smbo", "Async scheduling - No SMBO support"
         # Get all hyperparameters & plug them into config dicts, store jsons
         batch_proposals = self.get_hyperparam_proposal(num_total_evals)
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
@@ -137,8 +133,8 @@ class BaseHyperOptimisation(object):
 
         # Generate a queue of jobs to launch and work through them
         # Different seed logs are merged within queue whenever all completed
-        self.logger.info(f"START - {num_total_evals} Eval Configs - " \
-                         f"{max_running_jobs} Jobs at a Time -" \
+        self.logger.info(f"START - {num_total_evals} Eval Configs - "
+                         f"{max_running_jobs} Jobs at a Time -"
                          f" {num_seeds_per_eval} Seeds")
         start_t = time.time()
         experiment_queue = ExperimentQueue(self.resource_to_run,
@@ -151,8 +147,8 @@ class BaseHyperOptimisation(object):
         experiment_queue.run()
         time_elapsed = time.time() - start_t
 
-        self.logger.info(f"DONE - {num_total_evals} Eval Configs - " \
-                         f"{max_running_jobs} Jobs at a Time -" \
+        self.logger.info(f"DONE - {num_total_evals} Eval Configs - "
+                         f"{max_running_jobs} Jobs at a Time -"
                          f" {num_seeds_per_eval} Seeds")
 
         # Update + save hyperlog after merging eval log .hdf5 files
@@ -174,7 +170,7 @@ class BaseHyperOptimisation(object):
                         num_seeds_per_eval: Union[None, int] = 1):
         """ Run synchronous batches of jobs in a loop. """
         # Only run the batch loop for the remaining iterations
-        self.current_iter = int(self.current_iter/num_evals_per_batch)
+        self.current_iter = int(self.current_iter / num_evals_per_batch)
         for search_iter in range(num_search_batches - self.current_iter):
             # Update the hyperopt iteration counter
             self.current_iter += 1
@@ -184,8 +180,8 @@ class BaseHyperOptimisation(object):
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
 
-            self.logger.info(f"START - {self.current_iter}/" \
-                             f"{num_search_batches} Batch of" \
+            self.logger.info(f"START - {self.current_iter}/"
+                             f"{num_search_batches} Batch of"
                              f" Hyperparameters - {num_seeds_per_eval} Seeds")
 
             # Training w. prev. specified hyperparams & eval, get time taken
@@ -201,8 +197,8 @@ class BaseHyperOptimisation(object):
             experiment_queue.run()
             time_elapsed = time.time() - start_t
 
-            self.logger.info(f"DONE - {self.current_iter}/" \
-                             f"{num_search_batches} Batch of" \
+            self.logger.info(f"DONE - {self.current_iter}/"
+                             f"{num_search_batches} Batch of"
                              f" Hyperparameters - {num_seeds_per_eval} Seeds")
             time_elapsed = time.time() - start_t
 
@@ -217,7 +213,7 @@ class BaseHyperOptimisation(object):
                                                 perf_measures)
             for f in batch_fnames:
                 os.remove(f)
-            print_framed(f"COMPLETED BATCH CLEAN-UP {self.current_iter}/" \
+            print_framed(f"COMPLETED BATCH CLEAN-UP {self.current_iter}/"
                          f"{num_search_batches}")
 
     def update_hyper_log(self, batch_proposals, run_ids, time_elapsed,
@@ -228,14 +224,13 @@ class BaseHyperOptimisation(object):
             while True:
                 try:
                     meta_eval_log = self.get_meta_eval_log(
-                                        self.hyper_log.all_run_ids
-                                        + run_ids)
+                        self.hyper_log.all_run_ids + run_ids)
                     break
-                except:
+                except Exception:
                     time.sleep(1)
                     continue
 
-            self.logger.info(f"MERGE - {len(run_ids)} Eval Configs of " \
+            self.logger.info(f"MERGE - {len(run_ids)} Eval Configs of "
                              f"Hyperparameters - {num_seeds_per_eval} Seeds")
 
             # Get performance score, update & save hypersearch log
@@ -248,7 +243,7 @@ class BaseHyperOptimisation(object):
             perf_measures = self.hyper_log.update_log(batch_proposals,
                                                       None, time_elapsed,
                                                       run_ids)
-            self.logger.info(f"UPDATE - {len(run_ids)} Eval Configs of " \
+            self.logger.info(f"UPDATE - {len(run_ids)} Eval Configs of "
                              f"Hyperparameters - {num_seeds_per_eval} Seeds")
         return perf_measures
 
@@ -276,7 +271,7 @@ class BaseHyperOptimisation(object):
                         sample_config.train_config[param] = param_value
                     elif config_id == "model":
                         sample_config.model_config[param] = param_value
-                except:
+                except Exception:
                     sample_config.train_config[param_name] = param_value
             # Add param configs to batch lists
             config_params_batch.append(sample_config)

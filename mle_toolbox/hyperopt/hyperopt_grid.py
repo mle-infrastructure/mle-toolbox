@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence, Iterable
+from collections.abc import Mapping, Iterable
 from functools import partial, reduce
 import operator
 from itertools import product
@@ -17,8 +17,8 @@ class GridHyperoptimisation(BaseHyperOptimisation):
                  job_fname: str,
                  experiment_dir: str,
                  search_params: dict,
-                 search_type: str="grid",
-                 search_schedule: str="sync"):
+                 search_type: str = "grid",
+                 search_schedule: str = "sync"):
         BaseHyperOptimisation.__init__(self, hyper_log, resource_to_run,
                                        job_arguments, config_fname, job_fname,
                                        experiment_dir, search_params,
@@ -39,7 +39,7 @@ class GridHyperoptimisation(BaseHyperOptimisation):
                and self.eval_counter < self.num_param_configs):
             # Get parameter batch from the grid
             proposal_params = self.param_grid[self.eval_counter]
-            if not proposal_params in (self.hyper_log.all_evaluated_params
+            if proposal_params not in (self.hyper_log.all_evaluated_params
                                        + param_batch):
                 # Add parameter proposal to the batch list
                 param_batch.append(proposal_params)

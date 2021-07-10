@@ -1,5 +1,9 @@
 import numpy as np
-from statsmodels.stats.weightstats import ztest
+try:
+    from statsmodels.stats.weightstats import ztest
+except ModuleNotFoundError as err:
+    raise ModuleNotFoundError(f"{err}. You need to install `statsmodels` "
+                              "to use the `mle_toolbox.hypothesis` module.")
 from statsmodels.stats.multitest import multipletests
 
 
@@ -27,7 +31,7 @@ class HypothesisTester(object):
         # TODO: Parallelize/vectorize this?!
         for i in range(self.num_evals):
             for j in range(self.num_evals):
-                # One sided z-test = i - j is non-zero: Rejection (smaller than)
+                # One sided z-test = i-j is non-zero: Rejection (smaller than)
                 z_stat, p_val = ztest(
                     self.meta_log[self.eval_ids[i]].stats[metric_name].mean -
                     self.meta_log[self.eval_ids[j]].stats[metric_name].mean,
@@ -57,9 +61,8 @@ class HypothesisTester(object):
         assert correction_name in self.correct_methods
         corrected_p_vals = np.zeros((self.num_evals, self.num_evals - 1))
         # Remove diagonal (test agains self - replace with 1)
-        clean_p_val = p_vals_temp[~np.eye(p_vals_temp.shape[0],dtype=bool)]
+        clean_p_val = p_vals_temp[~np.eye(p_vals_temp.shape[0], dtype=bool)]
         clean_p_val = clean_p_val.reshape(p_vals_temp.shape[0], -1)
-        diag_elem = p_vals_temp.diagonal()
         for eval_run in range(self.num_evals):
             _, p_correct, _, _ = multipletests(clean_p_val[eval_run],
                                                method=correction_name)
@@ -67,13 +70,13 @@ class HypothesisTester(object):
         # Readd diagonal column
         d = corrected_p_vals.shape[0]
         assert corrected_p_vals.shape[1] == d - 1
-        matrix_new = np.ndarray((d, d+1))
-        matrix_new[:,0] = 1
-        matrix_new[:-1, 1:] = corrected_p_vals.reshape((d-1, d))
-        matrix_new = matrix_new.reshape(-1)[:-d].reshape(d,d)
+        matrix_new = np.ndarray((d, d + 1))
+        matrix_new[:, 0] = 1
+        matrix_new[:-1, 1:] = corrected_p_vals.reshape((d - 1, d))
+        matrix_new = matrix_new.reshape(-1)[:-d].reshape(d, d)
         return np.flip(matrix_new, axis=0)
 
-    def plot(self, corrected: bool=False, method: str="bonferroni"):
+    def plot(self, corrected: bool = False, method: str = "bonferroni"):
         """ Helper plot function for p-values (corrected with method). """
         from mle_toolbox.visualize import plot_2D_heatmap
         if corrected:
@@ -82,11 +85,10 @@ class HypothesisTester(object):
             p_vals_to_plot = self.p_vals
 
         plot_title = (r"$H_0: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] = 0$"
-                      + r" vs. " +
-                      " $H_1: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] < 0$")
+                      r" vs. $H_1: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] < 0$")  # noqa: E501
         fig, ax = plot_2D_heatmap(self.eval_ids, self.eval_ids, p_vals_to_plot,
                                   min_heat=0.0, max_heat=0.15,
-                                  title = plot_title,
+                                  title=plot_title,
                                   xy_labels=["Run A", "Run B"],
                                   variable_name="Corrected P-Values",
                                   figsize=(12, 10))

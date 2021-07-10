@@ -1,5 +1,5 @@
 try:
-    import matplotlib
+    import matplotlib  # noqa: F401
     # Suppress all axis/future warnings from mpl
     import warnings
     warnings.filterwarnings("ignore", module="matplotlib\..*")
@@ -33,10 +33,9 @@ from .dynamic_2d_grid import animate_2D_grid
 from .dynamic_2d_scatter import animate_2D_scatter
 
 
-__all__ = [
-           'visualize_2D_grid',
-           'plot_heatmap_array',
-           'moving_smooth_ts'
+__all__ = ['visualize_2D_grid',
+           'plot_2D_heatmap',
+           'moving_smooth_ts',
            'visualize_1D_lcurves',
            'visualize_1D_line',
            'visualize_1D_bar',
@@ -44,5 +43,4 @@ __all__ = [
            'plot_1D_bar',
            'animate_1D_lines',
            'animate_2D_grid',
-           'animate_2D_scatter'
-           ]
+           'animate_2D_scatter']
