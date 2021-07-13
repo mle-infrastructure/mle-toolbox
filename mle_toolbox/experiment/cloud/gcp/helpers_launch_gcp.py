@@ -2,15 +2,15 @@ import os
 import subprocess as sp
 from dotmap import DotMap
 from typing import Union
-from .startup_script import (tmux_setup,
-                             clone_gcp_bucket_dir,
-                             install_venv,
-                             install_additional_setup,
-                             jax_gpu_build,
-                             jax_tpu_build,
-                             exec_python,
-                             exec_bash,
-                             sync_results_from_dir)
+from .startup_script_gcp import (tmux_setup,
+                                 clone_gcp_bucket_dir,
+                                 install_venv,
+                                 install_additional_setup,
+                                 jax_gpu_build,
+                                 jax_tpu_build,
+                                 exec_python,
+                                 exec_bash,
+                                 sync_results_from_dir)
 
 
 cores_to_machine_type = {1: "n2-highcpu-2",

@@ -1,4 +1,4 @@
-from .startup_script import slurm_base_job_config, slurm_job_exec
+from .startup_script_slurm import slurm_base_job_config, slurm_job_exec
 
 
 def slurm_generate_startup_file(job_arguments: dict) -> str:

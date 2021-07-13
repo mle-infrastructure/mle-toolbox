@@ -1,5 +1,24 @@
 # Running Tests
 
+## `flake8` Linting
+
+```
+flake8 ./mle_toolbox --count --select=E9,F63,F7,F82 --show-source --statistics
+flake8 ./mle_toolbox --count --exit-zero --max-line-length=127 --statistics
+```
+
+## `mypy` Type Checking
+
+```
+mypy mle_toolbox/.
+```
+
+## `black`Formatting
+
+```
+black --verbose --config pyproject.toml
+```
+
 ## Test Coverage
 
 *Note*: This page and content is still work in progress!

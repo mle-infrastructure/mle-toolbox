@@ -106,9 +106,9 @@ def get_time_experiment(db, last_experiment_id):
             stop_time = db.dget(last_experiment_id, "stop_time")
         except Exception:
             start_date = dt.datetime.strptime(start_time, "%m/%d/%Y %H:%M:%S")
-            end_date = start_date + dt.timedelta(days=int(tot_days),
-                                                 hours=int(tot_hours),
-                                                 minutes=int(tot_mins))
+            end_date = start_date + dt.timedelta(days=int(float(tot_days)),
+                                                 hours=int(float(tot_hours)),
+                                                 minutes=int(float(tot_mins)))
             stop_time = end_date.strftime("%m/%d/%Y %H:%M:%S")
     else:
         start_time = "-"

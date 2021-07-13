@@ -17,7 +17,7 @@ from .ssh_manager import setup_proxy_server
 setup_proxy_server()
 
 
-def get_gcloud_db(number_of_connect_tries: int = 5):
+def get_gcloud_db(number_of_connect_tries: int = 5) -> int:
     """ Pull latest experiment database from gcloud storage. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -125,8 +125,8 @@ def upload_local_dir_to_gcs(local_path: str,
                     remote_path = os.path.join(gcs_path,
                                                local_file[1 +
                                                           len(local_path):])
-                   blob = bucket.blob(remote_path)
-                   blob.upload_from_filename(local_file)
+                    blob = bucket.blob(remote_path)
+                    blob.upload_from_filename(local_file)
         # Only upload single file - e.g. zip compressed experiment
         else:
             remote_path = gcs_path
@@ -136,8 +136,8 @@ def upload_local_dir_to_gcs(local_path: str,
 
 
 def download_gcs_dir(gcs_path: str,
-                     local_path: str="",
-                     number_of_connect_tries: int=5):
+                     local_path: str = "",
+                     number_of_connect_tries: int = 5):
     """ Download entire dir (recursively) from Google Cloud Storage Bucket. """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -146,7 +146,7 @@ def download_gcs_dir(gcs_path: str,
         try:
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-        except:
+        except Exception:
             logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
                         f" - Failed sending to GCloud Storage")
 
@@ -166,7 +166,7 @@ def download_gcs_dir(gcs_path: str,
             if not os.path.exists(dir_path):
                 try:
                     os.makedirs(dir_path)
-                except:
+                except Exception:
                     pass
             blob.download_to_filename(os.path.join(local_path, filename))
     # Only download single file - e.g. zip compressed experiment
@@ -185,7 +185,7 @@ def zipdir(path: str, zip_fname: str):
     for root, dirs, files in os.walk(path):
         for file in files:
             ziph.write(os.path.join(root, file),
-                       os.path.join(root[prefix_len+1:], file))
+                       os.path.join(root[prefix_len + 1:], file))
     ziph.close()
 
 
@@ -233,6 +233,7 @@ def get_gcloud_zip_experiment(db,
             experiment_id = "e-id-" + experiment_id
 
         if experiment_id not in all_experiment_ids:
+            time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
             print(time_t, "The experiment you try to retrieve does not exist")
             experiment_id = input(time_t +
                                   " Which experiment do you want to retrieve?")

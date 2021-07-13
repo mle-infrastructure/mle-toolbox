@@ -49,7 +49,10 @@ class MetaLog(object):
     @property
     def eval_ids(self):
         """ Get ids of runs stored in meta_log instance. """
-        return list(self.meta_log.keys())
+        if self.num_configs > 1:
+            return list(self.meta_log.keys())
+        else:
+            print("Only single configuration/evaluation loaded.")
 
     def __len__(self):
         """ Return number of runs stored in meta_log. """
@@ -97,88 +100,115 @@ def load_meta_log(log_fname: str, mean_seeds: bool = True) -> DotMap:
 
 def mean_over_seeds(result_dict: DotMap) -> DotMap:
     """ Mean all individual runs over their respective seeds.
+        BATCH EVAL CASE:
         IN: {'b_1_eval_0_seed_0': {'meta': {}, 'stats': {}, 'time': {}},
              'b_1_eval_0_seed_1': {'meta': {}, 'stats': {}, 'time': {}},
               ...}
         OUT: {'b_1_eval_0': {'meta': {}, 'stats': {}, 'time': {},
               'b_1_eval_1': {'meta': {}, 'stats': {}, 'time': {}}
+        SINGLE EVAL CASE:
+        IN: {'seed_0': {'meta': {}, 'stats': {}, 'time': {}},
+             'seed_1': {'meta': {}, 'stats': {}, 'time': {}},
+              ...}
+        OUT: {'eval': {'meta': {}, 'stats': {}, 'time': {}}
     """
     all_runs = list(result_dict.keys())
     eval_runs = []
     split_by = "_seed_"
 
-    # Get again the different unique runs (without their seeds)
+    # Get the different unique runs (without their seeds)
     for run in all_runs:
         split = run.split(split_by)
-        eval_runs.append(split[0])
+        if len(split) > 1:
+            eval_runs.append(split[0])
+        else:
+            # Break if there are only different seeds - single config!
+            break
     unique_evals = list(set(eval_runs))
 
-    # Get seeds specific to each one of eval/run - append later on to meta data
-    evals_and_seeds = {key: [] for key in unique_evals}
-    for run in all_runs:
-        split = run.split(split_by)
-        evals_and_seeds[split[0]].append(int(split[1]))
+    if len(unique_evals) > 0:
+        # Get seeds specific to each eval/run - append later on to meta data
+        evals_and_seeds = {key: [] for key in unique_evals}
+        for run in all_runs:
+            split = run.split(split_by)
+            evals_and_seeds[split[0]].append(int(split[1]))
 
+        new_results_dict = mean_batch_evals(result_dict, unique_evals,
+                                            evals_and_seeds, all_runs)
+    else:
+        new_results_dict = mean_single_eval(result_dict, all_runs, "eval")
+    return DotMap(new_results_dict, _dynamic=False)
+
+
+def mean_single_eval(result_dict, all_seeds_for_run, eval_name):
+    """ Mean over seeds of single config run. """
+    new_results_dict = {}
+    data_temp = result_dict[all_seeds_for_run[0]]
+    # Get all main data source keys ("meta", "stats", "time")
+    data_sources = list(data_temp.keys())
+    # Get all variables within the data sources
+    data_items = {data_sources[i]:
+                  list(data_temp[data_sources[i]].keys())
+                  for i in range(len(data_sources))}
+    # Collect all runs together - data at this point is not modified
+    source_to_store = {key: {} for key in data_sources}
+    for ds in data_sources:
+        data_to_store = {key: [] for key in data_items[ds]}
+        for i, o_name in enumerate(data_items[ds]):
+            for i, seed_id in enumerate(all_seeds_for_run):
+                seed_run = result_dict[seed_id]
+                data_to_store[o_name].append(seed_run[ds][o_name][:])
+        source_to_store[ds] = data_to_store
+    new_results_dict[eval_name] = source_to_store
+
+    # Aggregate over the collected runs
+    mean_sources = {key: {} for key in data_sources}
+    for ds in data_sources:
+        # Mean over time and stats data
+        if ds in ["time", "stats"]:
+            mean_dict = {key: {} for key in data_items[ds]}
+            for i, o_name in enumerate(data_items[ds]):
+                if (type(new_results_dict[eval_name][ds][o_name][0][0]) not
+                   in [str, bytes, np.bytes_, np.str_]):
+                    mean_tol, std_tol = tolerant_mean(
+                        new_results_dict[eval_name][ds][o_name])
+                    mean_dict[o_name]["mean"] = mean_tol
+                    mean_dict[o_name]["std"] = std_tol
+                else:
+                    mean_dict[o_name] = new_results_dict[eval_name][ds][o_name]
+        # Append over all meta data (strings, seeds nothing to mean)
+        elif ds == "meta":
+            mean_dict = {}
+            for i, o_name in enumerate(data_items[ds]):
+                temp = np.array(
+                    new_results_dict[eval_name][ds][o_name]
+                ).squeeze().astype('U200')
+                # Get rid of duplicate experiment dir strings
+                if o_name in ["experiment_dir", "eval_id", "config_fname",
+                              "model_type"]:
+                    mean_dict[o_name] = str(np.unique(temp)[0])
+                else:
+                    mean_dict[o_name] = temp
+
+            # Add seeds as clean array of integers to dict
+            mean_dict["seeds"] = [int(s.split("_")[1]) for s in
+                                  all_seeds_for_run]
+        else:
+            raise ValueError
+        mean_sources[ds] = mean_dict
+    new_results_dict[eval_name] = mean_sources
+    return new_results_dict
+
+
+def mean_batch_evals(result_dict, unique_evals, evals_and_seeds, all_runs):
+    """ Mean over seeds for all batches and evals. """
     # Loop over all evals (e.g. b_1_eval_0) and merge + aggregate data
     new_results_dict = {}
     for eval in unique_evals:
         all_seeds_for_run = [i for i in all_runs if i.startswith(eval + "_")]
-        data_temp = result_dict[all_seeds_for_run[0]]
-        # Get all main data source keys ("meta", "stats", "time")
-        data_sources = list(data_temp.keys())
-        # Get all variables within the data sources
-        data_items = {data_sources[i]:
-                      list(data_temp[data_sources[i]].keys())
-                      for i in range(len(data_sources))}
-
-        # Collect all runs together - data at this point is not modified
-        source_to_store = {key: {} for key in data_sources}
-        for ds in data_sources:
-            data_to_store = {key: [] for key in data_items[ds]}
-            for i, o_name in enumerate(data_items[ds]):
-                for i, seed_id in enumerate(all_seeds_for_run):
-                    seed_run = result_dict[seed_id]
-                    data_to_store[o_name].append(seed_run[ds][o_name][:])
-            source_to_store[ds] = data_to_store
-        new_results_dict[eval] = source_to_store
-
-        # Aggregate over the collected runs
-        mean_sources = {key: {} for key in data_sources}
-        for ds in data_sources:
-            # Mean over time and stats data
-            if ds in ["time", "stats"]:
-                mean_dict = {key: {} for key in data_items[ds]}
-                for i, o_name in enumerate(data_items[ds]):
-                    if (type(new_results_dict[eval][ds][o_name][0][0]) not
-                       in [str, bytes, np.bytes_, np.str_]):
-                        mean_tol, std_tol = tolerant_mean(
-                            new_results_dict[eval][ds][o_name])
-                        mean_dict[o_name]["mean"] = mean_tol
-                        mean_dict[o_name]["std"] = std_tol
-                    else:
-                        mean_dict[o_name] = new_results_dict[eval][ds][o_name]
-            # Append over all meta data (strings, seeds nothing to mean)
-            elif ds == "meta":
-                mean_dict = {}
-                for i, o_name in enumerate(data_items[ds]):
-                    temp = np.array(
-                        new_results_dict[eval][ds][o_name]
-                    ).squeeze().astype('U200')
-                    # Get rid of duplicate experiment dir strings
-                    if o_name in ["experiment_dir", "eval_id", "config_fname",
-                                  "model_type"]:
-                        mean_dict[o_name] = str(np.unique(temp)[0])
-                    else:
-                        mean_dict[o_name] = temp
-
-                # Add seeds as clean array of integers to dict
-                mean_dict["seeds"] = {}
-                mean_dict["seeds"] = evals_and_seeds[eval]
-            else:
-                raise ValueError
-            mean_sources[ds] = mean_dict
-        new_results_dict[eval] = mean_sources
-    return DotMap(new_results_dict, _dynamic=False)
+        eval_dict = mean_single_eval(result_dict, all_seeds_for_run, eval)
+        new_results_dict[eval] = eval_dict[eval]
+    return new_results_dict
 
 
 def tolerant_mean(arrs: list):

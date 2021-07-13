@@ -3,7 +3,7 @@ import time
 import subprocess as sp
 from typing import Union
 from .manage_job_local import submit_subprocess, random_id
-from .cluster.slurm.helpers_launch import slurm_generate_startup_file
+from .cluster.slurm.helpers_launch_slurm import slurm_generate_startup_file
 from mle_toolbox import mle_config
 
 

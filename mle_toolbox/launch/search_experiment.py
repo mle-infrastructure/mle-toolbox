@@ -1,10 +1,12 @@
 import os
+from typing import Dict, Union
 
 
 def run_hyperparameter_search(resource_to_run: str,
-                              meta_job_args: dict,
-                              single_job_args: dict,
-                              param_search_args: dict):
+                              meta_job_args: Dict[str, str],
+                              single_job_args: Dict[str, Union[str, int]],
+                              param_search_args: Dict[str, Dict[str, Union[str, bool, Dict[str, Union[str, bool]]]]]  # noqa: E501
+                              ) -> None:
     """ Run a hyperparameter search experiment. """
     # Import only if used, this will raise an informative error when
     # scikit-optimize is not installed.
@@ -14,21 +16,21 @@ def run_hyperparameter_search(resource_to_run: str,
                             SMBOHyperoptimisation)
 
     # 1. Setup the hyperlogger for the experiment
-    hyperlog_fname = os.path.join(meta_job_args.experiment_dir,
+    hyperlog_fname = os.path.join(meta_job_args["experiment_dir"],
                                   "hyper_log.pkl")
     # If experiment does not use meta_log .hdf5 file system - no metric logging
-    if "no_results_logging" not in param_search_args.search_logging.keys():
-        param_search_args.search_logging["no_results_logging"] = False
+    if "no_results_logging" not in param_search_args["search_logging"].keys():
+        param_search_args["search_logging"]["no_results_logging"] = False
     hyper_log = HyperoptLogger(hyperlog_fname,
-                               **param_search_args.search_logging)
+                               **param_search_args["search_logging"])
 
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
-    if param_search_args.search_config.search_type == "random":
+    if param_search_args["search_config"]["search_type"] == "random":
         hyper_opt = RandomHyperoptimisation
-    elif param_search_args.search_config.search_type == "grid":
+    elif param_search_args["search_config"]["search_type"] == "grid":
         hyper_opt = GridHyperoptimisation
-    elif param_search_args.search_config.search_type == "smbo":
+    elif param_search_args["search_config"]["search_type"] == "smbo":
         hyper_opt = SMBOHyperoptimisation
     else:
         raise ValueError("Please provide a valid \
@@ -38,8 +40,8 @@ def run_hyperparameter_search(resource_to_run: str,
     hyper_opt_instance = hyper_opt(hyper_log,
                                    resource_to_run,
                                    single_job_args,
-                                   meta_job_args.base_train_config,
-                                   meta_job_args.base_train_fname,
-                                   meta_job_args.experiment_dir,
+                                   meta_job_args["base_train_config"],
+                                   meta_job_args["base_train_fname"],
+                                   meta_job_args["experiment_dir"],
                                    **param_search_args.search_config)
     hyper_opt_instance.run_search(**param_search_args.search_resources)

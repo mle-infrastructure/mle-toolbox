@@ -6,9 +6,9 @@ import random
 import re
 from dotmap import DotMap
 from typing import Union
-from .cloud.gcp.helpers_launch import (gcp_generate_startup_file,
-                                       gcp_get_submission_cmd,
-                                       gcp_delete_vm_instance)
+from .cloud.gcp.helpers_launch_gcp import (gcp_generate_startup_file,
+                                           gcp_get_submission_cmd,
+                                           gcp_delete_vm_instance)
 from mle_toolbox import mle_config
 from mle_toolbox.remote.gcloud_transfer import download_gcs_dir
 

@@ -1,5 +1,5 @@
 from mle_toolbox import mle_config
-from .startup_script import sge_base_job_config, sge_job_exec
+from .startup_script_sge import sge_base_job_config, sge_job_exec
 
 
 def sge_generate_startup_file(job_arguments: dict) -> str:
