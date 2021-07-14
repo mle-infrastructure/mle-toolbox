@@ -63,7 +63,8 @@ class MetaLog(object):
         return self.meta_log[item]
 
 
-def load_meta_log(log_fname: str, mean_seeds: bool = True) -> DotMap:
+def load_meta_log(log_fname: str,
+                  aggregate_seeds: bool = True) -> DotMap:
     """ Load in logging results & mean the results over different runs """
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
@@ -93,12 +94,12 @@ def load_meta_log(log_fname: str, mean_seeds: bool = True) -> DotMap:
     h5f.close()
 
     # Return as dot-callable dictionary
-    if mean_seeds:
-        result_dict = mean_over_seeds(result_dict)
+    if aggregate_seeds:
+        result_dict = aggregate_over_seeds(result_dict)
     return MetaLog(DotMap(result_dict, _dynamic=False))
 
 
-def mean_over_seeds(result_dict: DotMap) -> DotMap:
+def aggregate_over_seeds(result_dict: DotMap) -> DotMap:
     """ Mean all individual runs over their respective seeds.
         BATCH EVAL CASE:
         IN: {'b_1_eval_0_seed_0': {'meta': {}, 'stats': {}, 'time': {}},
@@ -132,15 +133,17 @@ def mean_over_seeds(result_dict: DotMap) -> DotMap:
         for run in all_runs:
             split = run.split(split_by)
             evals_and_seeds[split[0]].append(int(split[1]))
-
-        new_results_dict = mean_batch_evals(result_dict, unique_evals,
-                                            evals_and_seeds, all_runs)
+        # Perform seed aggregation for all evaluations
+        new_results_dict = aggregate_batch_evals(result_dict, unique_evals,
+                                                 evals_and_seeds, all_runs)
     else:
-        new_results_dict = mean_single_eval(result_dict, all_runs, "eval")
+        new_results_dict = aggregate_single_eval(result_dict, all_runs, "eval")
     return DotMap(new_results_dict, _dynamic=False)
 
 
-def mean_single_eval(result_dict, all_seeds_for_run, eval_name):
+def aggregate_single_eval(result_dict: dict,
+                          all_seeds_for_run: list,
+                          eval_name: str) -> dict:
     """ Mean over seeds of single config run. """
     new_results_dict = {}
     data_temp = result_dict[all_seeds_for_run[0]]
@@ -162,51 +165,64 @@ def mean_single_eval(result_dict, all_seeds_for_run, eval_name):
     new_results_dict[eval_name] = source_to_store
 
     # Aggregate over the collected runs
-    mean_sources = {key: {} for key in data_sources}
+    aggregate_sources = {key: {} for key in data_sources}
     for ds in data_sources:
         # Mean over time and stats data
         if ds in ["time", "stats"]:
-            mean_dict = {key: {} for key in data_items[ds]}
+            aggregate_dict = {key: {} for key in data_items[ds]}
             for i, o_name in enumerate(data_items[ds]):
                 if (type(new_results_dict[eval_name][ds][o_name][0][0]) not
                    in [str, bytes, np.bytes_, np.str_]):
+                    # Compute mean and standard deviation over seeds
                     mean_tol, std_tol = tolerant_mean(
                         new_results_dict[eval_name][ds][o_name])
-                    mean_dict[o_name]["mean"] = mean_tol
-                    mean_dict[o_name]["std"] = std_tol
+                    aggregate_dict[o_name]["mean"] = mean_tol
+                    aggregate_dict[o_name]["std"] = std_tol
+
+                    # Compute 10, 25, 50, 75, 90 percentiles over seeds
+                    p50, p10, p25, p75, p90 = tolerant_median(
+                        new_results_dict[eval_name][ds][o_name])
+                    aggregate_dict[o_name]["p50"] = p50
+                    aggregate_dict[o_name]["p10"] = p10
+                    aggregate_dict[o_name]["p25"] = p25
+                    aggregate_dict[o_name]["p75"] = p75
+                    aggregate_dict[o_name]["p90"] = p90
                 else:
-                    mean_dict[o_name] = new_results_dict[eval_name][ds][o_name]
+                    aggregate_dict[o_name] = new_results_dict[eval_name][ds][o_name]  # noqa: E501
         # Append over all meta data (strings, seeds nothing to mean)
         elif ds == "meta":
-            mean_dict = {}
+            aggregate_dict = {}
             for i, o_name in enumerate(data_items[ds]):
                 temp = np.array(
                     new_results_dict[eval_name][ds][o_name]
                 ).squeeze().astype('U200')
                 # Get rid of duplicate experiment dir strings
-                if o_name in ["experiment_dir", "eval_id", "config_fname",
-                              "model_type"]:
-                    mean_dict[o_name] = str(np.unique(temp)[0])
+                if o_name in ["experiment_dir", "eval_id",
+                              "config_fname", "model_type"]:
+                    aggregate_dict[o_name] = str(np.unique(temp)[0])
                 else:
-                    mean_dict[o_name] = temp
+                    aggregate_dict[o_name] = temp
 
             # Add seeds as clean array of integers to dict
-            mean_dict["seeds"] = [int(s.split("_")[1]) for s in
-                                  all_seeds_for_run]
+            aggregate_dict["seeds"] = [int(s.split("_")[1]) for s in
+                                       all_seeds_for_run]
         else:
             raise ValueError
-        mean_sources[ds] = mean_dict
-    new_results_dict[eval_name] = mean_sources
+        aggregate_sources[ds] = aggregate_dict
+    new_results_dict[eval_name] = aggregate_sources
     return new_results_dict
 
 
-def mean_batch_evals(result_dict, unique_evals, evals_and_seeds, all_runs):
+def aggregate_batch_evals(result_dict: dict,
+                          unique_evals: list,
+                          evals_and_seeds: list,
+                          all_runs: list):
     """ Mean over seeds for all batches and evals. """
     # Loop over all evals (e.g. b_1_eval_0) and merge + aggregate data
     new_results_dict = {}
     for eval in unique_evals:
         all_seeds_for_run = [i for i in all_runs if i.startswith(eval + "_")]
-        eval_dict = mean_single_eval(result_dict, all_seeds_for_run, eval)
+        eval_dict = aggregate_single_eval(result_dict, all_seeds_for_run, eval)
         new_results_dict[eval] = eval_dict[eval]
     return new_results_dict
 
@@ -225,6 +241,26 @@ def tolerant_mean(arrs: list):
         for idx, l in enumerate(arrs):
             arr[:len(l), :, idx] = l
     return arr.mean(axis=-1), arr.std(axis=-1)
+
+
+def tolerant_median(arrs: list):
+    """ Helper function for case data to median has different lengths. """
+    lens = [len(i) for i in arrs]
+    if len(arrs[0].shape) == 1:
+        arr = np.ma.empty((np.max(lens), len(arrs)))
+        arr.mask = True
+        for idx, l in enumerate(arrs):
+            arr[:len(l), idx] = l
+    else:
+        arr = np.ma.empty((np.max(lens), arrs[0].shape[1], len(arrs)))
+        arr.mask = True
+        for idx, l in enumerate(arrs):
+            arr[:len(l), :, idx] = l
+    return (np.percentile(arr, 50, axis=-1),
+            np.percentile(arr, 10, axis=-1),
+            np.percentile(arr, 25, axis=-1),
+            np.percentile(arr, 75, axis=-1),
+            np.percentile(arr, 90, axis=-1))
 
 
 def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):

@@ -10,6 +10,7 @@ class HyperoptLogger(object):
     def __init__(self,
                  hyperlog_fname: str = "hyper_log.pkl",   # .pkl to store log
                  max_objective: bool = True,              # Max/min all metrics
+                 aggregate_seeds: str = "mean",           # How to aggreg seeds
                  problem_type: str = "final",             # "final"/"best" log
                  eval_metrics: Union[str, list] = [],     # Metric names stored
                  verbose_log: bool = True,                # Print at new update
@@ -18,6 +19,9 @@ class HyperoptLogger(object):
         """ Mini-class to log the  """
         self.hyperlog_fname = hyperlog_fname    # Where to save the log to
         self.max_objective = max_objective      # Max/min target (reward/loss)
+        self.aggregate_seeds = aggregate_seeds  # [mean, 10/25/50/75/90p]
+        assert self.aggregate_seeds in ["mean", "p10", "p25",
+                                        "p50", "p75", "p90"]
         self.problem_type = problem_type        # Time log ckpt (final/best)
         self.eval_metrics = eval_metrics        # Vars to compare across runs
         if type(self.eval_metrics) == str:
@@ -30,6 +34,16 @@ class HyperoptLogger(object):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
 
+        # Log initialization status and what/how we log
+        self.logger.info(f"HyperoptLogger Initialized ({self.hyperlog_fname})")
+        if not self.no_results_logging:
+            self.logger.info(f"Scoring: {self.problem_type} "
+                             f"| Max: {self.max_objective} "
+                             f"| Seeds: {self.aggregate_seeds}")
+            self.logger.info(f"Metrics: {self.eval_metrics}")
+
+        # Reload previous log if desired!
+        # TODO: Compute residual amount of evaluations to run and pass back
         if reload_log:
             self.reload_log()
             self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")
@@ -41,14 +55,18 @@ class HyperoptLogger(object):
             self.all_evaluated_params = []  # All evaluated parameters
         self.batch_id = 0                   # Batch evaluation tracker
 
+        print_framed("HYPEROPT LOGGER INITIALIZED")
+
     def update_log(self, params, meta_eval_log, time_elapsed, run_ids):
         """ Update  log dictionary with the most recent result dictionary """
         # Update the batch evaluation counter
         self.batch_id += 1
         if not self.no_results_logging:
-            perf_measures = evaluate_hyperparams(meta_eval_log, run_ids,
+            perf_measures = evaluate_hyperparams(meta_eval_log,
+                                                 run_ids,
                                                  self.problem_type,
-                                                 self.eval_metrics)
+                                                 self.eval_metrics,
+                                                 self.aggregate_seeds)
         else:
             perf_measures = None
 
@@ -170,53 +188,60 @@ class HyperoptLogger(object):
         return len(self.opt_log)
 
 
-def evaluate_hyperparams(eval_logs, run_ids, problem_type, eval_metrics):
+def evaluate_hyperparams(eval_logs: dict,
+                         run_ids: list,
+                         problem_type: str,
+                         eval_metrics: list,
+                         aggregate_seeds: str):
     """ Run the search for a number of iterations """
     if problem_type == "final":
         # Get final training loss as performance score
         perf_scores = evaluate_final_score(eval_logs,
-                                           measure_keys=eval_metrics,
-                                           run_ids=run_ids)
+                                           eval_metrics,
+                                           run_ids,
+                                           aggregate_seeds)
     elif problem_type == "best":
         # Get final training loss as performance score
         perf_scores = evaluate_best_score(eval_logs,
-                                          measure_keys=eval_metrics,
-                                          run_ids=run_ids)
+                                          eval_metrics,
+                                          run_ids,
+                                          aggregate_seeds)
     else:
         raise ValueError
     return perf_scores
 
 
-def evaluate_final_score(eval_logs, measure_keys=["train_loss"],
-                         run_ids=None):
+def evaluate_final_score(eval_logs, eval_metrics=["train_loss"],
+                         run_ids=None, aggregate_seeds="mean"):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation
     OUT: dict of final scores at end of training for all metrics
     """
     perf_per_metric = {}
-    for metric in measure_keys:
+    for metric in eval_metrics:
         int_out = {}
         for run in run_ids:
-            int_out[run] = eval_logs[run]["stats"][metric]["mean"][-1]
+            int_out[run] = eval_logs[run]["stats"][metric][aggregate_seeds][-1]
         perf_per_metric[metric] = int_out
     return perf_per_metric
 
 
-def evaluate_best_score(eval_logs, measure_keys=["train_loss"],
-                        run_ids=None, max_objective=True):
+def evaluate_best_score(eval_logs, eval_metrics=["train_loss"],
+                        run_ids=None, max_objective=True,
+                        aggregate_seeds="mean"):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation
     OUT: dict of best scores during course of training for all metrics
     """
     perf_per_metric = {}
-    for metric in measure_keys:
+    for metric in eval_metrics:
         int_out = {}
         for run in run_ids:
             if max_objective:
                 int_out[run] = np.max(
-                    eval_logs[run]["stats"][metric]["mean"])
+                    eval_logs[run]["stats"][metric][aggregate_seeds])
             else:
                 int_out[run] = np.min(
-                    eval_logs[run]["stats"][metric]["mean"])
+                    eval_logs[run]["stats"][metric][aggregate_seeds])
         perf_per_metric[metric] = int_out
     return perf_per_metric

@@ -328,5 +328,5 @@ class BaseHyperOptimisation(object):
                          file_ids=all_run_ids)
 
         # Load in meta-results log with values meaned over seeds
-        meta_eval_logs = load_meta_log(meta_log_fname, mean_seeds=True)
+        meta_eval_logs = load_meta_log(meta_log_fname, aggregate_seeds=True)
         return meta_eval_logs
