@@ -1,5 +1,5 @@
 ![MLE_Toolbox_Banner](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/thumbnails/mle_thumbnail.png?raw=true)
-[![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
+[![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://github.com/RobertTLange/mle-toolbox/blob/main/docs/how_to_toolbox.md) [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 
@@ -12,7 +12,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](docs/how_to_toolbox.md) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
 3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/numpy_ode), training [PyTorch MNIST-CNNs](examples/torch_mnist) or [VAEs in JAX](examples/jax_vae).
-4. Setup  up and run your own experiments using the [template files](templates/) and `mle run <exp_config>.yaml`.
+5. Run your own experiments using the [template files](https://github.com/RobertTLange/mle-toolbox/tree/main/templates), [project](https://github.com/RobertTLange/mle-project-template) and `mle run`.
 
 
 ## Installation :memo:

@@ -18,43 +18,50 @@ setup_proxy_server()
 
 
 def get_gcloud_db(number_of_connect_tries: int = 5) -> int:
-    """ Pull latest experiment database from gcloud storage. """
+    """Pull latest experiment database from gcloud storage."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
         try:
             # Connect to project and bucket
             client = storage.Client(mle_config.gcp.project_name)
-            bucket = client.get_bucket(mle_config.gcp.bucket_name,
-                                       timeout=20)
+            bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
             # Download blob to db file
             blob = bucket.blob(mle_config.gcp.protocol_fname)
-            with open(expanduser(mle_config.general.local_protocol_fname),
-                      'wb') as file_obj:
+            with open(
+                expanduser(mle_config.general.local_protocol_fname), "wb"
+            ) as file_obj:
                 blob.download_to_file(file_obj)
-            logger.info(f"Pulled from GCloud Storage - "
-                        f"{mle_config.gcp.protocol_fname}")
+            logger.info(
+                f"Pulled from GCloud Storage - " f"{mle_config.gcp.protocol_fname}"
+            )
             return 1
         except Exception as ex:
             # Remove empty file - causes error otherwise when trying to load
             os.remove(expanduser(mle_config.general.local_protocol_fname))
             if type(ex).__name__ == "NotFound":
-                logger.info(f"No DB found in GCloud Storage"
-                            f" - {mle_config.gcp.protocol_fname}")
-                logger.info("New DB will be created - "
-                            f"{mle_config.gcp.project_name}/"
-                            f"{mle_config.gcp.bucket_name}")
+                logger.info(
+                    f"No DB found in GCloud Storage"
+                    f" - {mle_config.gcp.protocol_fname}"
+                )
+                logger.info(
+                    "New DB will be created - "
+                    f"{mle_config.gcp.project_name}/"
+                    f"{mle_config.gcp.bucket_name}"
+                )
                 return 1
             else:
-                logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                            f" - Failed pulling from GCloud Storage"
-                            f" - {type(ex).__name__}")
+                logger.info(
+                    f"Attempt {i+1}/{number_of_connect_tries}"
+                    f" - Failed pulling from GCloud Storage"
+                    f" - {type(ex).__name__}"
+                )
     # If after 5 pulls no successful connection established - return failure
     return 0
 
 
 def send_gcloud_db(number_of_connect_tries: int = 5):
-    """ Send updated database back to gcloud storage. """
+    """Send updated database back to gcloud storage."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -64,20 +71,21 @@ def send_gcloud_db(number_of_connect_tries: int = 5):
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
             blob = bucket.blob(mle_config.gcp.protocol_fname)
             blob.upload_from_filename(
-                filename=expanduser(mle_config.general.local_protocol_fname))
-            logger.info(f"Send to GCloud Storage - "
-                        f"{mle_config.gcp.protocol_fname}")
+                filename=expanduser(mle_config.general.local_protocol_fname)
+            )
+            logger.info(f"Send to GCloud Storage - " f"{mle_config.gcp.protocol_fname}")
             return 1
         except Exception:
-            logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        f" - Failed sending to GCloud Storage")
+            logger.info(
+                f"Attempt {i+1}/{number_of_connect_tries}"
+                f" - Failed sending to GCloud Storage"
+            )
     # If after 5 pulls no successful connection established - return failure
     return 0
 
 
-def delete_gcs_dir(gcs_path: str,
-                   number_of_connect_tries: int = 5):
-    """ Delete a directory in a GCS bucket. """
+def delete_gcs_dir(gcs_path: str, number_of_connect_tries: int = 5):
+    """Delete a directory in a GCS bucket."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -85,8 +93,10 @@ def delete_gcs_dir(gcs_path: str,
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
         except Exception:
-            logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        " - Failed sending to GCloud Storage")
+            logger.info(
+                f"Attempt {i+1}/{number_of_connect_tries}"
+                " - Failed sending to GCloud Storage"
+            )
 
     # Delete all files in directory
     blobs = bucket.list_blobs(prefix=gcs_path)
@@ -97,10 +107,10 @@ def delete_gcs_dir(gcs_path: str,
             pass
 
 
-def upload_local_dir_to_gcs(local_path: str,
-                            gcs_path: str,
-                            number_of_connect_tries: int = 5):
-    """ Send entire dir (recursively) to Google Cloud Storage Bucket. """
+def upload_local_dir_to_gcs(
+    local_path: str, gcs_path: str, number_of_connect_tries: int = 5
+):
+    """Send entire dir (recursively) to Google Cloud Storage Bucket."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     for i in range(number_of_connect_tries):
@@ -108,23 +118,25 @@ def upload_local_dir_to_gcs(local_path: str,
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
         except Exception:
-            logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        " - Failed sending to GCloud Storage")
+            logger.info(
+                f"Attempt {i+1}/{number_of_connect_tries}"
+                " - Failed sending to GCloud Storage"
+            )
 
     def upload_single_file(local_path, gcs_path, bucket):
         # Recursively upload the folder structure
         if os.path.isdir(local_path):
-            for local_file in glob.glob(os.path.join(local_path, '**')):
+            for local_file in glob.glob(os.path.join(local_path, "**")):
                 if not os.path.isfile(local_file):
-                    upload_single_file(local_file,
-                                       os.path.join(gcs_path,
-                                                    os.path.basename(
-                                                        local_file)),
-                                       bucket)
+                    upload_single_file(
+                        local_file,
+                        os.path.join(gcs_path, os.path.basename(local_file)),
+                        bucket,
+                    )
                 else:
-                    remote_path = os.path.join(gcs_path,
-                                               local_file[1 +
-                                                          len(local_path):])
+                    remote_path = os.path.join(
+                        gcs_path, local_file[1 + len(local_path) :]
+                    )
                     blob = bucket.blob(remote_path)
                     blob.upload_from_filename(local_file)
         # Only upload single file - e.g. zip compressed experiment
@@ -132,13 +144,14 @@ def upload_local_dir_to_gcs(local_path: str,
             remote_path = gcs_path
             blob = bucket.blob(remote_path)
             blob.upload_from_filename(local_path)
+
     upload_single_file(local_path, gcs_path, bucket)
 
 
-def download_gcs_dir(gcs_path: str,
-                     local_path: str = "",
-                     number_of_connect_tries: int = 5):
-    """ Download entire dir (recursively) from Google Cloud Storage Bucket. """
+def download_gcs_dir(
+    gcs_path: str, local_path: str = "", number_of_connect_tries: int = 5
+):
+    """Download entire dir (recursively) from Google Cloud Storage Bucket."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
@@ -147,8 +160,10 @@ def download_gcs_dir(gcs_path: str,
             client = storage.Client(mle_config.gcp.project_name)
             bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
         except Exception:
-            logger.info(f"Attempt {i+1}/{number_of_connect_tries}"
-                        f" - Failed sending to GCloud Storage")
+            logger.info(
+                f"Attempt {i+1}/{number_of_connect_tries}"
+                f" - Failed sending to GCloud Storage"
+            )
 
     blobs = bucket.list_blobs(prefix=gcs_path)  # Get list of files
     blobs = list(blobs)
@@ -159,7 +174,7 @@ def download_gcs_dir(gcs_path: str,
         if not os.path.exists(local_path):
             os.makedirs(local_path)
         for blob in blobs:
-            filename = blob.name[len(gcs_path):]
+            filename = blob.name[len(gcs_path) :]
             local_f_path = os.path.join(local_path, filename)
             dir_path = os.path.dirname(local_f_path)
 
@@ -172,27 +187,28 @@ def download_gcs_dir(gcs_path: str,
     # Only download single file - e.g. zip compressed experiment
     else:
         for blob in blobs:
-            filename = blob.name.split('/')[1]
+            filename = blob.name.split("/")[1]
             blob.download_to_filename(filename)
 
 
 def zipdir(path: str, zip_fname: str):
-    """ Zip a directory to upload afterwards to GCloud Storage. """
+    """Zip a directory to upload afterwards to GCloud Storage."""
     # ziph is zipfile handle
-    ziph = zipfile.ZipFile(zip_fname, 'w', zipfile.ZIP_DEFLATED)
+    ziph = zipfile.ZipFile(zip_fname, "w", zipfile.ZIP_DEFLATED)
     # Get rid of redundant part of path
     prefix_len = len(path)
     for root, dirs, files in os.walk(path):
         for file in files:
-            ziph.write(os.path.join(root, file),
-                       os.path.join(root[prefix_len + 1:], file))
+            ziph.write(
+                os.path.join(root, file), os.path.join(root[prefix_len + 1 :], file)
+            )
     ziph.close()
 
 
-def send_gcloud_zip_experiment(experiment_dir: str,
-                               experiment_id: str,
-                               delete_after_upload: bool = False):
-    """ Zip & upload experiment dir to Gcloud storage. """
+def send_gcloud_zip_experiment(
+    experiment_dir: str, experiment_id: str, delete_after_upload: bool = False
+):
+    """Zip & upload experiment dir to Gcloud storage."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
@@ -206,8 +222,7 @@ def send_gcloud_zip_experiment(experiment_dir: str,
     zipdir(experiment_dir, local_hash_fname)
 
     # 3. Upload the zip file to the GCS bucket
-    upload_local_dir_to_gcs(local_path=local_hash_fname,
-                            gcs_path=gcloud_hash_fname)
+    upload_local_dir_to_gcs(local_path=local_hash_fname, gcs_path=gcloud_hash_fname)
     logger.info(f"UPLOAD TO GCS BUCKET - {experiment_id}:")
     logger.info(f"{gcloud_hash_fname}")
 
@@ -222,11 +237,13 @@ def send_gcloud_zip_experiment(experiment_dir: str,
         logger.info(f"DELETED - {experiment_id}: experiment dir + .zip file")
 
 
-def get_gcloud_zip_experiment(db,
-                              experiment_id: str,
-                              all_experiment_ids: list,
-                              local_dir_name: Union[None, str] = None):
-    """ Download zipped experiment from GCS. Unpack & clean up. """
+def get_gcloud_zip_experiment(
+    db,
+    experiment_id: str,
+    all_experiment_ids: list,
+    local_dir_name: Union[None, str] = None,
+):
+    """Download zipped experiment from GCS. Unpack & clean up."""
     # Ensure the right prefix
     while True:
         if experiment_id[:5] != "e-id-":
@@ -235,8 +252,7 @@ def get_gcloud_zip_experiment(db,
         if experiment_id not in all_experiment_ids:
             time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
             print(time_t, "The experiment you try to retrieve does not exist")
-            experiment_id = input(time_t +
-                                  " Which experiment do you want to retrieve?")
+            experiment_id = input(time_t + " Which experiment do you want to retrieve?")
         else:
             break
 
@@ -248,10 +264,10 @@ def get_gcloud_zip_experiment(db,
 
     # Unzip the retrieved file
     if local_dir_name is None:
-        with zipfile.ZipFile(local_hash_fname, 'r') as zip_ref:
+        with zipfile.ZipFile(local_hash_fname, "r") as zip_ref:
             zip_ref.extractall(experiment_id)
     else:
-        with zipfile.ZipFile(local_hash_fname, 'r') as zip_ref:
+        with zipfile.ZipFile(local_hash_fname, "r") as zip_ref:
             zip_ref.extractall(local_dir_name)
 
     # Delete the zip file
@@ -259,8 +275,10 @@ def get_gcloud_zip_experiment(db,
 
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Goodbye message if successful
-    print(time_t, f"Successfully retrieved {experiment_id}"
-                  f" - from GCS {gcloud_hash_fname}")
+    print(
+        time_t,
+        f"Successfully retrieved {experiment_id}" f" - from GCS {gcloud_hash_fname}",
+    )
 
     # Update protocol retrieval status of the experiment
     db.dadd(experiment_id, ("retrieved_results", True))

@@ -2,9 +2,9 @@ from .startup_script_slurm import slurm_base_job_config, slurm_job_exec
 
 
 def slurm_generate_startup_file(job_arguments: dict) -> str:
-    """ Generate the bash script template to submit with SBATCH. """
+    """Generate the bash script template to submit with SBATCH."""
     # Set the job template depending on the desired number of GPUs
-    base_template = (slurm_base_job_config + '.')[:-1]
+    base_template = (slurm_base_job_config + ".")[:-1]
 
     # Add desired number of requested gpus
     if "num_gpus" in job_arguments:

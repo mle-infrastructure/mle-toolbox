@@ -5,7 +5,7 @@ import numpy as np
 
 
 def get_slurm_data():
-    """ Helper to get all utilisation data for slurm resource. """
+    """Helper to get all utilisation data for slurm resource."""
     user_data, job_df = get_user_slurm_data()
     host_data = get_host_slurm_data(job_df)
     util_data = get_util_slurm_data()
@@ -13,29 +13,28 @@ def get_slurm_data():
 
 
 def get_user_slurm_data():
-    """ Get jobs scheduled by Slurm cluster users. """
-    user_data = {"user": [],
-                 "total": [],
-                 "run": [],
-                 "wait": [],
-                 "login": []}
+    """Get jobs scheduled by Slurm cluster users."""
+    user_data = {"user": [], "total": [], "run": [], "wait": [], "login": []}
 
     try:
         # Get squeue output in detailed form
-        processes = sp.check_output(['squeue', '-o',
-                                     '"%.20P %.20u %.2t %.10M %.6D %C %m %N"'])
-        all_job_infos = processes.split(b'\n')[1:-1]
+        processes = sp.check_output(
+            ["squeue", "-o", '"%.20P %.20u %.2t %.10M %.6D %C %m %N"']
+        )
+        all_job_infos = processes.split(b"\n")[1:-1]
         all_job_infos = [j.decode() for j in all_job_infos]
     except Exception:
         pass
 
-    job_df = {"user": [],
-              "partition": [],
-              "status": [],
-              "node": [],
-              "run_time": [],
-              "num_cores": [],
-              "min_memory": []}
+    job_df = {
+        "user": [],
+        "partition": [],
+        "status": [],
+        "node": [],
+        "run_time": [],
+        "num_cores": [],
+        "min_memory": [],
+    }
     # Loop over jobs and extract relevant data into dataframe
     for job in all_job_infos:
         job_clean = job.split()[1:]
@@ -51,12 +50,12 @@ def get_user_slurm_data():
     # Loop over unique users and construct data to show
     unique_users = job_df.user.unique().tolist()
     for u_id in unique_users:
-        sub_df = job_df.loc[job_df['user'] == u_id]
+        sub_df = job_df.loc[job_df["user"] == u_id]
         user_data["user"].append(u_id)
         user_data["total"].append(sub_df.shape[0])
-        sub_run = sub_df.loc[sub_df['status'] == "R"]
+        sub_run = sub_df.loc[sub_df["status"] == "R"]
         user_data["run"].append(sub_run.shape[0])
-        sub_wait = sub_df.loc[sub_df['status'] == "PD"]
+        sub_wait = sub_df.loc[sub_df["status"] == "PD"]
         # "CG" is completing status
         user_data["wait"].append(sub_wait.shape[0])
         user_data["login"].append(0)
@@ -72,30 +71,26 @@ def get_user_slurm_data():
 
 
 def get_host_slurm_data(job_df):
-    """ Get jobs running on different Slurm cluster hosts. """
-    host_data = {"host_id": [],
-                 "total": [],
-                 "run": [],
-                 "login": []}
+    """Get jobs running on different Slurm cluster hosts."""
+    host_data = {"host_id": [], "total": [], "run": [], "login": []}
 
     unique_partitions = job_df.partition.unique().tolist()
     for h_id in unique_partitions:
-        sub_df = job_df.loc[job_df['partition'] == h_id]
+        sub_df = job_df.loc[job_df["partition"] == h_id]
         host_data["host_id"].append(h_id)
         host_data["total"].append(sub_df.shape[0])
-        sub_run = sub_df.loc[sub_df['status'] == "R"]
+        sub_run = sub_df.loc[sub_df["status"] == "R"]
         host_data["run"].append(sub_run.shape[0])
         host_data["login"].append(0)
     return host_data
 
 
 def get_util_slurm_data():
-    """ Get memory and CPU utilisation for specific slurm partition. """
+    """Get memory and CPU utilisation for specific slurm partition."""
     try:
         # Get squeue output in detailed form
-        processes = sp.check_output(['sinfo', '--Node', '-o',
-                                     '"%.20P %N %c %O %m %e"'])
-        all_node_infos = processes.split(b'\n')[1:-1]
+        processes = sp.check_output(["sinfo", "--Node", "-o", '"%.20P %N %c %O %m %e"'])
+        all_node_infos = processes.split(b"\n")[1:-1]
         all_node_infos = [j.decode() for j in all_node_infos]
     except Exception:
         pass
@@ -109,18 +104,20 @@ def get_util_slurm_data():
             used_cores += float(node_clean[2]) * float(node_clean[3]) / 100
             total_mem += float(node_clean[4]) / 1000
             # Total memory - free memory
-            used_mem += (float(node_clean[4]) / 1000 -
-                         float(node_clean[5][:-1]) / 1000)
+            used_mem += float(node_clean[4]) / 1000 - float(node_clean[5][:-1]) / 1000
         except Exception:
             pass
 
-    util_data = {"cores": total_cores,
-                 "cores_util": used_cores,
-                 "mem": total_mem,
-                 "mem_util": used_mem,
-                 "time_date": datetime.now().strftime("%m/%d/%y"),
-                 "time_hour": datetime.now().strftime("%H:%M:%S")}
+    util_data = {
+        "cores": total_cores,
+        "cores_util": used_cores,
+        "mem": total_mem,
+        "mem_util": used_mem,
+        "time_date": datetime.now().strftime("%m/%d/%y"),
+        "time_hour": datetime.now().strftime("%H:%M:%S"),
+    }
     return util_data
+
 
 # squeue -p partition_name
 # sacct -j job_id (get resource!)

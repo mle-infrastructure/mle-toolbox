@@ -1,13 +1,15 @@
 from mle_toolbox.utils import print_framed
 from mle_toolbox.protocol import load_local_protocol_db
-from mle_toolbox.remote.gcloud_transfer import (get_gcloud_db,
-                                                send_gcloud_db,
-                                                get_gcloud_zip_experiment,
-                                                delete_gcs_dir)
+from mle_toolbox.remote.gcloud_transfer import (
+    get_gcloud_db,
+    send_gcloud_db,
+    get_gcloud_zip_experiment,
+    delete_gcs_dir,
+)
 
 
 def sync_gcs():
-    """ Download experiments in GCS bucket onto drive + delete remote files."""
+    """Download experiments in GCS bucket onto drive + delete remote files."""
     # Download the current state of the protocol db and load it in
     get_gcloud_db()
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
@@ -23,10 +25,11 @@ def sync_gcs():
             # Pull only if you haven't retrieved before
             # TODO: Make this optional - ask user if want to retrieve again
             if not_retrieved_yet:
-                print_framed(f'RETRIEVE E-ID {e_id}')
+                print_framed(f"RETRIEVE E-ID {e_id}")
                 gcloud_hash_fname = get_gcloud_zip_experiment(
-                    db, e_id, all_experiment_ids)
-                print_framed(f'DELETE E-ID {e_id}')
+                    db, e_id, all_experiment_ids
+                )
+                print_framed(f"DELETE E-ID {e_id}")
                 delete_gcs_dir(gcloud_hash_fname)
-                print_framed(f'COMPLETED E-ID {e_id}')
+                print_framed(f"COMPLETED E-ID {e_id}")
     send_gcloud_db()

@@ -1,9 +1,8 @@
 import numpy as np
 
 
-def construct_hyperparam_range(params_to_search: dict,
-                               search_type: str) -> dict:
-    """ Helper to generate list of hyperparam ranges from YAML dictionary. """
+def construct_hyperparam_range(params_to_search: dict, search_type: str) -> dict:
+    """Helper to generate list of hyperparam ranges from YAML dictionary."""
     param_range = {}
     # For grid hyperopt generate numpy lists with desired resolution
     if search_type == "grid":
@@ -12,32 +11,32 @@ def construct_hyperparam_range(params_to_search: dict,
                 param_range[k] = v
         if "real" in params_to_search.keys():
             for k, v in params_to_search["real"].items():
-                param_range[k] = np.linspace(float(v["begin"]),
-                                             float(v["end"]),
-                                             int(v["bins"])).tolist()
+                param_range[k] = np.linspace(
+                    float(v["begin"]), float(v["end"]), int(v["bins"])
+                ).tolist()
         if "integer" in params_to_search.keys():
             for k, v in params_to_search["integer"].items():
-                param_range[k] = np.arange(int(v["begin"]),
-                                           int(v["end"]),
-                                           int(v["spacing"])).tolist()
+                param_range[k] = np.arange(
+                    int(v["begin"]), int(v["end"]), int(v["spacing"])
+                ).tolist()
 
     # For random hyperopt generate list/1d-line range to sample from
     elif search_type == "random":
         if "categorical" in params_to_search.keys():
             for k, v in params_to_search["categorical"].items():
-                param_range[k] = {"value_type": "categorical",
-                                  "values": v}
+                param_range[k] = {"value_type": "categorical", "values": v}
         if "real" in params_to_search.keys():
             for k, v in params_to_search["real"].items():
-                param_range[k] = {"value_type": "real",
-                                  "values": [float(v["begin"]),
-                                             float(v["end"])]}
+                param_range[k] = {
+                    "value_type": "real",
+                    "values": [float(v["begin"]), float(v["end"])],
+                }
         if "integer" in params_to_search.keys():
             for k, v in params_to_search["integer"].items():
-                param_range[k] = {"value_type": "integer",
-                                  "values": np.arange(
-                                                int(v["begin"]),
-                                                int(v["end"]), 1).tolist()}
+                param_range[k] = {
+                    "value_type": "integer",
+                    "values": np.arange(int(v["begin"]), int(v["end"]), 1).tolist(),
+                }
 
     # For SMBO-based hyperopt generate spaces with skopt classes
     elif search_type == "smbo":
@@ -48,21 +47,25 @@ def construct_hyperparam_range(params_to_search: dict,
         try:
             from skopt.space import Real, Integer, Categorical
         except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(f"{err}. You need to"
-                                      "install `scikit-optimize` to use "
-                                      "the `mle_toolbox.hyperopt` module.")
+            raise ModuleNotFoundError(
+                f"{err}. You need to"
+                "install `scikit-optimize` to use "
+                "the `mle_toolbox.hyperopt` module."
+            )
 
         if "categorical" in params_to_search.keys():
             for k, v in params_to_search["categorical"].items():
                 param_range[k] = Categorical(v, name=k)
         if "real" in params_to_search.keys():
             for k, v in params_to_search["real"].items():
-                param_range[k] = Real(float(v["begin"]), float(v["end"]),
-                                      prior=v["prior"], name=k)
+                param_range[k] = Real(
+                    float(v["begin"]), float(v["end"]), prior=v["prior"], name=k
+                )
         if "integer" in params_to_search.keys():
             for k, v in params_to_search["integer"].items():
-                param_range[k] = Integer(int(v["begin"]), int(v["end"]),
-                                         prior=v["prior"], name=k)
+                param_range[k] = Integer(
+                    int(v["begin"]), int(v["end"]), prior=v["prior"], name=k
+                )
     else:
         raise ValueError("Please provide a valid hyperparam search type.")
     return param_range

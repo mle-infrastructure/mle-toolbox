@@ -8,25 +8,28 @@ from mle_toolbox import mle_config
 
 
 def setup_proxy_server():
-    """ Set Gcloud creds & port to tunnel for internet connection. """
+    """Set Gcloud creds & port to tunnel for internet connection."""
     if determine_resource() == "slurm-cluster":
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-            mle_config.slurm.credentials.gcp_credentials_path)
+            mle_config.slurm.credentials.gcp_credentials_path
+        )
         if mle_config.slurm.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.slurm.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.slurm.info.https_proxy
     elif determine_resource() == "sge-cluster":
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-            mle_config.sge.credentials.gcp_credentials_path)
+            mle_config.sge.credentials.gcp_credentials_path
+        )
         if mle_config.sge.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.sge.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.sge.info.https_proxy
 
 
 class SSH_Manager(object):
-    """ SSH client for file transfer & local 2 remote experiment exec. """
+    """SSH client for file transfer & local 2 remote experiment exec."""
+
     def __init__(self, remote_resource: str):
-        """ Set the credentials & resource details. """
+        """Set the credentials & resource details."""
         setup_proxy_server()
         self.remote_resource = remote_resource
 
@@ -45,35 +48,39 @@ class SSH_Manager(object):
             self.password = mle_config.slurm.credentials.password
 
         # We are always using tunnel even if not necessary!
-        if self.jump_server == '':
+        if self.jump_server == "":
             self.jump_server = self.main_server
 
     def generate_tunnel(self):
-        """ Generate a tunnel through the jump host. """
-        return SSHTunnelForwarder((self.jump_server, self.port),
-                                  ssh_username=self.user,
-                                  ssh_password=self.password,
-                                  remote_bind_address=(self.main_server,
-                                                       self.port))
+        """Generate a tunnel through the jump host."""
+        return SSHTunnelForwarder(
+            (self.jump_server, self.port),
+            ssh_username=self.user,
+            ssh_password=self.password,
+            remote_bind_address=(self.main_server, self.port),
+        )
 
     def connect(self, tunnel):
-        """ Connect to the ssh client. """
+        """Connect to the ssh client."""
         while True:
             try:
                 client = paramiko.SSHClient()
                 client.load_system_host_keys()
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                client.connect(hostname=tunnel.local_bind_host,
-                               port=tunnel.local_bind_port,
-                               username=self.user, password=self.password,
-                               timeout=100)
+                client.connect(
+                    hostname=tunnel.local_bind_host,
+                    port=tunnel.local_bind_port,
+                    username=self.user,
+                    password=self.password,
+                    timeout=100,
+                )
                 break
             except Exception:
                 continue
         return client
 
     def sync_dir(self, local_dir_name, remote_dir_name):
-        """ Clone/sync over a local directory to remote server. """
+        """Clone/sync over a local directory to remote server."""
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
             scp = SCPClient(client.get_transport())
@@ -82,7 +89,7 @@ class SSH_Manager(object):
         return
 
     def execute_command(self, cmds_to_exec: List[str]):
-        """ Execute a shell command on the remote server. """
+        """Execute a shell command on the remote server."""
         for cmd in cmds_to_exec:
             with self.generate_tunnel() as tunnel:
                 client = self.connect(tunnel)
@@ -93,7 +100,7 @@ class SSH_Manager(object):
         return
 
     def read_file(self, file_name: str):
-        """ Read a file from remote server and return it. """
+        """Read a file from remote server and return it."""
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
             ftp = client.open_sftp()
@@ -110,7 +117,7 @@ class SSH_Manager(object):
         return all_lines
 
     def write_to_file(self, str_to_write: str, file_name: str):
-        """ Write a string to a text file on remote server. """
+        """Write a string to a text file on remote server."""
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
             ftp = client.open_sftp()
@@ -122,7 +129,7 @@ class SSH_Manager(object):
         return
 
     def get_file(self, remote_dir_name: str, local_dir_name: str):
-        """ scp clone a remote directory to the local machine. """
+        """scp clone a remote directory to the local machine."""
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
             scp = SCPClient(client.get_transport())
@@ -131,7 +138,7 @@ class SSH_Manager(object):
         return
 
     def delete_file(self, file_name: str):
-        """ Delete a file on the remote server. """
+        """Delete a file on the remote server."""
         with self.generate_tunnel() as tunnel:
             client = self.connect(tunnel)
             ftp = client.open_sftp()

@@ -17,25 +17,27 @@ from .exploit import SelectionStrategy
 
 
 class PBT_Manager(object):
-    def __init__(self,
-                 pbt_log: PBT_Logger,
-                 resource_to_run: str,
-                 job_arguments: dict,
-                 config_fname: str,
-                 job_fname: str,
-                 experiment_dir: str,
-                 pbt_logging: dict,
-                 pbt_resources: dict,
-                 pbt_config: dict):
-        """ Manger orchestrating PBT experiment """
+    def __init__(
+        self,
+        pbt_log: PBT_Logger,
+        resource_to_run: str,
+        job_arguments: dict,
+        config_fname: str,
+        job_fname: str,
+        experiment_dir: str,
+        pbt_logging: dict,
+        pbt_resources: dict,
+        pbt_config: dict,
+    ):
+        """Manger orchestrating PBT experiment"""
         # Set up the PBT search run
-        self.pbt_log = pbt_log                        # Hyperopt. Log Instance
-        self.resource_to_run = resource_to_run        # Compute resource to run
-        self.config_fname = config_fname              # Fname base config file
+        self.pbt_log = pbt_log  # Hyperopt. Log Instance
+        self.resource_to_run = resource_to_run  # Compute resource to run
+        self.config_fname = config_fname  # Fname base config file
         self.base_config = load_json_config(config_fname)  # Base Train Config
-        self.job_fname = job_fname                    # Python file to run job
-        self.job_arguments = job_arguments            # Cluster/VM job info
-        self.experiment_dir = experiment_dir          # Where to store all logs
+        self.job_fname = job_fname  # Python file to run job
+        self.job_arguments = job_arguments  # Cluster/VM job info
+        self.experiment_dir = experiment_dir  # Where to store all logs
         if self.experiment_dir[-1] != "/":
             self.experiment_dir += "/"
 
@@ -59,27 +61,35 @@ class PBT_Manager(object):
         self.num_total_update_steps = pbt_resources.num_total_update_steps
         self.num_steps_until_ready = pbt_resources.num_steps_until_ready
         self.num_steps_until_eval = pbt_resources.num_steps_until_eval
-        self.num_pbt_steps = math.ceil(self.num_total_update_steps /  # noqa: W504,E501
-                                       self.num_steps_until_ready)
+        self.num_pbt_steps = math.ceil(
+            self.num_total_update_steps / self.num_steps_until_ready  # noqa: W504,E501
+        )
 
         # Setup the exploration and selection strategies
-        self.gen_logger = Population_Logger(pbt_logging.eval_metric,
-                                            pbt_logging.max_objective,
-                                            self.num_population_members)
+        self.gen_logger = Population_Logger(
+            pbt_logging.eval_metric,
+            pbt_logging.max_objective,
+            self.num_population_members,
+        )
         self.selection = SelectionStrategy(pbt_config.selection.strategy)
-        self.exploration = ExplorationStrategy(pbt_config.exploration.strategy,
-                                               pbt_config.pbt_params)
+        self.exploration = ExplorationStrategy(
+            pbt_config.exploration.strategy, pbt_config.pbt_params
+        )
 
     def run(self):
-        """ Run the PBT Hyperparameter Search. """
+        """Run the PBT Hyperparameter Search."""
         self.pbt_queue = []
-        self.logger.info(f"START - PBT Members: {self.num_population_members}"
-                         f" - Updates: {self.num_pbt_steps}"
-                         f" - Train Updates: {self.num_total_update_steps}")
-        self.logger.info("-> Steps Until PBT 'Ready': "
-                         f"{self.num_steps_until_ready}"
-                         " - Steps Until PBT 'Eval': "
-                         f"{self.num_steps_until_eval}")
+        self.logger.info(
+            f"START - PBT Members: {self.num_population_members}"
+            f" - Updates: {self.num_pbt_steps}"
+            f" - Train Updates: {self.num_total_update_steps}"
+        )
+        self.logger.info(
+            "-> Steps Until PBT 'Ready': "
+            f"{self.num_steps_until_ready}"
+            " - Steps Until PBT 'Eval': "
+            f"{self.num_steps_until_eval}"
+        )
 
         # Launch a first set of jobs - sample from prior distribution
         for worker_id in range(self.num_population_members):
@@ -87,22 +97,30 @@ class PBT_Manager(object):
             seed_id = np.random.randint(1000, 9999)
             run_id, config_fname = self.save_config(worker_id, 0, hyperparams)
             experiment, job_id = self.launch(config_fname, seed_id)
-            self.pbt_queue.append({"worker_id": worker_id,
-                                   "pbt_step_id": 0,
-                                   "experiment": experiment,
-                                   "config_fname": config_fname,
-                                   "job_id": job_id,
-                                   "run_id": run_id,
-                                   "seed_id": seed_id,
-                                   "hyperparams": hyperparams})
+            self.pbt_queue.append(
+                {
+                    "worker_id": worker_id,
+                    "pbt_step_id": 0,
+                    "experiment": experiment,
+                    "config_fname": config_fname,
+                    "job_id": job_id,
+                    "run_id": run_id,
+                    "seed_id": seed_id,
+                    "hyperparams": hyperparams,
+                }
+            )
             time.sleep(0.1)
 
-        self.logger.info("LAUNCH - First PBT Batch: "
-                         f"{self.num_population_members}")
-        population_bars = [tqdm(total=self.num_pbt_steps,
-                                position=i, leave=True,
-                                bar_format='{l_bar}{bar:45}{r_bar}{bar:-45b}')
-                           for i in range(self.num_population_members)]
+        self.logger.info("LAUNCH - First PBT Batch: " f"{self.num_population_members}")
+        population_bars = [
+            tqdm(
+                total=self.num_pbt_steps,
+                position=i,
+                leave=True,
+                bar_format="{l_bar}{bar:45}{r_bar}{bar:-45b}",
+            )
+            for i in range(self.num_population_members)
+        ]
 
         # Monitor - exploit, explore
         while True:
@@ -127,7 +145,8 @@ class PBT_Manager(object):
                     if worker["pbt_step_id"] < self.num_pbt_steps - 1:
                         # 2. Exploit/Selection step
                         copy_info, hyperparams, ckpt = self.selection.select(
-                            worker["worker_id"], self.gen_logger)
+                            worker["worker_id"], self.gen_logger
+                        )
                         # 3. Exploration if previous exploitation update
                         if copy_info["copy_bool"]:
                             hyperparams = self.exploration.explore(hyperparams)
@@ -135,18 +154,19 @@ class PBT_Manager(object):
                         # 4. Spawn a new job
                         seed_id = np.random.randint(1000, 9999)
                         run_id, config_fname = self.save_config(
-                            worker["worker_id"], worker["pbt_step_id"] + 1,
-                            hyperparams)
-                        experiment, job_id = self.launch(config_fname, seed_id,
-                                                         ckpt)
-                        new_worker = {"worker_id": worker["worker_id"],
-                                      "pbt_step_id": worker["pbt_step_id"] + 1,
-                                      "experiment": experiment,
-                                      "config_fname": config_fname,
-                                      "job_id": job_id,
-                                      "run_id": run_id,
-                                      "seed_id": seed_id,
-                                      "hyperparams": hyperparams}
+                            worker["worker_id"], worker["pbt_step_id"] + 1, hyperparams
+                        )
+                        experiment, job_id = self.launch(config_fname, seed_id, ckpt)
+                        new_worker = {
+                            "worker_id": worker["worker_id"],
+                            "pbt_step_id": worker["pbt_step_id"] + 1,
+                            "experiment": experiment,
+                            "config_fname": config_fname,
+                            "job_id": job_id,
+                            "run_id": run_id,
+                            "seed_id": seed_id,
+                            "hyperparams": hyperparams,
+                        }
                         time.sleep(0.1)
 
                         # Replace old worker by new one
@@ -155,19 +175,23 @@ class PBT_Manager(object):
                         population_bars[worker["worker_id"]].close()
 
                     num_updates, performance = self.gen_logger.get_worker_data(
-                        worker["worker_id"])
+                        worker["worker_id"]
+                    )
 
-                    log_data = {"worker_id": worker["worker_id"],
-                                "pbt_step_id": worker["pbt_step_id"],
-                                "num_updates": num_updates,
-                                "performance": performance,
-                                "hyperparams": worker["hyperparams"]}
+                    log_data = {
+                        "worker_id": worker["worker_id"],
+                        "pbt_step_id": worker["pbt_step_id"],
+                        "num_updates": num_updates,
+                        "performance": performance,
+                        "hyperparams": worker["hyperparams"],
+                    }
                     for k, v in copy_info.items():
                         log_data[k] = v
 
                     self.pbt_log.update_log(log_data)
-                    completed_pbt += (worker["pbt_step_id"]
-                                      == self.num_pbt_steps - 1)  # noqa: 503
+                    completed_pbt += (
+                        worker["pbt_step_id"] == self.num_pbt_steps - 1
+                    )  # noqa: 503
                 # Break out of while loop once all workers done
             if completed_pbt == self.num_population_members:
                 break
@@ -180,19 +204,22 @@ class PBT_Manager(object):
                 pass
         return
 
-    def launch(self, config_fname: str, seed_id: int,
-               model_ckpt: Union[None, str] = None):
-        """ Launch jobs for one configuration and network checkpoint. """
+    def launch(
+        self, config_fname: str, seed_id: int, model_ckpt: Union[None, str] = None
+    ):
+        """Launch jobs for one configuration and network checkpoint."""
         # 1. Instantiate the experiment class and start a single seed
         cmd_line_input = {"seed_id": seed_id}
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
-        experiment = Experiment(self.resource_to_run,
-                                self.job_fname,
-                                config_fname,
-                                self.job_arguments,
-                                self.experiment_dir,
-                                cmd_line_input)
+        experiment = Experiment(
+            self.resource_to_run,
+            self.job_fname,
+            config_fname,
+            self.job_arguments,
+            self.experiment_dir,
+            cmd_line_input,
+        )
 
         # 2. Launch a single experiment
         job_id = experiment.schedule()
@@ -201,17 +228,21 @@ class PBT_Manager(object):
         return experiment, job_id
 
     def monitor(self, experiment: Experiment, job_id: str):
-        """ Monitor job for one eval/worker configuration. """
+        """Monitor job for one eval/worker configuration."""
         status = experiment.monitor(job_id, False)
         return status
 
     def save_config(self, worker_id: int, pbt_step_id: int, hyperparams: dict):
-        """ Generate config file for a specific proposal to evaluate """
+        """Generate config file for a specific proposal to evaluate"""
         sample_config = copy.deepcopy(self.base_config)
 
         # Add amount of steps until eval/ready to train config
-        sample_config.train_config["num_steps_until_ready"] = self.num_steps_until_ready  # noqa: E501
-        sample_config.train_config["num_steps_until_eval"] = self.num_steps_until_eval    # noqa: E501
+        sample_config.train_config[
+            "num_steps_until_ready"
+        ] = self.num_steps_until_ready  # noqa: E501
+        sample_config.train_config[
+            "num_steps_until_eval"
+        ] = self.num_steps_until_eval  # noqa: E501
 
         # Construct config dicts individually - set params in train config
         for param_name, param_value in hyperparams.items():
@@ -219,53 +250,61 @@ class PBT_Manager(object):
 
         # Write hyperparams to config .json
         run_id = "worker_" + str(worker_id) + "_step_" + str(pbt_step_id)
-        s_config_fname = os.path.join(self.experiment_dir, run_id + '.json')
-        with open(s_config_fname, 'w') as f:
+        s_config_fname = os.path.join(self.experiment_dir, run_id + ".json")
+        with open(s_config_fname, "w") as f:
             json.dump(sample_config, f)
         return run_id, s_config_fname
 
     def get_pbt_log_data(self):
-        """ Get best recent model & performance for population members. """
+        """Get best recent model & performance for population members."""
         log_data = []
         for worker in self.pbt_queue:
             # Get path to experiment storage directory
             try:
-                subdirs = [f.path for f in
-                           os.scandir(self.experiment_dir) if f.is_dir()]
-                exp_dir = [f for f in subdirs
-                           if f.endswith(worker["run_id"])][0]
+                subdirs = [
+                    f.path for f in os.scandir(self.experiment_dir) if f.is_dir()
+                ]
+                exp_dir = [f for f in subdirs if f.endswith(worker["run_id"])][0]
                 log_dir = os.path.join(exp_dir, "logs")
                 model_dir = os.path.join(exp_dir, "models", "final")
 
                 # Load performance log of worker
-                log_files = [os.path.join(log_dir, f)
-                             for f in os.listdir(log_dir)
-                             if os.path.isfile(os.path.join(log_dir, f))]
+                log_files = [
+                    os.path.join(log_dir, f)
+                    for f in os.listdir(log_dir)
+                    if os.path.isfile(os.path.join(log_dir, f))
+                ]
                 log_file = [f for f in log_files if f.endswith(".hdf5")]
 
                 if len(log_file) > 0:
                     perf_log = load_run_log(exp_dir)
-                    perf = perf_log.meta_log.stats[self.pbt_logging.eval_metric][-1]  # noqa: E501
+                    perf = perf_log.meta_log.stats[self.pbt_logging.eval_metric][
+                        -1
+                    ]  # noqa: E501
                     num_updates = perf_log.meta_log.time["num_updates"][-1]
                 else:
                     continue
 
                 # Get network checkpoint filename
                 # TODO: Make this more general (not only torch) - .pt/.npy/etc.
-                model_files = [os.path.join(model_dir, f)
-                               for f in os.listdir(model_dir)
-                               if os.path.isfile(os.path.join(model_dir, f))]
+                model_files = [
+                    os.path.join(model_dir, f)
+                    for f in os.listdir(model_dir)
+                    if os.path.isfile(os.path.join(model_dir, f))
+                ]
                 model_ckpt = [f for f in model_files if f.endswith(".pt")]
 
-                log_data.append({
-                    "worker_id": worker["worker_id"],
-                    "pbt_step_id": worker["pbt_step_id"],
-                    "num_updates": num_updates,
-                    "log_path": log_file[0] if len(log_file) > 0 else None,
-                    "model_ckpt": (model_ckpt[0] if len(model_ckpt) > 0
-                                   else None),
-                    self.pbt_logging.eval_metric: perf,
-                    "hyperparams": worker["hyperparams"]})
+                log_data.append(
+                    {
+                        "worker_id": worker["worker_id"],
+                        "pbt_step_id": worker["pbt_step_id"],
+                        "num_updates": num_updates,
+                        "log_path": log_file[0] if len(log_file) > 0 else None,
+                        "model_ckpt": (model_ckpt[0] if len(model_ckpt) > 0 else None),
+                        self.pbt_logging.eval_metric: perf,
+                        "hyperparams": worker["hyperparams"],
+                    }
+                )
             except Exception:
                 continue
         return log_data

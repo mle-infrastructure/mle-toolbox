@@ -21,12 +21,21 @@ TOC_LINE_POSITION = 2
 
 
 class MarkdownGenerator:
-    """ Generating GitHub flavored Markdown. Init by using 'with' statement."""
-    def __init__(self, document=None, filename=None,
-                 syntax=None, root_object=True,
-                 tmp_dir=None, header_data_array=None,
-                 header_index=None, document_data_array=None,
-                 enable_write=True, enable_TOC=True):
+    """Generating GitHub flavored Markdown. Init by using 'with' statement."""
+
+    def __init__(
+        self,
+        document=None,
+        filename=None,
+        syntax=None,
+        root_object=True,
+        tmp_dir=None,
+        header_data_array=None,
+        header_index=None,
+        document_data_array=None,
+        enable_write=True,
+        enable_TOC=True,
+    ):
         """
         Constructor method for MarkdownGenerator
         :param document: existing opened document file, defaults to None
@@ -38,8 +47,7 @@ class MarkdownGenerator:
         # Attribute to determine if object is first instance of generator
         self.root_object = root_object
         self.document = document
-        self.document_data_array = (document_data_array
-                                    if document_data_array else [])
+        self.document_data_array = document_data_array if document_data_array else []
         self.enable_write = enable_write
         self.enable_TOC = enable_TOC
 
@@ -65,7 +73,7 @@ class MarkdownGenerator:
         self.tmp_dir = tmp_dir
 
     def __enter__(self):
-        """ Override enter method to enable usage of 'with' to open/close. """
+        """Override enter method to enable usage of 'with' to open/close."""
         if self.filename.is_dir():
             self.filename.mkdir(exist_ok=True)
             self.filename.joinpath(DEFAULT_FILE_LOCATION, ".md")
@@ -77,7 +85,7 @@ class MarkdownGenerator:
         return self
 
     def __exit__(self, *args, **kwargs):
-        """ Close file on exit. """
+        """Close file on exit."""
         if self.enable_TOC:
             self.genTableOfContent()
         if not self.enable_write:
@@ -85,7 +93,7 @@ class MarkdownGenerator:
         self.document.close()
 
     def genTableOfContent(self, linenumber=TOC_LINE_POSITION, max_depth=3):
-        """ Method for creating table of contents. """
+        """Method for creating table of contents."""
         tableofcontents = []
         tableofcontents.append(f"### Table of Contents  {linesep}")
         prevLevel = 0
@@ -108,7 +116,7 @@ class MarkdownGenerator:
         self.document_data_array = (
             self.document_data_array[: linenumber - 1]
             + tableofcontents
-            + self.document_data_array[linenumber - 1:]
+            + self.document_data_array[linenumber - 1 :]
         )
         if self.enable_write:
             self.document.close()
@@ -116,7 +124,7 @@ class MarkdownGenerator:
             self.document.writelines(self.document_data_array)
 
     def writeText(self, text, html_escape: bool = True):
-        """ Method for writing arbitrary text into the document file. """
+        """Method for writing arbitrary text into the document file."""
         if html_escape:
             self.document_data_array.append(escape(str(text)))
             if self.enable_write:
@@ -127,7 +135,7 @@ class MarkdownGenerator:
             self.document.write(str(text))
 
     def writeTextLine(self, text=None, html_escape: bool = True):
-        """ Write arbitrary text into the document file and add new line. """
+        """Write arbitrary text into the document file and add new line."""
         if text is None:
             self.document_data_array.append(str("") + linesep)
             if self.enable_write:
@@ -143,8 +151,9 @@ class MarkdownGenerator:
         if self.enable_write:
             self.document.write(str(text) + "" + linesep)
 
-    def writeAttributeValuePairLine(self, key_value_pair: tuple,
-                                    total_padding: int = 30):
+    def writeAttributeValuePairLine(
+        self, key_value_pair: tuple, total_padding: int = 30
+    ):
 
         if len(key_value_pair) == 2:
             required_padding = total_padding - len(key_value_pair[0])
@@ -156,17 +165,19 @@ class MarkdownGenerator:
             return
 
     def addHeader(self, level: int, text):
-        """ Method for adding named headers for the document. """
+        """Method for adding named headers for the document."""
         # Text for lowercase, remove punctuation, replace whitespace with dash
         anchor = "#" + text.lower().translate(
             str.maketrans("", "", punctuation.replace("-", ""))
         ).replace(" ", "-")
 
         self.header_index += 1
-        header = {"headerName": escape(text),
-                  "headerLevel": level,
-                  "headerHref": anchor,
-                  "headerID": self.header_index}
+        header = {
+            "headerName": escape(text),
+            "headerLevel": level,
+            "headerHref": anchor,
+            "headerID": self.header_index,
+        }
 
         if level <= MAX_HEADER_LEVEL and level >= MIN_HEADER_LEVEL:
             if level != MIN_HEADER_LEVEL or self.header_index != 1:
@@ -195,8 +206,7 @@ class MarkdownGenerator:
             self.writeTextLine(italicized)
         return italicized
 
-    def addBoldedAndItalicizedText(self, text,
-                                   write_as_line: bool = False) -> str:
+    def addBoldedAndItalicizedText(self, text, write_as_line: bool = False) -> str:
         bolded_italicized = f"***{text.strip()}***"
         if write_as_line:
             self.writeTextLine(bolded_italicized)
@@ -216,8 +226,7 @@ class MarkdownGenerator:
             return f'[{text}]({url} "{title}")'
         return f"[{text}]({url})"
 
-    def generateImageHrefNotation(self, image_uri: str,
-                                  alt_text, title=None) -> str:
+    def generateImageHrefNotation(self, image_uri: str, alt_text, title=None) -> str:
         if title:
             return f'![{alt_text}]({image_uri} "{title}")'
         return f"![{alt_text}]({image_uri})"
@@ -225,35 +234,43 @@ class MarkdownGenerator:
     def addHorizontalRule(self):
         self.writeTextLine(f"{linesep}{HORIZONTAL_RULE}{linesep}")
 
-    def addCodeBlock(self, text, syntax: str = None,
-                     escape_html: bool = False):
+    def addCodeBlock(self, text, syntax: str = None, escape_html: bool = False):
         # Escape backtics/grave accents in attempt to deny codeblock escape
         grave_accent_escape = "\`"  # noqa: W605
         text = text.replace("`", grave_accent_escape)
 
         if escape_html:
             self.writeTextLine(
-                f"{CODE_BLOCK}{syntax}{linesep}{text}{linesep}{CODE_BLOCK}")
+                f"{CODE_BLOCK}{syntax}{linesep}{text}{linesep}{CODE_BLOCK}"
+            )
         else:
             self.writeTextLine(
                 f"{CODE_BLOCK}{syntax}{linesep}{text}{linesep}{CODE_BLOCK}",
-                html_escape=False,)
+                html_escape=False,
+            )
 
     def addSinglelineBlockQuote(self, text):
-        """ Method for adding single line blockquote. """
-        self.writeTextLine(f"{SINGLE_LINE_BLOCKQUOTE}{escape(text.strip())}",
-                           html_escape=False)
+        """Method for adding single line blockquote."""
+        self.writeTextLine(
+            f"{SINGLE_LINE_BLOCKQUOTE}{escape(text.strip())}", html_escape=False
+        )
 
     def addUnorderedList(self, iterableStringList):
-        """ Method from constructing unordered list. """
+        """Method from constructing unordered list."""
         for item in iterableStringList:
             self.writeText(f"  * {item}{linesep}")
         self.writeTextLine()
 
-    def addTable(self, header_names=None, row_elements=None,
-                 alignment="center", dictionary_list=None,
-                 html_escape=True, capitalize_headers=False):
-        """ Method for generating Markdown table with centered cells. """
+    def addTable(
+        self,
+        header_names=None,
+        row_elements=None,
+        alignment="center",
+        dictionary_list=None,
+        html_escape=True,
+        capitalize_headers=False,
+    ):
+        """Method for generating Markdown table with centered cells."""
         useDictionaryList = False
         useProvidedHeadernames = False
 
@@ -261,7 +278,8 @@ class MarkdownGenerator:
             if dictionary_list is None:
                 raise TypeError(
                     "Invalid paramaters for generating new table."
-                    " Use either dictionary list or row_elements.")
+                    " Use either dictionary list or row_elements."
+                )
             else:
                 useDictionaryList = True
 
@@ -325,16 +343,17 @@ class MarkdownGenerator:
                 self.writeTextLine("|")
         self.writeTextLine()
 
-    def insertDetailsAndSummary(self, summary_name="Click to collapse/fold.",
-                                escape_html=True):
+    def insertDetailsAndSummary(
+        self, summary_name="Click to collapse/fold.", escape_html=True
+    ):
         self.writeTextLine("<details>", html_escape=False)
         if escape_html:
-            self.writeTextLine(f"<summary>{escape(summary_name)}</summary>",
-                               html_escape=False)
+            self.writeTextLine(
+                f"<summary>{escape(summary_name)}</summary>", html_escape=False
+            )
         else:
             # Makes bolding possible for summary name with HTML
-            self.writeTextLine(f"<summary>{summary_name}</summary>",
-                               html_escape=False)
+            self.writeTextLine(f"<summary>{summary_name}</summary>", html_escape=False)
         self.writeTextLine()
         self.unfinished_details_summary_count["value"] += 1
 

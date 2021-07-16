@@ -3,19 +3,19 @@ import glob
 import time
 import logging
 from typing import Union
-from .manage_job_local import (local_check_job_args,
-                               local_submit_venv_job,
-                               local_submit_conda_job)
-from .manage_job_sge import (sge_check_job_args,
-                             sge_submit_job,
-                             sge_monitor_job)
-from .manage_job_slurm import (slurm_check_job_args,
-                               slurm_submit_job,
-                               slurm_monitor_job)
-from .manage_job_gcp import (gcp_check_job_args,
-                             gcp_submit_job,
-                             gcp_monitor_job,
-                             gcp_clean_up)
+from .manage_job_local import (
+    local_check_job_args,
+    local_submit_venv_job,
+    local_submit_conda_job,
+)
+from .manage_job_sge import sge_check_job_args, sge_submit_job, sge_monitor_job
+from .manage_job_slurm import slurm_check_job_args, slurm_submit_job, slurm_monitor_job
+from .manage_job_gcp import (
+    gcp_check_job_args,
+    gcp_submit_job,
+    gcp_monitor_job,
+    gcp_clean_up,
+)
 
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
@@ -24,8 +24,8 @@ from mle_toolbox import mle_config
 from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
 
 # Overview of implemented remote resources in addition to local processes
-cluster_resources = ['sge-cluster', 'slurm-cluster']
-cloud_resources = ['gcp-cloud']
+cluster_resources = ["sge-cluster", "slurm-cluster"]
+cloud_resources = ["gcp-cloud"]
 
 
 class Experiment(object):
@@ -65,20 +65,23 @@ class Experiment(object):
         monitor_local: Monitors experiment locally on your machine
         monitor_cluster: Monitors experiment remotely on SGE/Slurm clusters
     """
-    def __init__(self,
-                 resource_to_run: str,
-                 job_filename: str,
-                 config_filename: Union[None, str],
-                 job_arguments: Union[None, dict],
-                 experiment_dir: str,
-                 cmd_line_input: Union[None, dict] = None,
-                 extra_cmd_line_input: Union[None, dict] = None,
-                 logger_level: str = logging.WARNING):
+
+    def __init__(
+        self,
+        resource_to_run: str,
+        job_filename: str,
+        config_filename: Union[None, str],
+        job_arguments: Union[None, dict],
+        experiment_dir: str,
+        cmd_line_input: Union[None, dict] = None,
+        extra_cmd_line_input: Union[None, dict] = None,
+        logger_level: str = logging.WARNING,
+    ):
         # Init experiment class with relevant info
-        self.resource_to_run = resource_to_run     # compute resource for job
-        self.job_filename = job_filename           # path to train script
-        self.config_filename = config_filename     # path to config json
-        self.experiment_dir = experiment_dir       # main results dir (create)
+        self.resource_to_run = resource_to_run  # compute resource for job
+        self.job_filename = job_filename  # path to train script
+        self.config_filename = config_filename  # path to config json
+        self.experiment_dir = experiment_dir  # main results dir (create)
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
 
@@ -91,14 +94,15 @@ class Experiment(object):
         # Add additional cmd line args if extra ones are specified
         if extra_cmd_line_input is not None:
             self.cmd_line_args = self.generate_extra_cmd_line_args(
-                self.cmd_line_args, extra_cmd_line_input)
+                self.cmd_line_args, extra_cmd_line_input
+            )
 
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logger_level)
 
     def check_job_args(self, job_arguments):
-        """ Check if required args are provided. Complete w. default otw. """
+        """Check if required args are provided. Complete w. default otw."""
         if self.resource_to_run == "sge-cluster":
             full_job_arguments = sge_check_job_args(job_arguments)
         elif self.resource_to_run == "slurm-cluster":
@@ -110,7 +114,7 @@ class Experiment(object):
         return full_job_arguments
 
     def run(self):
-        """ Schedule experiment, monitor and clean up afterwards. """
+        """Schedule experiment, monitor and clean up afterwards."""
         # Schedule job, create success boolean and job identifier
         job_id = self.schedule()
         # Monitor status of job based on identifier
@@ -120,31 +124,43 @@ class Experiment(object):
         return status_out
 
     def schedule(self):
-        """ Schedule job on cluster (sge/slurm), cloud (gcp) or locally. """
+        """Schedule job on cluster (sge/slurm), cloud (gcp) or locally."""
         if self.resource_to_run in cluster_resources:
             job_id = self.schedule_cluster()
             if self.job_status == 1:
-                self.logger.info(f"Job ID: {job_id} - Cluster job scheduled"
-                                 f" - {self.config_filename}")
+                self.logger.info(
+                    f"Job ID: {job_id} - Cluster job scheduled"
+                    f" - {self.config_filename}"
+                )
             else:
-                self.logger.info(f"Job ID: {job_id} - Error when scheduling "
-                                 f"cluster job - {self.config_filename}")
+                self.logger.info(
+                    f"Job ID: {job_id} - Error when scheduling "
+                    f"cluster job - {self.config_filename}"
+                )
         elif self.resource_to_run in cloud_resources:
             job_id = self.schedule_cloud()
             if self.job_status == 1:
-                self.logger.info(f"VM Name: {job_id} - Cloud job scheduled"
-                                 f" - {self.config_filename}")
+                self.logger.info(
+                    f"VM Name: {job_id} - Cloud job scheduled"
+                    f" - {self.config_filename}"
+                )
             else:
-                self.logger.info(f"VM Name: {job_id} - Error when scheduling "
-                                 f"cloud job - {self.config_filename}")
+                self.logger.info(
+                    f"VM Name: {job_id} - Error when scheduling "
+                    f"cloud job - {self.config_filename}"
+                )
         else:
             job_id = self.schedule_local()
             if self.job_status == 1:
-                self.logger.info(f"PID: {job_id.pid} - Local job scheduled "
-                                 f"- {self.config_filename}")
+                self.logger.info(
+                    f"PID: {job_id.pid} - Local job scheduled "
+                    f"- {self.config_filename}"
+                )
             else:
-                self.logger.info(f"PID: {job_id.pid} - Error when scheduling "
-                                 f"local job - {self.config_filename}")
+                self.logger.info(
+                    f"PID: {job_id.pid} - Error when scheduling "
+                    f"local job - {self.config_filename}"
+                )
         # Return sge/slurm - job_id (qstat/squeue), gcp - vm_name, local - proc
         return job_id
 
@@ -156,55 +172,65 @@ class Experiment(object):
         if self.resource_to_run in cluster_resources:
             status_out = self.monitor_cluster(job_id, continuous)
             if status_out == 0:
-                self.logger.info(f"Job ID: {job_id} - "
-                                 "Cluster job successfully "
-                                 f"completed - {self.config_filename}")
+                self.logger.info(
+                    f"Job ID: {job_id} - "
+                    "Cluster job successfully "
+                    f"completed - {self.config_filename}"
+                )
             else:
-                self.logger.info(f"Job ID: {job_id} - Error when running "
-                                 f"cluster job - {self.config_filename}")
+                self.logger.info(
+                    f"Job ID: {job_id} - Error when running "
+                    f"cluster job - {self.config_filename}"
+                )
         elif self.resource_to_run in cloud_resources:
             status_out = self.monitor_cloud(job_id, continuous)
             if status_out == 0:
-                self.logger.info(f"VM Name: {job_id} - Cloud job successfully "
-                                 f"completed - {self.config_filename}")
+                self.logger.info(
+                    f"VM Name: {job_id} - Cloud job successfully "
+                    f"completed - {self.config_filename}"
+                )
             else:
-                self.logger.info(f"VM Name: {job_id} - Error when running "
-                                 f"cloud job - {self.config_filename}")
+                self.logger.info(
+                    f"VM Name: {job_id} - Error when running "
+                    f"cloud job - {self.config_filename}"
+                )
         else:
             status_out = self.monitor_local(job_id, continuous)
             if status_out == 0:
-                self.logger.info("PID: {job_id.pid} - Local job successfully "
-                                 f"completed - { self.config_filename}")
+                self.logger.info(
+                    "PID: {job_id.pid} - Local job successfully "
+                    f"completed - { self.config_filename}"
+                )
             else:
-                self.logger.info(f"PID: {job_id.pid} - Error when running "
-                                 f"local job - {self.config_filename}")
+                self.logger.info(
+                    f"PID: {job_id.pid} - Error when running "
+                    f"local job - {self.config_filename}"
+                )
         return status_out
 
     def schedule_local(self):
-        """ Schedules experiment locally on your machine. """
+        """Schedules experiment locally on your machine."""
         if mle_config.general.use_conda_virtual_env:
-            proc = local_submit_conda_job(self.job_filename,
-                                          self.cmd_line_args,
-                                          self.job_arguments)
+            proc = local_submit_conda_job(
+                self.job_filename, self.cmd_line_args, self.job_arguments
+            )
         else:
-            proc = local_submit_venv_job(self.job_filename,
-                                         self.cmd_line_args,
-                                         self.job_arguments)
+            proc = local_submit_venv_job(
+                self.job_filename, self.cmd_line_args, self.job_arguments
+            )
         self.job_status = 1
         return proc
 
     def schedule_cluster(self):
-        """ Schedules experiment to run remotely on SGE or Slurm clusters. """
+        """Schedules experiment to run remotely on SGE or Slurm clusters."""
         if self.resource_to_run == "sge-cluster":
-            job_id = sge_submit_job(self.job_filename,
-                                    self.cmd_line_args,
-                                    self.job_arguments,
-                                    clean_up=True)
+            job_id = sge_submit_job(
+                self.job_filename, self.cmd_line_args, self.job_arguments, clean_up=True
+            )
         elif self.resource_to_run == "slurm-cluster":
-            job_id = slurm_submit_job(self.job_filename,
-                                      self.cmd_line_args,
-                                      self.job_arguments,
-                                      clean_up=True)
+            job_id = slurm_submit_job(
+                self.job_filename, self.cmd_line_args, self.job_arguments, clean_up=True
+            )
         if job_id == -1:
             self.job_status = 0
         else:
@@ -212,20 +238,22 @@ class Experiment(object):
         return job_id
 
     def schedule_cloud(self):
-        """ Schedules experiment to run remotely on GCP cloud. """
+        """Schedules experiment to run remotely on GCP cloud."""
         if self.resource_to_run == "gcp-cloud":
             # Send config file to remote machine - independent of code base!
-            upload_local_dir_to_gcs(local_path=self.config_filename,
-                                    gcs_path=os.path.join(
-                                        mle_config.gcp.code_dir,
-                                        self.config_filename))
+            upload_local_dir_to_gcs(
+                local_path=self.config_filename,
+                gcs_path=os.path.join(mle_config.gcp.code_dir, self.config_filename),
+            )
 
             # Submit VM Creation + Startup exec
-            job_id = gcp_submit_job(self.job_filename,
-                                    self.cmd_line_args,
-                                    self.job_arguments,
-                                    self.experiment_dir,
-                                    clean_up=True)
+            job_id = gcp_submit_job(
+                self.job_filename,
+                self.cmd_line_args,
+                self.job_arguments,
+                self.experiment_dir,
+                clean_up=True,
+            )
         if job_id == -1:
             self.job_status = 0
         else:
@@ -233,7 +261,7 @@ class Experiment(object):
         return job_id
 
     def monitor_local(self, proc, continuous: bool = True):
-        """ Monitors experiment locally on your machine. """
+        """Monitors experiment locally on your machine."""
         # Poll status of local process & change status when done
         if continuous:
             while self.job_status:
@@ -261,7 +289,7 @@ class Experiment(object):
                 return 0
 
     def monitor_cluster(self, job_id: str, continuous: bool = True):
-        """ Monitors experiment remotely on SGE or Slurm clusters. """
+        """Monitors experiment remotely on SGE or Slurm clusters."""
         if continuous:
             while self.job_status:
                 if self.resource_to_run == "sge-cluster":
@@ -277,12 +305,11 @@ class Experiment(object):
                 return slurm_monitor_job(job_id)
 
     def monitor_cloud(self, job_id: str, continuous: bool = True):
-        """ Monitors experiment remotely on GCP cloud. """
+        """Monitors experiment remotely on GCP cloud."""
         if continuous:
             while self.job_status:
                 if self.resource_to_run == "gcp-cloud":
-                    self.job_status = gcp_monitor_job(job_id,
-                                                      self.job_arguments)
+                    self.job_status = gcp_monitor_job(job_id, self.job_arguments)
                 time.sleep(10)
             return 0
         else:
@@ -290,7 +317,7 @@ class Experiment(object):
                 return gcp_monitor_job(job_id, self.job_arguments)
 
     def clean_up(self, job_id: str):
-        """ Remove error and log files at end of training. """
+        """Remove error and log files at end of training."""
         # Clean up if not development!
         if not mle_config.general.development:
             for filename in glob.glob(self.job_arguments["err_file"] + "*"):
@@ -311,10 +338,8 @@ class Experiment(object):
             # Wait for download to wrap up!
             time.sleep(100)
 
-    def generate_cmd_line_args(self,
-                               cmd_line_input: Union[None,
-                                                     dict] = None) -> str:
-        """ Generate cmd line args for .py -> get_train_configs_ready """
+    def generate_cmd_line_args(self, cmd_line_input: Union[None, dict] = None) -> str:
+        """Generate cmd line args for .py -> get_train_configs_ready"""
         cmd_line_args = " -exp_dir " + self.experiment_dir
 
         if self.config_filename is not None:
@@ -324,19 +349,16 @@ class Experiment(object):
             if "seed_id" in cmd_line_input.keys():
                 cmd_line_args += " -seed " + str(cmd_line_input["seed_id"])
                 # Update the job argument details with the seed-job-id
-                self.job_arguments["job_name"] += "-" + str(
-                    cmd_line_input["seed_id"])
+                self.job_arguments["job_name"] += "-" + str(cmd_line_input["seed_id"])
             if "model_ckpt" in cmd_line_input.keys():
-                cmd_line_args += " -model_ckpt " + str(
-                    cmd_line_input["model_ckpt"])
+                cmd_line_args += " -model_ckpt " + str(cmd_line_input["model_ckpt"])
         return cmd_line_args
 
-    def generate_extra_cmd_line_args(self, cmd_line_args: str,
-                                     extra_cmd_line_input: Union[None,
-                                                                 dict] = None
-                                     ) -> str:
-        """ Generate extra cmd line args for .py -> e.g. for postproc """
-        full_cmd_line_args = (cmd_line_args + '.')[:-1]
+    def generate_extra_cmd_line_args(
+        self, cmd_line_args: str, extra_cmd_line_input: Union[None, dict] = None
+    ) -> str:
+        """Generate extra cmd line args for .py -> e.g. for postproc"""
+        full_cmd_line_args = (cmd_line_args + ".")[:-1]
         for k, v in extra_cmd_line_input.items():
             full_cmd_line_args += " -" + k + " " + str(v)
         return full_cmd_line_args

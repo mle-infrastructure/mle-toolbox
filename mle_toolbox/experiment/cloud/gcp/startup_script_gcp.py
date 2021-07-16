@@ -21,7 +21,7 @@ echo -e '#!/bin/bash\ntmux a' > /tmux_a.sh
 chmod a+x /tmux_a.sh
 """
 
-install_venv = '''# Setup virtual env + install base required packages
+install_venv = """# Setup virtual env + install base required packages
 tmux new-session -s gcp_exp -d htop ENTER
 tmux split-window
 tmux send "
@@ -35,17 +35,17 @@ tmux send "
     pip install -r requirements.txt
     )
 "
-'''
+"""
 
-install_additional_setup = '''# Setup virtual env + install base required packages
+install_additional_setup = """# Setup virtual env + install base required packages
 tmux send "
     cd /{remote_dir}
     . env/bin/activate
     bash {extra_install_fname}
     "
-'''
+"""
 
-jax_tpu_build = '''# Install jaxlib for TPU
+jax_tpu_build = """# Install jaxlib for TPU
 tmux send "
     cd /{remote_dir}
     . env/bin/activate
@@ -53,17 +53,17 @@ tmux send "
     pip install --upgrade --user https://storage.googleapis.com/jax-releases/tpu/jaxlib-0.1.55+tpu-$PYTHON_VERSION-none-manylinux2010_x86_64.whl
     pip install --upgrade --user jax
     "
-'''
+"""
 
-jax_gpu_build = '''# Install jaxlib for GPU
+jax_gpu_build = """# Install jaxlib for GPU
 tmux send "
     cd /{remote_dir}
     . env/bin/activate
     pip install --upgrade jax jaxlib==0.1.64+cuda110 -f https://storage.googleapis.com/jax-releases/jax_releases.html
     "
-'''
+"""
 
-exec_python = '''
+exec_python = """
 tmux send "
 (
   cd /{remote_dir} &&
@@ -74,9 +74,9 @@ tmux send "
 echo WILL SHUT DOWN IN 5 MIN ...
 sleep 100 && sudo shutdown now
 "
-'''
+"""
 
-exec_bash = '''
+exec_bash = """
 tmux send "
 (
   cd /{remote_dir} &&
@@ -87,9 +87,9 @@ tmux send "
 echo WILL SHUT DOWN IN 5 MIN ...
 sleep 100 && sudo shutdown now
 "
-'''
+"""
 
-sync_results_from_dir = '''
+sync_results_from_dir = """
 # Wait for experiment startup before continuous rsync
 sleep 120
 tmux split-window -h
@@ -99,4 +99,4 @@ while true; do
     sleep 10
 done
 " ENTER
-'''
+"""

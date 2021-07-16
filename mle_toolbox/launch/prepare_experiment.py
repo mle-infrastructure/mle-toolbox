@@ -9,7 +9,7 @@ from ..remote.gcloud_transfer import get_gcloud_db
 
 
 def welcome_to_mle_toolbox(verbose=False):
-    """ Let's friendly greet the next user of the MLE-Toolbox! """
+    """Let's friendly greet the next user of the MLE-Toolbox!"""
     print(85 * "=")
     welcome_ascii = """
             __  _____    ______   ______            ____
@@ -22,8 +22,10 @@ def welcome_to_mle_toolbox(verbose=False):
     print(72 * " " + "@RobertTLange")
     print(85 * "=")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(time_t, f"Thx for using MLE-Toolbox {__version__}"
-                  f" Locally, on Clusters or Cloud.")
+    print(
+        time_t,
+        f"Thx for using MLE-Toolbox {__version__}" f" Locally, on Clusters or Cloud.",
+    )
     if verbose:
         print(time_t, "It implements the following experiment types:")
         print("  - single-experiment: Run a single configuration experiment.")
@@ -31,22 +33,25 @@ def welcome_to_mle_toolbox(verbose=False):
         print("  - hyperparameter-search: Run a hyperparameter search.")
 
 
-def prepare_logger(experiment_dir: Union[str, None] = None,
-                   debug_mode: bool = False):
-    """ Setup up the verbose/file logging of the experiment. """
+def prepare_logger(experiment_dir: Union[str, None] = None, debug_mode: bool = False):
+    """Setup up the verbose/file logging of the experiment."""
     logger = logging.getLogger()
     if logger.handlers:
         for handler in logger.handlers:
             logger.removeHandler(handler)
 
-    file_path = (os.path.join(experiment_dir, "exp_debug.log")
-                 if debug_mode else os.path.expanduser("~/full_debug.log"))
+    file_path = (
+        os.path.join(experiment_dir, "exp_debug.log")
+        if debug_mode
+        else os.path.expanduser("~/full_debug.log")
+    )
     logging.basicConfig(
         filename=file_path,
-        filemode='a',
-        format='%(asctime)s %(name)s %(levelname)s %(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        level=logging.DEBUG)
+        filemode="a",
+        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+        level=logging.DEBUG,
+    )
     logging.getLogger("git").setLevel(logging.ERROR)
     logging.getLogger("google").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
@@ -56,15 +61,16 @@ def prepare_logger(experiment_dir: Union[str, None] = None,
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
-    formatter = logging.Formatter(fmt='%(asctime)s %(message)s',
-                                  datefmt='%m/%d/%Y %I:%M:%S %p')
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"
+    )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     return logger
 
 
 def check_job_config(job_config: dict):
-    """ Check if config has all necessary ingredients for job to run. """
+    """Check if config has all necessary ingredients for job to run."""
     # Compile list of required arguments for specific job types
     necessary_ingredients = ["meta_job_args", "single_job_args"]
     if job_config.meta_job_args["job_type"] == "multiple-experiments":
@@ -92,7 +98,7 @@ def check_job_config(job_config: dict):
 
 
 def ask_for_experiment_id(repeated_question: bool = False):
-    """ Helper function asking user for experiment id from protocol log. """
+    """Helper function asking user for experiment id from protocol log."""
     # Get most recent/up-to-date experiment DB from Google Cloud Storage
     if not repeated_question:
         if mle_config.general.use_gcloud_protocol_sync:
@@ -101,9 +107,7 @@ def ask_for_experiment_id(repeated_question: bool = False):
             accessed_remote_db = False
         time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
         if accessed_remote_db:
-            print(
-                time_t,
-                "Successfully pulled latest experiment protocol from gcloud.")
+            print(time_t, "Successfully pulled latest experiment protocol from gcloud.")
         else:
             print(time_t, "Careful - you are using local experiment protocol.")
     else:
@@ -119,11 +123,13 @@ def ask_for_experiment_id(repeated_question: bool = False):
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
     if not repeated_question:
-        experiment_id = input(time_t + " Which experiment id do you " +
-                              "want to use? [E-ID/N]:  ")
+        experiment_id = input(
+            time_t + " Which experiment id do you " + "want to use? [E-ID/N]:  "
+        )
     else:
-        experiment_id = input(time_t + " Which experiment id do you " +
-                              "want to use next? [E-ID/N]:  ")
+        experiment_id = input(
+            time_t + " Which experiment id do you " + "want to use next? [E-ID/N]:  "
+        )
 
     while True:
         if experiment_id == "N":

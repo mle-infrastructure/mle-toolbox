@@ -8,7 +8,7 @@ from mle_toolbox import mle_config
 
 
 def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
-    """ Check the input job arguments & add default values if missing. """
+    """Check the input job arguments & add default values if missing."""
     if job_arguments is None:
         job_arguments = {}
 
@@ -29,11 +29,10 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     return job_arguments
 
 
-def slurm_submit_job(filename: str,
-                     cmd_line_arguments: str,
-                     job_arguments: dict,
-                     clean_up: bool = True) -> str:
-    """ Create a qsub job & submit it based on provided file to execute. """
+def slurm_submit_job(
+    filename: str, cmd_line_arguments: str, job_arguments: dict, clean_up: bool = True
+) -> str:
+    """Create a qsub job & submit it based on provided file to execute."""
     # Create base string of job id
     base = "submit_{0}".format(random_id())
 
@@ -44,16 +43,18 @@ def slurm_submit_job(filename: str,
     elif f_extension == ".sh":
         script = f"bash {filename} {cmd_line_arguments}"
     else:
-        raise ValueError(f"Script with {f_extension} cannot be handled"
-                         " by mle-toolbox. Only base .py, .sh experiments"
-                         " are so far implemented. Please open an issue.")
+        raise ValueError(
+            f"Script with {f_extension} cannot be handled"
+            " by mle-toolbox. Only base .py, .sh experiments"
+            " are so far implemented. Please open an issue."
+        )
     job_arguments["script"] = script
     slurm_job_template = slurm_generate_startup_file(job_arguments)
 
-    open(base + '.sh', 'w').write(slurm_job_template.format(**job_arguments))
+    open(base + ".sh", "w").write(slurm_job_template.format(**job_arguments))
 
     # Submit the job via subprocess call
-    command = 'sbatch < ' + base + '.sh'
+    command = "sbatch < " + base + ".sh"
     proc = submit_subprocess(command)
 
     # Wait until system has processed submission
@@ -76,11 +77,14 @@ def slurm_submit_job(filename: str,
     # Wait until the job is listed under the qstat scheduled jobs
     while True:
         try:
-            out = sp.check_output(["squeue", "-u",
-                                   mle_config.slurm.credentials.user_name])
-            job_info = out.split(b'\n')[1:]
-            running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
-                               for i in range(len(job_info) - 1)]
+            out = sp.check_output(
+                ["squeue", "-u", mle_config.slurm.credentials.user_name]
+            )
+            job_info = out.split(b"\n")[1:]
+            running_job_ids = [
+                int(job_info[i].decode("utf-8").split()[0])
+                for i in range(len(job_info) - 1)
+            ]
             success = job_id in running_job_ids
             if success:
                 break
@@ -92,17 +96,18 @@ def slurm_submit_job(filename: str,
 
     # Finally delete all the unneccessary log files
     if clean_up:
-        os.remove(base + '.sh')
+        os.remove(base + ".sh")
 
     return job_id
 
 
 def slurm_monitor_job(job_id: Union[list, int]) -> bool:
-    """ Monitor the status of a job based on its id. """
+    """Monitor the status of a job based on its id."""
     while True:
         try:
-            out = sp.check_output(["squeue", "-u",
-                                   mle_config.slurm.credentials.user_name])
+            out = sp.check_output(
+                ["squeue", "-u", mle_config.slurm.credentials.user_name]
+            )
             break
         except sp.CalledProcessError as e:
             stderr = e.stderr
@@ -110,9 +115,10 @@ def slurm_monitor_job(job_id: Union[list, int]) -> bool:
             print(stderr, return_code)
             time.sleep(0.5)
 
-    job_info = out.split(b'\n')[1:]
-    running_job_ids = [int(job_info[i].decode("utf-8").split()[0])
-                       for i in range(len(job_info) - 1)]
+    job_info = out.split(b"\n")[1:]
+    running_job_ids = [
+        int(job_info[i].decode("utf-8").split()[0]) for i in range(len(job_info) - 1)
+    ]
     if type(job_id) == int:
         job_id = [job_id]
     S1 = set(job_id)

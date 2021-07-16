@@ -15,6 +15,7 @@ from .core_files_load import load_json_config, load_mle_toolbox_config
 # Safely import such that no import errors are thrown - reduce dependencies
 try:
     import torch
+
     __torch_installed = True
 except ImportError:
     __torch_installed = False
@@ -22,6 +23,7 @@ except ImportError:
 
 try:
     import gym
+
     __gym_installed = True
 except ImportError:
     __gym_installed = False
@@ -29,6 +31,7 @@ except ImportError:
 
 try:
     import jax
+
     __jax_installed = True
 except ImportError:
     __jax_installed = False
@@ -38,15 +41,15 @@ except ImportError:
 mle_config = load_mle_toolbox_config()
 
 
-def set_random_seeds(seed_id: Union[int, None],
-                     return_key: bool = False,
-                     verbose: bool = False):
-    """ Set random seed (random, npy, torch, gym) for reproduction """
+def set_random_seeds(
+    seed_id: Union[int, None], return_key: bool = False, verbose: bool = False
+):
+    """Set random seed (random, npy, torch, gym) for reproduction"""
     if seed_id is not None:
-        os.environ['PYTHONHASHSEED'] = str(seed_id)
+        os.environ["PYTHONHASHSEED"] = str(seed_id)
         random.seed(seed_id)
         np.random.seed(seed_id)
-        seeds_set = ['random', 'numpy']
+        seeds_set = ["random", "numpy"]
         if __torch_installed:
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
@@ -54,12 +57,12 @@ def set_random_seeds(seed_id: Union[int, None],
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(seed_id)
                 torch.cuda.manual_seed(seed_id)
-            seeds_set.append('torch')
+            seeds_set.append("torch")
 
         if __gym_installed:
-            if hasattr(gym.spaces, 'prng'):
+            if hasattr(gym.spaces, "prng"):
                 gym.spaces.prng.seed(seed_id)
-            seeds_set.append('gym')
+            seeds_set.append("gym")
 
         if verbose:
             print(f"-- Random seeds ({', '.join(seeds_set)}) set to {seed_id}")
@@ -76,35 +79,57 @@ def set_random_seeds(seed_id: Union[int, None],
 def parse_experiment_args(
     default_config_fname: str = "configs/base_config.json",
     default_seed: Union[None, int] = None,
-        default_experiment_dir: str = "experiments/"):
-    """ Helper function to parse experiment args given to MLExperiment. """
+    default_experiment_dir: str = "experiments/",
+):
+    """Helper function to parse experiment args given to MLExperiment."""
     parser = argparse.ArgumentParser()
     # Standard inputs for training runs (config to load & experiment directory)
-    parser.add_argument('-config', '--config_fname', action="store",
-                        default=default_config_fname, type=str,
-                        help='Filename from which to load configuration.')
-    parser.add_argument('-exp_dir', '--experiment_dir', action="store",
-                        default=default_experiment_dir, type=str,
-                        help='Directory to store logs in.')
+    parser.add_argument(
+        "-config",
+        "--config_fname",
+        action="store",
+        default=default_config_fname,
+        type=str,
+        help="Filename from which to load configuration.",
+    )
+    parser.add_argument(
+        "-exp_dir",
+        "--experiment_dir",
+        action="store",
+        default=default_experiment_dir,
+        type=str,
+        help="Directory to store logs in.",
+    )
 
     # Command line input for the random seed to replicate experiment
-    parser.add_argument('-seed', '--seed_id', action="store",
-                        default=default_seed, type=int,
-                        help='Seed id on which to train.')
+    parser.add_argument(
+        "-seed",
+        "--seed_id",
+        action="store",
+        default=default_seed,
+        type=int,
+        help="Seed id on which to train.",
+    )
 
     # Optional: Checkpoint path to potentially reload model
-    parser.add_argument('-model_ckpt', '--model_ckpt', action="store",
-                        default=None, help='Model checkpoint to reload.')
+    parser.add_argument(
+        "-model_ckpt",
+        "--model_ckpt",
+        action="store",
+        default=None,
+        help="Model checkpoint to reload.",
+    )
     cmd_args, extra_args = parser.parse_known_args()
     return cmd_args, extra_args
 
 
-def load_experiment_config(config_fname: str,
-                           experiment_dir: str,
-                           seed_id: Union[None, int],
-                           model_ckpt: Union[None, str]
-                           ) -> Tuple[DotMap, DotMap, DotMap]:
-    """ Prepare job config files for experiment run (add seed id, etc.). """
+def load_experiment_config(
+    config_fname: str,
+    experiment_dir: str,
+    seed_id: Union[None, int],
+    model_ckpt: Union[None, str],
+) -> Tuple[DotMap, DotMap, DotMap]:
+    """Prepare job config files for experiment run (add seed id, etc.)."""
     # Load .json config file + add config fname to clone + add experiment dir
     config = load_json_config(config_fname)
     config.log_config.config_fname = config_fname
@@ -154,7 +179,7 @@ def load_experiment_config(config_fname: str,
 
 
 def get_extra_cmd_line_input(extra_cmd_args: Union[list, None] = None):
-    """ Parse additional command line inputs & return them as dotmap. """
+    """Parse additional command line inputs & return them as dotmap."""
     # extra_cmd_args is a sequential list of command line keys & arguments
     if extra_cmd_args is not None:
         # Unpack the command line data into a dotmap dict
@@ -175,7 +200,7 @@ def get_extra_cmd_line_input(extra_cmd_args: Union[list, None] = None):
 
 
 def ask_for_resource_to_run():
-    """ Ask user if they want to exec on remote resource. """
+    """Ask user if they want to exec on remote resource."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     resource = input(time_t + " Where to run? [local/slurm/sge/gcp] ")
     while resource not in ["local", "slurm", "sge", "gcp"]:
@@ -194,16 +219,16 @@ def ask_for_resource_to_run():
 
 
 def ask_for_binary_input(question: str, default_answer: str = "N"):
-    """ Ask user if they want to exec on remote resource. """
+    """Ask user if they want to exec on remote resource."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     q_str = f"{time_t} {question} [Y/N]"
-    print(q_str, end=' ')
+    print(q_str, end=" ")
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given or timeout after 60 secs
     answer = default_answer
     while True:
         i, o, e = select.select([sys.stdin], [], [], 60)
-        if (i):
+        if i:
             answer = sys.stdin.readline().strip()
             if answer in ["y", "n", "Y", "N"]:
                 break
@@ -215,14 +240,16 @@ def ask_for_binary_input(question: str, default_answer: str = "N"):
 
 
 def determine_resource() -> str:
-    """ Check if cluster (sge/slurm) is available. """
+    """Check if cluster (sge/slurm) is available."""
     hostname = platform.node()
-    on_sge_cluster = any(re.match(l, hostname) for
-                         l in mle_config.sge.info.node_reg_exp)
-    on_slurm_cluster = any(re.match(l, hostname) for
-                           l in mle_config.slurm.info.node_reg_exp)
-    on_sge_head = (hostname in mle_config.sge.info.head_names)
-    on_slurm_head = (hostname in mle_config.slurm.info.head_names)
+    on_sge_cluster = any(
+        re.match(line, hostname) for line in mle_config.sge.info.node_reg_exp
+    )
+    on_slurm_cluster = any(
+        re.match(line, hostname) for line in mle_config.slurm.info.node_reg_exp
+    )
+    on_sge_head = hostname in mle_config.sge.info.head_names
+    on_slurm_head = hostname in mle_config.slurm.info.head_names
     if on_sge_head or on_sge_cluster:
         return "sge-cluster"
     elif on_slurm_head or on_slurm_cluster:

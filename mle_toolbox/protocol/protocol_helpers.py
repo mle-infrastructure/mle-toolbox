@@ -14,17 +14,19 @@ from ..protocol.protocol_table import generate_protocol_table
 
 
 def load_local_protocol_db():
-    """ Load local database from config name & reconstruct experiment id. """
+    """Load local database from config name & reconstruct experiment id."""
     # Attempt loading local protocol database - otherwise return clean one
     db = pickledb.load(mle_config.general.local_protocol_fname, False)
     # Get the most recent experiment id
     all_experiment_ids = list(db.getall())
 
     def natural_keys(text: str):
-        """ Helper function for sorting alpha-numeric strings. """
+        """Helper function for sorting alpha-numeric strings."""
+
         def atoi(text):
             return int(text) if text.isdigit() else text
-        return [atoi(c) for c in re.split(r'(\d+)', text)]
+
+        return [atoi(c) for c in re.split(r"(\d+)", text)]
 
     # Sort experiment ids & get the last one
     if len(all_experiment_ids) > 0:
@@ -36,12 +38,12 @@ def load_local_protocol_db():
 
 
 def protocol_summary(tail: int = 5, verbose: bool = True):
-    """ Construct a summary dataframe of previous experiments. """
+    """Construct a summary dataframe of previous experiments."""
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     # Set pandas df format option to print
-    pd.set_option('display.max_columns', 5)
-    pd.set_option('max_colwidth', 30)
+    pd.set_option("display.max_columns", 5)
+    pd.set_option("max_colwidth", 30)
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     if len(all_experiment_ids) > 0:
         purposes, project_names, exp_paths = [], [], []
@@ -81,34 +83,41 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
             if meta_args["job_type"] == "hyperparameter-search":
                 search_resources = job_spec_args["search_resources"]
                 if job_spec_args["search_config"]["search_schedule"] == "sync":
-                    total_jobs.append(search_resources["num_search_batches"]
-                                      * search_resources["num_evals_per_batch"]
-                                      * search_resources["num_seeds_per_eval"])
+                    total_jobs.append(
+                        search_resources["num_search_batches"]
+                        * search_resources["num_evals_per_batch"]
+                        * search_resources["num_seeds_per_eval"]
+                    )
                 else:
-                    total_jobs.append(search_resources["num_total_evals"]
-                                      * search_resources["num_seeds_per_eval"])
+                    total_jobs.append(
+                        search_resources["num_total_evals"]
+                        * search_resources["num_seeds_per_eval"]
+                    )
             elif meta_args["job_type"] == "multiple-experiments":
-                total_jobs.append(len(job_spec_args["config_fnames"]) *
-                                  job_spec_args["num_seeds"])
+                total_jobs.append(
+                    len(job_spec_args["config_fnames"]) * job_spec_args["num_seeds"]
+                )
             else:
                 total_jobs.append(1)
 
-        d = {"ID": all_experiment_ids[-tail:],
-             "Date": start_times,
-             "Project": project_names,
-             "Purpose": purposes,
-             "Experiment Dir": exp_paths,
-             "Status": statuses,
-             "Seeds": num_seeds,
-             "Resource": resource,
-             "CPUs": num_cpus,
-             "GPUs": num_gpus,
-             "Type": job_types,
-             "Jobs": total_jobs}
+        d = {
+            "ID": all_experiment_ids[-tail:],
+            "Date": start_times,
+            "Project": project_names,
+            "Purpose": purposes,
+            "Experiment Dir": exp_paths,
+            "Status": statuses,
+            "Seeds": num_seeds,
+            "Resource": resource,
+            "CPUs": num_cpus,
+            "GPUs": num_gpus,
+            "Type": job_types,
+            "Jobs": total_jobs,
+        }
         df = pd.DataFrame(d)
         df["ID"] = [e.split("-")[-1] for e in df["ID"]]
-        df["Date"] = df["Date"].map('{:.5}'.format)
-        df["Purpose"] = df["Purpose"].map('{:.30}'.format)
+        df["Date"] = df["Date"].map("{:.5}".format)
+        df["Purpose"] = df["Purpose"].map("{:.30}".format)
 
         # Print a nice table overview (no job resources)
         if verbose:
@@ -122,17 +131,18 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
         return None
 
 
-def update_protocol_var(experiment_id: str,
-                        db_var_name: Union[List[str], str],
-                        db_var_value: Union[list, str, dict]):
-    """ Update variable(s) stored in protocol db for an experiment. """
+def update_protocol_var(
+    experiment_id: str,
+    db_var_name: Union[List[str], str],
+    db_var_value: Union[list, str, dict],
+):
+    """Update variable(s) stored in protocol db for an experiment."""
     # Load in the DB
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
     # Update the variable(s) of the experiment
     if type(db_var_name) == list:
         for db_v_id in range(len(db_var_name)):
-            db.dadd(experiment_id, (db_var_name[db_v_id],
-                                    db_var_value[db_v_id]))
+            db.dadd(experiment_id, (db_var_name[db_v_id], db_var_value[db_v_id]))
     else:
         db.dadd(experiment_id, (db_var_name, db_var_value))
     db.dump()
@@ -140,15 +150,15 @@ def update_protocol_var(experiment_id: str,
 
 
 def delete_protocol_from_input():
-    """ Ask user if they want to delete previous experiment by id. """
+    """Ask user if they want to delete previous experiment by id."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     q_str = "{} Want to delete experiment? - state its id: [e_id/N]"
-    print(q_str.format(time_t), end=' ')
+    print(q_str.format(time_t), end=" ")
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given or timeout after 60 secs
     while True:
         i, o, e = select.select([sys.stdin], [], [], 60)
-        if (i):
+        if i:
             e_id = sys.stdin.readline().strip()
             if e_id == "N":
                 break
@@ -165,24 +175,28 @@ def delete_protocol_from_input():
         try:
             db.drem(e_id)
             db.dump()
-            print("{} Another one? - state the next id: [e_id/N]".format(
-                time_t), end=' ')
+            print(
+                "{} Another one? - state the next id: [e_id/N]".format(time_t), end=" "
+            )
         except Exception:
-            print("\n{} The e_id is not in the protocol db. "
-                  "Please try again: [e_id/N]".format(time_t), end=' ')
+            print(
+                "\n{} The e_id is not in the protocol db. "
+                "Please try again: [e_id/N]".format(time_t),
+                end=" ",
+            )
         sys.stdout.flush()
 
 
 def abort_protocol_from_input():
-    """ Ask user if they want to change experiment status to 'aborted'. """
+    """Ask user if they want to change experiment status to 'aborted'."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     q_str = "{} Want to set exp. status to aborted? - state its id: [e_id/N]"
-    print(q_str.format(time_t), end=' ')
+    print(q_str.format(time_t), end=" ")
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given or timeout after 60 secs
     while True:
         i, o, e = select.select([sys.stdin], [], [], 60)
-        if (i):
+        if i:
             e_id = sys.stdin.readline().strip()
             if e_id == "N":
                 break
@@ -199,9 +213,13 @@ def abort_protocol_from_input():
         try:
             db.dadd(e_id, ("job_status", "aborted"))
             db.dump()
-            print("{} Another one? - state the next id: [e_id/N]".format(
-                time_t), end=' ')
+            print(
+                "{} Another one? - state the next id: [e_id/N]".format(time_t), end=" "
+            )
         except Exception:
-            print("\n{} The e_id is not in the protocol db. "
-                  "Please try again: [e_id/N]".format(time_t), end=' ')
+            print(
+                "\n{} The e_id is not in the protocol db. "
+                "Please try again: [e_id/N]".format(time_t),
+                end=" ",
+            )
         sys.stdout.flush()

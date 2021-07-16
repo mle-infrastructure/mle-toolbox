@@ -1,9 +1,12 @@
 import numpy as np
+
 try:
     from statsmodels.stats.weightstats import ztest
 except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(f"{err}. You need to install `statsmodels` "
-                              "to use the `mle_toolbox.hypothesis` module.")
+    raise ModuleNotFoundError(
+        f"{err}. You need to install `statsmodels` "
+        "to use the `mle_toolbox.hypothesis` module."
+    )
 from statsmodels.stats.multitest import multipletests
 
 
@@ -12,13 +15,22 @@ class HypothesisTester(object):
     Helper for Testing Hypotheses & Correcting for Multiple Testing and FDR.
     TODO: Add more than just z-test.
     """
+
     def __init__(self, meta_log):
         self.meta_log = meta_log
         self.eval_ids = self.meta_log.eval_ids
         self.num_evals = len(meta_log)
-        self.correct_methods = ['bonferroni', 'sidak', 'holm-sidak', 'holm',
-                                'simes-hochberg', 'hommel', 'fdr_bh',
-                                'fdr_tsbh', 'fdr_tsbky']
+        self.correct_methods = [
+            "bonferroni",
+            "sidak",
+            "holm-sidak",
+            "holm",
+            "simes-hochberg",
+            "hommel",
+            "fdr_bh",
+            "fdr_tsbh",
+            "fdr_tsbky",
+        ]
 
     def run_pairwise(self, metric_name: str):
         """
@@ -33,9 +45,10 @@ class HypothesisTester(object):
             for j in range(self.num_evals):
                 # One sided z-test = i-j is non-zero: Rejection (smaller than)
                 z_stat, p_val = ztest(
-                    self.meta_log[self.eval_ids[i]].stats[metric_name].mean -
-                    self.meta_log[self.eval_ids[j]].stats[metric_name].mean,
-                    alternative='smaller')
+                    self.meta_log[self.eval_ids[i]].stats[metric_name].mean
+                    - self.meta_log[self.eval_ids[j]].stats[metric_name].mean,
+                    alternative="smaller",
+                )
                 self.p_vals[self.num_evals - i - 1, j] = p_val
 
     def run_corrections(self):
@@ -56,7 +69,7 @@ class HypothesisTester(object):
             self.corrected_p_vals[c_name] = self.single_correction(c_name)
 
     def single_correction(self, correction_name: str):
-        """ Run a single correction for all rows in p_vals array. """
+        """Run a single correction for all rows in p_vals array."""
         p_vals_temp = np.flip(self.p_vals, axis=0)
         assert correction_name in self.correct_methods
         corrected_p_vals = np.zeros((self.num_evals, self.num_evals - 1))
@@ -64,8 +77,9 @@ class HypothesisTester(object):
         clean_p_val = p_vals_temp[~np.eye(p_vals_temp.shape[0], dtype=bool)]
         clean_p_val = clean_p_val.reshape(p_vals_temp.shape[0], -1)
         for eval_run in range(self.num_evals):
-            _, p_correct, _, _ = multipletests(clean_p_val[eval_run],
-                                               method=correction_name)
+            _, p_correct, _, _ = multipletests(
+                clean_p_val[eval_run], method=correction_name
+            )
             corrected_p_vals[eval_run] = p_correct
         # Readd diagonal column
         d = corrected_p_vals.shape[0]
@@ -77,18 +91,26 @@ class HypothesisTester(object):
         return np.flip(matrix_new, axis=0)
 
     def plot(self, corrected: bool = False, method: str = "bonferroni"):
-        """ Helper plot function for p-values (corrected with method). """
+        """Helper plot function for p-values (corrected with method)."""
         from mle_toolbox.visualize import plot_2D_heatmap
+
         if corrected:
             p_vals_to_plot = self.corrected_p_vals[method]
         else:
             p_vals_to_plot = self.p_vals
 
-        plot_title = (r"$H_0: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] = 0$"
-                      r" vs. $H_1: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] < 0$")  # noqa: E501
-        fig, ax = plot_2D_heatmap(self.eval_ids, self.eval_ids, p_vals_to_plot,
-                                  min_heat=0.0, max_heat=0.15,
-                                  title=plot_title,
-                                  xy_labels=["Run A", "Run B"],
-                                  variable_name="Corrected P-Values",
-                                  figsize=(12, 10))
+        plot_title = (
+            r"$H_0: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] = 0$"
+            r" vs. $H_1: \mathbb{E}_t[\mathcal{L}^A - \mathcal{L}^B] < 0$"
+        )  # noqa: E501
+        fig, ax = plot_2D_heatmap(
+            self.eval_ids,
+            self.eval_ids,
+            p_vals_to_plot,
+            min_heat=0.0,
+            max_heat=0.15,
+            title=plot_title,
+            xy_labels=["Run A", "Run B"],
+            variable_name="Corrected P-Values",
+            figsize=(12, 10),
+        )

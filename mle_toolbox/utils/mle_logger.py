@@ -34,24 +34,27 @@ class MLE_Logger(object):
         top_k_metric_name (str): Variable name/score key to save
         top_k_minimize_metric (str): Boolean for min/max score in top k logging
     """
-    def __init__(self,
-                 time_to_track: List[str],
-                 what_to_track: List[str],
-                 time_to_print: List[str],
-                 what_to_print: List[str],
-                 config_fname: str,
-                 experiment_dir: str = "/",
-                 seed_id: Union[str, None] = None,
-                 overwrite_experiment_dir: bool = False,
-                 use_tboard: bool = False,
-                 tboard_fname: Union[str, None] = None,
-                 print_every_k_updates: Union[int, None] = None,
-                 model_type: str = "no-model-type-provided",
-                 ckpt_time_to_track: Union[str, None] = None,
-                 save_every_k_ckpt: Union[int, None] = None,
-                 save_top_k_ckpt: Union[int, None] = None,
-                 top_k_metric_name: Union[str, None] = None,
-                 top_k_minimize_metric: Union[bool, None] = None):
+
+    def __init__(
+        self,
+        time_to_track: List[str],
+        what_to_track: List[str],
+        time_to_print: List[str],
+        what_to_print: List[str],
+        config_fname: str,
+        experiment_dir: str = "/",
+        seed_id: Union[str, None] = None,
+        overwrite_experiment_dir: bool = False,
+        use_tboard: bool = False,
+        tboard_fname: Union[str, None] = None,
+        print_every_k_updates: Union[int, None] = None,
+        model_type: str = "no-model-type-provided",
+        ckpt_time_to_track: Union[str, None] = None,
+        save_every_k_ckpt: Union[int, None] = None,
+        save_top_k_ckpt: Union[int, None] = None,
+        top_k_metric_name: Union[str, None] = None,
+        top_k_minimize_metric: Union[bool, None] = None,
+    ):
         # Initialize counters of log - log, model, figures
         self.log_update_counter = 0
         self.log_save_counter = 0
@@ -76,9 +79,14 @@ class MLE_Logger(object):
             self.top_k_storage_time = []
 
         # Set up the logging directories - save the timestamped config file
-        self.setup_experiment_dir(experiment_dir, config_fname, seed_id,
-                                  use_tboard, tboard_fname,
-                                  overwrite_experiment_dir)
+        self.setup_experiment_dir(
+            experiment_dir,
+            config_fname,
+            seed_id,
+            use_tboard,
+            tboard_fname,
+            overwrite_experiment_dir,
+        )
 
         # Initialize pd dataframes to store logging stats/times
         self.time_to_track = time_to_track + ["time_elapsed"]
@@ -98,25 +106,26 @@ class MLE_Logger(object):
         self.start_time = time.time()
 
     def extend_tracking(self, add_track_vars: List[str]):
-        """ Add string names of variables to track. """
+        """Add string names of variables to track."""
         assert self.log_update_counter == 0
         self.what_to_track += add_track_vars
         self.stats_to_track = pd.DataFrame(columns=self.what_to_track)
 
-    def setup_experiment_dir(self,
-                             base_exp_dir: str,
-                             config_fname: Union[str, None],
-                             seed_id: Union[str, None],
-                             use_tboard: bool = False,
-                             tboard_fname: Union[str, None] = None,
-                             overwrite_experiment_dir: bool = False):
-        """ Setup a directory for experiment & copy over config. """
+    def setup_experiment_dir(
+        self,
+        base_exp_dir: str,
+        config_fname: Union[str, None],
+        seed_id: Union[str, None],
+        use_tboard: bool = False,
+        tboard_fname: Union[str, None] = None,
+        overwrite_experiment_dir: bool = False,
+    ):
+        """Setup a directory for experiment & copy over config."""
         # Get timestamp of experiment & create new directories
         timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
         base_str = os.path.split(config_fname)[1].split(".")[0]
         self.base_str = base_str
-        self.experiment_dir = os.path.join(base_exp_dir, timestr
-                                           + base_str + "/")
+        self.experiment_dir = os.path.join(base_exp_dir, timestr + base_str + "/")
 
         # Create a new empty directory for the experiment
         if not os.path.exists(self.experiment_dir):
@@ -138,26 +147,21 @@ class MLE_Logger(object):
                 pass
 
         # Create separate sub-dirs for checkpoints & final trained model
-        if not os.path.exists(os.path.join(self.experiment_dir,
-                                           "models/final/")):
+        if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
             try:
                 os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
             except Exception:
                 pass
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir,
-                                               "models/every_k/")):
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/every_k/")):
                 try:
-                    os.mkdir(os.path.join(self.experiment_dir,
-                                          "models/every_k/"))
+                    os.mkdir(os.path.join(self.experiment_dir, "models/every_k/"))
                 except Exception:
                     pass
         if self.save_top_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir,
-                                               "models/top_k/")):
+            if not os.path.exists(os.path.join(self.experiment_dir, "models/top_k/")):
                 try:
-                    os.mkdir(os.path.join(self.experiment_dir,
-                                          "models/top_k/"))
+                    os.mkdir(os.path.join(self.experiment_dir, "models/top_k/"))
                 except Exception:
                     pass
 
@@ -167,25 +171,36 @@ class MLE_Logger(object):
             shutil.copy(config_fname, self.config_copy)
 
         # Set where to log to (Stats - .hdf5, model - .ckpth)
-        self.log_save_fname = (self.experiment_dir + "logs/" +
-                               timestr + base_str + "_" + seed_id
-                               + ".hdf5")
+        self.log_save_fname = (
+            self.experiment_dir + "logs/" + timestr + base_str + "_" + seed_id + ".hdf5"
+        )
 
         # Create separate filenames for checkpoints & final trained model
-        self.final_model_save_fname = (self.experiment_dir + "models/final/" +
-                                       timestr + base_str + "_" + seed_id)
+        self.final_model_save_fname = (
+            self.experiment_dir + "models/final/" + timestr + base_str + "_" + seed_id
+        )
         if self.save_every_k_ckpt is not None:
             self.every_k_ckpt_list = []
-            self.every_k_model_save_fname = (self.experiment_dir +
-                                             "models/every_k/" +
-                                             timestr + base_str + "_" + seed_id
-                                             + "_k_")
+            self.every_k_model_save_fname = (
+                self.experiment_dir
+                + "models/every_k/"
+                + timestr
+                + base_str
+                + "_"
+                + seed_id
+                + "_k_"
+            )
         if self.save_top_k_ckpt is not None:
             self.top_k_ckpt_list = []
-            self.top_k_model_save_fname = (self.experiment_dir +
-                                           "models/top_k/" +
-                                           timestr + base_str + "_" + seed_id
-                                           + "_top_")
+            self.top_k_model_save_fname = (
+                self.experiment_dir
+                + "models/top_k/"
+                + timestr
+                + base_str
+                + "_"
+                + seed_id
+                + "_top_"
+            )
 
         # Different extensions to model checkpoints based on model type
         if self.model_type == "torch":
@@ -206,21 +221,26 @@ class MLE_Logger(object):
             try:
                 from torch.utils.tensorboard import SummaryWriter
             except ModuleNotFoundError as err:
-                raise ModuleNotFoundError(f"{err}. You need to install "
-                                          "`torch` if you want that "
-                                          "DeepLogger logs to tensorboard.")
-            self.writer = SummaryWriter(self.experiment_dir + "tboards/" +
-                                        tboard_fname + "_" + seed_id)
+                raise ModuleNotFoundError(
+                    f"{err}. You need to install "
+                    "`torch` if you want that "
+                    "DeepLogger logs to tensorboard."
+                )
+            self.writer = SummaryWriter(
+                self.experiment_dir + "tboards/" + tboard_fname + "_" + seed_id
+            )
         else:
             self.writer = None
 
-    def update_log(self,
-                   clock_tick: dict,
-                   stats_tick: dict,
-                   model=None,
-                   plot_to_tboard=None,
-                   save=False):
-        """ Update with the newest tick of performance stats, net weights """
+    def update_log(
+        self,
+        clock_tick: dict,
+        stats_tick: dict,
+        model=None,
+        plot_to_tboard=None,
+        save=False,
+    ):
+        """Update with the newest tick of performance stats, net weights"""
         # Check all keys do exist in data dicts to log [exclude time_elapsed]
         for k in self.time_to_track[:-1]:
             assert k in clock_tick.keys(), f"{k} not in clock_tick keys."
@@ -229,8 +249,9 @@ class MLE_Logger(object):
 
         # Transform clock_tick, stats_tick lists into pd arrays
         c_tick = pd.DataFrame(columns=self.time_to_track)
-        c_tick.loc[0] = ([clock_tick[k] for k in self.time_to_track[:-1]]
-                         + [time.time() - self.start_time])
+        c_tick.loc[0] = [clock_tick[k] for k in self.time_to_track[:-1]] + [
+            time.time() - self.start_time
+        ]
         s_tick = pd.DataFrame(columns=self.what_to_track)
         s_tick.loc[0] = [stats_tick[k] for k in self.stats_to_track]
 
@@ -248,8 +269,11 @@ class MLE_Logger(object):
         # Print the most current results
         if self.verbose and self.print_every_k_updates is not None:
             if self.log_update_counter % self.print_every_k_updates == 0:
-                print(pd.concat([c_tick[self.time_to_print],
-                                 s_tick[self.what_to_print]], axis=1))
+                print(
+                    pd.concat(
+                        [c_tick[self.time_to_print], s_tick[self.what_to_print]], axis=1
+                    )
+                )
 
         # Save the log if boolean says so
         if save:
@@ -258,32 +282,31 @@ class MLE_Logger(object):
                 self.save_model(model)
             self.save_log()
 
-    def update_tboard(self,
-                      clock_tick: dict,
-                      stats_tick: dict,
-                      model=None,
-                      plot_to_tboard=None):
-        """ Update the tensorboard with the newest events """
+    def update_tboard(
+        self, clock_tick: dict, stats_tick: dict, model=None, plot_to_tboard=None
+    ):
+        """Update the tensorboard with the newest events"""
         # Set the x-axis time variable to first key provided in time key dict
         time_var_id = clock_tick[self.time_to_track.keys()[0]]
 
         # Add performance & step counters
         for k in self.what_to_track.keys():
-            self.writer.add_scalar('performance/' + k,
-                                   np.mean(stats_tick[k]),
-                                   time_var_id)
+            self.writer.add_scalar(
+                "performance/" + k, np.mean(stats_tick[k]), time_var_id
+            )
 
         # Log the model params & gradients
         if model is not None:
             if self.model_type == "torch":
                 for name, param in model.named_parameters():
-                    self.writer.add_histogram('weights/' + name,
-                                              param.clone().cpu().data.numpy(),
-                                              time_var_id)
                     self.writer.add_histogram(
-                        'gradients/' + name,
+                        "weights/" + name, param.clone().cpu().data.numpy(), time_var_id
+                    )
+                    self.writer.add_histogram(
+                        "gradients/" + name,
                         param.grad.clone().cpu().data.numpy(),
-                        time_var_id)
+                        time_var_id,
+                    )
             elif self.model_type == "jax":
                 # Try to add parameters from nested dict first - then simple
                 # TODO: Add gradient tracking for JAX models
@@ -291,25 +314,25 @@ class MLE_Logger(object):
                     try:
                         for w in model[layer].keys():
                             self.writer.add_histogram(
-                                'weights/' + layer + '/' + w,
+                                "weights/" + layer + "/" + w,
                                 np.array(model[layer][w]),
-                                time_var_id)
+                                time_var_id,
+                            )
                     except Exception:
                         self.writer.add_histogram(
-                            'weights/' + layer,
-                            np.array(model[layer]),
-                            time_var_id)
+                            "weights/" + layer, np.array(model[layer]), time_var_id
+                        )
 
         # Add the plot of interest to tboard
         if plot_to_tboard is not None:
-            self.writer.add_figure('plot', plot_to_tboard, time_var_id)
+            self.writer.add_figure("plot", plot_to_tboard, time_var_id)
 
         # Flush the log event
         self.writer.flush()
 
     def save_log(self):
-        """ Create compressed .hdf5 file containing group <random-seed-id> """
-        h5f = h5py.File(self.log_save_fname, 'a')
+        """Create compressed .hdf5 file containing group <random-seed-id>"""
+        h5f = h5py.File(self.log_save_fname, "a")
 
         # Create "datasets" to store in the hdf5 file [time, stats]
         # Store all relevant meta data (log filename, checkpoint filename)
@@ -317,49 +340,76 @@ class MLE_Logger(object):
             h5f.create_dataset(
                 name=self.seed_id + "/meta/model_ckpt",
                 data=[self.final_model_save_fname.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
             h5f.create_dataset(
                 name=self.seed_id + "/meta/log_paths",
                 data=[self.log_save_fname.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
             h5f.create_dataset(
                 name=self.seed_id + "/meta/experiment_dir",
                 data=[self.experiment_dir.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
             h5f.create_dataset(
                 name=self.seed_id + "/meta/config_fname",
                 data=[self.config_copy.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
             h5f.create_dataset(
                 name=self.seed_id + "/meta/eval_id",
                 data=[self.base_str.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
             h5f.create_dataset(
                 name=self.seed_id + "/meta/model_type",
                 data=[self.model_type.encode("ascii", "ignore")],
-                compression='gzip', compression_opts=4, dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
 
             if self.save_top_k_ckpt or self.save_every_k_ckpt:
                 h5f.create_dataset(
                     name=self.seed_id + "/meta/ckpt_time_to_track",
                     data=[self.ckpt_time_to_track.encode("ascii", "ignore")],
-                    compression='gzip', compression_opts=4, dtype='S200')
+                    compression="gzip",
+                    compression_opts=4,
+                    dtype="S200",
+                )
 
             if self.save_top_k_ckpt:
                 h5f.create_dataset(
                     name=self.seed_id + "/meta/top_k_metric_name",
                     data=[self.top_k_metric_name.encode("ascii", "ignore")],
-                    compression='gzip', compression_opts=4, dtype='S200')
+                    compression="gzip",
+                    compression_opts=4,
+                    dtype="S200",
+                )
 
         # Store all time_to_track variables
         for o_name in self.time_to_track:
             if self.log_save_counter >= 1:
                 if h5f.get(self.seed_id + "/time/" + o_name):
                     del h5f[self.seed_id + "/time/" + o_name]
-            h5f.create_dataset(name=self.seed_id + "/time/" + o_name,
-                               data=self.clock_to_track[o_name],
-                               compression='gzip', compression_opts=4,
-                               dtype='float32')
+            h5f.create_dataset(
+                name=self.seed_id + "/time/" + o_name,
+                data=self.clock_to_track[o_name],
+                compression="gzip",
+                compression_opts=4,
+                dtype="float32",
+            )
 
         # Store all what_to_track variables
         for o_name in self.what_to_track:
@@ -370,18 +420,20 @@ class MLE_Logger(object):
             if type(data_to_store[0]) == np.ndarray:
                 data_to_store = np.stack(data_to_store)
             if type(data_to_store[0]) in [np.str_, str]:
-                data_to_store = [t.encode("ascii", "ignore") for t
-                                 in data_to_store]
+                data_to_store = [t.encode("ascii", "ignore") for t in data_to_store]
             if type(data_to_store[0]) in [bytes, np.str_]:
-                data_type = np.dtype('S200')
+                data_type = np.dtype("S200")
             elif type(data_to_store[0]) == int:
-                data_type = np.dtype('int32')
+                data_type = np.dtype("int32")
             else:
-                data_type = np.dtype('float32')
-            h5f.create_dataset(name=self.seed_id + "/stats/" + o_name,
-                               data=np.array(data_to_store).astype(data_type),
-                               compression='gzip', compression_opts=4,
-                               dtype=data_type)
+                data_type = np.dtype("float32")
+            h5f.create_dataset(
+                name=self.seed_id + "/stats/" + o_name,
+                data=np.array(data_to_store).astype(data_type),
+                compression="gzip",
+                compression_opts=4,
+                dtype=data_type,
+            )
 
         # Store data on stored checkpoints - stored every k updates
         if self.save_every_k_ckpt is not None:
@@ -392,34 +444,49 @@ class MLE_Logger(object):
             h5f.create_dataset(
                 name=self.seed_id + "/meta/every_k_storage_time",
                 data=np.array(self.every_k_storage_time),
-                compression='gzip', compression_opts=4,
-                dtype='float32')
-            h5f.create_dataset(name=self.seed_id + "/meta/every_k_ckpt_list",
-                               data=[t.encode("ascii", "ignore") for t
-                                     in self.every_k_ckpt_list],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
+                compression="gzip",
+                compression_opts=4,
+                dtype="float32",
+            )
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/every_k_ckpt_list",
+                data=[t.encode("ascii", "ignore") for t in self.every_k_ckpt_list],
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
 
         #  Store data on stored checkpoints - stored top k ckpt
         if self.save_top_k_ckpt is not None:
             if self.log_save_counter >= 1:
-                for o_name in ["top_k_storage_time", "top_k_ckpt_list",
-                               "top_k_performance"]:
+                for o_name in [
+                    "top_k_storage_time",
+                    "top_k_ckpt_list",
+                    "top_k_performance",
+                ]:
                     if h5f.get(self.seed_id + "/meta/" + o_name):
                         del h5f[self.seed_id + "/meta/" + o_name]
-            h5f.create_dataset(name=self.seed_id + "/meta/top_k_storage_time",
-                               data=np.array(self.top_k_storage_time),
-                               compression='gzip', compression_opts=4,
-                               dtype='float32')
-            h5f.create_dataset(name=self.seed_id + "/meta/top_k_ckpt_list",
-                               data=[t.encode("ascii", "ignore") for t
-                                     in self.top_k_ckpt_list],
-                               compression='gzip', compression_opts=4,
-                               dtype='S200')
-            h5f.create_dataset(name=self.seed_id + "/meta/top_k_performance",
-                               data=np.array(self.top_k_performance),
-                               compression='gzip', compression_opts=4,
-                               dtype='float32')
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/top_k_storage_time",
+                data=np.array(self.top_k_storage_time),
+                compression="gzip",
+                compression_opts=4,
+                dtype="float32",
+            )
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/top_k_ckpt_list",
+                data=[t.encode("ascii", "ignore") for t in self.top_k_ckpt_list],
+                compression="gzip",
+                compression_opts=4,
+                dtype="S200",
+            )
+            h5f.create_dataset(
+                name=self.seed_id + "/meta/top_k_performance",
+                data=np.array(self.top_k_performance),
+                compression="gzip",
+                compression_opts=4,
+                dtype="float32",
+            )
 
         h5f.flush()
         h5f.close()
@@ -428,7 +495,7 @@ class MLE_Logger(object):
         self.log_save_counter += 1
 
     def save_model(self, model):
-        """ Save current state of the model as a checkpoint - torch! """
+        """Save current state of the model as a checkpoint - torch!"""
         # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
         if self.model_type == "torch":
             # Torch model case - save model state dict as .pt checkpoint
@@ -443,16 +510,24 @@ class MLE_Logger(object):
         if self.save_every_k_ckpt is not None:
             if self.log_save_counter % self.save_every_k_ckpt == 0:
                 if self.model_type == "torch":
-                    ckpt_path = (self.every_k_model_save_fname +
-                                 str(self.model_save_counter) + ".pt")
+                    ckpt_path = (
+                        self.every_k_model_save_fname
+                        + str(self.model_save_counter)
+                        + ".pt"
+                    )
                     self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
-                    ckpt_path = (self.every_k_model_save_fname +
-                                 str(self.model_save_counter) + ".pkl")
+                    ckpt_path = (
+                        self.every_k_model_save_fname
+                        + str(self.model_save_counter)
+                        + ".pkl"
+                    )
                     save_pkl_object(model, ckpt_path)
                 # Update model save count & time point of storage
                 self.model_save_counter += 1
-                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]  # noqa: E501
+                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[
+                    -1
+                ]  # noqa: E501
                 self.every_k_storage_time.append(time)
                 self.every_k_ckpt_list.append(ckpt_path)
 
@@ -464,12 +539,18 @@ class MLE_Logger(object):
             # Fill up empty top k slots
             if len(self.top_k_performance) < self.save_top_k_ckpt:
                 if self.model_type == "torch":
-                    ckpt_path = (self.top_k_model_save_fname +
-                                 str(len(self.top_k_performance)) + ".pt")
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + str(len(self.top_k_performance))
+                        + ".pt"
+                    )
                     self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
-                    ckpt_path = (self.top_k_model_save_fname +
-                                 str(len(self.top_k_performance)) + ".pkl")
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + str(len(self.top_k_performance))
+                        + ".pkl"
+                    )
                     save_pkl_object(model, ckpt_path)
                 updated_top_k = True
                 self.top_k_performance.append(score)
@@ -477,52 +558,68 @@ class MLE_Logger(object):
                 self.top_k_ckpt_list.append(ckpt_path)
 
             # If minimize = replace worst performing model (max score)
-            if (self.top_k_minimize_metric and
-               max(self.top_k_performance) > score and not updated_top_k):
+            if (
+                self.top_k_minimize_metric
+                and max(self.top_k_performance) > score
+                and not updated_top_k
+            ):
                 id_to_replace = np.argmax(self.top_k_performance)
                 self.top_k_performance[id_to_replace] = score
                 self.top_k_storage_time[id_to_replace] = time
                 if self.model_type == "torch":
-                    ckpt_path = (self.top_k_model_save_fname +
-                                 str(id_to_replace) + ".pt")
+                    ckpt_path = self.top_k_model_save_fname + str(id_to_replace) + ".pt"
                     self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
-                    ckpt_path = (self.top_k_model_save_fname +
-                                 str(id_to_replace) + ".pkl")
+                    ckpt_path = (
+                        self.top_k_model_save_fname + str(id_to_replace) + ".pkl"
+                    )
                     save_pkl_object(model, ckpt_path)
                 updated_top_k = True
 
             # If minimize = replace worst performing model (max score)
-            if (not self.top_k_minimize_metric and
-               min(self.top_k_performance) > score and not updated_top_k):
+            if (
+                not self.top_k_minimize_metric
+                and min(self.top_k_performance) > score
+                and not updated_top_k
+            ):
                 id_to_replace = np.argmin(self.top_k_performance)
                 self.top_k_performance[id_to_replace] = score
-                self.top_k_storage_time[id_to_replace] = (
-                    self.clock_to_track[
-                        self.ckpt_time_to_track].to_numpy()[-1])
+                self.top_k_storage_time[id_to_replace] = self.clock_to_track[
+                    self.ckpt_time_to_track
+                ].to_numpy()[-1]
                 if self.model_type == "torch":
-                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
-                                 str(id_to_replace) + ".pt")
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + "_top_"
+                        + str(id_to_replace)
+                        + ".pt"
+                    )
                     self.save_torch_model(ckpt_path, model)
                 elif self.model_type in ["jax", "sklearn"]:
-                    ckpt_path = (self.top_k_model_save_fname + "_top_" +
-                                 str(id_to_replace) + ".pkl")
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + "_top_"
+                        + str(id_to_replace)
+                        + ".pkl"
+                    )
                     save_pkl_object(model, ckpt_path)
                 updated_top_k = True
 
     def save_torch_model(self, path_to_store, model):
-        """ Store a torch checkpoint for a model. """
+        """Store a torch checkpoint for a model."""
         try:
             import torch
         except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(f"{err}. You need to install "
-                                      "`torch` if you want to save a model "
-                                      "checkpoint.")
+            raise ModuleNotFoundError(
+                f"{err}. You need to install "
+                "`torch` if you want to save a model "
+                "checkpoint."
+            )
         # Update the saved weights in a single file!
         torch.save(model.state_dict(), path_to_store)
 
     def save_plot(self, fig, fname_ext=".png"):
-        """ Store a figure in a experiment_id/figures directory. """
+        """Store a figure in a experiment_id/figures directory."""
         # Create new directory to store figures - if it doesn't exist yet
         figures_dir = os.path.join(self.experiment_dir, "figures/")
         if not os.path.exists(figures_dir):
@@ -533,28 +630,34 @@ class MLE_Logger(object):
 
         # Tick up counter, save figure, store new path to figure
         self.fig_save_counter += 1
-        figure_fname = os.path.join(figures_dir,
-                                    "fig_" + str(self.fig_save_counter) +
-                                    "seed_" + str(self.seed_id)
-                                    + fname_ext)
+        figure_fname = os.path.join(
+            figures_dir,
+            "fig_"
+            + str(self.fig_save_counter)
+            + "seed_"
+            + str(self.seed_id)
+            + fname_ext,
+        )
         fig.savefig(figure_fname, dpi=300)
         self.fig_storage_paths.append(figure_fname)
 
         # Store figure paths if any where created
-        h5f = h5py.File(self.log_save_fname, 'a')
+        h5f = h5py.File(self.log_save_fname, "a")
         if self.fig_save_counter > 1:
             if h5f.get(self.seed_id + "/meta/fig_storage_paths"):
                 del h5f[self.seed_id + "/meta/fig_storage_paths"]
-        h5f.create_dataset(name=self.seed_id + "/meta/fig_storage_paths",
-                           data=[t.encode("ascii", "ignore") for t
-                                 in self.fig_storage_paths],
-                           compression='gzip', compression_opts=4,
-                           dtype='S200')
+        h5f.create_dataset(
+            name=self.seed_id + "/meta/fig_storage_paths",
+            data=[t.encode("ascii", "ignore") for t in self.fig_storage_paths],
+            compression="gzip",
+            compression_opts=4,
+            dtype="S200",
+        )
         h5f.flush()
         h5f.close()
 
     def save_to_extra_dir(self, obj, fname):
-        """ Helper fct. to save object (dict/etc.) as .pkl in exp. subdir. """
+        """Helper fct. to save object (dict/etc.) as .pkl in exp. subdir."""
         filename, file_extension = os.path.splitext(fname)
         extra_dir = os.path.join(self.experiment_dir, "extra/")
         path_to_store = os.path.join(extra_dir, fname)

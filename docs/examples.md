@@ -1,4 +1,4 @@
-# Examples
+# Examples :school_satchel:
 
 * :page_facing_up: [Euler PDE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde) - Integrate a PDE using forward Euler for different initial conditions.
 
@@ -10,7 +10,7 @@
 
 * :page_facing_up: [Multi Bash](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
 
-# Notebooks
+# Notebooks :pencil:
 
 - :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).
 - :notebook: [Hypothesis Testing](notebooks/hypothesis_testing.ipynb) - Compare different experiment runs & perform hypothesis tests.

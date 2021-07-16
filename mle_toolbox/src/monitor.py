@@ -3,39 +3,44 @@ from rich.live import Live
 from mle_toolbox import mle_config
 from mle_toolbox.utils import determine_resource
 from mle_toolbox.protocol import load_local_protocol_db
-from mle_toolbox.monitor import (layout_mle_dashboard,
-                                 update_mle_dashboard)
+from mle_toolbox.monitor import layout_mle_dashboard, update_mle_dashboard
 
 
 def monitor():
-    """ Initialize & live update rich dashboard with cluster data. """
+    """Initialize & live update rich dashboard with cluster data."""
     # Get host resource [local, sge-cluster, slurm-cluster]
     resource = determine_resource()
 
     # Start storing utilisation history
-    util_hist = {"rel_mem_util": [],
-                 "rel_cpu_util": [],
-                 "times_date": [],
-                 "times_hour": []}
+    util_hist = {
+        "rel_mem_util": [],
+        "rel_cpu_util": [],
+        "times_date": [],
+        "times_hour": [],
+    }
 
     if mle_config.general.use_gcloud_protocol_sync:
         try:
             # Import of helpers for GCloud storage of results/protocol
             from mle_toolbox.remote.gcloud_transfer import get_gcloud_db
+
             _ = get_gcloud_db()
         except ImportError:
-            raise ImportError("You need to install `google-cloud-storage` to "
-                              "synchronize protocols with GCloud. Or set "
-                              "`use_glcoud_protocol_sync = False` in your "
-                              "config file.")
+            raise ImportError(
+                "You need to install `google-cloud-storage` to "
+                "synchronize protocols with GCloud. Or set "
+                "`use_glcoud_protocol_sync = False` in your "
+                "config file."
+            )
 
     # Get newest data depending on resourse!
     db, all_e_ids, last_e_id = load_local_protocol_db()
 
     # Generate the dashboard layout and display first data
     layout = layout_mle_dashboard(resource)
-    layout, util_hist = update_mle_dashboard(layout, resource, util_hist,
-                                             db, all_e_ids, last_e_id)
+    layout, util_hist = update_mle_dashboard(
+        layout, resource, util_hist, db, all_e_ids, last_e_id
+    )
 
     # Start timers for GCS pulling and reloading of local protocol db
     timer_gcs = time.time()
@@ -45,9 +50,9 @@ def monitor():
     with Live(layout, refresh_per_second=10, screen=True):
         while True:
             try:
-                layout, util_hist = update_mle_dashboard(layout, resource,
-                                                         util_hist, db,
-                                                         all_e_ids, last_e_id)
+                layout, util_hist = update_mle_dashboard(
+                    layout, resource, util_hist, db, all_e_ids, last_e_id
+                )
 
                 # Every 10 seconds reload local database file
                 if time.time() - timer_db > 10:

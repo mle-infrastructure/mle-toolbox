@@ -5,41 +5,77 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import seaborn as sns
 
 
-
-def animate_2D_grid(data, var_name="A Variable", dt=1,
-                    ylabel="y-Axis Label", xlabel="x-Axis Label",
-                    range_y=None, range_x=None, every_nth=1, round_ticks=1,
-                    vmin=None, vmax=None,
-                    title="Animated Grid", interval=100, fps=60,
-                    fname="test_anim.gif", direct_save=True,
-                    no_axis_ticks=False, cmap=sns.cm.rocket):
-    """ Generate a gif animation of a set of 1d curves. """
-    animator = AnimatedGrid(data, var_name, dt, title,
-                            ylabel, xlabel, range_y, range_x,
-                            every_nth, round_ticks, vmin, vmax,
-                            interval, no_axis_ticks, cmap)
+def animate_2D_grid(
+    data,
+    var_name="A Variable",
+    dt=1,
+    ylabel="y-Axis Label",
+    xlabel="x-Axis Label",
+    range_y=None,
+    range_x=None,
+    every_nth=1,
+    round_ticks=1,
+    vmin=None,
+    vmax=None,
+    title="Animated Grid",
+    interval=100,
+    fps=60,
+    fname="test_anim.gif",
+    direct_save=True,
+    no_axis_ticks=False,
+    cmap=sns.cm.rocket,
+):
+    """Generate a gif animation of a set of 1d curves."""
+    animator = AnimatedGrid(
+        data,
+        var_name,
+        dt,
+        title,
+        ylabel,
+        xlabel,
+        range_y,
+        range_x,
+        every_nth,
+        round_ticks,
+        vmin,
+        vmax,
+        interval,
+        no_axis_ticks,
+        cmap,
+    )
     if direct_save:
-        animator.ani.save(fname, fps=fps, writer='imagemagick')
+        animator.ani.save(fname, fps=fps, writer="imagemagick")
     return animator
 
 
 class AnimatedGrid(object):
-    """ An animated line plot of all lines in provided data over time. """
-    def __init__(self, data, var_name="A Variable", dt=1,
-                 title="Animated Grid",
-                 ylabel="y-Axis", xlabel="Time",
-                 range_y=None, range_x=None, every_nth=1, round_ticks=1,
-                 vmin=None, vmax=None, interval=100, no_axis_ticks=False,
-                 cmap=sns.cm.rocket):
+    """An animated line plot of all lines in provided data over time."""
+
+    def __init__(
+        self,
+        data,
+        var_name="A Variable",
+        dt=1,
+        title="Animated Grid",
+        ylabel="y-Axis",
+        xlabel="Time",
+        range_y=None,
+        range_x=None,
+        every_nth=1,
+        round_ticks=1,
+        vmin=None,
+        vmax=None,
+        interval=100,
+        no_axis_ticks=False,
+        cmap=sns.cm.rocket,
+    ):
         self.num_steps = data.shape[0]
         self.data = data
         self.t = 0
         self.dt = dt
         self.title = title
-        self.range_x = (range_x if range_x is not None
-                        else np.arange(data.shape[1]))
-        self.range_y = (range_y if range_y is not None
-                        else np.arange(data.shape[2]))
+        self.range_x = range_x if range_x is not None else np.arange(data.shape[1])
+        self.range_y = range_y if range_y is not None else np.arange(data.shape[2])
         self.var_name = var_name
         self.every_nth = every_nth
         self.round_ticks = round_ticks
@@ -54,8 +90,9 @@ class AnimatedGrid(object):
             self.ax.set_xlabel(xlabel, fontsize=20)
 
         # Plot the initial image
-        self.im = self.ax.imshow(np.zeros(self.data[0].shape),
-                                 cmap=cmap, vmin=vmin, vmax=vmax)
+        self.im = self.ax.imshow(
+            np.zeros(self.data[0].shape), cmap=cmap, vmin=vmin, vmax=vmax
+        )
 
         if self.no_axis_ticks:
             self.ax.axis("off")
@@ -65,11 +102,14 @@ class AnimatedGrid(object):
             for tick in self.ax.yaxis.get_major_ticks():
                 tick.label.set_fontsize(20)
         # Then setup FuncAnimation.
-        self.ani = animation.FuncAnimation(self.fig, self.update,
-                                           frames=self.num_steps,
-                                           interval=interval,
-                                           init_func=self.setup_plot,
-                                           blit=False)
+        self.ani = animation.FuncAnimation(
+            self.fig,
+            self.update,
+            frames=self.num_steps,
+            interval=interval,
+            init_func=self.setup_plot,
+            blit=False,
+        )
         self.fig.tight_layout()
 
     def setup_plot(self):
@@ -86,11 +126,12 @@ class AnimatedGrid(object):
             if len(self.range_y) != 0:
                 if type(self.range_y[-1]) is not str:
                     if self.round_ticks != 0:
-                        yticklabels = [str(round(float(label), self.round_ticks))
-                                       for label in self.range_y[::-1]]
+                        yticklabels = [
+                            str(round(float(label), self.round_ticks))
+                            for label in self.range_y[::-1]
+                        ]
                     else:
-                        yticklabels = [str(int(label))
-                                       for label in self.range_y[::-1]]
+                        yticklabels = [str(int(label)) for label in self.range_y[::-1]]
                 else:
                     yticklabels = [str(label) for label in self.range_y[::-1]]
             else:
@@ -105,11 +146,12 @@ class AnimatedGrid(object):
             if len(self.range_x) != 0:
                 if type(self.range_x[-1]) is not str:
                     if self.round_ticks != 0:
-                        xticklabels = [str(round(float(label), self.round_ticks))
-                                       for label in self.range_x]
+                        xticklabels = [
+                            str(round(float(label), self.round_ticks))
+                            for label in self.range_x
+                        ]
                     else:
-                        xticklabels = [str(int(label))
-                                       for label in self.range_x]
+                        xticklabels = [str(int(label)) for label in self.range_x]
                 else:
                     xticklabels = [str(label) for label in self.range_x]
             else:
@@ -121,8 +163,12 @@ class AnimatedGrid(object):
                     label.set_visible(False)
 
             # Rotate the tick labels and set their alignment.
-            plt.setp(self.ax.get_xticklabels(), rotation=45, ha="right",
-                     rotation_mode="anchor")
+            plt.setp(
+                self.ax.get_xticklabels(),
+                rotation=45,
+                ha="right",
+                rotation_mode="anchor",
+            )
 
             divider = make_axes_locatable(self.ax)
             cax = divider.append_axes("right", size="7%", pad=0.15)
@@ -136,9 +182,7 @@ class AnimatedGrid(object):
         self.t += self.dt
         self.im.set_data(sub_data)
         if self.title is not None:
-            self.ax.set_title(self.title +
-                              r" $t={:.1f}$".format(self.t),
-                              fontsize=25)
+            self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
-        return self.im,
+        return (self.im,)

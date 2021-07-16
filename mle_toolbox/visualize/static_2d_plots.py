@@ -6,35 +6,37 @@ from typing import List, Union
 
 
 def moving_smooth_ts(ts, window_size: int = 20):
-    """ Smoothes a time series using a moving average filter. """
+    """Smoothes a time series using a moving average filter."""
     smooth_df = pd.DataFrame(ts)
     mean_ts = smooth_df[0].rolling(window_size, min_periods=1).mean()
     std_ts = smooth_df[0].rolling(window_size, min_periods=1).std()
     return mean_ts, std_ts
 
 
-def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
-                      fixed_params: Union[None, dict] = None,
-                      params_to_plot: list = [],
-                      target_to_plot: str = "target",
-                      plot_title: str = "Temp Title",
-                      plot_subtitle: Union[None, str] = None,
-                      xy_labels: Union[None, List[str]] = ["x-label",
-                                                           "y-label"],
-                      variable_name: Union[None, str] = "Var Label",
-                      every_nth_tick: int = 1,
-                      plot_colorbar: bool = True,
-                      text_in_cell: bool = False,
-                      max_heat: Union[None, float] = None,
-                      min_heat: Union[None, float] = None,
-                      norm_cols: bool = False,
-                      norm_rows: bool = False,
-                      return_array: bool = False,
-                      round_ticks: int = 1,
-                      fig=None, ax=None,
-                      figsize: tuple = (10, 8),
-                      cmap="magma"):
-    """ Fix certain params & visualize grid target value over other two. """
+def visualize_2D_grid(
+    hyper_df: pd.core.frame.DataFrame,
+    fixed_params: Union[None, dict] = None,
+    params_to_plot: list = [],
+    target_to_plot: str = "target",
+    plot_title: str = "Temp Title",
+    plot_subtitle: Union[None, str] = None,
+    xy_labels: Union[None, List[str]] = ["x-label", "y-label"],
+    variable_name: Union[None, str] = "Var Label",
+    every_nth_tick: int = 1,
+    plot_colorbar: bool = True,
+    text_in_cell: bool = False,
+    max_heat: Union[None, float] = None,
+    min_heat: Union[None, float] = None,
+    norm_cols: bool = False,
+    norm_rows: bool = False,
+    return_array: bool = False,
+    round_ticks: int = 1,
+    fig=None,
+    ax=None,
+    figsize: tuple = (10, 8),
+    cmap="magma",
+):
+    """Fix certain params & visualize grid target value over other two."""
     assert len(params_to_plot) == 2, "You can only plot 2 variables!"
 
     # Select the data to plot - max. fix 2 other vars
@@ -55,33 +57,50 @@ def visualize_2D_grid(hyper_df: pd.core.frame.DataFrame,
     # Construct the 2D array using helper function
     range_x = np.unique(temp_df[p_to_plot[0]])
     range_y = np.unique(temp_df[p_to_plot[1]])
-    heat_array = get_heatmap_array(range_x, range_y, temp_df.to_numpy(),
-                                   norm_cols, norm_rows)
+    heat_array = get_heatmap_array(
+        range_x, range_y, temp_df.to_numpy(), norm_cols, norm_rows
+    )
 
     if return_array:
         return heat_array, range_x, range_y
     else:
         # Construct the plot
-        fig, ax = plot_2D_heatmap(range_x, range_y, heat_array,
-                                  plot_title, plot_subtitle,
-                                  xy_labels, variable_name, every_nth_tick,
-                                  plot_colorbar, text_in_cell, max_heat,
-                                  min_heat, round_ticks, figsize=figsize,
-                                  fig=fig, ax=ax, cmap=cmap)
+        fig, ax = plot_2D_heatmap(
+            range_x,
+            range_y,
+            heat_array,
+            plot_title,
+            plot_subtitle,
+            xy_labels,
+            variable_name,
+            every_nth_tick,
+            plot_colorbar,
+            text_in_cell,
+            max_heat,
+            min_heat,
+            round_ticks,
+            figsize=figsize,
+            fig=fig,
+            ax=ax,
+            cmap=cmap,
+        )
         return fig, ax
 
 
-def get_heatmap_array(range_x: np.ndarray,
-                      range_y: np.ndarray,
-                      results_df: np.ndarray,
-                      norm_cols: bool = False,
-                      norm_rows: bool = False):
-    """ Construct the 2D array to plot the heat. """
+def get_heatmap_array(
+    range_x: np.ndarray,
+    range_y: np.ndarray,
+    results_df: np.ndarray,
+    norm_cols: bool = False,
+    norm_rows: bool = False,
+):
+    """Construct the 2D array to plot the heat."""
     bring_the_heat = np.zeros((len(range_y), len(range_x)))
     for i, val_x in enumerate(range_x):
         for j, val_y in enumerate(range_y):
-            case_at_hand = np.where((results_df[:, 0] == val_x)
-                                    & (results_df[:, 1] == val_y))
+            case_at_hand = np.where(
+                (results_df[:, 0] == val_x) & (results_df[:, 1] == val_y)
+            )
             results_temp = results_df[case_at_hand, 2]
             # Reverse index so that small in bottom left corner
             bring_the_heat[len(range_y) - 1 - j, i] = results_temp
@@ -94,29 +113,32 @@ def get_heatmap_array(range_x: np.ndarray,
     return bring_the_heat
 
 
-def plot_2D_heatmap(range_x: np.ndarray,
-                    range_y: np.ndarray,
-                    heat_array: np.ndarray,
-                    title: str = "Placeholder Title",
-                    subtitle: Union[None, str] = None,
-                    xy_labels: list = ["x-label", "y-label"],
-                    variable_name: Union[None, str] = None,
-                    every_nth_tick: int = 1,
-                    plot_colorbar: bool = True,
-                    text_in_cell: bool = False,
-                    max_heat: Union[None, float] = None,
-                    min_heat: Union[None, float] = None,
-                    round_ticks: int = 1,
-                    fig=None,
-                    ax=None,
-                    figsize: tuple = (10, 8),
-                    cmap="magma"):
-    """ Plot the 2D heatmap. """
+def plot_2D_heatmap(
+    range_x: np.ndarray,
+    range_y: np.ndarray,
+    heat_array: np.ndarray,
+    title: str = "Placeholder Title",
+    subtitle: Union[None, str] = None,
+    xy_labels: list = ["x-label", "y-label"],
+    variable_name: Union[None, str] = None,
+    every_nth_tick: int = 1,
+    plot_colorbar: bool = True,
+    text_in_cell: bool = False,
+    max_heat: Union[None, float] = None,
+    min_heat: Union[None, float] = None,
+    round_ticks: int = 1,
+    fig=None,
+    ax=None,
+    figsize: tuple = (10, 8),
+    cmap="magma",
+):
+    """Plot the 2D heatmap."""
     if fig is None or ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     if max_heat is None and min_heat is None:
-        im = ax.imshow(heat_array, cmap=cmap, vmax=np.max(heat_array),
-                       vmin=np.min(heat_array))
+        im = ax.imshow(
+            heat_array, cmap=cmap, vmax=np.max(heat_array), vmin=np.min(heat_array)
+        )
     elif max_heat is not None and min_heat is None:
         im = ax.imshow(heat_array, cmap=cmap, vmax=max_heat)
     elif max_heat is None and min_heat is not None:
@@ -128,8 +150,9 @@ def plot_2D_heatmap(range_x: np.ndarray,
     if len(range_y) != 0:
         if type(range_y[-1]) is not str:
             if round_ticks != 0:
-                yticklabels = [str(round(float(label), round_ticks))
-                               for label in range_y[::-1]]
+                yticklabels = [
+                    str(round(float(label), round_ticks)) for label in range_y[::-1]
+                ]
             else:
                 yticklabels = [str(int(label)) for label in range_y[::-1]]
         else:
@@ -146,11 +169,11 @@ def plot_2D_heatmap(range_x: np.ndarray,
     if len(range_x) != 0:
         if type(range_x[-1]) is not str:
             if round_ticks != 0:
-                xticklabels = [str(round(float(label), round_ticks))
-                               for label in range_x]
+                xticklabels = [
+                    str(round(float(label), round_ticks)) for label in range_x
+                ]
             else:
-                xticklabels = [str(int(label))
-                               for label in range_x]
+                xticklabels = [str(int(label)) for label in range_x]
         else:
             xticklabels = [str(label) for label in range_x]
     else:
@@ -162,13 +185,12 @@ def plot_2D_heatmap(range_x: np.ndarray,
             label.set_visible(False)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
     if subtitle is None:
         ax.set_title(title)
     else:
-        ax.set_title(title + '\n' + str(subtitle))
+        ax.set_title(title + "\n" + str(subtitle))
     if len(range_x) != 0:
         ax.set_xlabel(xy_labels[0])
     if len(range_y) != 0:
@@ -188,7 +210,11 @@ def plot_2D_heatmap(range_x: np.ndarray,
     if text_in_cell:
         for y in range(heat_array.shape[0]):
             for x in range(heat_array.shape[1]):
-                ax.text(x, y, '%.2f' % heat_array[y, x],
-                        horizontalalignment='center',
-                        verticalalignment='center',)
+                ax.text(
+                    x,
+                    y,
+                    "%.2f" % heat_array[y, x],
+                    horizontalalignment="center",
+                    verticalalignment="center",
+                )
     return fig, ax
