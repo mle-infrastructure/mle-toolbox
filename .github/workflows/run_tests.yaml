@@ -24,20 +24,19 @@ jobs:
         python-version: ${{ matrix.python }}
     - name: Install testing and linting dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-timeout flake8
-    - name: Install requirements
+        make install-dev
+    - name: Format with black style
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements/requirements.txt
-        pip install -r requirements/requirements-test.txt
-        pip install .
-    - name: Run tests
-      run: |
-        pytest -vv --durations=0 ./tests/unit
+        make format
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 ./mle_toolbox --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 ./mle_toolbox --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        make lint
+    - name: Type-check with MyPy
+      run: |
+        make type-check
+    - name: Run unit tests
+      run: |
+        make test-unit
+    - name: Run integration tests
+      run: |
+        make test-integration
