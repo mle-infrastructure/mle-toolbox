@@ -73,8 +73,8 @@ def check_job_config(job_config: dict):
     """Check if config has all necessary ingredients for job to run."""
     # Compile list of required arguments for specific job types
     necessary_ingredients = ["meta_job_args", "single_job_args"]
-    if job_config.meta_job_args["job_type"] == "multiple-experiments":
-        necessary_ingredients += ["multi_experiment_args"]
+    if job_config.meta_job_args["job_type"] == "multiple-configs":
+        necessary_ingredients += ["multi_config_args"]
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
         necessary_ingredients += ["param_search_args"]
     elif job_config.meta_job_args["job_type"] == "population-based-training":

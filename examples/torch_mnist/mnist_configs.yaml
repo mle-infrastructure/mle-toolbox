@@ -7,7 +7,7 @@ meta_job_args:
     experiment_dir: "experiments/mnist_configs"
 
 # Parameters specific to the experiment type
-multi_experiment_args:
+multi_config_args:
     config_fnames:
         - "mnist_mlp_config.json"
         - "mnist_cnn_config.json"

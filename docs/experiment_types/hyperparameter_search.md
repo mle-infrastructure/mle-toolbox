@@ -1,11 +1,12 @@
-# Meta Arguments: What job? What train .py file? Base config? Where to store?
-meta_job_args:
-    project_name: "examples"
-    job_type: "hyperparameter-search"
-    base_train_fname: "mnist/run_mnist_network.py"
-    base_train_config: "mnist/mnist_cnn_config.json"
-    experiment_dir: "experiments/mnist_search/"
+# Hyperparameter Searches
 
+*Note*: This page and content is still work in progress!
+
+Given a fixed training configuration file and the Python training script the only thing that has to be adapted for the different types of experiments is the meta configuration file.
+
+## Random/Grid Search Over Parameters
+
+```yaml
 # Parameters specific to the hyperparameter search
 param_search_args:
     search_logging:
@@ -19,7 +20,7 @@ param_search_args:
         num_evals_per_batch: 2
         num_seeds_per_eval: 1
     search_config:
-        search_type: "grid"
+        search_type: "grid"  # "random"/"smbo"
         search_schedule: "sync"
         search_params:
             categorical:
@@ -31,11 +32,4 @@ param_search_args:
                     begin: 1e-5
                     end: 1e-2
                     bins: 2
-
-# Parameters specific to an individual job
-single_job_args:
-    job_name: "cnn"
-    num_gpus: 1
-    num_logical_cores: 4
-    exclude_nodes:
-        - "cognition14"
+```

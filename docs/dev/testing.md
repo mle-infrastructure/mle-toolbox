@@ -13,10 +13,10 @@ flake8 ./mle_toolbox --count --exit-zero --max-line-length=127 --statistics
 mypy mle_toolbox/.
 ```
 
-## `black`Formatting
+## `black` Formatting
 
 ```
-black --verbose --config pyproject.toml
+black mle_toolbox/. --verbose
 ```
 
 ## Test Coverage

@@ -9,6 +9,17 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 <span style="color:red">Add **basic example GIF** for toolbox application</span>.
 
+## What Does The `mle-toolbox` Provide?
+
+1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
+2. Common research experiment setups:
+    - Launching and collecting multiple random seeds in parallel/batches.
+    - Hyperparameter searches: Random, Grid, SMBO, Population-Based Training.
+    - Pre- and post-processing pipelines for data prep/result visualization.
+3. Automated report generation for hyperparameter searches.
+4. Storage of results and database in Google Cloud Storage Bucket.
+5. Resource monitoring with dashboard visualization.
+
 ## 5 Steps To Get Started :stew:
 
 1. Follow the [installation instructions](setup/installation/) and set up your credentials/configurations.

@@ -1,11 +1,17 @@
 import numpy as np
+import os
 import h5py
 from dotmap import DotMap
 from typing import Union, List
+import matplotlib.pyplot as plt
 
 
 class MetaLog(object):
     """Class wrapper for meta_log dictionary w. additional functionality."""
+    meta_vars: List[str]
+    stats_vars: List[str]
+    time_vars: List[str]
+    num_configs: int
 
     def __init__(self, meta_log: DotMap):
         self.meta_log = meta_log
@@ -37,7 +43,7 @@ class MetaLog(object):
         iter_to_plot: Union[str, None] = None,
         fig=None,
         ax=None,
-    ):
+    ) -> None:
         """Plot all runs in meta-log for variable 'target_to_plot'."""
         from mle_toolbox.visualize import visualize_1D_lcurves
 
@@ -59,14 +65,14 @@ class MetaLog(object):
         )
 
     @property
-    def eval_ids(self):
+    def eval_ids(self) -> Union[int, None]:
         """Get ids of runs stored in meta_log instance."""
         if self.num_configs > 1:
             return list(self.meta_log.keys())
         else:
             print("Only single configuration/evaluation loaded.")
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of runs stored in meta_log."""
         return len(self.eval_ids)
 
@@ -75,8 +81,9 @@ class MetaLog(object):
         return self.meta_log[item]
 
 
-def load_meta_log(log_fname: str, aggregate_seeds: bool = True) -> DotMap:
+def load_meta_log(log_fname: str, aggregate_seeds: bool = True) -> MetaLog:
     """Load in logging results & mean the results over different runs"""
+    assert os.path.exists(log_fname), f"File {log_fname} does not exist."
     # Open File & Get array names to load in
     h5f = h5py.File(log_fname, mode="r")
     # Get all ids of all runs (b_1_eval_0_seed_0)

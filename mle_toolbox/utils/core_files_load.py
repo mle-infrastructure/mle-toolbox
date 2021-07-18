@@ -4,13 +4,14 @@ import toml
 import commentjson
 import pickle
 from dotmap import DotMap
+from typing import Union, Dict, Tuple, Any
 
 # Import helpers for loading meta-log and hyper-log files
-from .load_meta_log import load_meta_log
-from .load_hyper_log import load_hyper_log
+from .load_meta_log import load_meta_log, MetaLog
+from .load_hyper_log import load_hyper_log, HyperLog
 
 
-def load_mle_toolbox_config(config_fname="~/mle_config.toml"):
+def load_mle_toolbox_config(config_fname: str="~/mle_config.toml") -> DotMap:
     """Load cluster config from the .toml file. See docs for more info."""
     # This assumes that the config file is always named the same way!
     try:
@@ -24,7 +25,7 @@ def load_mle_toolbox_config(config_fname="~/mle_config.toml"):
         try:
             from mle_toolbox.initialize.crypto_credentials import (
                 decrypt_ssh_credentials,
-            )  # noqa: E501
+            )
         except ModuleNotFoundError as err:
             raise ModuleNotFoundError(
                 f"{err}. You need to"
@@ -66,8 +67,8 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
     # Check that job-specific arguments are given in yaml config
     experiment_type = config["meta_job_args"]["job_type"]
     all_experiment_types = [
-        "single-experiment",
-        "multiple-experiments",
+        "single-config",
+        "multiple-config",
         "hyperparameter-search",
         "population-based-training",
     ]
@@ -75,10 +76,10 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
         experiment_type in all_experiment_types
     ), "Job type has to be in {all_experiment_types}."
 
-    if experiment_type == "single-experiment":
+    if experiment_type == "single-config":
         assert "single_job_args" in config.keys()
-    elif experiment_type == "multiple-experiments":
-        assert "multi_experiment_args" in config.keys()
+    elif experiment_type == "multiple-config":
+        assert "multi_config_args" in config.keys()
     elif experiment_type == "hyperparameter-search":
         assert "param_search_args" in config.keys()
     elif experiment_type == "population-based-training":
@@ -100,7 +101,7 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
     return DotMap(config, _dynamic=False)
 
 
-def load_json_config(config_fname: str) -> DotMap:
+def load_json_config(config_fname: str) -> Dict[str, Union[str, int, dict]]:
     """Load in a config JSON file and return as a dictionary"""
     json_config = commentjson.loads(open(config_fname, "r").read())
     dict_config = DotMap(json_config, _dynamic=False)
@@ -112,7 +113,7 @@ def load_json_config(config_fname: str) -> DotMap:
     return dict_config
 
 
-def load_pkl_object(filename: str):
+def load_pkl_object(filename: str) -> Any:
     """Helper to reload pickle objects."""
     with open(filename, "rb") as input:
         obj = pickle.load(input)
@@ -120,10 +121,10 @@ def load_pkl_object(filename: str):
 
 
 def load_result_logs(
-    experiment_dir: str,
+    experiment_dir: str = "experiments",
     meta_log_fname: str = "meta_log.hdf5",
     hyper_log_fname: str = "hyper_log.pkl",
-):
+) -> Tuple[MetaLog, HyperLog]:
     """Load both meta and hyper logs for an experiment."""
     meta_log = load_meta_log(os.path.join(experiment_dir, meta_log_fname))
     hyper_log = load_hyper_log(os.path.join(experiment_dir, hyper_log_fname))
@@ -134,7 +135,7 @@ def load_result_logs(
     return meta_log, hyper_log
 
 
-def load_run_log(experiment_dir: str, mean_seeds: bool = False):
+def load_run_log(experiment_dir: str, mean_seeds: bool = False) -> MetaLog:
     """Load a single .hdf5 log from <experiment_dir>/logs."""
     if experiment_dir.endswith(".hdf5"):
         log_path = experiment_dir

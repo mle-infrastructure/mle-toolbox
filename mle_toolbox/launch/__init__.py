@@ -1,6 +1,6 @@
-from .single_experiment import run_single_experiment
+from .single_config import run_single_config
 from .processing_job import run_processing_job
-from .multi_experiment import run_multiple_experiments
+from .multi_config import run_multiple_configs
 from .search_experiment import run_hyperparameter_search
 from .pbt_experiment import run_population_based_training
 from .prepare_experiment import (
@@ -11,9 +11,9 @@ from .prepare_experiment import (
 )
 
 __all__ = [
-    "run_single_experiment",
+    "run_single_config",
     "run_processing_job",
-    "run_multiple_experiments",
+    "run_multiple_configs",
     "run_hyperparameter_search",
     "run_population_based_training",
     "welcome_to_mle_toolbox",

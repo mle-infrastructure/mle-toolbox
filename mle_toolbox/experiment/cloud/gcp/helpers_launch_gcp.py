@@ -1,7 +1,7 @@
 import os
 import subprocess as sp
 from dotmap import DotMap
-from typing import Union
+from typing import Union, Tuple
 from .startup_script_gcp import (
     tmux_setup,
     clone_gcp_bucket_dir,
@@ -35,7 +35,7 @@ gpu_types = [
 ]
 
 
-base_gcp_args = DotMap(
+base_gcp_args = dict(
     {
         "ZONE": "us-west1-a",
         "ACCELERATOR_TYPE": None,
@@ -47,7 +47,7 @@ base_gcp_args = DotMap(
 )
 
 
-tpu_gcp_args = DotMap(
+tpu_gcp_args = dict(
     {
         "ZONE": "europe-west4-a",
         "ACCELERATOR_TYPE": "v3-8",
@@ -56,19 +56,20 @@ tpu_gcp_args = DotMap(
 )
 
 
-def gcp_get_submission_cmd(vm_name: str, job_args: DotMap, startup_fname: str) -> list:
+def gcp_get_submission_cmd(vm_name: str, job_args: DotMap,
+                           startup_fname: str) -> Tuple[list, dict]:
     """Construct gcloud VM instance creation cmd to execute via cmd line."""
-    if job_args.use_tpus:
+    if job_args['use_tpus']:
         job_gcp_args = tpu_gcp_args
     else:
         job_gcp_args = base_gcp_args
         # job_gcp_args.MACHINE_TYPE = cores_to_machine_type[
         #                                 job_args.num_logical_cores]
         if job_args.num_gpus > 0:
-            job_gcp_args.ACCELERATOR_TYPE = "nvidia-tesla-v100"
-            job_gcp_args.ACCELERATOR_COUNT = job_args.num_gpus
+            job_gcp_args['ACCELERATOR_TYPE'] = "nvidia-tesla-v100"
+            job_gcp_args['ACCELERATOR_COUNT'] = job_args['num_gpus']
 
-    if job_args.use_tpus:
+    if job_args['use_tpus']:
         # TPU VM Alpha gcloud create CMD
         gcp_launch_cmd = [
             "gcloud",
@@ -79,9 +80,9 @@ def gcp_get_submission_cmd(vm_name: str, job_args: DotMap, startup_fname: str) -
             "create",
             f"{vm_name}",
             "--preemptible",
-            f"--zone={job_gcp_args.ZONE}",
-            f"--accelerator-type={job_gcp_args.ACCELERATOR_TYPE}",
-            f"--version={job_gcp_args.RUNTIME_VERSION}",
+            f"--zone={job_gcp_args['ZONE']}",
+            f"--accelerator-type={job_gcp_args['ACCELERATOR_TYPE']}",
+            f"--version={job_gcp_args['RUNTIME_VERSION']}",
             f"--metadata-from-file=startup-script={startup_fname}",
             "--no-user-output-enabled",
             "--verbosity",
@@ -96,12 +97,12 @@ def gcp_get_submission_cmd(vm_name: str, job_args: DotMap, startup_fname: str) -
             "create",
             f"{vm_name}",
             "--preemptible",
-            f"--zone={job_gcp_args.ZONE}",
-            f"--custom-cpu={2*job_args.num_logical_cores}",
-            f"--custom-memory={2048*job_args.num_logical_cores}MB",
+            f"--zone={job_gcp_args['ZONE']}",
+            f"--custom-cpu={2*job_args['num_logical_cores']}",
+            f"--custom-memory={2048*job_args['num_logical_cores']}MB",
             "--custom-vm-type=n1",
-            f"--image={job_gcp_args.IMAGE_NAME}",
-            f"--image-project={job_gcp_args.IMAGE_PROJECT}",
+            f"--image={job_gcp_args['IMAGE_NAME']}",
+            f"--image-project={job_gcp_args['IMAGE_PROJECT']}",
             f"--metadata-from-file=startup-script={startup_fname}",
             "--scopes=cloud-platform,storage-full",
             "--boot-disk-size=128GB",
@@ -113,14 +114,14 @@ def gcp_get_submission_cmd(vm_name: str, job_args: DotMap, startup_fname: str) -
 
         # Attach GPUs to Job if desired - make sure to install nvidia driver
         if (
-            job_gcp_args.ACCELERATOR_COUNT > 0
-            and job_gcp_args.ACCELERATOR_TYPE is not None
+            job_gcp_args['ACCELERATOR_COUNT'] > 0
+            and job_gcp_args['ACCELERATOR_TYPE'] is not None
         ):
             gcp_launch_cmd += [
                 "--metadata=install-nvidia-driver=True"
                 "--maintenance-policy=TERMINATE",
-                f"--accelerator=type={job_gcp_args.ACCELERATOR_TYPE},"
-                + f"count={job_gcp_args.ACCELERATOR_COUNT}",
+                f"--accelerator=type={job_gcp_args['ACCELERATOR_TYPE']},"
+                f"count={job_gcp_args['ACCELERATOR_COUNT']}",
             ]
 
     return gcp_launch_cmd, job_gcp_args
@@ -137,7 +138,7 @@ def gcp_generate_startup_file(
     extra_install_fname: Union[None, str],
     use_tpus: bool = False,
     use_cuda: bool = False,
-) -> str:
+) -> None:
     """Generate bash script template to launch at VM startup."""
     # Build the start job execution script
     # 1. Connecting to tmux via: gcloud compute ssh $VM -- /sudo_tmux_a.sh
@@ -197,7 +198,7 @@ def gcp_generate_startup_file(
         f.write(startup_script_content)
 
 
-def gcp_delete_vm_instance(vm_name: str, use_tpus: bool = False):
+def gcp_delete_vm_instance(vm_name: str, use_tpus: bool = False) -> None:
     """Quitely delete job by its name + zone. TODO: Add robustness check."""
     vm_zone = "europe-west4-a" if use_tpus else "us-west1-a"
     if not use_tpus:

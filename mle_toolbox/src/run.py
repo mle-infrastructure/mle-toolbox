@@ -32,8 +32,8 @@ from mle_toolbox.remote.ssh_execute import (
 
 # Import different experiment executers & setup tools (log, config, etc.)
 from mle_toolbox.launch import (
-    run_single_experiment,
-    run_multiple_experiments,
+    run_single_config,
+    run_multiple_configs,
     run_processing_job,
     welcome_to_mle_toolbox,
     prepare_logger,
@@ -76,7 +76,8 @@ def run(cmd_args):
 
     # 2. Set up logging config for experiment instance
     logger = prepare_logger(
-        job_config.meta_job_args.experiment_dir, job_config.meta_job_args.debug_mode
+        job_config.meta_job_args.experiment_dir,
+        job_config.meta_job_args.debug_mode
     )
     logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
 
@@ -201,17 +202,19 @@ def run(cmd_args):
     # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
     # (a) Experiment: Run a single experiment
-    if job_config.meta_job_args["job_type"] == "single-experiment":
-        run_single_experiment(
-            resource_to_run, job_config.meta_job_args, job_config.single_job_args
+    if job_config.meta_job_args["job_type"] == "single-config":
+        run_single_config(
+            resource_to_run,
+            job_config.meta_job_args,
+            job_config.single_job_args
         )
     # (b) Experiment: Run training over different config files/seeds
-    elif job_config.meta_job_args["job_type"] == "multiple-experiments":
-        run_multiple_experiments(
+    elif job_config.meta_job_args["job_type"] == "multiple-configs":
+        run_multiple_configs(
             resource_to_run,
             job_config.meta_job_args,
             job_config.single_job_args,
-            job_config.multi_experiment_args,
+            job_config.multi_config_args,
         )
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["job_type"] == "hyperparameter-search":

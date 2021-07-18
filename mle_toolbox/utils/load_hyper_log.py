@@ -153,7 +153,7 @@ class HyperLog(object):
         return self.hyper_log[item]
 
 
-def load_hyper_log(hyper_log_fpath: str):
+def load_hyper_log(hyper_log_fpath: str) -> HyperLog:
     """Load & transform the dictionary log into a pandas df"""
     # Load the log from the pkl file
     hyper_log = load_pkl_hyper_log(hyper_log_fpath)

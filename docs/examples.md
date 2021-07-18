@@ -10,6 +10,9 @@
 
 * :page_facing_up: [Multi Bash](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
 
+* :page_facing_up: [MNIST PBT](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist) - Population-Based Training for a MNIST MLP network.
+
+
 # Notebooks :pencil:
 
 - :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).

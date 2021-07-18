@@ -5,7 +5,7 @@ import math
 import time
 import shutil
 import logging
-from typing import Union
+from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
@@ -21,13 +21,13 @@ class PBT_Manager(object):
         self,
         pbt_log: PBT_Logger,
         resource_to_run: str,
-        job_arguments: dict,
+        job_arguments: Dict[str, Union[str, int]],
         config_fname: str,
         job_fname: str,
         experiment_dir: str,
-        pbt_logging: dict,
-        pbt_resources: dict,
-        pbt_config: dict,
+        pbt_logging: Dict[str, Union[str, int]],
+        pbt_resources: Dict[str, int],
+        pbt_config: Dict[str, Union[str, int]],
     ):
         """Manger orchestrating PBT experiment"""
         # Set up the PBT search run

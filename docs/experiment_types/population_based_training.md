@@ -1,11 +1,8 @@
-# Meta Arguments: What job? .py file? Base config? Where to store?
-meta_job_args:
-    project_name: "examples"
-    job_type: "population-based-training"
-    base_train_fname: "pbt_mnist/run_mnist_train.py"
-    base_train_config: "pbt_mnist/mnist_config.json"
-    experiment_dir: "experiments/pbt_mnist"
+# Population-Based Training
 
+*Note*: This page and content is still work in progress!
+
+```yaml
 # Parameters specific to the population-based training
 pbt_args:
     pbt_logging:
@@ -26,8 +23,4 @@ pbt_args:
             strategy: "perturb"
         selection:
             strategy: "truncation"
-
-# Parameters specific to an individual job
-single_job_args:
-    job_name: "cnn"
-    num_logical_cores: 4
+```

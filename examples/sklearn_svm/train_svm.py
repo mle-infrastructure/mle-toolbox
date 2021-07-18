@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from mle_toolbox import MLExperiment
 
 
-def main(mle):
+def main(mle: MLExperiment) -> None:
     """ Train and log a simple SVM classifier. """
     # Load downsampled images and flatten them
     digits = datasets.load_digits()
