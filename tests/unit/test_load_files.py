@@ -39,6 +39,7 @@ class TestFileLoading(unittest.TestCase):
     def test_load_mle_config(self):
         """ Assert correct loading of mle config .toml file. """
         mle_config = load_mle_toolbox_config(mle_config_fname)
+        assert type(mle_config) == DotMap
 
     def test_load_result_logs(self):
         """ Assert correct loading of hyper/meta log files. """

@@ -58,7 +58,7 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
                 mle_config[resource].credentials.user_name = dec_user
                 mle_config[resource].credentials.password = dec_pass
 
-        return mle_config
+    return mle_config
 
 
 def load_yaml_config(cmd_args: dict) -> DotMap:
