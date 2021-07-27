@@ -9,6 +9,7 @@ install-dev:
 	python -m pip install --upgrade pip
 	pip install virtualenv
 	virtualenv venv-mle-toolbox
+	sudo -s
 	source venv-mle-toolbox/bin/activate
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
