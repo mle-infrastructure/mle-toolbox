@@ -12,7 +12,6 @@ from .cloud.gcp.helpers_launch_gcp import (
     gcp_delete_vm_instance,
 )
 from mle_toolbox import mle_config
-from mle_toolbox.remote.gcloud_transfer import download_gcs_dir
 
 
 def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
@@ -150,6 +149,8 @@ def gcp_clean_up(vm_name: str, job_arguments: dict, experiment_dir: str):
     # delete_gcs_dir(gcs_path=mle_config.gcp.code_dir)
 
     # Download results back to local directory
+    from mle_toolbox.remote.gcloud_transfer import download_gcs_dir
+
     download_gcs_dir(
         gcs_path=os.path.join(mle_config.gcp.results_dir, experiment_dir),
         local_path="./" + experiment_dir,

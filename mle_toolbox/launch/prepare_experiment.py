@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 from datetime import datetime
-from typing import Union
 from .. import __version__, mle_config
 from ..protocol import protocol_summary, load_local_protocol_db
 from ..remote.gcloud_transfer import get_gcloud_db
@@ -66,7 +65,7 @@ def prepare_logger() -> logging.Logger:
     return logger
 
 
-def check_job_config(job_config: dict):
+def check_job_config(job_config: dict) -> None:
     """Check if config has all necessary ingredients for job to run."""
     # Compile list of required arguments for specific job types
     necessary_ingredients = ["meta_job_args", "single_job_args"]
@@ -80,7 +79,7 @@ def check_job_config(job_config: dict):
     # Check if ingredients are in config keys
     for nec_ing in necessary_ingredients:
         if nec_ing not in job_config.keys():
-            raise ValueError("Provide additional input: {}".format(nec_ing))
+            raise ValueError(f"Provide additional input: {nec_ing}")
 
     # TODO: Make this more robust by asserting existence of required keys
     # Differentiate between required and not - check types and file existence

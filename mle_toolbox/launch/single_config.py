@@ -1,9 +1,7 @@
 from ..experiment import Experiment
 
 
-def run_single_config(
-    resource_to_run: str, meta_job_args: dict, single_job_args: dict
-):
+def run_single_config(resource_to_run: str, meta_job_args: dict, single_job_args: dict):
     """Run a single experiment locally/remote."""
     # 1. Instantiate the experiment class
     experiment = Experiment(

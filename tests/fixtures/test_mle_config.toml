@@ -15,7 +15,7 @@ use_gcloud_protocol_sync = true
 use_gcloud_results_storage = true
 
 # Storing of encrypted ssh credentials
-use_credential_encryption = true
+use_credential_encryption = false
 
 # Whether to use conda or venv for experiment virtual environment
 use_conda_virtual_env = true

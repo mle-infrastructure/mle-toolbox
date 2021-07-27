@@ -35,13 +35,18 @@ def local_submit_conda_job(filename: str, cmd_line_arguments: str, job_arguments
             " by mle-toolbox. Only base .py, .sh experiments"
             " are so far implemented. Please open an issue."
         )
-    env_name = job_arguments["env_name"]
-    current_env = os.environ["CONDA_PREFIX"]
-    if current_env != env_name:
-        # activate the correct conda environment
-        cmd = f"source $(conda info --base)/etc/profile.d/conda.sh \
-                && conda activate {env_name} \
-                && {cmd}"
+
+    try:
+        env_name = job_arguments["env_name"]
+        current_env = os.environ["CONDA_PREFIX"]
+        if current_env != env_name:
+            # activate the correct conda environment
+            cmd = f"source $(conda info --base)/etc/profile.d/conda.sh \
+                    && conda activate {env_name} \
+                    && {cmd}"
+    except Exception as e:
+        print(e)
+
     proc = submit_subprocess(cmd)
     return proc
 
@@ -56,7 +61,7 @@ def local_submit_venv_job(filename: str, cmd_line_arguments: str, job_arguments:
     return proc
 
 
-def submit_subprocess(cmd: str):
+def submit_subprocess(cmd: str) -> sp.Popen:
     """Submit a subprocess & return the process."""
     while True:
         try:

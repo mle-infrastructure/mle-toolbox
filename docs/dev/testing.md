@@ -1,4 +1,4 @@
-# Running Tests
+# Running The Test Suite
 
 ## `flake8` Linting
 
@@ -25,11 +25,15 @@ black mle_toolbox/. --verbose
 
 ### Unit Tests
 
-- [ ] File loading
-    - [ ] `.yaml` experiment configuration
-    - [ ] `.json` run configuration
-    - [ ] `meta_log.hdf5`
-    - [ ] `hyper_log.pkl`
+```
+pytest -vv tests/unit
+```
+
+- [ ] File loading: `tests/unit/test_load_files.py`
+    - [x] `.yaml` experiment configuration
+    - [x] `.json` run configuration
+    - [x] `meta_log.hdf5`
+    - [x] `hyper_log.pkl`
     - [ ] Trained models
         - [ ] `.pkl`-based (sklearn)
         - [ ] `.npy`-based (JAX)
@@ -59,8 +63,12 @@ black mle_toolbox/. --verbose
 
 ### Integration Tests
 
+```
+pytest -vv tests/integration
+```
+
 - [ ] Experiment types running on different resources
-    - [ ] Single experiment
+    - [ ] Single configuration experiment: `tests/integration/test_single_config.py`
     - [ ] Random search experiment
     - [ ] Grid search experiment
     - [ ] SMBO search experiment
@@ -78,3 +86,5 @@ black mle_toolbox/. --verbose
 - [ ] Toolbox initialization
     - [ ] Config file changing
     - [ ] Encryption ssh credentials
+
+- [ ] GCS integration

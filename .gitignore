@@ -1,5 +1,3 @@
-minimal_pbt.ipynb
-
 *.gif
 *.zip
 mle_config.toml
@@ -12,7 +10,6 @@ __pycache__
 data/
 *.key
 tboards/
-*.hdf5
 *.ckpt
 .pytest_cache/
 experiments/

@@ -201,9 +201,7 @@ def run(cmd_args):
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["experiment_type"] == "single-config":
         run_single_config(
-            resource_to_run,
-            job_config.meta_job_args,
-            job_config.single_job_args
+            resource_to_run, job_config.meta_job_args, job_config.single_job_args
         )
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":

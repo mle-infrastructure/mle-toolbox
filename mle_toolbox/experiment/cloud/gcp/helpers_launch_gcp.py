@@ -56,20 +56,21 @@ tpu_gcp_args = dict(
 )
 
 
-def gcp_get_submission_cmd(vm_name: str, job_args: DotMap,
-                           startup_fname: str) -> Tuple[list, dict]:
+def gcp_get_submission_cmd(
+    vm_name: str, job_args: DotMap, startup_fname: str
+) -> Tuple[list, dict]:
     """Construct gcloud VM instance creation cmd to execute via cmd line."""
-    if job_args['use_tpus']:
+    if job_args["use_tpus"]:
         job_gcp_args = tpu_gcp_args
     else:
         job_gcp_args = base_gcp_args
         # job_gcp_args.MACHINE_TYPE = cores_to_machine_type[
         #                                 job_args.num_logical_cores]
         if job_args.num_gpus > 0:
-            job_gcp_args['ACCELERATOR_TYPE'] = "nvidia-tesla-v100"
-            job_gcp_args['ACCELERATOR_COUNT'] = job_args['num_gpus']
+            job_gcp_args["ACCELERATOR_TYPE"] = "nvidia-tesla-v100"
+            job_gcp_args["ACCELERATOR_COUNT"] = job_args["num_gpus"]
 
-    if job_args['use_tpus']:
+    if job_args["use_tpus"]:
         # TPU VM Alpha gcloud create CMD
         gcp_launch_cmd = [
             "gcloud",
@@ -114,8 +115,8 @@ def gcp_get_submission_cmd(vm_name: str, job_args: DotMap,
 
         # Attach GPUs to Job if desired - make sure to install nvidia driver
         if (
-            job_gcp_args['ACCELERATOR_COUNT'] > 0
-            and job_gcp_args['ACCELERATOR_TYPE'] is not None
+            job_gcp_args["ACCELERATOR_COUNT"] > 0
+            and job_gcp_args["ACCELERATOR_TYPE"] is not None
         ):
             gcp_launch_cmd += [
                 "--metadata=install-nvidia-driver=True"

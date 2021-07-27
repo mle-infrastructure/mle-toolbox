@@ -10,12 +10,12 @@ from mle_toolbox.utils import load_meta_log
 
 
 cmd_args_proxy = DotMap({
-                "config_fname": "tests/fixtures/test_yaml_config.yaml",
-                "base_train_fname": "tests/fixtures/test_python_script.py",
-                "base_train_config": "tests/fixtures/test_json_config.json",
-                "experiment_dir": "experiments/"})
+    "config_fname": "tests/fixtures/test_yaml_config.yaml",
+    "base_train_fname": "tests/fixtures/test_python_script.py",
+    "base_train_config": "tests/fixtures/test_json_config.json",
+    "experiment_dir": "experiments/"})
 
-mle_config_fname = "tests/test_mle_config.toml"
+mle_config_fname = "tests/fixtures/test_mle_config.toml"
 meta_log_fname = "test_meta_log.hdf5"
 hyper_log_fname = "test_hyper_log.pkl"
 

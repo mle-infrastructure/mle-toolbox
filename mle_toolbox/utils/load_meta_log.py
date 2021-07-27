@@ -1,13 +1,14 @@
 import numpy as np
+import numpy.typing as npt
 import os
 import h5py
 from dotmap import DotMap
-from typing import Union, List
-import matplotlib.pyplot as plt
+from typing import Union, List, Tuple
 
 
 class MetaLog(object):
     """Class wrapper for meta_log dictionary w. additional functionality."""
+
     meta_vars: List[str]
     stats_vars: List[str]
     time_vars: List[str]
@@ -249,7 +250,7 @@ def aggregate_single_eval(
 
 def aggregate_batch_evals(
     result_dict: dict, unique_evals: list, evals_and_seeds: list, all_runs: list
-):
+) -> dict:
     """Mean over seeds for all batches and evals."""
     # Loop over all evals (e.g. b_1_eval_0) and merge + aggregate data
     new_results_dict = {}
@@ -260,7 +261,7 @@ def aggregate_batch_evals(
     return new_results_dict
 
 
-def tolerant_mean(arrs: list):
+def tolerant_mean(arrs: List[npt.ArrayLike]) -> Tuple[npt.ArrayLike]:
     """Helper function for case where data to mean has different lengths."""
     lens = [len(i) for i in arrs]
     if len(arrs[0].shape) == 1:
@@ -276,7 +277,7 @@ def tolerant_mean(arrs: list):
     return arr.mean(axis=-1), arr.std(axis=-1)
 
 
-def tolerant_median(arrs: list):
+def tolerant_median(arrs: List[npt.ArrayLike]) -> Tuple[npt.ArrayLike]:
     """Helper function for case data to median has different lengths."""
     lens = [len(i) for i in arrs]
     if len(arrs[0].shape) == 1:
@@ -298,7 +299,7 @@ def tolerant_median(arrs: list):
     )
 
 
-def subselect_meta_log(meta_log: DotMap, run_ids: List[str]):
+def subselect_meta_log(meta_log: DotMap, run_ids: List[str]) -> DotMap:
     """Subselect the meta log dict based on a list of run ids."""
     sub_log = DotMap()
     for run_id in run_ids:

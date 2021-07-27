@@ -20,9 +20,6 @@ from .manage_job_gcp import (
 # Import cluster credentials - SGE or Slurm scheduling system
 from mle_toolbox import mle_config
 
-# Import utility to copy local code directory to GCS bucket
-from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
-
 # Overview of implemented remote resources in addition to local processes
 cluster_resources = ["sge-cluster", "slurm-cluster"]
 cloud_resources = ["gcp-cloud"]
@@ -71,11 +68,11 @@ class Experiment(object):
         resource_to_run: str,
         job_filename: str,
         config_filename: Union[None, str],
-        job_arguments: Union[None, dict],
-        experiment_dir: str,
+        job_arguments: dict = {},
+        experiment_dir: str = "experiments/",
         cmd_line_input: Union[None, dict] = None,
         extra_cmd_line_input: Union[None, dict] = None,
-        logger_level: str = logging.WARNING,
+        logger_level: int = logging.WARNING,
     ):
         # Init experiment class with relevant info
         self.resource_to_run = resource_to_run  # compute resource for job
@@ -113,7 +110,7 @@ class Experiment(object):
             full_job_arguments = local_check_job_args(job_arguments)
         return full_job_arguments
 
-    def run(self):
+    def run(self) -> bool:
         """Schedule experiment, monitor and clean up afterwards."""
         # Schedule job, create success boolean and job identifier
         job_id = self.schedule()
@@ -123,7 +120,7 @@ class Experiment(object):
         self.clean_up(job_id)
         return status_out
 
-    def schedule(self):
+    def schedule(self) -> str:
         """Schedule job on cluster (sge/slurm), cloud (gcp) or locally."""
         if self.resource_to_run in cluster_resources:
             job_id = self.schedule_cluster()
@@ -164,7 +161,7 @@ class Experiment(object):
         # Return sge/slurm - job_id (qstat/squeue), gcp - vm_name, local - proc
         return job_id
 
-    def monitor(self, job_id: str, continuous: bool = True):
+    def monitor(self, job_id: str, continuous: bool = True) -> bool:
         """
         Monitor on cluster (sge/slurm), cloud (gcp) or locally via id.
         If 'continuous' bool is true, then monitor until experiment status 0.
@@ -221,7 +218,7 @@ class Experiment(object):
         self.job_status = 1
         return proc
 
-    def schedule_cluster(self):
+    def schedule_cluster(self) -> int:
         """Schedules experiment to run remotely on SGE or Slurm clusters."""
         if self.resource_to_run == "sge-cluster":
             job_id = sge_submit_job(
@@ -237,9 +234,12 @@ class Experiment(object):
             self.job_status = 1
         return job_id
 
-    def schedule_cloud(self):
+    def schedule_cloud(self) -> int:
         """Schedules experiment to run remotely on GCP cloud."""
         if self.resource_to_run == "gcp-cloud":
+            # Import utility to copy local code directory to GCS bucket
+            from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
+
             # Send config file to remote machine - independent of code base!
             upload_local_dir_to_gcs(
                 local_path=self.config_filename,
@@ -260,7 +260,7 @@ class Experiment(object):
             self.job_status = 1
         return job_id
 
-    def monitor_local(self, proc, continuous: bool = True):
+    def monitor_local(self, proc, continuous: bool = True) -> int:
         """Monitors experiment locally on your machine."""
         # Poll status of local process & change status when done
         if continuous:
@@ -288,7 +288,7 @@ class Experiment(object):
             else:
                 return 0
 
-    def monitor_cluster(self, job_id: str, continuous: bool = True):
+    def monitor_cluster(self, job_id: str, continuous: bool = True) -> int:
         """Monitors experiment remotely on SGE or Slurm clusters."""
         if continuous:
             while self.job_status:
@@ -304,7 +304,7 @@ class Experiment(object):
             elif self.resource_to_run == "slurm-cluster":
                 return slurm_monitor_job(job_id)
 
-    def monitor_cloud(self, job_id: str, continuous: bool = True):
+    def monitor_cloud(self, job_id: str, continuous: bool = True) -> int:
         """Monitors experiment remotely on GCP cloud."""
         if continuous:
             while self.job_status:
@@ -316,21 +316,19 @@ class Experiment(object):
             if self.resource_to_run == "gcp-cloud":
                 return gcp_monitor_job(job_id, self.job_arguments)
 
-    def clean_up(self, job_id: str):
+    def clean_up(self, job_id: str) -> None:
         """Remove error and log files at end of training."""
-        # Clean up if not development!
-        if not mle_config.general.development:
-            for filename in glob.glob(self.job_arguments["err_file"] + "*"):
-                try:
-                    os.remove(filename)
-                except Exception:
-                    pass
-            for filename in glob.glob(self.job_arguments["log_file"] + "*"):
-                try:
-                    os.remove(filename)
-                except Exception:
-                    pass
-            self.logger.info("Cleaned up log, error, results files")
+        for filename in glob.glob(self.job_arguments["err_file"] + "*"):
+            try:
+                os.remove(filename)
+            except Exception:
+                pass
+        for filename in glob.glob(self.job_arguments["log_file"] + "*"):
+            try:
+                os.remove(filename)
+            except Exception:
+                pass
+        self.logger.info("Cleaned up log, error, results files")
 
         # Delete VM instance and code directory stored in data bucket
         if self.resource_to_run == "gcp-cloud":
@@ -359,6 +357,7 @@ class Experiment(object):
     ) -> str:
         """Generate extra cmd line args for .py -> e.g. for postproc"""
         full_cmd_line_args = (cmd_line_args + ".")[:-1]
-        for k, v in extra_cmd_line_input.items():
-            full_cmd_line_args += " -" + k + " " + str(v)
+        if extra_cmd_line_input is not None:
+            for k, v in extra_cmd_line_input.items():
+                full_cmd_line_args += " -" + k + " " + str(v)
         return full_cmd_line_args

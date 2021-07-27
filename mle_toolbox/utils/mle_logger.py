@@ -5,7 +5,7 @@ import shutil
 import time
 import datetime
 import h5py
-from typing import Union, List
+from typing import Union, List, Dict
 from .helpers import save_pkl_object
 
 
@@ -43,7 +43,7 @@ class MLE_Logger(object):
         what_to_print: List[str],
         config_fname: str,
         experiment_dir: str = "/",
-        seed_id: Union[str, None] = None,
+        seed_id: str = "no_seed",
         overwrite_experiment_dir: bool = False,
         use_tboard: bool = False,
         tboard_fname: Union[str, None] = None,
@@ -60,7 +60,7 @@ class MLE_Logger(object):
         self.log_save_counter = 0
         self.model_save_counter = 0
         self.fig_save_counter = 0
-        self.fig_storage_paths = []
+        self.fig_storage_paths: List[str] = []
         self.print_every_k_updates = print_every_k_updates
 
         # MODEL LOGGING SETUP: Type of model/every k-th ckpt/top k ckpt
@@ -73,10 +73,10 @@ class MLE_Logger(object):
 
         # Initialize lists for top k scores and to track storage times
         if self.save_every_k_ckpt is not None:
-            self.every_k_storage_time = []
+            self.every_k_storage_time: List[int] = []
         if self.save_top_k_ckpt is not None:
-            self.top_k_performance = []
-            self.top_k_storage_time = []
+            self.top_k_performance: List[float] = []
+            self.top_k_storage_time: List[int] = []
 
         # Set up the logging directories - save the timestamped config file
         self.setup_experiment_dir(
@@ -105,7 +105,7 @@ class MLE_Logger(object):
         # Start stop-watch/clock of experiment
         self.start_time = time.time()
 
-    def extend_tracking(self, add_track_vars: List[str]):
+    def extend_tracking(self, add_track_vars: List[str]) -> None:
         """Add string names of variables to track."""
         assert self.log_update_counter == 0
         self.what_to_track += add_track_vars
@@ -114,12 +114,12 @@ class MLE_Logger(object):
     def setup_experiment_dir(
         self,
         base_exp_dir: str,
-        config_fname: Union[str, None],
-        seed_id: Union[str, None],
+        config_fname: str,
+        seed_id: str,
         use_tboard: bool = False,
         tboard_fname: Union[str, None] = None,
         overwrite_experiment_dir: bool = False,
-    ):
+    ) -> None:
         """Setup a directory for experiment & copy over config."""
         # Get timestamp of experiment & create new directories
         timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
@@ -128,42 +128,18 @@ class MLE_Logger(object):
         self.experiment_dir = os.path.join(base_exp_dir, timestr + base_str + "/")
 
         # Create a new empty directory for the experiment
-        if not os.path.exists(self.experiment_dir):
-            try:
-                os.makedirs(self.experiment_dir)
-            except Exception:
-                pass
-
-        if not os.path.exists(os.path.join(self.experiment_dir, "logs/")):
-            try:
-                os.makedirs(os.path.join(self.experiment_dir, "logs/"))
-            except Exception:
-                pass
-
-        if not os.path.exists(os.path.join(self.experiment_dir, "models/")):
-            try:
-                os.makedirs(os.path.join(self.experiment_dir, "models/"))
-            except Exception:
-                pass
+        os.makedirs(self.experiment_dir, exist_ok=True)
+        os.makedirs(os.path.join(self.experiment_dir, "logs/"), exist_ok=True)
+        os.makedirs(os.path.join(self.experiment_dir, "models/"), exist_ok=True)
 
         # Create separate sub-dirs for checkpoints & final trained model
-        if not os.path.exists(os.path.join(self.experiment_dir, "models/final/")):
-            try:
-                os.mkdir(os.path.join(self.experiment_dir, "models/final/"))
-            except Exception:
-                pass
+        os.makedirs(os.path.join(self.experiment_dir, "models/final/"), exist_ok=True)
         if self.save_every_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/every_k/")):
-                try:
-                    os.mkdir(os.path.join(self.experiment_dir, "models/every_k/"))
-                except Exception:
-                    pass
+            os.makedirs(os.path.join(self.experiment_dir, "models/every_k/"),
+                        exist_ok=True)
         if self.save_top_k_ckpt is not None:
-            if not os.path.exists(os.path.join(self.experiment_dir, "models/top_k/")):
-                try:
-                    os.mkdir(os.path.join(self.experiment_dir, "models/top_k/"))
-                except Exception:
-                    pass
+            os.makedirs(os.path.join(self.experiment_dir, "models/top_k/"),
+                        exist_ok=True)
 
         exp_time_base = self.experiment_dir + timestr + base_str
         self.config_copy = exp_time_base + ".json"
@@ -180,7 +156,7 @@ class MLE_Logger(object):
             self.experiment_dir + "models/final/" + timestr + base_str + "_" + seed_id
         )
         if self.save_every_k_ckpt is not None:
-            self.every_k_ckpt_list = []
+            self.every_k_ckpt_list: List[str] = []
             self.every_k_model_save_fname = (
                 self.experiment_dir
                 + "models/every_k/"
@@ -191,7 +167,7 @@ class MLE_Logger(object):
                 + "_k_"
             )
         if self.save_top_k_ckpt is not None:
-            self.top_k_ckpt_list = []
+            self.top_k_ckpt_list: List[str] = []
             self.top_k_model_save_fname = (
                 self.experiment_dir
                 + "models/top_k/"
@@ -234,8 +210,8 @@ class MLE_Logger(object):
 
     def update_log(
         self,
-        clock_tick: dict,
-        stats_tick: dict,
+        clock_tick: Dict[str, int],
+        stats_tick: Dict[str, float],
         model=None,
         plot_to_tboard=None,
         save=False,
@@ -527,7 +503,7 @@ class MLE_Logger(object):
                 self.model_save_counter += 1
                 time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[
                     -1
-                ]  # noqa: E501
+                ]
                 self.every_k_storage_time.append(time)
                 self.every_k_ckpt_list.append(ckpt_path)
 
@@ -634,7 +610,7 @@ class MLE_Logger(object):
             figures_dir,
             "fig_"
             + str(self.fig_save_counter)
-            + "seed_"
+            + "_"
             + str(self.seed_id)
             + fname_ext,
         )

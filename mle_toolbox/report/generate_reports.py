@@ -30,9 +30,13 @@ class ReportGenerator:
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
 
-    def __init__(self, e_id, db,
-                 logger: Union[None, logging.Logger] = None,
-                 pdf_gen: bool = False):
+    def __init__(
+        self,
+        e_id,
+        db,
+        logger: Union[None, logging.Logger] = None,
+        pdf_gen: bool = False,
+    ):
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db

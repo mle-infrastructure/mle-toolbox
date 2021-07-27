@@ -7,6 +7,9 @@ install:
 install-dev:
 	# Install requirements for testing/development
 	python -m pip install --upgrade pip
+	pip install virtualenv
+	virtualenv venv-mle-toolbox
+	source venv-mle-toolbox/bin/activate
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
 	pip install pytest pytest-timeout flake8 black
@@ -36,12 +39,12 @@ type-check:
 	# mypy mle_toolbox/.
 
 test-unit:
-	# Run unit tests
+	# Run unit tests: File loading, job template generation
 	pytest -vv --durations=0 ./tests/unit
 
 test-integration:
-	# Run integration tests
-	# pytest -vv --durations=0 ./tests/integration
+	# Run integration tests: Different experiment types, report generation
+	pytest -vv --durations=0 ./tests/integration/test_single_config.py
 
 deploy-docs:
 	# Deploy documentation homepage: https://roberttlange.github.io/mle-toolbox/
@@ -52,7 +55,7 @@ deploy-docs:
 	mkdocs gh-deploy --force
 
 pypi-publish:
-	# Publish package in PyPi repositories
+	# Publish package in PyPi repositories - triggered for new release
 	python -m pip install --upgrade pip
 	pip install setuptools wheel twine
 	python setup.py sdist bdist_wheel
