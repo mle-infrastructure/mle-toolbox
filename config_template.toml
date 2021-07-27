@@ -19,6 +19,7 @@ use_credential_encryption = true
 
 # Whether to use conda or venv for experiment virtual environment
 use_conda_virtual_env = true
+use_venv_virtual_env = false
 
 # Set remote experiment submission environment name
 remote_env_name = 'mle-toolbox'

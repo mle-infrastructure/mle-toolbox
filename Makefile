@@ -7,13 +7,9 @@ install:
 install-dev:
 	# Install requirements for testing/development
 	python -m pip install --upgrade pip
-	pip install virtualenv
-	virtualenv venv-mle-toolbox
-	sudo -s
-	source venv-mle-toolbox/bin/activate
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
-	pip install pytest pytest-timeout flake8 black
+	pip install pytest pytest-timeout flake8 black pydocstyle
 	pip install -e .
 
 clean:
@@ -34,6 +30,10 @@ lint:
 	flake8 ./mle_toolbox --count --select=E9,F63,F7,F82 --show-source --statistics
 	# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 	flake8 ./mle_toolbox --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+docstrings:
+	# Check compliance with Python docstring conventions - PEP257.
+	pydocstyle
 
 type-check:
 	# Run type-checking

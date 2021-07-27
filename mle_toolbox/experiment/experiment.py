@@ -5,6 +5,7 @@ import logging
 from typing import Union
 from .manage_job_local import (
     local_check_job_args,
+    local_submit_job,
     local_submit_venv_job,
     local_submit_conda_job,
 )
@@ -211,9 +212,13 @@ class Experiment(object):
             proc = local_submit_conda_job(
                 self.job_filename, self.cmd_line_args, self.job_arguments
             )
-        else:
+        elif mle_config.general.use_venv_virtual_env:
             proc = local_submit_venv_job(
                 self.job_filename, self.cmd_line_args, self.job_arguments
+            )
+        else:
+            proc = local_submit_job(
+                self.job_filename, self.cmd_line_args
             )
         self.job_status = 1
         return proc

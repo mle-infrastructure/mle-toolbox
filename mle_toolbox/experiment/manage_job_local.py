@@ -61,6 +61,13 @@ def local_submit_venv_job(filename: str, cmd_line_arguments: str, job_arguments:
     return proc
 
 
+def local_submit_job(filename: str, cmd_line_arguments: str):
+    """Create a local job & submit it based on provided file to execute."""
+    cmd = f"python {filename} {cmd_line_arguments}"
+    proc = submit_subprocess(cmd)
+    return proc
+
+
 def submit_subprocess(cmd: str) -> sp.Popen:
     """Submit a subprocess & return the process."""
     while True:
