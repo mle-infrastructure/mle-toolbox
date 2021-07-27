@@ -4,13 +4,15 @@ If you want to use the toolbox on your local machine follow the instructions loc
 
 ## PyPI Installation
 
+The latest release of the toolbox can be installed via [PyPi](https://pypi.org/project/mle-toolbox/):
+
 ```
 pip install mle-toolbox
 ```
 
 ## GitHub Installation
 
-Alternatively, you can clone this repository and afterwards 'manually' install it:
+If you want the most recent version with all pre-release commits, you can clone the repository and afterwards 'manually' install it:
 
 ```
 git clone https://github.com/RobertTLange/mle-toolbox.git
@@ -18,22 +20,30 @@ cd mle-toolbox
 pip install -e .
 ```
 
-By default this will only install the minimal dependencies (not including specialized packages such as `scikit-optimize`, `statsmodels`, etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/).
+By default this will only install the minimal dependencies (not including special packages for hyperparameter optimization such as `scikit-optimize`, `statsmodels`, etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/):
 
-## TODO
+```
+pip install -r requirements/requirements-test.txt
+```
 
-### Conda Installation
+## :fire: Future Support
+
+In the future I plan to add an installation via `conda-forge` and Docker/Singularity images for the `mle-toolbox`.
+
+#### Conda Installation
 
 ```
 conda install mle-toolbox
 ```
 
-### Containerization
-
-#### Docker
+#### Docker Image
 
 ```
 docker run...
 ```
 
-#### Singularity
+#### Singularity Image
+
+```
+singularity pull docker://RobertTLange/...
+```

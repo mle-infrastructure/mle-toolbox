@@ -483,9 +483,9 @@ def make_gcp_util(gcp_data) -> Align:
     table.add_column("Run", justify="center")
     table.add_column("Stage", justify="center")
     table.add_column("Stop", justify="center")
-    for m_id in range(len(gcp_data["job_type"])):
+    for m_id in range(len(gcp_data["experiment_type"])):
         table.add_row(
-            str(gcp_data["job_type"][m_id]),
+            str(gcp_data["experiment_type"][m_id]),
             str(gcp_data["run"][m_id]),
             str(gcp_data["stage"][m_id]),
             str(gcp_data["stop"][m_id]),

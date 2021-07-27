@@ -8,7 +8,7 @@ from ..protocol import protocol_summary, load_local_protocol_db
 from ..remote.gcloud_transfer import get_gcloud_db
 
 
-def welcome_to_mle_toolbox(verbose=False):
+def welcome_to_mle_toolbox(verbose: bool = False) -> None:
     """Let's friendly greet the next user of the MLE-Toolbox!"""
     print(85 * "=")
     welcome_ascii = """
@@ -33,18 +33,15 @@ def welcome_to_mle_toolbox(verbose=False):
         print("  - hyperparameter-search: Run a hyperparameter search.")
 
 
-def prepare_logger(experiment_dir: Union[str, None] = None, debug_mode: bool = False):
+def prepare_logger() -> logging.Logger:
     """Setup up the verbose/file logging of the experiment."""
     logger = logging.getLogger()
     if logger.handlers:
         for handler in logger.handlers:
             logger.removeHandler(handler)
 
-    file_path = (
-        os.path.join(experiment_dir, "exp_debug.log")
-        if debug_mode
-        else os.path.expanduser("~/full_debug.log")
-    )
+    # Always log to root directory
+    file_path = os.path.expanduser("~/full_debug.log")
     logging.basicConfig(
         filename=file_path,
         filemode="a",
@@ -73,11 +70,11 @@ def check_job_config(job_config: dict):
     """Check if config has all necessary ingredients for job to run."""
     # Compile list of required arguments for specific job types
     necessary_ingredients = ["meta_job_args", "single_job_args"]
-    if job_config.meta_job_args["job_type"] == "multiple-configs":
+    if job_config.meta_job_args["experiment_type"] == "multiple-configs":
         necessary_ingredients += ["multi_config_args"]
-    elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
+    elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
         necessary_ingredients += ["param_search_args"]
-    elif job_config.meta_job_args["job_type"] == "population-based-training":
+    elif job_config.meta_job_args["experiment_type"] == "population-based-training":
         necessary_ingredients += ["pbt_args"]
 
     # Check if ingredients are in config keys
@@ -88,7 +85,7 @@ def check_job_config(job_config: dict):
     # TODO: Make this more robust by asserting existence of required keys
     # Differentiate between required and not - check types and file existence
     """
-    meta_job_args: project_name, job_type, base_train_fname, base_train_config,
+    meta_job_args: project_name, experiment_type, base_train_fname, base_train_config,
                    experiment_dir, (remote_exec_dir) = all strings, check files
     single_job_args: job_name, num_logical_cores, log_file, err_file, env_name,
                      extra_cmd_line_input (all optional - except env_name?)

@@ -1,6 +1,6 @@
 # Project Template
 
-In order to get a feeling for how an experiment based on the toolbox utilities may look like, checkout the project template repository.
+In order to get a feeling for how an experiment based on the toolbox utilities may look like, checkout the [project template repository](https://github.com/RobertTLange/mle-project-template).
 
 ## General Directory Structure
 
@@ -29,8 +29,12 @@ The `.yaml` file specifies what type of experiment you want to run. It consists 
 # Meta Arguments: What job? What train .py file?
 # Base .json config? Where to store?
 meta_job_args:
+    # Choose a project name used for logging your experiments
     project_name: "<project_name>"
-    job_type: "<experiment_type>"
+    # Specifies what experiment to run. Can be one of the following:
+    # 'single-config', 'multiple-configs', 'hyperparameter-search',
+    # 'population-based-training'
+    experiment_type: "<experiment_type>"
     base_train_fname: "mle_python.py"
     base_train_config: "train/<base_config>.json"
     experiment_dir: "experiments/"

@@ -1,4 +1,6 @@
 import os
+import logging
+from typing import Union
 from dotmap import DotMap
 from .generate_markdown import MarkdownGenerator
 from .generate_figures import FigureGenerator
@@ -28,7 +30,9 @@ class ReportGenerator:
     Outputs: <e_id>.md, <e_id>.html, <e_id>.pdf
     """
 
-    def __init__(self, e_id, db, logger=None, pdf_gen=False):
+    def __init__(self, e_id, db,
+                 logger: Union[None, logging.Logger] = None,
+                 pdf_gen: bool = False):
         # Get the experiment data from the protocol db
         self.e_id = e_id
         self.db = db
@@ -45,7 +49,7 @@ class ReportGenerator:
 
         # Setup logger for report generation
         if logger is None:
-            self.logger = prepare_logger(None, False)
+            self.logger = prepare_logger()
         else:
             self.logger = logger
 
@@ -196,7 +200,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
             report_data["job_spec_args"], ["params_to_search"]
         )
         doc.addTable(dictionary_list=specific_table)
-        if report_data["meta_job_args"]["job_type"] == "hyperparameter-search":
+        if report_data["meta_job_args"]["experiment_type"] == "hyperparameter-search":
             search_table = construct_hypersearch_table(
                 report_data["job_spec_args"]["params_to_search"]
             )

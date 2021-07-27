@@ -5,9 +5,6 @@ title = "mle-toolbox-config"
 # 1. General Toolbox Configuration - Verbosity + Whether to use GCS Storage
 #------------------------------------------------------------------------------#
 [general]
-# Store a full log of every experiment run in .txt file
-development = false
-
 # Local filename to store protocol DB in
 local_protocol_fname = '~/local_robs_mle_protocol.db'
 

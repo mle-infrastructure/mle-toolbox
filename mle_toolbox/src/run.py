@@ -75,11 +75,8 @@ def run(cmd_args):
             )
 
     # 2. Set up logging config for experiment instance
-    logger = prepare_logger(
-        job_config.meta_job_args.experiment_dir,
-        job_config.meta_job_args.debug_mode
-    )
-    logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
+    logger = prepare_logger()
+    logger.info(f"Loaded experiment config YAML: {cmd_args['config_fname']}")
 
     # 3. If local - check if experiment should be run on remote resource
     if current_resource not in ["sge-cluster", "slurm-cluster"] or (
@@ -202,14 +199,14 @@ def run(cmd_args):
     # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
     # (a) Experiment: Run a single experiment
-    if job_config.meta_job_args["job_type"] == "single-config":
+    if job_config.meta_job_args["experiment_type"] == "single-config":
         run_single_config(
             resource_to_run,
             job_config.meta_job_args,
             job_config.single_job_args
         )
     # (b) Experiment: Run training over different config files/seeds
-    elif job_config.meta_job_args["job_type"] == "multiple-configs":
+    elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         run_multiple_configs(
             resource_to_run,
             job_config.meta_job_args,
@@ -217,7 +214,7 @@ def run(cmd_args):
             job_config.multi_config_args,
         )
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
-    elif job_config.meta_job_args["job_type"] == "hyperparameter-search":
+    elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
         # Import only if needed due to optional dependency on scikit-optimize
         from ..launch import run_hyperparameter_search
 
@@ -228,7 +225,7 @@ def run(cmd_args):
             job_config.param_search_args,
         )
     # (d) Experiment: Run population-based-training for NN training
-    elif job_config.meta_job_args["job_type"] == "population-based-training":
+    elif job_config.meta_job_args["experiment_type"] == "population-based-training":
         from ..launch import run_population_based_training
 
         run_population_based_training(

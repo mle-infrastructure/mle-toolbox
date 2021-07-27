@@ -5,9 +5,6 @@ title = "mle-toolbox-config"
 # 1. General Toolbox Configuration - Verbosity + Whether to use GCS Storage
 #------------------------------------------------------------------------------#
 [general]
-# Store a full log of every experiment run in .txt file
-development = false
-
 # Local filename to store protocol DB in
 local_protocol_fname = '~/local_robs_mle_protocol.db'
 
@@ -44,7 +41,7 @@ remote_env_name = 'mle-toolbox'
     node_reg_exp = ['<nodes-to-monitor1>']
     partitions = ['<partition1>']
 
-    # Info for results retrieval & internet tunneling
+    # Info for results retrieval & internet tunneling if local launch
     main_server_name = '<main-server-ip>'
     jump_server_name = '<jump-host-ip>'
     ssh_port = 22

@@ -47,7 +47,7 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     if len(all_experiment_ids) > 0:
         purposes, project_names, exp_paths = [], [], []
-        num_seeds, statuses, start_times, job_types = [], [], [], []
+        num_seeds, statuses, start_times, experiment_types = [], [], [], []
         resource, num_cpus, num_gpus, total_jobs = [], [], [], []
         if tail is None:
             tail = len(all_experiment_ids)
@@ -71,16 +71,16 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
 
             # Get job type data
             meta_args = db.dget(e_id, "meta_job_args")
-            if meta_args["job_type"] == "hyperparameter-search":
-                job_types.append("search")
-            elif meta_args["job_type"] == "multiple-experiments":
-                job_types.append("multi")
+            if meta_args["experiment_type"] == "hyperparameter-search":
+                experiment_types.append("search")
+            elif meta_args["experiment_type"] == "multiple-experiments":
+                experiment_types.append("multi")
             else:
-                job_types.append("other")
+                experiment_types.append("other")
 
             # Get number of jobs in experiement
             job_spec_args = db.dget(e_id, "job_spec_args")
-            if meta_args["job_type"] == "hyperparameter-search":
+            if meta_args["experiment_type"] == "hyperparameter-search":
                 search_resources = job_spec_args["search_resources"]
                 if job_spec_args["search_config"]["search_schedule"] == "sync":
                     total_jobs.append(
@@ -93,7 +93,7 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
                         search_resources["num_total_evals"]
                         * search_resources["num_seeds_per_eval"]
                     )
-            elif meta_args["job_type"] == "multiple-experiments":
+            elif meta_args["experiment_type"] == "multiple-experiments":
                 total_jobs.append(
                     len(job_spec_args["config_fnames"]) * job_spec_args["num_seeds"]
                 )
@@ -111,7 +111,7 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
             "Resource": resource,
             "CPUs": num_cpus,
             "GPUs": num_gpus,
-            "Type": job_types,
+            "Type": experiment_types,
             "Jobs": total_jobs,
         }
         df = pd.DataFrame(d)

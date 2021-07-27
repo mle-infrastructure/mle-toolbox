@@ -13,16 +13,16 @@ ML researchers need to coordinate different types of experiments on separate rem
 2. Common research experiment setups:
     - Launching and collecting multiple random seeds in parallel/batches.
     - Hyperparameter searches: Random, Grid, SMBO, Population-Based Training.
-    - Pre- and post-processing pipelines for data prep/result visualization.
+    - Pre- and post-processing pipelines for data preparation/result visualization.
 3. Automated report generation for hyperparameter searches.
 4. Storage of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
 ## The 4 Step `mle-toolbox` Cooking Recipe :stew:
 
-1. Follow the [instructions below](#installing-mletoolbox-dependencies) to install the `mle-toolbox` and set up your credentials/configurations.
+1. Follow the [instructions below](https://github.com/RobertTLange/mle-toolbox#installation-memo) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](https://roberttlange.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples :page_facing_up:](#examples-getting-started-running-jobs) to get started: Toy [ODE integration](examples/numpy_ode), training [PyTorch MNIST-CNNs](examples/torch_mnist) or [VAEs in JAX](examples/jax_vae).
+3. Check out the [examples :page_facing_up:](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_ode), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](examples/jax_vae).
 5. Run your own experiments using the [template files](https://github.com/RobertTLange/mle-toolbox/tree/main/templates), [project](https://github.com/RobertTLange/mle-project-template) and `mle run`.
 
 
@@ -50,7 +50,7 @@ By default this will only install the minimal dependencies (not including specia
 By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:
 
 1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
-2. Manually edit the [`template_config.toml`](templates/template_config.toml) template. Move/rename the template to your home directory via `mv template_config.toml ~/mle_config.toml`.
+2. Manually edit the [`config_template.toml`](config_template.toml) template. Move/rename the template to your home directory via `mv config_template.toml ~/mle_config.toml`.
 
 The configuration procedure consists of 3 optional steps, which depend on your needs:
 
@@ -73,15 +73,17 @@ You are now ready to dive deeper into the specifics of [job configuration](https
 
 ## Examples :school_satchel:
 
-* :page_facing_up: [Euler PDE](examples/numpy_pde) - Integrate a PDE using forward Euler for different initial conditions.
-* :page_facing_up: [MNIST CNN](examples/mnist) - Train CNNs on multiple random seeds & different training configs.
-* :page_facing_up: [JAX VAE](examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
-* :page_facing_up: [Sklearn SVM](examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
-* :page_facing_up: [Multi Bash](examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
+* :page_facing_up: [Euler PDE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde) - Integrate a PDE using forward Euler for different initial conditions.
+* :page_facing_up: [MNIST CNN](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/mnist) - Train CNNs on multiple random seeds & different training configs.
+* :page_facing_up: [JAX VAE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae) - Search through the hyperparameter space of a MNIST VAE.
+* :page_facing_up: [Sklearn SVM](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/sklearn_svm) - Train a SVM classifier to classify low-dimensional digits.
+* :page_facing_up: [Multi Bash](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/bash_configs) - Launch multi-configuration experiments for bash based jobs.
+* :page_facing_up: [MNIST PBT](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist) - Population-Based Training for a MNIST MLP network.
 ---
-- :notebook: [Evaluate Results](notebooks/evaluate_results.ipynb) - Walk through post-processing pipeline (loading/visualization).
-- :notebook: [Hypothesis Testing](notebooks/hypothesis_testing.ipynb) - Compare different experiment runs & perform hypothesis tests.
-- :notebook: [GIF Animations](notebooks/animate_results.ipynb) - Walk through set of animation helpers.
+- :notebook: [Evaluate Results](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb) - Walk through post-processing of gridsearch results (loading/visualization).
+- :notebook: [Hypothesis Testing](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb) - Compare different experiment runs & perform hypothesis tests.
+- :notebook: [GIF Animations](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/animate_results.ipynb) - Walk through set of animation helpers.
+- :notebook: [PBT Evaluation](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb) - Visualize and inspect the result from Population-Based Training.
 
 ### Acknowledgements & Citing `mle-toolbox` :pencil2:
 
@@ -102,5 +104,5 @@ Much of the `mle-toolbox` design has been inspired by discussions with [Jonathan
 ## Notes, Development & Questions :question:
 
 - If you find a bug or want a new feature, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue :hugs:
-- You can check out the history of release modifications in [`CHANGELOG.md`](CHANGELOG.md) (*added, changed, fixed*).
-- You can find a set of open milestones in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- You can check out the history of release modifications in [`CHANGELOG.md`](https://github.com/RobertTLange/mle-toolbox/blob/main/CHANGELOG.md) (*added, changed, fixed*).
+- You can find a set of open milestones in [`CONTRIBUTING.md`](https://github.com/RobertTLange/mle-toolbox/blob/main/CONTRIBUTING.md).

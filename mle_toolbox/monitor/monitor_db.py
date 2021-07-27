@@ -88,7 +88,7 @@ def get_time_experiment(db, last_experiment_id):
     job_spec_args = db.dget(last_experiment_id, "job_spec_args")
     single_job_args = db.dget(last_experiment_id, "single_job_args")
 
-    if meta_args["job_type"] == "hyperparameter-search":
+    if meta_args["experiment_type"] == "hyperparameter-search":
         search_resources = job_spec_args["search_resources"]
         if job_spec_args["search_config"]["search_schedule"] == "sync":
             total_jobs = (
@@ -108,7 +108,7 @@ def get_time_experiment(db, last_experiment_id):
             )
             total_batches = total_jobs / search_resources["max_running_jobs"]
             jobs_per_batch = search_resources["max_running_jobs"]
-    elif meta_args["job_type"] == "multiple-experiments":
+    elif meta_args["experiment_type"] == "multiple-experiments":
         total_jobs = len(job_spec_args["config_fnames"]) * job_spec_args["num_seeds"]
         total_batches = 1
         jobs_per_batch = "-"
@@ -169,7 +169,7 @@ def get_last_experiment(db, last_experiment_id):
     # e_path = db.dget(last_experiment_id, "exp_retrieval_path")
     meta_args = db.dget(last_experiment_id, "meta_job_args")
     job_spec_args = db.dget(last_experiment_id, "job_spec_args")
-    e_type = meta_args["job_type"]
+    e_type = meta_args["experiment_type"]
     e_dir = meta_args["experiment_dir"]
     e_script = meta_args["base_train_fname"]
     e_config = os.path.split(meta_args["base_train_config"])[1]

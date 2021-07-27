@@ -11,7 +11,7 @@ from .load_meta_log import load_meta_log, MetaLog
 from .load_hyper_log import load_hyper_log, HyperLog
 
 
-def load_mle_toolbox_config(config_fname: str="~/mle_config.toml") -> DotMap:
+def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
     """Load cluster config from the .toml file. See docs for more info."""
     # This assumes that the config file is always named the same way!
     try:
@@ -65,7 +65,7 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
         assert k in config.keys(), f"Please provide {k} in .yaml config."
 
     # Check that job-specific arguments are given in yaml config
-    experiment_type = config["meta_job_args"]["job_type"]
+    experiment_type = config["meta_job_args"]["experiment_type"]
     all_experiment_types = [
         "single-config",
         "multiple-config",

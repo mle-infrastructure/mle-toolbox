@@ -72,12 +72,12 @@ def protocol_experiment(
     db.dadd(new_experiment_id, ("single_job_args", job_config.single_job_args))
 
     if (
-        db.dget(new_experiment_id, "meta_job_args")["job_type"]
+        db.dget(new_experiment_id, "meta_job_args")["experiment_type"]
         == "multiple-experiments"
     ):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.multi_config_args))
     elif (
-        db.dget(new_experiment_id, "meta_job_args")["job_type"]
+        db.dget(new_experiment_id, "meta_job_args")["experiment_type"]
         == "hyperparameter-search"
     ):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.param_search_args))
@@ -93,20 +93,20 @@ def protocol_experiment(
     db.dadd(new_experiment_id, ("log_config", base_config["log_config"]))
 
     # Add the number of seeds over which experiment is run
-    if job_config.meta_job_args["job_type"] == "hyperparameter-search":
+    if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
         num_seeds = job_config.param_search_args.search_resources[
             "num_seeds_per_eval"
         ]  # noqa: disable=E501
-    elif job_config.meta_job_args["job_type"] == "multiple-configs":
+    elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         num_seeds = job_config.multi_config_args["num_seeds"]
     else:
         num_seeds = 1
     db.dadd(new_experiment_id, ("num_seeds", num_seeds))
 
     # Gen unique experiment config hash - base_config + job_spec_args
-    if job_config.meta_job_args["job_type"] == "hyperparameter-search":
+    if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
         meta_to_hash = job_config.param_search_args
-    elif job_config.meta_job_args["job_type"] == "multiple-configs":
+    elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         meta_to_hash = job_config.multi_config_args
     else:
         meta_to_hash = {}

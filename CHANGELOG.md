@@ -7,6 +7,11 @@
 
 ##### Changed
 - Allow logging of array data in meta log `.hdf5` file by making `tolerant_mean` work for matrices.
+- Change configuration .yaml to use `experiment_type` instead of `job_type` for clear distinction:
+  - *job*: Single submission process on resource (e.g. single seed for single configuration)
+  - *eval*: Single parameter configuration which can be executed/trained for multiple seeds (individual jobs!)
+  - *experiment*: Refers to entire sequence of jobs to be executed (e.g. grid search with pre/post-processing)
+
 
 ##### Fixed
 

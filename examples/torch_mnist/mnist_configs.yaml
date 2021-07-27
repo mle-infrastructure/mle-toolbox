@@ -1,7 +1,7 @@
 # Meta Arguments: What job? What train .py file? Base config? Where to store?
 meta_job_args:
     project_name: "examples"
-    job_type: "multiple-experiments"
+    experiment_type: "multiple-experiments"
     base_train_fname: "mnist/run_mnist_network.py"
     base_train_config: "mnist/mnist_cnn_config.json"
     experiment_dir: "experiments/mnist_configs"

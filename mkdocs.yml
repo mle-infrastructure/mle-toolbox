@@ -36,11 +36,10 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started:
-    - setup/video_tutorials.md
     - setup/installation.md
     - setup/configuration.md
     - setup/template.md
-    - setup/infrastructure.md
+    - setup/video_tutorials.md
   - Experiments:
     - experiment_types/single_pre_post.md
     - experiment_types/multiple_configs.md
@@ -48,6 +47,7 @@ nav:
     - experiment_types/population_based_training.md
   - Examples: examples.md
   - Development:
+    - dev/infrastructure.md
     - dev/future_plans.md
     - dev/remote_backends.md
     - dev/testing.md
