@@ -21,8 +21,9 @@ param_search_args:
             - "noise"
     search_resources:
         num_search_batches: 2
-        num_evals_per_batch: 10
-        num_seeds_per_eval: 1
+        num_evals_per_batch: 2
+        num_seeds_per_eval: 2
+        random_seeds: [1, 4]
     search_config:
         search_type: "grid"
         search_schedule: "sync"
@@ -31,15 +32,11 @@ param_search_args:
                 x_0:
                     begin: 1
                     end: 10
-                    bins: 3
+                    bins: 2
                 noise_mean:
                     begin: 0
                     end: 0.01
-                    bins: 3
-            categorical:
-                r_var:
-                    - 0
-                    - 1
+                    bins: 2
 
 # Parameters specific to an individual job
 single_job_args:

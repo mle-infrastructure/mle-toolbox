@@ -51,6 +51,6 @@ def run_hyperparameter_search(
         meta_job_args["base_train_config"],
         meta_job_args["base_train_fname"],
         meta_job_args["experiment_dir"],
-        **param_search_args.search_config
+        **param_search_args["search_config"]
     )
-    hyper_opt_instance.run_search(**param_search_args.search_resources)
+    hyper_opt_instance.run_search(**param_search_args["search_resources"])

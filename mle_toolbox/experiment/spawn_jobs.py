@@ -81,7 +81,7 @@ def spawn_multiple_seeds(
         job_arguments,
         experiment_dir,
         num_seeds,
-        random_seeds,
+        random_seeds=random_seeds,
         max_running_jobs=num_seeds,
     )
     multi_experiment.run()

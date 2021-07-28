@@ -99,7 +99,7 @@ class BaseHyperOptimisation(object):
             f"Hyperoptimisation ({self.search_schedule} - "
             + f"{self.search_type}) Run - Range of Parameters:"
         )
-        for line in pformat(self.search_params.toDict()).split("\n"):
+        for line in pformat(self.search_params).split("\n"):
             self.logger.info(line)
 
         # Start Launching Jobs Depending on the Scheduling Setup
