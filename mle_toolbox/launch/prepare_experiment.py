@@ -87,9 +87,16 @@ def check_job_config(job_config: dict) -> None:
                    experiment_dir, (remote_exec_dir) = all strings, check files
     single_job_args: job_name, num_logical_cores, log_file, err_file, env_name,
                      extra_cmd_line_input (all optional - except env_name?)
-    multi_experiment_args: config_fnames, num_seeds
+    multi_config_args: config_fnames, num_seeds, random_seeds
     param_search_args: search_logging, search_resources, search_config
     """
+    if job_config.meta_job_args["experiment_type"] == "multiple-configs":
+        if "random_seeds" not in job_config["multi_config_args"].keys():
+            job_config["multi_config_args"]["random_seeds"] = None
+    elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
+        if ("random_seeds" not in
+                job_config["param_search_args"]["search_resources"].keys()):
+            job_config["param_search_args"]["search_resources"]["random_seeds"] = None
 
 
 def ask_for_experiment_id(repeated_question: bool = False):

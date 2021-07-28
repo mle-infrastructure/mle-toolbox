@@ -17,5 +17,6 @@ def run_multiple_configs(
         single_job_args,
         meta_job_args["experiment_dir"],
         num_seeds=multi_config_args["num_seeds"],
+        random_seeds=multi_config_args["random_seeds"],
         logger_level=logging.INFO,
     )

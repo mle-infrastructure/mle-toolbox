@@ -4,7 +4,7 @@ import shutil
 import json
 import copy
 import logging
-from typing import Union
+from typing import Union, List
 from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
@@ -69,6 +69,7 @@ class BaseHyperOptimisation(object):
         num_total_evals: Union[None, int] = None,
         max_running_jobs: Union[None, int] = None,
         num_seeds_per_eval: Union[None, int] = 1,
+        random_seeds: Union[None, List[int]] = None,
     ):
         """
         Run a hyperparameter search: Random, Grid, SMBO
@@ -112,7 +113,8 @@ class BaseHyperOptimisation(object):
             if self.hyper_log.no_results_logging:
                 self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
             self.run_sync_search(
-                num_search_batches, num_evals_per_batch, num_seeds_per_eval
+                num_search_batches, num_evals_per_batch, num_seeds_per_eval,
+                random_seeds
             )
         else:
             self.logger.info(
@@ -123,13 +125,15 @@ class BaseHyperOptimisation(object):
             print_framed("START HYPEROPT RUNS")
             if self.hyper_log.no_results_logging:
                 self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
-            self.run_async_search(num_total_evals, max_running_jobs, num_seeds_per_eval)
+            self.run_async_search(num_total_evals, max_running_jobs, num_seeds_per_eval,
+                                  random_seeds)
 
     def run_async_search(
         self,
         num_total_evals: int,
         max_running_jobs: int,
-        num_seeds_per_eval: Union[None, int] = 1,
+        num_seeds_per_eval: int = 1,
+        random_seeds: Union[None, List[int]] = None,
     ):
         """Run jobs asynchronously - launch whenever resource available."""
         # Does not work with Batch SMBO since proposals rely on GP!
@@ -154,6 +158,7 @@ class BaseHyperOptimisation(object):
             self.job_arguments,
             self.experiment_dir,
             num_seeds_per_eval,
+            random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
         )
         experiment_queue.run()
@@ -182,6 +187,7 @@ class BaseHyperOptimisation(object):
         num_search_batches: int,
         num_evals_per_batch: int,
         num_seeds_per_eval: Union[None, int] = 1,
+        random_seeds: Union[None, List[int]] = None,
     ):
         """Run synchronous batches of jobs in a loop."""
         # Only run the batch loop for the remaining iterations
@@ -211,6 +217,7 @@ class BaseHyperOptimisation(object):
                 self.job_arguments,
                 self.experiment_dir,
                 num_seeds_per_eval,
+                random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
             )
             experiment_queue.run()

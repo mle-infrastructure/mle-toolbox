@@ -24,6 +24,8 @@ use_venv_virtual_env = false
 # Set remote experiment submission environment name
 remote_env_name = 'mle-toolbox'
 
+# Set the random seed for the toolbox/full experiment reproducibility
+random_seed = 42
 
 #------------------------------------------------------------------------------#
 # 2. Configuration for Slurm Cluster

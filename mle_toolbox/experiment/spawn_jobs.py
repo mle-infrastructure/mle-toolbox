@@ -70,6 +70,7 @@ def spawn_multiple_seeds(
     experiment_dir: str,
     num_seeds: int,
     default_seed: int = 0,
+    random_seeds: Union[None, List[int]] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn same experiment w. diff. seeds multiple times locally/remote."""
@@ -80,6 +81,7 @@ def spawn_multiple_seeds(
         job_arguments,
         experiment_dir,
         num_seeds,
+        random_seeds,
         max_running_jobs=num_seeds,
     )
     multi_experiment.run()
@@ -92,6 +94,7 @@ def spawn_multiple_configs(
     job_arguments: Union[None, dict],
     experiment_dir: str,
     num_seeds: Union[None, int] = None,
+    random_seeds: Union[None, List[int]] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
@@ -112,6 +115,7 @@ def spawn_multiple_configs(
     )
 
     # Run Experiment Jobs in Batch mode!
+    default_seed = 0
     multi_experiment = ExperimentQueue(
         resource_to_run,
         job_filename,
@@ -119,8 +123,9 @@ def spawn_multiple_configs(
         job_arguments,
         experiment_dir,
         num_seeds,
-        0,
-        num_seeds * num_configs,
+        default_seed,
+        random_seeds,
+        num_seeds * num_configs
     )
     multi_experiment.run()
 

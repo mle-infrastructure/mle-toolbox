@@ -12,6 +12,7 @@ from mle_toolbox.utils import (
     ask_for_resource_to_run,
     ask_for_binary_input,
     print_framed,
+    set_random_seeds,
 )
 
 # Import of helpers for protocoling experiments
@@ -43,6 +44,9 @@ from mle_toolbox.launch import (
 
 def run(cmd_args):
     """Main function of toolbox - Execute different types of experiments."""
+    # 0. Set all random seeds for 'outer loop' toolbox experiment management
+    set_random_seeds(mle_config.general.random_seed)
+
     # 1. Load in args for MLE + setup the experiment
     if not cmd_args.no_welcome:
         welcome_to_mle_toolbox()

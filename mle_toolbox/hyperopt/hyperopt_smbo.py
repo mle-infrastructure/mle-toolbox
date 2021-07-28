@@ -50,7 +50,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         # Initialize the surrogate model/hyperparam config proposer
         self.hyper_optimizer = Optimizer(
             dimensions=list(self.param_range.values()),
-            random_state=1,
+            random_state=42,
             base_estimator=smbo_config["base_estimator"],
             acq_func=smbo_config["acq_function"],
             n_initial_points=smbo_config["n_initial_points"],

@@ -14,6 +14,7 @@ config_filenames = ["examples/numpy_pde/pde_int_config_1.json",
                     "examples/numpy_pde/pde_int_config_2.json"]
 job_arguments = {}
 num_seeds = num_configs = 2
+random_seeds = [2, 3]
 experiment_dir = "examples/experiments/multi"
 
 
@@ -47,6 +48,7 @@ def test_experiment_queue() -> None:
         shutil.rmtree(exp_dir)
 
     # Run Experiment Jobs in Batch mode!
+    default_seed = 0
     multi_experiment = ExperimentQueue(
         resource_to_run,
         job_filename,
@@ -54,7 +56,8 @@ def test_experiment_queue() -> None:
         job_arguments,
         exp_dir,
         num_seeds,
-        0,
+        default_seed,
+        random_seeds,
         num_seeds * num_configs,
     )
     multi_experiment.run()
@@ -77,7 +80,8 @@ def test_run_multi() -> None:
                        "experiment_dir": exp_dir},
         single_job_args={},
         multi_config_args={"config_fnames": config_filenames,
-                           "num_seeds": num_seeds},
+                           "num_seeds": num_seeds,
+                           "random_seeds": random_seeds},
     )
 
     # Check that all results for different configs were generated

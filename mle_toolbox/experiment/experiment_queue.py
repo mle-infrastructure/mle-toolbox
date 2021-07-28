@@ -25,29 +25,35 @@ class ExperimentQueue(object):
         experiment_dir: str,
         num_seeds: int,
         default_seed: int = 0,
+        random_seeds: Union[None, List[int]] = None,
         max_running_jobs: int = 10,
         logger_level: int = logging.WARNING,
     ):
         # Init experiment class with relevant info
-        self.resource_to_run = resource_to_run  # compute resource for job
-        self.job_filename = job_filename  # path to train script
+        self.resource_to_run = resource_to_run    # compute resource for job
+        self.job_filename = job_filename          # path to train script
         self.config_filenames = config_filenames  # path to config json
-        self.experiment_dir = experiment_dir  # main results dir (create)
-        self.job_arguments = job_arguments  # job-specific args
-        self.num_seeds = num_seeds  # number seeds to run
+        self.experiment_dir = experiment_dir      # main results dir (create)
+        self.job_arguments = job_arguments        # job-specific args
+        self.num_seeds = num_seeds                # number seeds to run
         self.max_running_jobs = max_running_jobs  # number of sim running jobs
 
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logger_level)
 
+        # Check whether enough seeds explicitly supplied
+        if random_seeds is not None:
+            assert len(random_seeds) == num_seeds
+            self.random_seeds = random_seeds
+
         # Generate a list of dictionaries with different random seed cmd input
-        if self.num_seeds > 1:
+        if self.num_seeds > 1 and random_seeds is None:
             seeds_to_sample = np.arange(100000, 999999)
             self.random_seeds = np.random.choice(
                 seeds_to_sample, self.num_seeds, replace=False
             ).tolist()
-        else:
+        elif self.num_seeds == 1 and random_seeds is None:
             self.random_seeds = [default_seed]
 
         # Extract extra_cmd_line_input from job_arguments
