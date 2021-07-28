@@ -1,5 +1,5 @@
 import logging
-from ..experiment import spawn_multiple_configs
+from ..job import spawn_multiple_configs
 
 
 def run_multiple_configs(

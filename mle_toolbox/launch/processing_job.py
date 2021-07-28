@@ -1,4 +1,4 @@
-from ..experiment import spawn_processing_job
+from ..job import spawn_processing_job
 
 
 def run_processing_job(

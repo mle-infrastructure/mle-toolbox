@@ -26,11 +26,11 @@ cluster_resources = ["sge-cluster", "slurm-cluster"]
 cloud_resources = ["gcp-cloud"]
 
 
-class Experiment(object):
+class Job(object):
     """
-    Basic Experiment Class - Everything builds on this!
+    Basic Job Class - Everything builds on this!
 
-    This class defines, executes & monitors an individual experiment that can
+    This class defines, executes & monitors an individual job that can
     either be run locally, on a sungrid-engine (SGE) or SLURM cluster.
 
     Args:
@@ -55,13 +55,13 @@ class Experiment(object):
         logger_level (str): control logger verbosity of individual experiment.
 
     Methods:
-        run: Executes experiment, logs it & returns status if experiment done
-        schedule: Schedules experiment locally or remotely
-        schedule_local: Schedules experiment locally on your machine
-        schedule_cluster: Schedules experiment remotely on SGE/Slurm clusters
-        monitor: Monitors experiment locally or remotely
-        monitor_local: Monitors experiment locally on your machine
-        monitor_cluster: Monitors experiment remotely on SGE/Slurm clusters
+        run: Executes job, logs it & returns status if job done
+        schedule: Schedules job locally or remotely
+        schedule_local: Schedules job locally on your machine
+        schedule_cluster: Schedules job remotely on SGE/Slurm clusters
+        monitor: Monitors job locally or remotely
+        monitor_local: Monitors job locally on your machine
+        monitor_cluster: Monitors job remotely on SGE/Slurm clusters
     """
 
     def __init__(
@@ -75,7 +75,7 @@ class Experiment(object):
         extra_cmd_line_input: Union[None, dict] = None,
         logger_level: int = logging.WARNING,
     ):
-        # Init experiment class with relevant info
+        # Init job class with relevant info
         self.resource_to_run = resource_to_run  # compute resource for job
         self.job_filename = job_filename  # path to train script
         self.config_filename = config_filename  # path to config json
@@ -207,7 +207,7 @@ class Experiment(object):
         return status_out
 
     def schedule_local(self):
-        """Schedules experiment locally on your machine."""
+        """Schedules job locally on your machine."""
         if mle_config.general.use_conda_virtual_env:
             proc = local_submit_conda_job(
                 self.job_filename, self.cmd_line_args, self.job_arguments
@@ -224,7 +224,7 @@ class Experiment(object):
         return proc
 
     def schedule_cluster(self) -> int:
-        """Schedules experiment to run remotely on SGE or Slurm clusters."""
+        """Schedules job to run remotely on SGE or Slurm clusters."""
         if self.resource_to_run == "sge-cluster":
             job_id = sge_submit_job(
                 self.job_filename, self.cmd_line_args, self.job_arguments, clean_up=True
@@ -240,7 +240,7 @@ class Experiment(object):
         return job_id
 
     def schedule_cloud(self) -> int:
-        """Schedules experiment to run remotely on GCP cloud."""
+        """Schedules job to run remotely on GCP cloud."""
         if self.resource_to_run == "gcp-cloud":
             # Import utility to copy local code directory to GCS bucket
             from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
@@ -266,7 +266,7 @@ class Experiment(object):
         return job_id
 
     def monitor_local(self, proc, continuous: bool = True) -> int:
-        """Monitors experiment locally on your machine."""
+        """Monitors job locally on your machine."""
         # Poll status of local process & change status when done
         if continuous:
             while self.job_status:
@@ -294,7 +294,7 @@ class Experiment(object):
                 return 0
 
     def monitor_cluster(self, job_id: str, continuous: bool = True) -> int:
-        """Monitors experiment remotely on SGE or Slurm clusters."""
+        """Monitors job remotely on SGE or Slurm clusters."""
         if continuous:
             while self.job_status:
                 if self.resource_to_run == "sge-cluster":
@@ -310,7 +310,7 @@ class Experiment(object):
                 return slurm_monitor_job(job_id)
 
     def monitor_cloud(self, job_id: str, continuous: bool = True) -> int:
-        """Monitors experiment remotely on GCP cloud."""
+        """Monitors job remotely on GCP cloud."""
         if continuous:
             while self.job_status:
                 if self.resource_to_run == "gcp-cloud":

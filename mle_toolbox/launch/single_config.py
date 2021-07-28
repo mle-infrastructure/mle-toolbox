@@ -1,4 +1,4 @@
-from ..experiment import Experiment
+from ..job import Job
 
 
 def run_single_config(resource_to_run: str, meta_job_args: dict,
@@ -16,7 +16,7 @@ def run_single_config(resource_to_run: str, meta_job_args: dict,
 
     """
     # 1. Instantiate the experiment class
-    experiment = Experiment(
+    experiment = Job(
         resource_to_run,
         meta_job_args["base_train_fname"],
         meta_job_args["base_train_config"],

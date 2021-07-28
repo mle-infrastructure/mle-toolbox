@@ -11,7 +11,7 @@ For all example experiments you can add several command line options:
 ```
 mle run numpy_pde/pde_single.yaml             # Run single .json configuration  
 mle run numpy_pde/pde_configs.yaml            # Run two configs for 10 seeds each
-mle run numpy_pde/pde_search_grid.yaml        # Run synchronous gridsearch over 2 variables
+mle run numpy_pde/pde_search_grid_sync.yaml   # Run synchronous gridsearch over 2 variables
 mle run numpy_pde/pde_search_grid_async.yaml  # Run asynchronous gridsearch over 2 variables
 mle run numpy_pde/pde_search_random.yaml      # Run random search over 2 variables
 mle run numpy_pde/pde_search_smbo.yaml        # Run sequential model-based optimization

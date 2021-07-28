@@ -3,7 +3,7 @@ import os
 import shutil
 import datetime
 import subprocess as sp
-from mle_toolbox.experiment import Experiment
+from mle_toolbox.job import Job
 from mle_toolbox.launch.single_config import run_single_config
 
 
@@ -33,7 +33,7 @@ def check_correct_results(experiment_dir) -> None:
                                        "figures/fig_1_seed_0_pde_integral.png"))
 
 
-def test_experiment() -> None:
+def test_job() -> None:
     """ Test Experiment class - Run PDE experiment on local machine. """
     exp_dir = os.path.join(experiment_dir, "experiment_test")
     # Remove experiment dir at start of test
@@ -41,12 +41,12 @@ def test_experiment() -> None:
         shutil.rmtree(exp_dir)
 
     # Execute experiment 'job'
-    experiment = Experiment(resource_to_run,
-                            job_filename,
-                            config_filename,
-                            {},
-                            exp_dir)
-    status_out = experiment.run()
+    job = Job(resource_to_run,
+              job_filename,
+              config_filename,
+              {},
+              exp_dir)
+    status_out = job.run()
 
     # Check that status of experiment is 0 (job completed)
     assert not status_out

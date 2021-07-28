@@ -1,10 +1,9 @@
-import unittest
 import os
 import shutil
 import glob
 import datetime
 import subprocess as sp
-from mle_toolbox.experiment import ExperimentQueue
+from mle_toolbox.job import JobQueue
 from mle_toolbox.launch.multi_config import run_multiple_configs
 
 
@@ -40,7 +39,7 @@ def check_correct_results(experiment_dir, config_filename) -> None:
     assert png_counter == num_seeds
 
 
-def test_experiment_queue() -> None:
+def test_job_queue() -> None:
     """ Test `ExperimentQueue` class for correct result generation. """
     exp_dir = os.path.join(experiment_dir, "queue_test")
     # Remove experiment dir at start of test
@@ -49,7 +48,7 @@ def test_experiment_queue() -> None:
 
     # Run Experiment Jobs in Batch mode!
     default_seed = 0
-    multi_experiment = ExperimentQueue(
+    multi_experiment = JobQueue(
         resource_to_run,
         job_filename,
         config_filenames,

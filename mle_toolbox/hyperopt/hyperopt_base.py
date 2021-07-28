@@ -8,7 +8,7 @@ from typing import Union, List
 from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
-from ..experiment import ExperimentQueue
+from ..job import JobQueue
 from ..utils import load_json_config, load_meta_log, print_framed, merge_hdf5_files
 
 
@@ -151,7 +151,7 @@ class BaseHyperOptimisation(object):
             f" {num_seeds_per_eval} Seeds"
         )
         start_t = time.time()
-        experiment_queue = ExperimentQueue(
+        job_queue = JobQueue(
             self.resource_to_run,
             self.job_fname,
             batch_fnames,
@@ -161,7 +161,7 @@ class BaseHyperOptimisation(object):
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
         )
-        experiment_queue.run()
+        job_queue.run()
         time_elapsed = time.time() - start_t
 
         self.logger.info(
@@ -210,7 +210,7 @@ class BaseHyperOptimisation(object):
             # Training w. prev. specified hyperparams & eval, get time taken
             max_jobs = num_seeds_per_eval * num_evals_per_batch
             start_t = time.time()
-            experiment_queue = ExperimentQueue(
+            job_queue = JobQueue(
                 self.resource_to_run,
                 self.job_fname,
                 batch_fnames,
@@ -220,7 +220,7 @@ class BaseHyperOptimisation(object):
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
             )
-            experiment_queue.run()
+            job_queue.run()
             time_elapsed = time.time() - start_t
 
             self.logger.info(

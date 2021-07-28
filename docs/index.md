@@ -12,7 +12,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 ## What Does The `mle-toolbox` Provide?
 
 1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
-2. Common research experiment setups:
+2. Common machine learning research experiment setups:
     - Launching and collecting multiple random seeds in parallel/batches.
     - Hyperparameter searches: Random, Grid, SMBO, Population-Based Training.
     - Pre- and post-processing pipelines for data prep/result visualization.

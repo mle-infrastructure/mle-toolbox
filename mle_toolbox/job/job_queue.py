@@ -6,14 +6,14 @@ from tqdm import tqdm
 from typing import Union
 from typing import List
 import numpy as np
-from .experiment import Experiment
+from .job import Job
 from ..utils import merge_hdf5_files
 
 
-class ExperimentQueue(object):
+class JobQueue(object):
     """
-    Multi-Seed Experiment Class: This is essentially a for-loop handler for
-    the `Experiment` class when running multiple random seeds.
+    Multi-Seed Job Class: This is essentially a for-loop handler for
+    the `Job` class when running multiple random seeds.
     """
 
     def __init__(
@@ -87,14 +87,14 @@ class ExperimentQueue(object):
                             experiment_dir, timestr + base_str + "/logs/"
                         ),
                         "status": -1,
-                        "experiment": None,
+                        "job": None,
                         "job_id": None,
                         "merged_logs": False,
                     }
                 )
 
         self.queue_counter = 0  # Next job to schedule
-        self.num_completed_jobs = 0  # No. already completed experiments
+        self.num_completed_jobs = 0  # No. already completed jobs
         self.num_running_jobs = 0  # No. of currently running jobs
         self.num_total_jobs = len(self.queue)
 
@@ -109,9 +109,9 @@ class ExperimentQueue(object):
         """Launch -> Monitor -> Merge individual logs."""
         # 1. Spawn 1st batch of evals until limit of allowed usage is reached
         while self.num_running_jobs < min(self.max_running_jobs, self.num_total_jobs):
-            experiment, job_id = self.launch(self.queue_counter)
+            job, job_id = self.launch(self.queue_counter)
             self.queue[self.queue_counter]["status"] = 1
-            self.queue[self.queue_counter]["experiment"] = experiment
+            self.queue[self.queue_counter]["job"] = job
             self.queue[self.queue_counter]["job_id"] = job_id
             self.num_running_jobs += 1
             self.queue_counter += 1
@@ -133,7 +133,7 @@ class ExperimentQueue(object):
             # Loop over all jobs in queue - check status of prev running
             for job in self.queue:
                 if job["status"] == 1:
-                    status = self.monitor(job["experiment"], job["job_id"], False)
+                    status = self.monitor(job["job"], job["job_id"], False)
                     # If status changes to completed - update counters/state
                     if status == 0:
                         self.num_completed_jobs += 1
@@ -156,9 +156,9 @@ class ExperimentQueue(object):
                 self.max_running_jobs,
                 self.num_total_jobs - self.num_completed_jobs - self.num_running_jobs,
             ):
-                experiment, job_id = self.launch(self.queue_counter)
+                job, job_id = self.launch(self.queue_counter)
                 self.queue[self.queue_counter]["status"] = 1
-                self.queue[self.queue_counter]["experiment"] = experiment
+                self.queue[self.queue_counter]["job"] = job
                 self.queue[self.queue_counter]["job_id"] = job_id
                 self.num_running_jobs += 1
                 self.queue_counter += 1
@@ -169,7 +169,7 @@ class ExperimentQueue(object):
         """Launch a set of jobs for one configuration - one for each seed."""
         # 1. Instantiate the experiment class and start a single seed
         cmd_line_input = {"seed_id": self.queue[queue_counter]["seed_id"]}
-        experiment = Experiment(
+        job = Job(
             self.resource_to_run,
             self.job_filename,
             self.queue[queue_counter]["config_fname"],
@@ -180,25 +180,25 @@ class ExperimentQueue(object):
         )
 
         # 2. Launch a single experiment
-        job_id = experiment.schedule()
+        job_id = job.schedule()
 
-        # 3. Return updated counter, `Experiment` instance & corresponding ID
-        return experiment, job_id
+        # 3. Return updated counter, `Job` instance & corresponding ID
+        return job, job_id
 
-    def monitor(self, experiment: Experiment, job_id: str, continuous: bool = True):
+    def monitor(self, job: Job, job_id: str, continuous: bool = True):
         """Monitor all seed-specific jobs for one eval configuration."""
         if continuous:
             while True:
-                status = experiment.monitor(job_id, False)
+                status = job.monitor(job_id, False)
                 if status == 0:
                     return 0
         else:
-            status = experiment.monitor(job_id, False)
+            status = job.monitor(job_id, False)
             return status
 
     def merge_logs(self, log_dir: str, base_str: str):
         """Collect all seed-specific seeds into single <eval_id>.hdf5 file."""
-        # Only merge logs if experiment is based on python experiment!
+        # Only merge logs if job is based on python job!
         # Otherwise .hdf5 file system is not used and there is nothing to merge
         filename, file_extension = os.path.splitext(self.job_filename)
         if file_extension == ".py":

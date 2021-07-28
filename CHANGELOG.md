@@ -3,7 +3,7 @@
 ##### Added
 - Adds general processing job, which generalizes the post-processing job and enables 'shared'/centralized data pre-processing before a (search) experiment and results post-processing/figure generation afterwards. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/blob/main/examples/torch_mnist/mnist_single.yaml).
 - Adds population-based training experiment type. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist).
-- Adds a set of unit tests for more robustness and `flake8` linting.
+- Adds a set of unit/integration tests for more robustness and `flake8` linting.
 
 ##### Changed
 - Allow logging of array data in meta log `.hdf5` file by making `tolerant_mean` work for matrices.
@@ -11,6 +11,7 @@
   - *job*: Single submission process on resource (e.g. single seed for single configuration)
   - *eval*: Single parameter configuration which can be executed/trained for multiple seeds (individual jobs!)
   - *experiment*: Refers to entire sequence of jobs to be executed (e.g. grid search with pre/post-processing)
+- Restructure `experiment` subdirectory into `job` for consistent naming.
 
 
 ##### Fixed

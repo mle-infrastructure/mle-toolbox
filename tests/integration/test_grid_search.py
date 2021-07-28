@@ -1,8 +1,5 @@
-import unittest
 import os
 import shutil
-import glob
-import datetime
 import subprocess as sp
 from mle_toolbox.launch.search_experiment import run_hyperparameter_search
 
@@ -19,10 +16,15 @@ search_logging = {"reload_log": False,
                   "problem_type": "final",
                   "eval_metrics": ["integral", "noise"]}
 
-search_resources = {"num_search_batches": 2,
-                    "num_evals_per_batch": 2,
-                    "num_seeds_per_eval": 2,
-                    "random_seeds": [1, 4]}
+search_resources_sync = {"num_search_batches": 2,
+                         "num_evals_per_batch": 2,
+                         "num_seeds_per_eval": 2,
+                         "random_seeds": [1, 4]}
+
+search_resources_async = {"num_total_evals": 4,
+                          "max_running_jobs": 4,
+                          "num_seeds_per_eval": 2,
+                          "random_seeds": [1, 4]}
 
 search_config = {
     "search_type": "grid",
@@ -38,9 +40,6 @@ search_config = {
     }
 }
 
-param_search_args = {"search_logging": search_logging,
-                     "search_resources": search_resources,
-                     "search_config": search_config}
 single_job_args = {}
 
 experiment_dir = "examples/experiments/grid_sync"
@@ -57,11 +56,38 @@ def check_correct_results(experiment_dir: str) -> None:
 
 def test_run_grid_sync() -> None:
     """ Test job launch wrapper - Run PDE experiment on local machine. """
-    exp_dir = os.path.join(experiment_dir, "run_test")
+    exp_dir = os.path.join(experiment_dir, "run_sync_test")
     meta_job_args["experiment_dir"] = exp_dir
     # Remove experiment dir at start of test
     if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
         shutil.rmtree(exp_dir)
+
+    param_search_args = {"search_logging": search_logging,
+                         "search_resources": search_resources_sync,
+                         "search_config": search_config}
+    param_search_args["search_config"]["search_schedule"] = "sync"
+
+    run_hyperparameter_search(
+        resource_to_run,
+        meta_job_args,
+        single_job_args,
+        param_search_args)
+
+    check_correct_results(exp_dir)
+
+
+def test_run_grid_async() -> None:
+    """ Test job launch wrapper - Run PDE experiment on local machine. """
+    exp_dir = os.path.join(experiment_dir, "run_async_test")
+    meta_job_args["experiment_dir"] = exp_dir
+    # Remove experiment dir at start of test
+    if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
+        shutil.rmtree(exp_dir)
+
+    param_search_args = {"search_logging": search_logging,
+                         "search_resources": search_resources_async,
+                         "search_config": search_config}
+    param_search_args["search_config"]["search_schedule"] = "async"
 
     run_hyperparameter_search(
         resource_to_run,
@@ -81,7 +107,7 @@ def test_api_grid_sync() -> None:
         shutil.rmtree(exp_dir)
 
     # Execute the mle api command
-    bashCommand = ("mle run numpy_pde/pde_search_grid.yaml -nw -np -resource local"
+    bashCommand = ("mle run numpy_pde/pde_search_grid_sync.yaml -nw -np -resource local"
                    f" --experiment_dir {exp_dir}")
 
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)

@@ -9,7 +9,7 @@ from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
-from mle_toolbox.experiment import Experiment
+from mle_toolbox.job import Job
 from ..utils import load_json_config, load_run_log
 from .pbt_logger import PBT_Logger, Population_Logger
 from .explore import ExplorationStrategy
@@ -96,12 +96,12 @@ class PBT_Manager(object):
             hyperparams = self.exploration.resample()
             seed_id = np.random.randint(1000, 9999)
             run_id, config_fname = self.save_config(worker_id, 0, hyperparams)
-            experiment, job_id = self.launch(config_fname, seed_id)
+            job, job_id = self.launch(config_fname, seed_id)
             self.pbt_queue.append(
                 {
                     "worker_id": worker_id,
                     "pbt_step_id": 0,
-                    "experiment": experiment,
+                    "job": job,
                     "config_fname": config_fname,
                     "job_id": job_id,
                     "run_id": run_id,
@@ -127,7 +127,7 @@ class PBT_Manager(object):
             completed_pbt = 0
             for w_id in range(self.num_population_members):
                 worker = self.pbt_queue[w_id]
-                status = self.monitor(worker["experiment"], worker["job_id"])
+                status = self.monitor(worker["job"], worker["job_id"])
 
                 if status == 0:
                     try:
@@ -156,11 +156,11 @@ class PBT_Manager(object):
                         run_id, config_fname = self.save_config(
                             worker["worker_id"], worker["pbt_step_id"] + 1, hyperparams
                         )
-                        experiment, job_id = self.launch(config_fname, seed_id, ckpt)
+                        job, job_id = self.launch(config_fname, seed_id, ckpt)
                         new_worker = {
                             "worker_id": worker["worker_id"],
                             "pbt_step_id": worker["pbt_step_id"] + 1,
-                            "experiment": experiment,
+                            "job": job,
                             "config_fname": config_fname,
                             "job_id": job_id,
                             "run_id": run_id,
@@ -208,11 +208,11 @@ class PBT_Manager(object):
         self, config_fname: str, seed_id: int, model_ckpt: Union[None, str] = None
     ):
         """Launch jobs for one configuration and network checkpoint."""
-        # 1. Instantiate the experiment class and start a single seed
+        # 1. Instantiate the job class and start a single seed
         cmd_line_input = {"seed_id": seed_id}
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
-        experiment = Experiment(
+        job = job(
             self.resource_to_run,
             self.job_fname,
             config_fname,
@@ -221,15 +221,15 @@ class PBT_Manager(object):
             cmd_line_input,
         )
 
-        # 2. Launch a single experiment
-        job_id = experiment.schedule()
+        # 2. Launch a single job
+        job_id = job.schedule()
 
-        # 3. Return updated counter, `Experiment` instance & corresponding ID
-        return experiment, job_id
+        # 3. Return updated counter, `job` instance & corresponding ID
+        return job, job_id
 
-    def monitor(self, experiment: Experiment, job_id: str):
+    def monitor(self, job: Job, job_id: str):
         """Monitor job for one eval/worker configuration."""
-        status = experiment.monitor(job_id, False)
+        status = job.monitor(job_id, False)
         return status
 
     def save_config(self, worker_id: int, pbt_step_id: int, hyperparams: dict):
