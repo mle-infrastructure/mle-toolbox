@@ -74,7 +74,7 @@ def load_yaml_config(cmd_args: dict) -> DotMap:
     experiment_type = config["meta_job_args"]["experiment_type"]
     all_experiment_types = [
         "single-config",
-        "multiple-config",
+        "multiple-configs",
         "hyperparameter-search",
         "population-based-training",
     ]

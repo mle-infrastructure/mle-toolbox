@@ -4,7 +4,7 @@ from .core_experiment import (
     get_extra_cmd_line_input,
     set_random_seeds,
 )
-from .mle_logger import MLE_Logger
+from .mle_logger import MLELogger
 from .load_model import load_model
 from .helpers import print_framed
 
@@ -64,7 +64,7 @@ class MLExperiment(object):
             set_random_seeds(self.train_config.seed_id)
 
         # Initialize the logger for the experiment
-        self.log = MLE_Logger(**self.log_config)
+        self.log = MLELogger(**self.log_config)
 
         # Load model if checkpoint is provided
         if self.model_ckpt is not None:

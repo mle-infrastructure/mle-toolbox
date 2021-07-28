@@ -68,7 +68,8 @@ pytest -vv tests/integration
 ```
 
 - [ ] Experiment types running on different resources
-    - [x] Single configuration experiment: `tests/integration/test_single_config.py`
+    - [x] Single configuration: `tests/integration/test_single_config.py`
+    - [x] Multiple configuration: `tests/integration/test_multi_configs.py`
     - [ ] Random search experiment
     - [ ] Grid search experiment
     - [ ] SMBO search experiment

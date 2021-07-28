@@ -9,7 +9,7 @@ from typing import Union, List, Dict
 from .helpers import save_pkl_object
 
 
-class MLE_Logger(object):
+class MLELogger(object):
     """
     Logging object for Deep Learning experiments
 
@@ -130,16 +130,6 @@ class MLE_Logger(object):
         # Create a new empty directory for the experiment
         os.makedirs(self.experiment_dir, exist_ok=True)
         os.makedirs(os.path.join(self.experiment_dir, "logs/"), exist_ok=True)
-        os.makedirs(os.path.join(self.experiment_dir, "models/"), exist_ok=True)
-
-        # Create separate sub-dirs for checkpoints & final trained model
-        os.makedirs(os.path.join(self.experiment_dir, "models/final/"), exist_ok=True)
-        if self.save_every_k_ckpt is not None:
-            os.makedirs(os.path.join(self.experiment_dir, "models/every_k/"),
-                        exist_ok=True)
-        if self.save_top_k_ckpt is not None:
-            os.makedirs(os.path.join(self.experiment_dir, "models/top_k/"),
-                        exist_ok=True)
 
         exp_time_base = self.experiment_dir + timestr + base_str
         self.config_copy = exp_time_base + ".json"
@@ -470,8 +460,23 @@ class MLE_Logger(object):
         # Tick the log save counter
         self.log_save_counter += 1
 
+    def setup_model_ckpt_dir(self):
+        """ Create separate sub-dirs for checkpoints & final trained model. """
+        os.makedirs(os.path.join(self.experiment_dir, "models/final/"), exist_ok=True)
+        if self.save_every_k_ckpt is not None:
+            os.makedirs(os.path.join(self.experiment_dir, "models/every_k/"),
+                        exist_ok=True)
+        if self.save_top_k_ckpt is not None:
+            os.makedirs(os.path.join(self.experiment_dir, "models/top_k/"),
+                        exist_ok=True)
+
     def save_model(self, model):
         """Save current state of the model as a checkpoint - torch!"""
+        # If first model ckpt is saved - generate necessary directories
+        self.model_save_counter += 1
+        if self.model_save_counter == 1:
+            self.setup_model_ckpt_dir()
+
         # CASE 1: SIMPLE STORAGE OF MOST RECENTLY LOGGED MODEL STATE
         if self.model_type == "torch":
             # Torch model case - save model state dict as .pt checkpoint
@@ -500,7 +505,6 @@ class MLE_Logger(object):
                     )
                     save_pkl_object(model, ckpt_path)
                 # Update model save count & time point of storage
-                self.model_save_counter += 1
                 time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[
                     -1
                 ]

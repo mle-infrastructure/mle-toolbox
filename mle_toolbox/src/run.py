@@ -40,9 +40,6 @@ from mle_toolbox.launch import (
     check_job_config,
 )
 
-# Import utility to copy local code directory to GCS bucket
-from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs, delete_gcs_dir
-
 
 def run(cmd_args):
     """Main function of toolbox - Execute different types of experiments."""
@@ -58,25 +55,9 @@ def run(cmd_args):
     resource_to_run = cmd_args.resource_to_run
     job_config.meta_job_args.debug_mode = cmd_args.debug
 
-    if mle_config.general.use_gcloud_protocol_sync:
-        try:
-            # Import of helpers for GCloud storage of results/protocol
-            from ..remote.gcloud_transfer import (
-                get_gcloud_db,
-                send_gcloud_db,
-                send_gcloud_zip_experiment,
-            )
-        except ImportError:
-            raise ImportError(
-                "You need to install `google-cloud-storage` to "
-                "synchronize protocols with GCloud. Or set "
-                "`use_glcoud_protocol_sync = False` in your "
-                "config file."
-            )
-
     # 2. Set up logging config for experiment instance
     logger = prepare_logger()
-    logger.info(f"Loaded experiment config YAML: {cmd_args['config_fname']}")
+    logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
 
     # 3. If local - check if experiment should be run on remote resource
     if current_resource not in ["sge-cluster", "slurm-cluster"] or (
@@ -120,13 +101,30 @@ def run(cmd_args):
 
     # 5. Protocol experiment if desired (can also only be locally)!
     if not cmd_args.no_protocol:
-        # 3a. Get up-to-date experiment DB from Google Cloud Storage
+        # 5a. Import gcloud protocol utilities if sync wanted
+        if mle_config.general.use_gcloud_protocol_sync:
+            try:
+                # Import of helpers for GCloud storage of results/protocol
+                from ..remote.gcloud_transfer import (
+                    get_gcloud_db,
+                    send_gcloud_db,
+                    send_gcloud_zip_experiment,
+                )
+            except ImportError:
+                raise ImportError(
+                    "You need to install `google-cloud-storage` to "
+                    "synchronize protocols with GCloud. Or set "
+                    "`use_glcoud_protocol_sync = False` in your "
+                    "config file."
+                )
+
+        # 5b. Get up-to-date experiment DB from Google Cloud Storage
         if mle_config.general.use_gcloud_protocol_sync:
             accessed_remote_db = get_gcloud_db()
         else:
             accessed_remote_db = False
 
-        # 3b. Meta-protocol experiment - Print last ones - Delete from input
+        # 5c. Meta-protocol experiment - Print last ones - Delete from input
         protocol_summary(tail=10, verbose=True)
 
         # Only ask to delete if no purpose given!
@@ -138,7 +136,7 @@ def run(cmd_args):
         )
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
 
-        # 3c. Send recent/up-to-date experiment DB to Google Cloud Storage
+        # 5d. Send recent/up-to-date experiment DB to Google Cloud Storage
         if mle_config.general.use_gcloud_protocol_sync and accessed_remote_db:
             send_gcloud_db()
 
@@ -172,6 +170,8 @@ def run(cmd_args):
                 f"Start uploading {local_code_dir} to GCP bucket:"
                 + f" {mle_config.gcp.code_dir}"
             )
+            # Import utility to copy local code directory to GCS bucket
+            from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
             upload_local_dir_to_gcs(
                 local_path=local_code_dir, gcs_path=mle_config.gcp.code_dir
             )
@@ -289,5 +289,7 @@ def run(cmd_args):
     # 13. If job ran on GCP: Clean up & delete local code dir form GCS bucket
     if resource_to_run == "gcp-cloud":
         if delete_code_dir:
+            # Import utility to delete directory in GCS bucket
+            from mle_toolbox.remote.gcloud_transfer import delete_gcs_dir
             delete_gcs_dir(mle_config.gcp.code_dir)
     print_framed("EXPERIMENT FINISHED")

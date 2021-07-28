@@ -4,7 +4,7 @@ from .experiment import Experiment
 from .experiment_queue import ExperimentQueue
 
 
-def spawn_single_experiment(
+def spawn_single_job(
     resource_to_run: str,
     job_filename: str,
     config_filename: str,

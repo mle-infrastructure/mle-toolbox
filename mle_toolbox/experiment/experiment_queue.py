@@ -99,7 +99,7 @@ class ExperimentQueue(object):
         )
         self.logger.info("TOTAL JOBS TO EXECUTE - {}".format(self.num_total_jobs))
 
-    def run(self):
+    def run(self) -> None:
         """Launch -> Monitor -> Merge individual logs."""
         # 1. Spawn 1st batch of evals until limit of allowed usage is reached
         while self.num_running_jobs < min(self.max_running_jobs, self.num_total_jobs):

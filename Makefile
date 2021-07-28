@@ -45,7 +45,7 @@ test-unit:
 
 test-integration:
 	# Run integration tests: Different experiment types, report generation
-	pytest -vv --durations=0 ./tests/integration/test_single_config.py
+	pytest -vv --durations=0 ./tests/integration
 
 deploy-docs:
 	# Deploy documentation homepage: https://roberttlange.github.io/mle-toolbox/

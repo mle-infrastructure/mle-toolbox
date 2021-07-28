@@ -12,10 +12,10 @@ def run_multiple_configs(
     # 1. Create multiple experiment instances and submit the jobs
     spawn_multiple_configs(
         resource_to_run,
-        meta_job_args.base_train_fname,
-        multi_config_args.config_fnames,
+        meta_job_args["base_train_fname"],
+        multi_config_args["config_fnames"],
         single_job_args,
-        meta_job_args.experiment_dir,
-        num_seeds=multi_config_args.num_seeds,
+        meta_job_args["experiment_dir"],
+        num_seeds=multi_config_args["num_seeds"],
         logger_level=logging.INFO,
     )
