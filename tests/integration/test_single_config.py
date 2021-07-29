@@ -13,7 +13,8 @@ config_filename = "examples/numpy_pde/pde_int_config_1.json"
 experiment_dir = "examples/experiments/single"
 
 
-def check_correct_results(experiment_dir) -> None:
+def check_correct_results(experiment_dir: str,
+                          api_check: bool = False) -> None:
     """ Ensure that correct results and directories were generated. """
     timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
     base_str = os.path.split(config_filename)[1].split(".")[0]
@@ -31,6 +32,10 @@ def check_correct_results(experiment_dir) -> None:
     # Check that figure file exists
     assert os.path.exists(os.path.join(dir_to_check,
                                        "figures/fig_1_seed_0_pde_integral.png"))
+
+    # Check that experiment config yaml was created (reproducibility)
+    if api_check:
+        assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
 
 
 def test_job() -> None:
@@ -89,7 +94,7 @@ def test_api_single() -> None:
     output, error = process.communicate()
 
     # Check generated directories for correctness
-    check_correct_results(exp_dir)
+    check_correct_results(exp_dir, api_check=True)
     os.chdir('..')
 
 

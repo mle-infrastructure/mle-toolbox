@@ -17,7 +17,8 @@ def welcome_to_mle_toolbox(verbose: bool = False) -> None:
         /_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
     """
     print(welcome_ascii)
-    print(72 * " " + "@RobertTLange")
+    print(44 * " " + "@RobertTLange" + 28 * " ")
+    print(44 * " " + "Docs: roberttlange.github.io/mle-toolbox/")
     print(85 * "=")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     print(
@@ -26,9 +27,10 @@ def welcome_to_mle_toolbox(verbose: bool = False) -> None:
     )
     if verbose:
         print(time_t, "It implements the following experiment types:")
-        print("  - single-experiment: Run a single configuration experiment.")
-        print("  - multiple-experiments: Run multiple configs & random seeds.")
+        print("  - single-config: Run a single configuration experiment.")
+        print("  - multiple-configs: Run multiple configs & random seeds.")
         print("  - hyperparameter-search: Run a hyperparameter search.")
+        print("  - population-based-training: Run a PBT search.")
 
 
 def prepare_logger() -> logging.Logger:
@@ -90,6 +92,7 @@ def check_job_config(job_config: dict) -> None:
     multi_config_args: config_fnames, num_seeds, random_seeds
     param_search_args: search_logging, search_resources, search_config
     """
+    # If random seeds are not explicitly provided - set to None
     if job_config.meta_job_args["experiment_type"] == "multiple-configs":
         if "random_seeds" not in job_config["multi_config_args"].keys():
             job_config["multi_config_args"]["random_seeds"] = None

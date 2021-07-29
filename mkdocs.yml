@@ -40,6 +40,13 @@ nav:
     - setup/configuration.md
     - setup/template.md
     - setup/video_tutorials.md
+  - Core API:
+    - core_api/mle_run.md
+    - core_api/mle_retrieve.md
+    - core_api/mle_report.md
+    - core_api/mle_sync_gcs.md
+    - core_api/mle_monitor.md
+    - core_api/mle_init.md
   - Experiments:
     - experiment_types/single_pre_post.md
     - experiment_types/multiple_configs.md
@@ -48,10 +55,11 @@ nav:
   - Examples: examples.md
   - Development:
     - dev/infrastructure.md
-    - dev/future_plans.md
     - dev/remote_backends.md
     - dev/testing.md
     - dev/notes.md
+    - dev/future_plans.md
+
 
 markdown_extensions:
   - codehilite:

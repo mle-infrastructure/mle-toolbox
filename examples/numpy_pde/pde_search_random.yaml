@@ -14,8 +14,8 @@ param_search_args:
             - "noise"
     search_resources:
         num_search_batches: 2
-        num_evals_per_batch: 10
-        num_seeds_per_eval: 1
+        num_evals_per_batch: 2
+        num_seeds_per_eval: 2
     search_config:
         search_type: "random"
         search_params:

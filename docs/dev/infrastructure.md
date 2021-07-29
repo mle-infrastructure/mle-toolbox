@@ -1,4 +1,4 @@
-# Infrastructure
+# Toolbox Infrastructure
 
 In this document you can learn everything about how to run experiments with the `mle-toolbox`. The `mle-toolbox` allows you to run different types of experiments locally or on an SGE cluster. You have to provide three inputs:
 

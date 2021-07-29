@@ -17,7 +17,9 @@ random_seeds = [2, 3]
 experiment_dir = "examples/experiments/multi"
 
 
-def check_correct_results(experiment_dir, config_filename) -> None:
+def check_correct_results(experiment_dir: str,
+                          config_filename: str,
+                          api_check: bool = False) -> None:
     """ Ensure that correct results and directories were generated. """
     timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
     base_str = os.path.split(config_filename)[1].split(".")[0]
@@ -37,6 +39,10 @@ def check_correct_results(experiment_dir, config_filename) -> None:
                                               "figures/"), "*.png"))
 
     assert png_counter == num_seeds
+
+    # Check that experiment config yaml was created (reproducibility)
+    if api_check:
+        assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
 
 
 def test_job_queue() -> None:
@@ -105,5 +111,5 @@ def test_api_multi() -> None:
 
     # Check generated directories for correctness
     for cfname in config_filenames:
-        check_correct_results(exp_dir, cfname)
+        check_correct_results(exp_dir, cfname, api_check=True)
     os.chdir('..')

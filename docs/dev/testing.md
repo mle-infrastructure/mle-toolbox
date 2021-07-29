@@ -71,8 +71,8 @@ pytest -vv tests/integration
     - [x] Single configuration: `tests/integration/test_single_config.py`
     - [x] Multiple configuration: `tests/integration/test_multi_configs.py`
     - [x] A/Synchronous Grid search experiment: `tests/integration/test_grid_search.py`
-    - [ ] Random search experiment
-    - [ ] SMBO search experiment
+    - [x] Random search experiment: `tests/integration/test_random_search.py`
+    - [x] SMBO search experiment: `tests/integration/test_smbo_search.py`
     - [ ] PBT experiment
 
 - [ ] Report generation
@@ -89,3 +89,5 @@ pytest -vv tests/integration
     - [ ] Encryption ssh credentials
 
 - [ ] GCS integration
+    - [ ] Pull dummy protocol DB
+    - [ ] Send results/retrieve results

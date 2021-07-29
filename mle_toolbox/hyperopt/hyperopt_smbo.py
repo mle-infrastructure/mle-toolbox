@@ -25,12 +25,15 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         try:
             from skopt import Optimizer
         except ModuleNotFoundError as err:
+            print(err)
             raise ModuleNotFoundError(
                 f"{err}. You need to"
                 "install `scikit-optimize` to use "
                 "the `mle_toolbox.hyperopt` module."
             )
 
+        # Check that SMBO uses synchronous scheduling
+        assert search_schedule == "sync", "Batch SMBO schedules jobs synchronously"
         BaseHyperOptimisation.__init__(
             self,
             hyper_log,
@@ -48,6 +51,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         )
 
         # Initialize the surrogate model/hyperparam config proposer
+        self.smbo_config = smbo_config
         self.hyper_optimizer = Optimizer(
             dimensions=list(self.param_range.values()),
             random_state=42,

@@ -1,11 +1,5 @@
 # Examples :school_satchel:
 
-For all example experiments you can add several command line options:
-
-- `--no_welcome`: Don't print welcome messages at experiment launch.
-- `--no_protocol`: Do not record experiment in protocol database.
-- `--resource_to_run local`: Run the experiment locally on your machine.
-
 * :page_facing_up: [Euler PDE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde) - Integrate a PDE using forward Euler for different initial conditions.
 
 ```
@@ -17,7 +11,7 @@ mle run numpy_pde/pde_search_random.yaml      # Run random search over 2 variabl
 mle run numpy_pde/pde_search_smbo.yaml        # Run sequential model-based optimization
 ```
 
-### :page_facing_up: [MNIST CNN](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) - Train Torch CNNs on multiple random seeds & different training configs.
+* :page_facing_up: [MNIST CNN](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) - Train Torch CNNs on multiple random seeds & different training configs.
 
 ```
 mle run torch_mnist/mnist_pre_post.yaml       # Run one config with separate pre-/post-processing

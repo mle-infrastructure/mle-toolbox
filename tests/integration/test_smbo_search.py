@@ -5,7 +5,7 @@ from mle_toolbox.launch.search_experiment import run_hyperparameter_search
 
 
 resource_to_run = "local"
-experiment_dir = "examples/experiments/grid"
+experiment_dir = "examples/experiments/smbo"
 meta_job_args = {"base_train_fname": "examples/numpy_pde/run_pde_int.py",
                  "base_train_config": "examples/numpy_pde/pde_int_config_1.json"}
 
@@ -16,27 +16,27 @@ search_logging = {"reload_log": False,
                   "problem_type": "final",
                   "eval_metrics": ["integral", "noise"]}
 
-search_resources_sync = {"num_search_batches": 2,
+search_resources_sync = {"num_search_batches": 3,
                          "num_evals_per_batch": 2,
                          "num_seeds_per_eval": 2,
                          "random_seeds": [1, 4]}
 
-search_resources_async = {"num_total_evals": 4,
-                          "max_running_jobs": 4,
-                          "num_seeds_per_eval": 2,
-                          "random_seeds": [1, 4]}
-
 search_config = {
-    "search_type": "grid",
+    "search_type": "smbo",
     "search_schedule": "sync",
     "search_params": {
         "real": {"x_0": {"begin": 1,
                          "end": 10,
-                         "bins": 2},
+                         "prior": "log_uniform"},
                  "noise_mean": {"begin": 0,
                                 "end": 0.01,
-                                "bins": 2}
+                                "prior": "uniform"}
                  }
+    },
+    "smbo_config": {
+        "base_estimator": "GP",            # "GP", "RF", "ET", "GBRT"
+        "acq_function": "gp_hedge",        # "LCB", "EI", "PI", "gp_hedge" (samples)
+        "n_initial_points": 1              # Init points >= than batch size!
     }
 }
 
@@ -57,9 +57,9 @@ def check_correct_results(experiment_dir: str,
         assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
 
 
-def test_run_grid_sync() -> None:
+def test_run_smbo() -> None:
     """ Test job launch wrapper - Run PDE experiment on local machine. """
-    exp_dir = os.path.join(experiment_dir, "run_sync_test")
+    exp_dir = os.path.join(experiment_dir, "run_test")
     meta_job_args["experiment_dir"] = exp_dir
     # Remove experiment dir at start of test
     if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
@@ -68,7 +68,6 @@ def test_run_grid_sync() -> None:
     param_search_args = {"search_logging": search_logging,
                          "search_resources": search_resources_sync,
                          "search_config": search_config}
-    param_search_args["search_config"]["search_schedule"] = "sync"
 
     run_hyperparameter_search(
         resource_to_run,
@@ -76,41 +75,20 @@ def test_run_grid_sync() -> None:
         single_job_args,
         param_search_args)
 
+    # Check generated directories for correctness
     check_correct_results(exp_dir)
 
 
-def test_run_grid_async() -> None:
-    """ Test job launch wrapper - Run PDE experiment on local machine. """
-    exp_dir = os.path.join(experiment_dir, "run_async_test")
-    meta_job_args["experiment_dir"] = exp_dir
-    # Remove experiment dir at start of test
-    if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
-        shutil.rmtree(exp_dir)
-
-    param_search_args = {"search_logging": search_logging,
-                         "search_resources": search_resources_async,
-                         "search_config": search_config}
-    param_search_args["search_config"]["search_schedule"] = "async"
-
-    run_hyperparameter_search(
-        resource_to_run,
-        meta_job_args,
-        single_job_args,
-        param_search_args)
-
-    check_correct_results(exp_dir)
-
-
-def test_api_grid_sync() -> None:
+def test_api_smbo() -> None:
     """ Execute `mle run pde_grid_sync.yaml` and check running pipeline. """
     os.chdir('./examples')
-    exp_dir = "experiments/grid/api_test"
+    exp_dir = "experiments/smbo/api_test"
     # Remove experiment dir at start of test
     if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
         shutil.rmtree(exp_dir)
 
     # Execute the mle api command
-    bashCommand = ("mle run numpy_pde/pde_search_grid_sync.yaml -nw -np -resource local"
+    bashCommand = ("mle run numpy_pde/pde_search_smbo.yaml -nw -np -resource local"
                    f" --experiment_dir {exp_dir}")
 
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)

@@ -7,6 +7,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 <span style="color:red">Add **basic example GIF** for toolbox application</span>.
 
+
 ## What Does The `mle-toolbox` Provide?
 
 1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
@@ -18,12 +19,13 @@ ML researchers need to coordinate different types of experiments on separate rem
 4. Storage of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
+
 ## The 4 Step `mle-toolbox` Cooking Recipe :stew:
 
 1. Follow the [instructions below](https://github.com/RobertTLange/mle-toolbox#installation-memo) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](https://roberttlange.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples :page_facing_up:](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_ode), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](examples/jax_vae).
-5. Run your own experiments using the [template files](https://github.com/RobertTLange/mle-toolbox/tree/main/templates), [project](https://github.com/RobertTLange/mle-project-template) and `mle run`.
+3. Check out the [examples :page_facing_up:](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_ode), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae).
+5. Run your own experiments using the [template files, project](https://github.com/RobertTLange/mle-project-template) and [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/).
 
 
 ## Installation :memo:
@@ -63,12 +65,12 @@ The configuration procedure consists of 3 optional steps, which depend on your n
 
 You are now ready to dive deeper into the specifics of [job configuration](https://roberttlange.github.io/mle-toolbox) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
 
-1. **Initial setup of credentials & toolbox settings**: `mle init`
-2. **Start up an experiment**: `mle run <exp_config>.yaml`
-3. **Monitor resource utilisation**: `mle monitor`
-4. **Retrieve an experiment result**: `mle retrieve`
-5. **Create an experiment report with figures**: `mle report`
-6. **Extract all GCS-stored results to local drive**: `mle sync-gcs`
+1. Setup of credentials & toolbox settings: [`mle init`](https://roberttlange.github.io/mle-toolbox/core_api/mle_init/)
+2. Start up an experiment: [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/)
+3. Monitor resource utilisation: [`mle monitor`](https://roberttlange.github.io/mle-toolbox/core_api/mle_monitor/)
+4. Retrieve an experiment result: [`mle retrieve`](https://roberttlange.github.io/mle-toolbox/core_api/mle_retrieve/)
+5. Create an experiment report with figures: [`mle report`](https://roberttlange.github.io/mle-toolbox/core_api/mle_report/)
+6. Extract all GCS-stored results to your local drive: [`mle sync-gcs`](https://roberttlange.github.io/mle-toolbox/core_api/mle_sync_gcs/)
 
 
 ## Examples :school_satchel:
