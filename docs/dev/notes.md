@@ -21,7 +21,6 @@
 ### Notes for documentation
 
 - Apply for 1000$ GCP credits: https://edu.google.com/programs/credits/research/?modal_active=none
-* https://carbon.now.sh/ - for nice twitter screenshot
 
 
 #### Sun Grid Engine
@@ -70,6 +69,11 @@ mkdocs serve
 mkdocs gh-deploy --force
 ```
 
+## GitHub Actions
+
+- Billing: https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions
+
 ## Nice visualization tools
 
 - https://favicon.io/favicon-generator/
+- https://carbon.now.sh/ - for nice twitter screenshot

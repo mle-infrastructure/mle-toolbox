@@ -113,8 +113,10 @@ class BaseHyperOptimisation(object):
             if self.hyper_log.no_results_logging:
                 self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
             self.run_sync_search(
-                num_search_batches, num_evals_per_batch, num_seeds_per_eval,
-                random_seeds
+                num_search_batches,
+                num_evals_per_batch,
+                num_seeds_per_eval,
+                random_seeds,
             )
         else:
             self.logger.info(
@@ -125,8 +127,9 @@ class BaseHyperOptimisation(object):
             print_framed("START HYPEROPT RUNS")
             if self.hyper_log.no_results_logging:
                 self.logger.info("!!!WARNING!!!: No metrics hyperopt logging!")
-            self.run_async_search(num_total_evals, max_running_jobs, num_seeds_per_eval,
-                                  random_seeds)
+            self.run_async_search(
+                num_total_evals, max_running_jobs, num_seeds_per_eval, random_seeds
+            )
 
     def run_async_search(
         self,

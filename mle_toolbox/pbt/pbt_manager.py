@@ -57,23 +57,23 @@ class PBT_Manager(object):
         # PBT-specific arguments
         self.pbt_config = pbt_config
         self.pbt_logging = pbt_logging
-        self.num_population_members = pbt_resources.num_population_members
-        self.num_total_update_steps = pbt_resources.num_total_update_steps
-        self.num_steps_until_ready = pbt_resources.num_steps_until_ready
-        self.num_steps_until_eval = pbt_resources.num_steps_until_eval
+        self.num_population_members = pbt_resources["num_population_members"]
+        self.num_total_update_steps = pbt_resources["num_total_update_steps"]
+        self.num_steps_until_ready = pbt_resources["num_steps_until_ready"]
+        self.num_steps_until_eval = pbt_resources["num_steps_until_eval"]
         self.num_pbt_steps = math.ceil(
             self.num_total_update_steps / self.num_steps_until_ready  # noqa: W504,E501
         )
 
         # Setup the exploration and selection strategies
         self.gen_logger = Population_Logger(
-            pbt_logging.eval_metric,
-            pbt_logging.max_objective,
+            pbt_logging["eval_metric"],
+            pbt_logging["max_objective"],
             self.num_population_members,
         )
-        self.selection = SelectionStrategy(pbt_config.selection.strategy)
+        self.selection = SelectionStrategy(pbt_config["selection"]["strategy"])
         self.exploration = ExplorationStrategy(
-            pbt_config.exploration.strategy, pbt_config.pbt_params
+            pbt_config["exploration"]["strategy"], pbt_config["pbt_params"]
         )
 
     def run(self):
@@ -93,7 +93,7 @@ class PBT_Manager(object):
 
         # Launch a first set of jobs - sample from prior distribution
         for worker_id in range(self.num_population_members):
-            hyperparams = self.exploration.resample()
+            hyperparams = self.exploration.init_hyperparams(worker_id)
             seed_id = np.random.randint(1000, 9999)
             run_id, config_fname = self.save_config(worker_id, 0, hyperparams)
             job, job_id = self.launch(config_fname, seed_id)
@@ -147,6 +147,7 @@ class PBT_Manager(object):
                         copy_info, hyperparams, ckpt = self.selection.select(
                             worker["worker_id"], self.gen_logger
                         )
+                        print(hyperparams)
                         # 3. Exploration if previous exploitation update
                         if copy_info["copy_bool"]:
                             hyperparams = self.exploration.explore(hyperparams)
@@ -212,7 +213,7 @@ class PBT_Manager(object):
         cmd_line_input = {"seed_id": seed_id}
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
-        job = job(
+        job = Job(
             self.resource_to_run,
             self.job_fname,
             config_fname,
@@ -236,14 +237,11 @@ class PBT_Manager(object):
         """Generate config file for a specific proposal to evaluate"""
         sample_config = copy.deepcopy(self.base_config)
 
-        # Add amount of steps until eval/ready to train config
-        sample_config.train_config[
-            "num_steps_until_ready"
-        ] = self.num_steps_until_ready  # noqa: E501
-        sample_config.train_config[
-            "num_steps_until_eval"
-        ] = self.num_steps_until_eval  # noqa: E501
-
+        # Add amount of steps until eval/ready to train config & worker id/pbt step id
+        sample_config.train_config["num_steps_until_ready"] = self.num_steps_until_ready
+        sample_config.train_config["num_steps_until_eval"] = self.num_steps_until_eval
+        sample_config.train_config["worker_id"] = worker_id
+        sample_config.train_config["pbt_step_id"] = pbt_step_id
         # Construct config dicts individually - set params in train config
         for param_name, param_value in hyperparams.items():
             sample_config.train_config[param_name] = param_value
@@ -275,13 +273,10 @@ class PBT_Manager(object):
                     if os.path.isfile(os.path.join(log_dir, f))
                 ]
                 log_file = [f for f in log_files if f.endswith(".hdf5")]
-
                 if len(log_file) > 0:
                     perf_log = load_run_log(exp_dir)
-                    perf = perf_log.meta_log.stats[self.pbt_logging.eval_metric][
-                        -1
-                    ]  # noqa: E501
-                    num_updates = perf_log.meta_log.time["num_updates"][-1]
+                    perf = perf_log.stats[self.pbt_logging["eval_metric"]][-1]
+                    num_updates = perf_log.time["num_updates"][-1]
                 else:
                     continue
 
@@ -301,7 +296,7 @@ class PBT_Manager(object):
                         "num_updates": num_updates,
                         "log_path": log_file[0] if len(log_file) > 0 else None,
                         "model_ckpt": (model_ckpt[0] if len(model_ckpt) > 0 else None),
-                        self.pbt_logging.eval_metric: perf,
+                        self.pbt_logging["eval_metric"]: perf,
                         "hyperparams": worker["hyperparams"],
                     }
                 )

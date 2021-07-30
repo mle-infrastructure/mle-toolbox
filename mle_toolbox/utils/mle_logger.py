@@ -39,9 +39,9 @@ class MLELogger(object):
         self,
         time_to_track: List[str],
         what_to_track: List[str],
-        time_to_print: List[str],
-        what_to_print: List[str],
-        config_fname: str,
+        time_to_print: Union[List[str], None] = None,
+        what_to_print: Union[List[str], None] = None,
+        config_fname: str = "base_config.json",
         experiment_dir: str = "/",
         seed_id: str = "no_seed",
         overwrite_experiment_dir: bool = False,
@@ -97,7 +97,11 @@ class MLELogger(object):
         # Set up what to print
         self.time_to_print = time_to_print
         self.what_to_print = what_to_print
-        self.verbose = len(self.what_to_print) > 0
+
+        if self.what_to_print is None:
+            self.verbose = False
+        else:
+            self.verbose = len(self.what_to_print) > 0
 
         # Keep the seed id around
         self.seed_id = seed_id
@@ -173,6 +177,8 @@ class MLELogger(object):
             self.final_model_save_fname += ".pt"
         elif self.model_type in ["jax", "sklearn"]:
             self.final_model_save_fname += ".pkl"
+        elif self.model_type == "numpy":
+            self.final_model_save_fname += ".npy"
 
         # Delete old log file and tboard dir if overwrite allowed
         if overwrite_experiment_dir:
@@ -461,14 +467,16 @@ class MLELogger(object):
         self.log_save_counter += 1
 
     def setup_model_ckpt_dir(self):
-        """ Create separate sub-dirs for checkpoints & final trained model. """
+        """Create separate sub-dirs for checkpoints & final trained model."""
         os.makedirs(os.path.join(self.experiment_dir, "models/final/"), exist_ok=True)
         if self.save_every_k_ckpt is not None:
-            os.makedirs(os.path.join(self.experiment_dir, "models/every_k/"),
-                        exist_ok=True)
+            os.makedirs(
+                os.path.join(self.experiment_dir, "models/every_k/"), exist_ok=True
+            )
         if self.save_top_k_ckpt is not None:
-            os.makedirs(os.path.join(self.experiment_dir, "models/top_k/"),
-                        exist_ok=True)
+            os.makedirs(
+                os.path.join(self.experiment_dir, "models/top_k/"), exist_ok=True
+            )
 
     def save_model(self, model):
         """Save current state of the model as a checkpoint - torch!"""
@@ -484,8 +492,10 @@ class MLELogger(object):
         elif self.model_type in ["jax", "sklearn"]:
             # JAX/sklearn save parameter dict/model as dictionary
             save_pkl_object(model, self.final_model_save_fname)
+        elif self.model_type == "numpy":
+            np.save(self.final_model_save_fname, model)
         else:
-            raise ValueError("Provide valid model_type [torch, jax, sklearn].")
+            raise ValueError("Provide valid model_type [torch, jax, sklearn, numpy].")
 
         # CASE 2: SEPARATE STORAGE OF EVERY K-TH LOGGED MODEL STATE
         if self.save_every_k_ckpt is not None:
@@ -504,10 +514,15 @@ class MLELogger(object):
                         + ".pkl"
                     )
                     save_pkl_object(model, ckpt_path)
+                elif self.model_type == "numpy":
+                    ckpt_path = (
+                        self.every_k_model_save_fname
+                        + str(self.model_save_counter)
+                        + ".npy"
+                    )
+                    np.save(ckpt_path, model)
                 # Update model save count & time point of storage
-                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[
-                    -1
-                ]
+                time = self.clock_to_track[self.ckpt_time_to_track].to_numpy()[-1]
                 self.every_k_storage_time.append(time)
                 self.every_k_ckpt_list.append(ckpt_path)
 
@@ -532,6 +547,13 @@ class MLELogger(object):
                         + ".pkl"
                     )
                     save_pkl_object(model, ckpt_path)
+                elif self.model_type == "numpy":
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + str(len(self.top_k_performance))
+                        + ".npy"
+                    )
+                    np.save(ckpt_path, model)
                 updated_top_k = True
                 self.top_k_performance.append(score)
                 self.top_k_storage_time.append(time)
@@ -554,6 +576,11 @@ class MLELogger(object):
                         self.top_k_model_save_fname + str(id_to_replace) + ".pkl"
                     )
                     save_pkl_object(model, ckpt_path)
+                elif self.model_type == "numpy":
+                    ckpt_path = (
+                        self.top_k_model_save_fname + str(id_to_replace) + ".npy"
+                    )
+                    np.save(ckpt_path, model)
                 updated_top_k = True
 
             # If minimize = replace worst performing model (max score)
@@ -583,6 +610,14 @@ class MLELogger(object):
                         + ".pkl"
                     )
                     save_pkl_object(model, ckpt_path)
+                elif self.model_type in ["numpy"]:
+                    ckpt_path = (
+                        self.top_k_model_save_fname
+                        + "_top_"
+                        + str(id_to_replace)
+                        + ".npy"
+                    )
+                    np.save(ckpt_path, model)
                 updated_top_k = True
 
     def save_torch_model(self, path_to_store, model):
@@ -612,11 +647,7 @@ class MLELogger(object):
         self.fig_save_counter += 1
         figure_fname = os.path.join(
             figures_dir,
-            "fig_"
-            + str(self.fig_save_counter)
-            + "_"
-            + str(self.seed_id)
-            + fname_ext,
+            "fig_" + str(self.fig_save_counter) + "_" + str(self.seed_id) + fname_ext,
         )
         fig.savefig(figure_fname, dpi=300)
         self.fig_storage_paths.append(figure_fname)

@@ -97,8 +97,10 @@ def check_job_config(job_config: dict) -> None:
         if "random_seeds" not in job_config["multi_config_args"].keys():
             job_config["multi_config_args"]["random_seeds"] = None
     elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
-        if ("random_seeds" not in
-                job_config["param_search_args"]["search_resources"].keys()):
+        if (
+            "random_seeds"
+            not in job_config["param_search_args"]["search_resources"].keys()
+        ):
             job_config["param_search_args"]["search_resources"]["random_seeds"] = None
 
 
@@ -108,6 +110,7 @@ def ask_for_experiment_id(repeated_question: bool = False):
     if not repeated_question:
         if mle_config.general.use_gcloud_protocol_sync:
             from ..remote.gcloud_transfer import get_gcloud_db
+
             accessed_remote_db = get_gcloud_db()
         else:
             accessed_remote_db = False

@@ -21,10 +21,16 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
             f"Could not load mle-toolbox configuration .toml from {config_fname}"
             "Proceed with minimal config used for testing."
         )
-        mle_config = DotMap({"general": {"use_conda_virtual_env": False,
-                                         "use_venv_virtual_env": False,
-                                         "use_credential_encryption": False,
-                                         "random_seed": 42}})
+        mle_config = DotMap(
+            {
+                "general": {
+                    "use_conda_virtual_env": False,
+                    "use_venv_virtual_env": False,
+                    "use_credential_encryption": False,
+                    "random_seed": 42,
+                }
+            }
+        )
 
     # Decrypt ssh credentials for SGE & Slurm -> Only if local launch used!
     if mle_config.general.use_credential_encryption:

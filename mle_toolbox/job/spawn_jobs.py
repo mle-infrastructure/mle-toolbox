@@ -125,7 +125,7 @@ def spawn_multiple_configs(
         num_seeds,
         default_seed,
         random_seeds,
-        num_seeds * num_configs
+        num_seeds * num_configs,
     )
     multi_experiment.run()
 

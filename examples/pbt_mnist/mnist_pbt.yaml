@@ -2,7 +2,7 @@
 meta_job_args:
     project_name: "examples"
     experiment_type: "population-based-training"
-    base_train_fname: "pbt_mnist/run_mnist_train.py"
+    base_train_fname: "pbt_mnist/run_mnist_steps.py"
     base_train_config: "pbt_mnist/mnist_config.json"
     experiment_dir: "experiments/pbt_mnist"
 

@@ -217,9 +217,7 @@ class Job(object):
                 self.job_filename, self.cmd_line_args, self.job_arguments
             )
         else:
-            proc = local_submit_job(
-                self.job_filename, self.cmd_line_args
-            )
+            proc = local_submit_job(self.job_filename, self.cmd_line_args)
         self.job_status = 1
         return proc
 

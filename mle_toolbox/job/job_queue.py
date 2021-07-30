@@ -30,12 +30,12 @@ class JobQueue(object):
         logger_level: int = logging.WARNING,
     ):
         # Init experiment class with relevant info
-        self.resource_to_run = resource_to_run    # compute resource for job
-        self.job_filename = job_filename          # path to train script
+        self.resource_to_run = resource_to_run  # compute resource for job
+        self.job_filename = job_filename  # path to train script
         self.config_filenames = config_filenames  # path to config json
-        self.experiment_dir = experiment_dir      # main results dir (create)
-        self.job_arguments = job_arguments        # job-specific args
-        self.num_seeds = num_seeds                # number seeds to run
+        self.experiment_dir = experiment_dir  # main results dir (create)
+        self.job_arguments = job_arguments  # job-specific args
+        self.num_seeds = num_seeds  # number seeds to run
         self.max_running_jobs = max_running_jobs  # number of sim running jobs
 
         # Instantiate/connect a logger
