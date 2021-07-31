@@ -10,7 +10,7 @@ install-dev:
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
 	pip install pytest pytest-timeout pytest-cov
-	pip flake8 black pydocstyle
+	pip install flake8 black pydocstyle
 	pip install -e .
 
 clean:
