@@ -34,9 +34,12 @@ jobs:
     - name: Type-check with MyPy
       run: |
         make type-check
-    - name: Run unit tests
+    - name: Run unit/integration tests
       run: |
-        make test-unit
-    - name: Run integration tests
-      run: |
-        make test-integration
+        make tests
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        fail_ci_if_error: true # optional (default = false)
+        verbose: true # optional (default = false)
