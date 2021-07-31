@@ -36,7 +36,7 @@ jobs:
         make type-check
     - name: Run unit/integration tests
       run: |
-        make tests
+        make testing
     - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v2
       with:
