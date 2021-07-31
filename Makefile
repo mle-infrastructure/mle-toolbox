@@ -40,7 +40,7 @@ type-check:
 	# Run type-checking
 	# mypy mle_toolbox/.
 
-tests:
+testing:
 	# Run unit tests: File loading, job template generation
 	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml
 
