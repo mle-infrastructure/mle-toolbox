@@ -29,7 +29,7 @@ class PBT_Manager(object):
         pbt_resources: Dict[str, int],
         pbt_config: Dict[str, Union[str, int]],
     ):
-        """Manger orchestrating PBT experiment"""
+        """Manager orchestrating PBT experiment"""
         # Set up the PBT search run
         self.pbt_log = pbt_log  # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run  # Compute resource to run
@@ -62,7 +62,7 @@ class PBT_Manager(object):
         self.num_steps_until_ready = pbt_resources["num_steps_until_ready"]
         self.num_steps_until_eval = pbt_resources["num_steps_until_eval"]
         self.num_pbt_steps = math.ceil(
-            self.num_total_update_steps / self.num_steps_until_ready  # noqa: W504,E501
+            self.num_total_update_steps / self.num_steps_until_ready
         )
 
         # Setup the exploration and selection strategies
@@ -147,7 +147,6 @@ class PBT_Manager(object):
                         copy_info, hyperparams, ckpt = self.selection.select(
                             worker["worker_id"], self.gen_logger
                         )
-                        print(hyperparams)
                         # 3. Exploration if previous exploitation update
                         if copy_info["copy_bool"]:
                             hyperparams = self.exploration.explore(hyperparams)

@@ -49,6 +49,15 @@ single_job_args = {}
 def check_correct_results(experiment_dir: str,
                           api_check: bool = False) -> None:
     """ Ensure that correct results and directories were generated. """
+    assert os.path.exists(experiment_dir)
+    # Check that json config, hyper and meta logs were created
+    assert os.path.exists(os.path.join(experiment_dir, "pbt_log.pkl"))
+    # assert os.path.exists(os.path.join(experiment_dir, "worker_log.hdf5"))
+    assert os.path.exists(os.path.join(experiment_dir, "pbt_base_config.json"))
+
+    # Check that experiment config yaml was created (reproducibility)
+    if api_check:
+        assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
 
 
 def test_run_pbt() -> None:

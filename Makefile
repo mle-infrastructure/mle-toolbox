@@ -9,7 +9,8 @@ install-dev:
 	python -m pip install --upgrade pip
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
-	pip install pytest pytest-timeout flake8 black pydocstyle
+	pip install pytest pytest-timeout pytest-cov
+	pip flake8 black pydocstyle
 	pip install -e .
 
 clean:
@@ -39,13 +40,9 @@ type-check:
 	# Run type-checking
 	# mypy mle_toolbox/.
 
-test-unit:
+tests:
 	# Run unit tests: File loading, job template generation
-	pytest -vv --durations=0 ./tests/unit
-
-test-integration:
-	# Run integration tests: Different experiment types, report generation
-	pytest -vv --durations=0 ./tests/integration
+	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml
 
 deploy-docs:
 	# Deploy documentation homepage: https://roberttlange.github.io/mle-toolbox/

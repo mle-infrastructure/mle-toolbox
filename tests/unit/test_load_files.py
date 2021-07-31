@@ -10,14 +10,14 @@ from mle_toolbox.utils import load_meta_log
 
 
 cmd_args_proxy = DotMap({
-    "config_fname": "tests/fixtures/test_yaml_config.yaml",
-    "base_train_fname": "tests/fixtures/test_python_script.py",
-    "base_train_config": "tests/fixtures/test_json_config.json",
+    "config_fname": "tests/unit/fixtures/yaml_config.yaml",
+    "base_train_fname": "tests/unit/fixtures/python_script.py",
+    "base_train_config": "tests/unit/fixtures/json_config.json",
     "experiment_dir": "experiments/"})
 
-mle_config_fname = "tests/fixtures/test_mle_config.toml"
-meta_log_fname = "test_meta_log.hdf5"
-hyper_log_fname = "test_hyper_log.pkl"
+mle_config_fname = "tests/unit/fixtures/toolbox_config.toml"
+meta_log_fname = "meta_log.hdf5"
+hyper_log_fname = "hyper_log.pkl"
 
 
 class TestFileLoading(unittest.TestCase):
@@ -43,14 +43,14 @@ class TestFileLoading(unittest.TestCase):
 
     def test_load_result_logs(self):
         """ Assert correct loading of hyper/meta log files. """
-        meta, hyper = load_result_logs("tests/fixtures",
+        meta, hyper = load_result_logs("tests/unit/fixtures",
                                        meta_log_fname,
                                        hyper_log_fname)
 
     def test_load_meta_log(self):
-        meta = load_meta_log(os.path.join("tests/fixtures",
+        meta = load_meta_log(os.path.join("tests/unit/fixtures",
                                           meta_log_fname))
 
     def test_load_hyper_log(self):
-        hyper = load_hyper_log(os.path.join("tests/fixtures",
+        hyper = load_hyper_log(os.path.join("tests/unit/fixtures",
                                             hyper_log_fname))
