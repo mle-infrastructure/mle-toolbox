@@ -28,7 +28,7 @@ pbt_args:
                     end: 1
                     init: [0.9, 0.1]
         exploration:
-            strategy: "perturb"
+            strategy: "additive-noise"
         selection:
             strategy: "truncation"
 

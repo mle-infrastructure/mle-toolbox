@@ -6,7 +6,7 @@ def main(mle):
     """ Optimize a simple quadratic. """
     # Reload the 'weights' (theta) corresponding to quadratic
     if mle.model_ckpt is not None:
-        theta = np.load(mle.model_ckpt)
+        theta = mle.model_ckpt
     else:
         theta = np.array(mle.train_config.theta_init[mle.train_config.worker_id])
 
@@ -16,15 +16,16 @@ def main(mle):
     for update_counter in range(mle.train_config.num_steps_until_ready):
         theta = step(theta, h, mle.train_config.lrate)
         # Update log with latest evaluation results
-        if update_counter % mle.train_config.num_steps_until_eval == 0:
-            time_tick = {"num_updates": update_counter}
-            stats_tick = {"objective": evaluate(theta),
-                          "surrogate": surrogate_objective(theta, h)}
-            mle.update_log(time_tick, stats_tick, model=theta, save=True)
-            train_losses = []
+        time_tick = {"num_updates": update_counter + 1}
+        stats_tick = {"objective": evaluate(theta),
+                      "surrogate": surrogate_objective(theta, h),
+                      "theta_0": theta[0],
+                      "theta_1": theta[1]}
+        mle.update_log(time_tick, stats_tick, model=theta, save=True)
+        train_losses = []
 
     # Stop training if number of steps is 'ready' number reached!
-    if update_counter == mle.train_config.num_steps_until_ready:
+    if (update_counter + 1) == mle.train_config.num_steps_until_ready:
         return
 
     return

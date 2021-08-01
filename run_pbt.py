@@ -1,6 +1,6 @@
 import os
 import shutil
-import subprocess as sp
+from mle_toolbox.utils import set_random_seeds
 from mle_toolbox.launch.pbt_experiment import run_population_based_training
 
 
@@ -13,7 +13,7 @@ pbt_logging = {"max_objective": True,
                "eval_metric": "objective"}
 
 pbt_resources = {"num_population_members": 2,
-                 "num_total_update_steps": 8,
+                 "num_total_update_steps": 40,
                  "num_steps_until_ready": 4,
                  "num_steps_until_eval": 4}
 
@@ -62,6 +62,7 @@ def check_correct_results(experiment_dir: str,
 
 def test_run_pbt() -> None:
     """ Test job launch wrapper - Run PDE experiment on local machine. """
+    set_random_seeds(42)
     exp_dir = os.path.join(experiment_dir, "run_test")
     meta_job_args["experiment_dir"] = exp_dir
     # Remove experiment dir at start of test
@@ -78,22 +79,5 @@ def test_run_pbt() -> None:
     check_correct_results(exp_dir)
 
 
-# def test_api_pbt() -> None:
-#     """ Execute `mle run pde_grid_sync.yaml` and check running pipeline. """
-#     os.chdir('./examples')
-#     exp_dir = "experiments/pbt/api_test"
-#     # Remove experiment dir at start of test
-#     if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
-#         shutil.rmtree(exp_dir)
-#
-#     # Execute the mle api command
-#     bashCommand = ("mle run pbt_quadratic/quadratic_pbt.yaml"
-#                    " -nw -np -resource local"
-#                    f" --experiment_dir {exp_dir}")
-#
-#     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
-#     output, error = process.communicate()
-#
-#     # Check generated directories for correctness
-#     check_correct_results(exp_dir, api_check=True)
-#     os.chdir('..')
+if __name__ == "__main__":
+    test_run_pbt()

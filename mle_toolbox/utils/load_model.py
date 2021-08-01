@@ -1,3 +1,4 @@
+import numpy as np
 from .core_files_load import load_pkl_object
 
 
@@ -23,7 +24,11 @@ def load_model(ckpt_path: str, model_type: str, model=None):
     elif model_type in ["jax", "sklearn"]:
         model = load_pkl_object(ckpt_path)
         return model
+    elif model_type in ["numpy"]:
+        model = np.load(ckpt_path)
+        return model
     else:
         raise ValueError(
-            "Please provide a valid model " + "type ('torch', 'jax', 'sklearn')."
+            "Please provide a valid model " + "type ('torch', 'jax',"
+            " 'sklearn', 'numpy')."
         )

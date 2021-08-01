@@ -13,7 +13,13 @@ def run_population_based_training(
 
     # 1. Setup the hyperlogger for the experiment
     pbt_log_fname = os.path.join(meta_job_args["experiment_dir"], "pbt_log.pkl")
-    pbt_log = PBT_Logger(pbt_log_fname)
+    pbt_log = PBT_Logger(
+        pbt_log_fname,
+        meta_job_args["experiment_dir"],
+        pbt_args["pbt_logging"]["eval_metric"],
+        pbt_args["pbt_logging"]["max_objective"],
+        pbt_args["pbt_resources"]["num_population_members"],
+    )
 
     # 2. Initialize and run the PBT optimizer class
     pbt_opt_instance = PBT_Manager(
