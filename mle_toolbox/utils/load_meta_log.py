@@ -86,7 +86,7 @@ def load_meta_log(log_fname: str, aggregate_seeds: bool = True) -> MetaLog:
     """Load in logging results & mean the results over different runs"""
     assert os.path.exists(log_fname), f"File {log_fname} does not exist."
     # Open File & Get array names to load in
-    h5f = h5py.File(log_fname, mode="r")
+    h5f = h5py.File(log_fname, mode="r", swmr=True)
     # Get all ids of all runs (b_1_eval_0_seed_0)
     run_names = list(h5f.keys())
     # Get only stem of ids (b_1_eval_0)
@@ -111,7 +111,7 @@ def load_meta_log(log_fname: str, aggregate_seeds: bool = True) -> MetaLog:
                 data_to_store[o_name] = run[ds][o_name][:]
             source_to_store[ds] = data_to_store
         result_dict[rn] = source_to_store
-    h5f.close()
+    # h5f.close()
 
     # Return as dot-callable dictionary
     if aggregate_seeds:

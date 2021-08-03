@@ -18,7 +18,7 @@ class MLExperiment(object):
         auto_setup: bool = True,
         create_jax_prng: bool = False,
     ):
-        """Load the job configs for the MLE experiment."""
+        """Load job configuration for MLE experiment, setup logger & random seeds."""
         # Parse experiment command line arguments
         cmd_args, extra_args = parse_experiment_args(
             default_config_fname, default_seed, default_experiment_dir
@@ -46,7 +46,7 @@ class MLExperiment(object):
         if auto_setup:
             self.setup()
 
-    def setup(self):
+    def setup(self) -> None:
         """Set the random seed, initialize logger & reload a model."""
         # If no seed is provided in train_config - set it to default
         if "seed_id" not in self.train_config.keys():
@@ -77,6 +77,12 @@ class MLExperiment(object):
         model=None,
         plot_to_tboard=None,
         save=False,
-    ):
+    ) -> None:
         """Update the MLE_Logger instance with stats, model params & save."""
         self.log.update_log(clock_tick, stats_tick, model, plot_to_tboard, save)
+
+    def ready_to_log(self, update_counter: int) -> bool:
+        """Check whether update_counter is modulo of log_every_k_steps in logger."""
+        assert self.log.log_every_k_updates is not None, \
+            "Provide `log_every_k_updates` in your `log_config`"
+        return update_counter % self.log.log_every_k_updates == 0

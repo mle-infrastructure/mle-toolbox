@@ -10,7 +10,8 @@ import numpy as np
 from tqdm import tqdm
 
 from mle_toolbox.job import Job
-from ..utils import load_json_config
+from ..utils import load_json_config, load_run_log
+
 from .pbt_logger import PBT_Logger
 from .explore import ExplorationStrategy
 from .exploit import SelectionStrategy
@@ -105,6 +106,8 @@ class PBT_Manager(object):
                 position=i,
                 leave=True,
                 bar_format="{l_bar}{bar:45}{r_bar}{bar:-45b}",
+                desc=f"Worker {i}",
+                unit="Job"
             )
             for i in range(self.num_population_members)
         ]
@@ -141,8 +144,10 @@ class PBT_Manager(object):
                 status = self.monitor(worker["job"], worker["job_id"])
 
                 # If worker completed job - clean up + spawn new one
-                if (status == 0 and
-                        worker_log["num_updates"] == self.num_steps_until_ready):
+                if (
+                    status == 0
+                    and worker_log["num_updates"] == self.num_steps_until_ready
+                ):
                     try:
                         os.remove(worker["config_fname"])
                     except Exception:
@@ -174,7 +179,6 @@ class PBT_Manager(object):
                             model_ckpt,
                             hyperparams,
                         )
-                        time.sleep(0.1)
 
                         # Replace old worker by new one
                         self.pbt_queue[worker_data["worker_id"]] = worker_data
@@ -228,6 +232,18 @@ class PBT_Manager(object):
             "seed_id": seed_id,
             "hyperparams": hyperparams,
         }
+
+        # Sleep so that experiment dir + 1st log is created before monitoring
+        while True:
+            time.sleep(1)
+            subdirs = [f.path for f in os.scandir(self.experiment_dir)
+                       if f.is_dir()]
+            exp_dir = [f for f in subdirs if f.endswith(run_id)]
+            try:
+                _ = load_run_log(exp_dir[0])
+                break
+            except Exception:
+                continue
         return worker_data
 
     def monitor(self, job: Job, job_id: str) -> bool:

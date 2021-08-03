@@ -47,6 +47,7 @@ class MLELogger(object):
         overwrite_experiment_dir: bool = False,
         use_tboard: bool = False,
         tboard_fname: Union[str, None] = None,
+        log_every_k_updates: Union[int, None] = None,
         print_every_k_updates: Union[int, None] = None,
         model_type: str = "no-model-type-provided",
         ckpt_time_to_track: Union[str, None] = None,
@@ -61,6 +62,8 @@ class MLELogger(object):
         self.model_save_counter = 0
         self.fig_save_counter = 0
         self.fig_storage_paths: List[str] = []
+
+        self.log_every_k_updates = log_every_k_updates
         self.print_every_k_updates = print_every_k_updates
 
         # MODEL LOGGING SETUP: Type of model/every k-th ckpt/top k ckpt

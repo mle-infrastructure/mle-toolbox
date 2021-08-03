@@ -11,5 +11,5 @@ gitpython
 scp
 paramiko
 sshtunnel
-plotext
+plotext==2.3.1
 rich==9.13.0

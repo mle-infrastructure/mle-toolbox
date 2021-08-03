@@ -54,8 +54,7 @@ class PBT_Logger(object):
 
     def save_log(self):
         """Save the trace/log of the PBT."""
-        pbt_data_log = {"performance": self.pbt_df,
-                        "trajectory": self.trajectory_df}
+        pbt_data_log = {"performance": self.pbt_df, "trajectory": self.trajectory_df}
         save_pkl_object(pbt_data_log, self.pbt_log_fname)
 
     def get_most_recent_data(self) -> pd.DataFrame:
@@ -73,7 +72,8 @@ class PBT_Logger(object):
 
         try:
             exp_dir = [f for f in subdirs if f.endswith(run_id)][0]
-        except Exception:
+        except Exception as  e:
+            print(e, subdirs)
             exp_dir = ""
 
         log_dir = os.path.join(exp_dir, "logs")
@@ -86,13 +86,15 @@ class PBT_Logger(object):
                 for f in os.listdir(log_dir)
                 if (os.path.isfile(os.path.join(log_dir, f)) and f.endswith(".hdf5"))
             ]
-        except Exception:
+        except Exception as e:
+            print(e)
+            print(exp_dir)
             log_files = []
 
         if len(log_files) > 0:
             log_path = log_files[0]
             # A bit awkward - try loading until no blocking occurs
-            # os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+            os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
             while True:
                 try:
                     perf_log = load_run_log(exp_dir)
@@ -136,19 +138,19 @@ class PBT_Logger(object):
         }
         return worker_log
 
-    def get_truncation_population(self, most_recent_df, truncation_percent
-                                  ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_truncation_population(
+        self, most_recent_df, truncation_percent
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Get top and bottom of performance distribution."""
-        top_df, bottom_df = get_top_and_bottom(most_recent_df,
-                                               truncation_percent,
-                                               self.eval_metric,
-                                               self.max_objective)
+        top_df, bottom_df = get_top_and_bottom(
+            most_recent_df, truncation_percent, self.eval_metric, self.max_objective
+        )
         return top_df, bottom_df
 
 
-def get_top_and_bottom(df: pd.DataFrame, truncation_percent: float,
-                       eval_metric: str, max_objective: bool
-                       ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def get_top_and_bottom(
+    df: pd.DataFrame, truncation_percent: float, eval_metric: str, max_objective: bool
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Get top and bottom of performance distribution."""
     num_population_members = df.shape[0]
     n_rows = math.ceil(num_population_members * truncation_percent)
