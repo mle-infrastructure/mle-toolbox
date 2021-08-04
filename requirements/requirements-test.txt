@@ -3,3 +3,6 @@ scikit-optimize
 statsmodels
 pycrypto
 matplotlib
+seaborn
+xhtml2pdf
+markdown2

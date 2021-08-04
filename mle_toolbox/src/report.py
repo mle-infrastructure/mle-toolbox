@@ -14,7 +14,7 @@ def report(cmd_args):
         if experiment_id[:5] != "e-id-":
             experiment_id = "e-id-" + experiment_id
     # 2. Create 'reporter' instance and write reports
-    auto_generate_reports(experiment_id)
+    auto_generate_reports(experiment_id, pdf_gen=True)
 
 
 def auto_generate_reports(e_id: str, logger=None, pdf_gen: bool = False):

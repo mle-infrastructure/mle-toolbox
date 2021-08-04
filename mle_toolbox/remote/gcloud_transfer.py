@@ -1,6 +1,5 @@
-import os  # noqa: E902
+import os
 import glob
-from google.cloud import storage
 from os.path import expanduser
 import logging
 import zipfile
@@ -11,6 +10,15 @@ from typing import Union
 from mle_toolbox import mle_config
 from ..protocol import load_local_protocol_db
 from .ssh_manager import setup_proxy_server
+
+try:
+    from google.cloud import storage
+except ModuleNotFoundError as err:
+    raise ModuleNotFoundError(
+        f"{err}. You need to"
+        "install `google-cloud-storage` to use "
+        "the `mle_toolbox.remote.gcloud_transfer` module."
+    )
 
 
 # Set environment variable for gcloud credentials & proxy remote
@@ -277,8 +285,9 @@ def get_gcloud_zip_experiment(
     # Goodbye message if successful
     print(
         time_t,
-        f"Successfully retrieved {experiment_id}" f" - from GCS {gcloud_hash_fname}",
+        f"Successfully retrieved {experiment_id}" f" - from GCS",
     )
+    print(time_t, f"Remote Path: {gcloud_hash_fname}")
 
     # Update protocol retrieval status of the experiment
     db.dadd(experiment_id, ("retrieved_results", True))

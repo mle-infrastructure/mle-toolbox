@@ -1,19 +1,13 @@
 import os
 import logging
+from datetime import datetime
 from typing import Union
 from dotmap import DotMap
 from .generate_markdown import MarkdownGenerator
 from .generate_figures import FigureGenerator
 from ..launch.prepare_experiment import prepare_logger
+from ..src.retrieve import retrieve
 
-
-try:
-    import pdfkit
-except ModuleNotFoundError as err:
-    raise ModuleNotFoundError(
-        f"{err}. You need to install `pdfkit` "
-        "to use the `mle_toolbox.report` module."
-    )
 
 try:
     import markdown2
@@ -41,7 +35,35 @@ class ReportGenerator:
         self.e_id = e_id
         self.db = db
         self.report_data = DotMap(self.db.get(self.e_id))
-        self.experiment_dir = self.report_data.exp_retrieval_path
+
+        # Check whether the experiment dir exists - if not ask whether
+        # to pull from remote storage or to use a different directory
+        # Skip when auto-generation directly on resource that generated results
+        if os.path.isdir(self.report_data.exp_retrieval_path):
+            self.experiment_dir = self.report_data.exp_retrieval_path
+        else:
+            time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+            pull_question = input(
+                time_t + " Can't find results. Do you"
+                " want to pull remote results [Y/N]:  "
+            )
+            pull_bool = pull_question == "Y"
+            # Pull results from remote resource
+            if pull_bool:
+                self.experiment_dir = retrieve(
+                    DotMap(
+                        {
+                            "experiment_id": "no-id-given",
+                            "retrieve_all_new": False,
+                            "retrieve_local": False,
+                            "local_dir_name": None,
+                        }
+                    )
+                )
+            else:
+                self.experiment_dir = input(
+                    time_t + " Please provide relative" " path to results:  "
+                )
 
         # Create a directory for the reports to be stored in
         self.reports_dir = os.path.join(self.experiment_dir, "reports")
@@ -77,6 +99,7 @@ class ReportGenerator:
 
         # 2b. If search experiment generate all 2D figures to show in report
         search_vars, search_targets = self.get_hypersearch_data()
+
         if len(search_vars) > 1:
             _ = self.fig_generator.generate_all_2D_figures(search_vars, search_targets)
 
@@ -99,18 +122,20 @@ class ReportGenerator:
         # 5. Generate the PDF file.
         if self.pdf_gen:
             self.pdf_report_fname = os.path.join(self.reports_dir, self.e_id + ".pdf")
-            generate_pdf(self.pdf_report_fname, self.html_text)
+            generate_pdf(self.pdf_report_fname, self.html_report_fname)
             self.logger.info(f'Report - .pdf GENERATED: {self.e_id + ".pdf"}')
 
     def get_hypersearch_data(self):
         """Get hypersearch variables + targets for 2D visualization loop."""
         search_vars, search_targets = [], []
-        if "params_to_search" in self.report_data["job_spec_args"]:
-            params = self.report_data["job_spec_args"]["params_to_search"]
+        if "search_params" in self.report_data["job_spec_args"]["search_config"]:
+            params = self.report_data["job_spec_args"]["search_config"]["search_params"]
             for type, var_dict in params.items():
                 for var_name in var_dict.keys():
                     search_vars.append(var_name)
-            search_targets = self.report_data["job_spec_args"]["eval_metrics"]
+            search_targets = self.report_data["job_spec_args"]["search_logging"][
+                "eval_metrics"
+            ]
         return search_vars, search_targets
 
 
@@ -120,17 +145,13 @@ def construct_markdown_table(data_dict, exclude_keys=[], table_entries_per_row=2
     for k, value in data_dict.items():
         # Only add to table row if not excluded in given list
         if k not in exclude_keys:
-            current_row["Param C" + str(entry_counter + 1)] = (
-                "`" + str(k) + "`"
-            )  # noqa: E501
+            current_row["Param C" + str(entry_counter + 1)] = "`" + str(k) + "`"
             if type(value) == list:
                 v_temp = [str(x) for x in value]
                 v = ", ".join(v_temp)
             else:
                 v = str(value)
-            current_row["Value C" + str(entry_counter + 1)] = (
-                "`" + str(v) + "`"
-            )  # noqa: E501
+            current_row["Value C" + str(entry_counter + 1)] = "`" + str(v) + "`"
             entry_counter += 1
 
             # reset the row dictionary and append to table list
@@ -145,10 +166,10 @@ def construct_markdown_table(data_dict, exclude_keys=[], table_entries_per_row=2
     return table
 
 
-def construct_hypersearch_table(params_to_search):
+def construct_hypersearch_table(search_params):
     """Construct a markdown table for the hyperparameter search ranges."""
     table, current_row = [], {}
-    for type, var_dict in params_to_search.items():
+    for type, var_dict in search_params.items():
         for var_name, var_range in var_dict.items():
             current_row["Var. Type"] = "`" + str(type) + "`"
             current_row["Var. Name"] = "`" + str(var_name) + "`"
@@ -200,15 +221,17 @@ def generate_markdown(e_id, md_report_fname, report_data):
         doc.addTable(dictionary_list=job_table)
 
         doc.addHeader(3, "Job-Specific-Arguments.")
-        specific_table = construct_markdown_table(
-            report_data["job_spec_args"], ["params_to_search"]
-        )
-        doc.addTable(dictionary_list=specific_table)
         if report_data["meta_job_args"]["experiment_type"] == "hyperparameter-search":
             search_table = construct_hypersearch_table(
-                report_data["job_spec_args"]["params_to_search"]
+                report_data["job_spec_args"]["search_config"]["search_params"]
             )
             doc.addTable(dictionary_list=search_table)
+            doc.writeTextLine(
+                f'{doc.addBoldedText("Metrics:")} '
+                + str(report_data["job_spec_args"]["search_logging"]["eval_metrics"])
+            )
+
+        # TODO: Add more different experiment type configurations.
 
         # Base Configuration Hyperparameters used in the Experiment
         doc.addHeader(2, "Base Config Hyperparameters.")
@@ -238,25 +261,32 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
         # Add figure inclusion to HTML text
         # By default: 2 Figures per row - 45% width
         for fig in figure_fnames:
-            html_text += f'<img src="{fig}" width="45%"' + 'style="margin-right:20px">'
+            html_text += f'<img src="{fig}" width="500"' + 'style="margin-right:20px">'
+            html_text += "<br>"
         output_file.write(html_text)
     return html_text
 
 
-def generate_pdf(pdf_report_fname, html_text):
+def generate_pdf(pdf_report_fname, html_report_fname):
     """Generates a PDF report from the transformed html text."""
-    pdfkit.from_string(
-        html_text,
-        pdf_report_fname,
-        options={
-            "enable-local-file-access": None,
-            "page-size": "A4",
-            "dpi": 400,
-            "print-media-type": "",
-            "disable-smart-shrinking": "",
-            "quiet": "",
-        },
-    )
+    import codecs
+
+    try:
+        from xhtml2pdf import pisa
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(
+            f"{err}. You need to install `xhtml2pdf` "
+            "to use the `mle_toolbox.report` module."
+        )
+
+    result_file = open(pdf_report_fname, "w+b")
+    # convert HTML to PDF
+
+    file = codecs.open(html_report_fname, "r", "utf-8")
+    source_html = file.read()
+    _ = pisa.CreatePDF("<html>" + source_html + "</html>", dest=result_file)
+    # close output file
+    result_file.close()  # close output file
 
 
 def add_figures_to_markdown(md_report_fname, figure_fnames):

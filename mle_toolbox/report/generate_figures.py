@@ -1,7 +1,10 @@
 import os
 import itertools
+import warnings
 from mle_toolbox import load_result_logs
 from mle_toolbox.visualize import visualize_1D_lcurves, visualize_2D_grid
+
+warnings.filterwarnings("ignore")
 
 
 class FigureGenerator:

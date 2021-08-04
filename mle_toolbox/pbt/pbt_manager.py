@@ -107,7 +107,7 @@ class PBT_Manager(object):
                 leave=True,
                 bar_format="{l_bar}{bar:45}{r_bar}{bar:-45b}",
                 desc=f"Worker {i}",
-                unit="Job"
+                unit="Job",
             )
             for i in range(self.num_population_members)
         ]
@@ -236,8 +236,7 @@ class PBT_Manager(object):
         # Sleep so that experiment dir + 1st log is created before monitoring
         while True:
             time.sleep(1)
-            subdirs = [f.path for f in os.scandir(self.experiment_dir)
-                       if f.is_dir()]
+            subdirs = [f.path for f in os.scandir(self.experiment_dir) if f.is_dir()]
             exp_dir = [f for f in subdirs if f.endswith(run_id)]
             try:
                 _ = load_run_log(exp_dir[0])

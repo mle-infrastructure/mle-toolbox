@@ -1,12 +1,12 @@
-from .core_experiment import (
+from .utils.core_experiment import (
     load_experiment_config,
     parse_experiment_args,
     get_extra_cmd_line_input,
     set_random_seeds,
 )
-from .mle_logger import MLELogger
-from .load_model import load_model
-from .helpers import print_framed
+from .utils.load_model import load_model
+from .utils.helpers import print_framed
+from mle_logging import MLELogger
 
 
 class MLExperiment(object):
@@ -75,14 +75,16 @@ class MLExperiment(object):
         clock_tick: dict,
         stats_tick: dict,
         model=None,
-        plot_to_tboard=None,
+        plot_fig=None,
+        extra_obj=None,
         save=False,
     ) -> None:
         """Update the MLE_Logger instance with stats, model params & save."""
-        self.log.update_log(clock_tick, stats_tick, model, plot_to_tboard, save)
+        self.log.update(clock_tick, stats_tick, model, plot_fig, extra_obj, save)
 
     def ready_to_log(self, update_counter: int) -> bool:
         """Check whether update_counter is modulo of log_every_k_steps in logger."""
-        assert self.log.log_every_k_updates is not None, \
-            "Provide `log_every_k_updates` in your `log_config`"
-        return update_counter % self.log.log_every_k_updates == 0
+        assert (
+            self.log.log_every_j_steps is not None
+        ), "Provide `log_every_k_steps` in your `log_config`"
+        return update_counter % self.log.log_every_j_steps == 0 or update_counter == 0

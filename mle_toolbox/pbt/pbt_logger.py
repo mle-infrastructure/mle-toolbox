@@ -72,7 +72,7 @@ class PBT_Logger(object):
 
         try:
             exp_dir = [f for f in subdirs if f.endswith(run_id)][0]
-        except Exception as  e:
+        except Exception as e:
             print(e, subdirs)
             exp_dir = ""
 
@@ -94,7 +94,7 @@ class PBT_Logger(object):
         if len(log_files) > 0:
             log_path = log_files[0]
             # A bit awkward - try loading until no blocking occurs
-            os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+            os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
             while True:
                 try:
                     perf_log = load_run_log(exp_dir)

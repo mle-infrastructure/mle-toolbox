@@ -25,7 +25,6 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
         try:
             from skopt import Optimizer
         except ModuleNotFoundError as err:
-            print(err)
             raise ModuleNotFoundError(
                 f"{err}. You need to"
                 "install `scikit-optimize` to use "

@@ -16,7 +16,6 @@ from .core_files_load import (
     load_run_log,
 )
 from .core_files_merge import merge_hdf5_files
-from .mle_logger import MLELogger
 from .load_meta_log import load_meta_log
 from .load_hyper_log import load_hyper_log
 from .load_model import load_model
@@ -32,7 +31,6 @@ __all__ = [
     "ask_for_binary_input",
     "print_framed",
     "get_jax_os_ready",
-    "MLELogger",
     "load_experiment_config",
     "parse_experiment_args",
     "get_extra_cmd_line_input",

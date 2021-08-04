@@ -1,6 +1,4 @@
-import os
 from datetime import datetime
-
 from mle_toolbox.utils import print_framed
 from mle_toolbox.remote.ssh_manager import SSH_Manager
 from mle_toolbox.remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
@@ -13,18 +11,6 @@ def retrieve(cmd_args):
     experiment_id = cmd_args.experiment_id
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
-    # Either get entire result dir or only generated figures - ask for input
-    if cmd_args.figures_dir:
-        get_dir_or_fig = "fig-dir"
-    elif cmd_args.experiment_dir:
-        get_dir_or_fig = "exp-dir"
-    else:
-        get_dir_or_fig = input(
-            time_t
-            + " Retrieve entire result dir or "
-            + "only figures? [exp-dir/fig-dir]  "
-        )
-
     # Retrieve results for a single experiment
     if not cmd_args.retrieve_all_new:
         retrieval_counter = 0
@@ -36,9 +22,9 @@ def retrieve(cmd_args):
                     db,
                     all_e_ids,
                     accessed_db,
-                ) = ask_for_experiment_id()  # noqa: 501
+                ) = ask_for_experiment_id()
                 if cmd_args.retrieve_local:
-                    retrieve_single_experiment(db, experiment_id, get_dir_or_fig)
+                    retrieve_single_experiment(db, experiment_id)
                 else:
                     if cmd_args.local_dir_name is None:
                         local_dir_name = input(
@@ -55,7 +41,7 @@ def retrieve(cmd_args):
                 if experiment_id == "N":
                     break
                 if cmd_args.retrieve_local:
-                    retrieve_single_experiment(db, experiment_id, get_dir_or_fig)
+                    retrieve_single_experiment(db, experiment_id)
                 else:
                     if cmd_args.local_dir_name is None:
                         local_dir_name = input(
@@ -83,7 +69,7 @@ def retrieve(cmd_args):
                 stored_in_gcloud = False
             # Pull either from remote machine or gcloud bucket
             if cmd_args.retrieve_local and not stored_in_gcloud:
-                retrieve_single_experiment(db, experiment_id, get_dir_or_fig)
+                retrieve_single_experiment(db, experiment_id)
             else:
                 if cmd_args.local_dir_name is None:
                     local_dir_name = input(time_t + " Local results directory name:  ")
@@ -96,26 +82,14 @@ def retrieve(cmd_args):
         send_gcloud_db()
         print(time_t, "Updated retrieval protocol status & " "send to gcloud storage.")
 
+    return local_dir_name
 
-def retrieve_single_experiment(db, experiment_id: str, get_dir_or_fig: str):
+
+def retrieve_single_experiment(db, experiment_id: str):
     """Retrieve a single experiment from remote resource."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    # Try to retrieve experiment path from protocol db
-    while True:
-        if get_dir_or_fig == "exp-dir":
-            # Get path to experiment results dir & get cluster to retrieve from
-            file_path = db.dget(experiment_id, "exp_retrieval_path")
-            break
-        elif get_dir_or_fig == "fig-dir":
-            # Get path to figure dir & get cluster to retrieve from
-            dir_path = db.dget(experiment_id, "exp_retrieval_path")
-            fig_name = db.dget(experiment_id, "figures_dir")
-            file_path = os.path.join(dir_path, fig_name)
-            break
-        else:
-            get_dir_or_fig = input(
-                time_t + " Please repeat your " + "input: [exp-dir/fig-dir]  "
-            )
+    # Get path to experiment results dir & get cluster to retrieve from
+    file_path = db.dget(experiment_id, "exp_retrieval_path")
 
     remote_resource = db.dget(experiment_id, "exec_resource")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
@@ -139,9 +113,8 @@ def retrieve_single_experiment(db, experiment_id: str, get_dir_or_fig: str):
 
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Goodbye message if successful
-    print(
-        time_t, "Successfully retrieved {} - from {}".format(file_path, remote_resource)
-    )
+    print(time_t, f"Successfully retrieved {experiment_id} - from {remote_resource}")
+    print(time_t, f"Remote Path: {file_path}")
 
     # Update protocol retrieval status of the experiment
     db.dadd(experiment_id, ("retrieved_results", True))

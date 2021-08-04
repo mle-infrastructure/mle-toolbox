@@ -14,10 +14,13 @@
   - *eval*: Single parameter configuration which can be executed/trained for multiple seeds (individual jobs!)
   - *experiment*: Refers to entire sequence of jobs to be executed (e.g. grid search with pre/post-processing)
 - Restructure `experiment` subdirectory into `job` for consistent naming.
-
+- Refactor out `MLELogger` into separate `mle-logging` package. It is a core ingredient that should stand alone.
 
 ##### Fixed
 
+- Fixed `mle retrieve` to be actually useful and work robustly.
+- Fixed `mle report` to retrieve results if they don't exist (or to use a local directory provided by the user).
+- Fixed `mle report` to generate reports via `.html` file and the dependency `xhtml2pdf`.
 
 ### v0.2.9 - 06/23/2021
 

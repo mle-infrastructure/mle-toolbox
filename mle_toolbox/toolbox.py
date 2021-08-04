@@ -160,25 +160,11 @@ def retrieve_build_subparser(subparsers):
         help="Retrieve all new results.",
     )
     parser_retrieve.add_argument(
-        "-fig_dir",
-        "--figures_dir",
-        default=False,
-        action="store_true",
-        help="Retrieve only subdir with figures.",
-    )
-    parser_retrieve.add_argument(
-        "-exp_dir",
-        "--experiment_dir",
-        default=False,
-        action="store_true",
-        help="Retrieve entire experiment dir.",
-    )
-    parser_retrieve.add_argument(
         "-local",
         "--retrieve_local",
         default=False,
         action="store_true",
-        help="Retrieve experiment dir from remote.",
+        help="Retrieve experiment dir from remote and not cloud.",
     )
     parser_retrieve.add_argument(
         "-dir_name",
