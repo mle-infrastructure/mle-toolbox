@@ -6,7 +6,7 @@ from mle_toolbox.utils import (load_yaml_config,
                                load_mle_toolbox_config,
                                load_result_logs)
 from mle_toolbox.utils import load_hyper_log
-from mle_toolbox.utils import load_meta_log
+from mle_logging.load import load_meta_log
 
 
 cmd_args_proxy = DotMap({

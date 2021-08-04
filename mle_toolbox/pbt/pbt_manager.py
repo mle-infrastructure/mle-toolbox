@@ -9,8 +9,9 @@ from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
+from ..utils import load_json_config
 from mle_toolbox.job import Job
-from ..utils import load_json_config, load_run_log
+from mle_logging import load_run_log
 
 from .pbt_logger import PBT_Logger
 from .explore import ExplorationStrategy

@@ -1,6 +1,6 @@
 import argparse
 import os
-from mle_toolbox.utils import load_run_log
+from mle_logging import load_run_log
 import matplotlib.pyplot as plt
 
 

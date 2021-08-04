@@ -4,9 +4,9 @@ from .utils.core_experiment import (
     get_extra_cmd_line_input,
     set_random_seeds,
 )
-from .utils.load_model import load_model
 from .utils.helpers import print_framed
 from mle_logging import MLELogger
+from mle_logging.load import load_model
 
 
 class MLExperiment(object):

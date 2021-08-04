@@ -7,8 +7,8 @@ from dotmap import DotMap
 from typing import Union, Dict, Tuple, Any
 
 # Import helpers for loading meta-log and hyper-log files
-from .load_meta_log import load_meta_log, MetaLog
 from .load_hyper_log import load_hyper_log, HyperLog
+from mle_logging.load import load_meta_log, MetaLog
 
 
 def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
@@ -146,21 +146,3 @@ def load_result_logs(
         meta_log.meta_vars, meta_log.stats_vars, meta_log.time_vars
     )
     return meta_log, hyper_log
-
-
-def load_run_log(experiment_dir: str, mean_seeds: bool = False) -> MetaLog:
-    """Load a single .hdf5 log from <experiment_dir>/logs."""
-    if experiment_dir.endswith(".hdf5"):
-        log_path = experiment_dir
-    else:
-        log_dir = os.path.join(experiment_dir, "logs/")
-        log_paths = []
-        for file in os.listdir(log_dir):
-            if file.endswith(".hdf5"):
-                log_paths.append(os.path.join(log_dir, file))
-        if len(log_paths) > 1:
-            print(f"Multiple .hdf5 files available: {log_paths}")
-            print(f"Continue using: {log_paths[0]}")
-        log_path = log_paths[0]
-    run_log = load_meta_log(log_path, mean_seeds)
-    return run_log

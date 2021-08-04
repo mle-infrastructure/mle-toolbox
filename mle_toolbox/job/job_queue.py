@@ -7,7 +7,7 @@ from typing import Union
 from typing import List
 import numpy as np
 from .job import Job
-from ..utils import merge_hdf5_files
+from mle_logging.merge import merge_hdf5_files
 
 
 class JobQueue(object):

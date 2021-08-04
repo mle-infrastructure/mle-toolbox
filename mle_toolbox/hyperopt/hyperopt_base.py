@@ -9,7 +9,9 @@ from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
 from ..job import JobQueue
-from ..utils import load_json_config, load_meta_log, print_framed, merge_hdf5_files
+from ..utils import load_json_config, print_framed
+from mle_logging.merge import merge_hdf5_files
+from mle_logging.load import load_meta_log
 
 
 class BaseHyperOptimisation(object):
