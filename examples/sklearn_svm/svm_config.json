@@ -4,7 +4,6 @@
 "log_config": {"time_to_track": ["step_counter"],
                "what_to_track": ["train_acc", "test_acc"],
                "model_type": "sklearn",
-               "tboard_fname": "svm",
                "time_to_print": ["step_counter"],
                "what_to_print": ["train_acc", "test_acc"],
                "print_every_k_updates": 1,

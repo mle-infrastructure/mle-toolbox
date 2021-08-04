@@ -16,7 +16,6 @@
                "save_top_k_ckpt": 2,
                "top_k_metric_name": "val_loss",
                "top_k_minimize_metric": 1,
-               "tboard_fname": "vae",
                "use_tboard": 1
                }
 }

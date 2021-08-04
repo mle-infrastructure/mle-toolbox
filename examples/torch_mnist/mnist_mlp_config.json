@@ -3,7 +3,6 @@
                  "hidden_fc_dim": 128},
 "log_config": {"time_to_track": ["num_updates"],
                "what_to_track": ["train_loss", "test_loss"],
-               "tboard_fname": "config_1",
                "model_type": "torch",
                "time_to_print": ["num_updates"],
                "what_to_print": ["train_loss", "test_loss"],

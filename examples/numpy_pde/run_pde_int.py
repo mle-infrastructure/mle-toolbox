@@ -31,7 +31,7 @@ def main(mle):
 
     # Generate a sample plot and store it
     fig = plot_pde(x_t)
-    mle.log.save_plot(fig, "_pde_integral.png")
+    mle.log.save_plot(fig)
     return
 
 

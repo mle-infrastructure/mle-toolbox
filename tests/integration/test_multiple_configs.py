@@ -26,23 +26,23 @@ def check_correct_results(experiment_dir: str,
     dir_to_check = os.path.join(experiment_dir, timestr + base_str + "/")
 
     # Check that experiment directory with results exists
-    assert os.path.exists(dir_to_check)
+    assert os.path.exists(dir_to_check), "Directory missing"
     # Check that copied .json config exists
-    assert os.path.exists(os.path.join(dir_to_check,
-                                       timestr +
-                                       os.path.split(config_filename)[1]))
+    json_path = os.path.join(dir_to_check, timestr +
+                             os.path.split(config_filename)[1])
+    assert os.path.exists(json_path), f".json missing: {json_path}"
     # Check that log file exists
     assert os.path.exists(os.path.join(dir_to_check, "logs",
-                                       base_str + ".hdf5"))
+                                       base_str + ".hdf5")), "Log missing"
     # Check that figure files exist
     png_counter = len(glob.glob1(os.path.join(dir_to_check,
                                               "figures/"), "*.png"))
 
-    assert png_counter == num_seeds
+    assert png_counter == num_seeds, "Figure missing"
 
     # Check that experiment config yaml was created (reproducibility)
     if api_check:
-        assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
+        assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml")), "Experiment .yaml missing"
 
 
 def test_job_queue() -> None:
