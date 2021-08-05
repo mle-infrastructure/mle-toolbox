@@ -21,8 +21,8 @@ def protocol_experiment(
     db.dcreate(new_experiment_id)
 
     # Add purpose of experiment - cmd args or timeout input after 30 secs
+    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     if cmd_purpose is None:
-        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
         print(f"{time_t} Purpose of experiment?", end=" "),
         sys.stdout.flush()
         i, o, e = select.select([sys.stdin], [], [], 60)
@@ -111,7 +111,9 @@ def protocol_experiment(
     else:
         meta_to_hash = {}
 
-    config_to_hash = dict(base_config)
+    # Hash to store results by in GCS bucket
+    # Merged dictionary of timestamp, base_config, job_config
+    config_to_hash = {**{"time": time_t}, **dict(job_config), **dict(base_config)}
     config_to_hash["meta_config"] = meta_to_hash
     config_to_hash = json.dumps(config_to_hash).encode("ASCII")
 

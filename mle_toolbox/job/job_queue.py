@@ -7,7 +7,7 @@ from typing import Union
 from typing import List
 import numpy as np
 from .job import Job
-from mle_logging.merge import merge_hdf5_files
+from mle_logging import merge_seed_logs
 
 
 class JobQueue(object):
@@ -83,6 +83,9 @@ class JobQueue(object):
                         "config_fname": config_fname,
                         "seed_id": seed_id,
                         "base_str": base_str,
+                        "experiment_dir": os.path.join(
+                            experiment_dir, timestr + base_str
+                        ),
                         "log_dir": os.path.join(
                             experiment_dir, timestr + base_str + "/logs/"
                         ),
@@ -148,7 +151,7 @@ class JobQueue(object):
                                 if other_job["status"] == 0:
                                     completed_seeds += 1
                         if completed_seeds == self.num_seeds:
-                            self.merge_logs(job["log_dir"], job["base_str"])
+                            self.merge_seeds(job["experiment_dir"], job["base_str"])
                 time.sleep(0.1)
 
             # Once budget becomes available again - fill up with new jobs
@@ -196,25 +199,11 @@ class JobQueue(object):
             status = job.monitor(job_id, False)
             return status
 
-    def merge_logs(self, log_dir: str, base_str: str):
+    def merge_seeds(self, experiment_dir: str, base_str: str) -> None:
         """Collect all seed-specific seeds into single <eval_id>.hdf5 file."""
         # Only merge logs if job is based on python job!
         # Otherwise .hdf5 file system is not used and there is nothing to merge
         filename, file_extension = os.path.splitext(self.job_filename)
         if file_extension == ".py":
-            # Merge all .hdf5 files for different seeds into single log
-            collected_log_path = os.path.join(log_dir, base_str + ".hdf5")
-            while True:
-                log_paths = [os.path.join(log_dir, log) for log in os.listdir(log_dir)]
-                if len(log_paths) == self.num_seeds:
-                    # Delete joined log if at some point over-eagerly merged
-                    if collected_log_path in log_paths:
-                        os.remove(collected_log_path)
-                    break
-                else:
-                    time.sleep(1)
-
-            merge_hdf5_files(collected_log_path, log_paths, delete_files=True)
-            return log_paths, collected_log_path
-        else:
-            return [], []
+            merged_path = os.path.join(experiment_dir, "logs", base_str + ".hdf5")
+            merge_seed_logs(merged_path, experiment_dir, self.num_seeds)

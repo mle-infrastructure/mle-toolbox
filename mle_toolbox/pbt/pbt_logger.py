@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from typing import Tuple
-from mle_logging import load_run_log
+from mle_logging import load_log
 
 
 class PBT_Logger(object):

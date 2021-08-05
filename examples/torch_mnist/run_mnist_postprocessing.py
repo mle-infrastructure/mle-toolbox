@@ -1,6 +1,6 @@
 import argparse
 import os
-from mle_logging import load_run_log
+from mle_logging import load_log
 import matplotlib.pyplot as plt
 
 
@@ -9,7 +9,7 @@ def mnist_postprocessing(experiment_dir, figures_dir):
     # Find directory in which experiment results are stored + load log
     sub_dirs = [f.path for f in os.scandir(experiment_dir) if f.is_dir()]
     result_dir = [d for d in sub_dirs if d.endswith("mnist_mlp_config")][0]
-    loaded_log = load_run_log(result_dir)
+    loaded_log = load_log(result_dir)
     fig, ax = plt.subplots()
     ax.plot(loaded_log.meta_log.time.num_updates,
             loaded_log.meta_log.stats.test_loss)

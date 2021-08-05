@@ -8,7 +8,7 @@ from typing import Union, Dict, Tuple, Any
 
 # Import helpers for loading meta-log and hyper-log files
 from .load_hyper_log import load_hyper_log, HyperLog
-from mle_logging.load import load_meta_log, MetaLog
+from mle_logging import load_meta_log, MetaLog
 
 
 def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:

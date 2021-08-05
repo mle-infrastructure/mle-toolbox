@@ -21,6 +21,7 @@
 - Fixed `mle retrieve` to be actually useful and work robustly.
 - Fixed `mle report` to retrieve results if they don't exist (or to use a local directory provided by the user).
 - Fixed `mle report` to generate reports via `.html` file and the dependency `xhtml2pdf`.
+- Fixed unique hash for experiment results storage. Previously this only used the content of `base_config.json`, which did not result in a unique hash when running different searches via `job_config.yaml`. Now the hash is generated based on a merged dictionary of the time string, `base_config` and `job_config` 
 
 ### v0.2.9 - 06/23/2021
 
