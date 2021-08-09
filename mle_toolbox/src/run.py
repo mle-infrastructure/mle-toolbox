@@ -129,13 +129,13 @@ def run(cmd_args):
             accessed_remote_db = False
 
         # 5c. Meta-protocol experiment - Print last ones - Delete from input
-        protocol_summary(tail=10, verbose=True)
+        protocol_df = protocol_summary(tail=10, verbose=True)
 
         # Only ask to delete if no purpose given!
-        if cmd_args.purpose is None:
+        if cmd_args.purpose is None and protocol_df is not None:
             delete_protocol_from_input()
             abort_protocol_from_input()
-        new_experiment_id = protocol_experiment(
+        new_experiment_id, purpose = protocol_experiment(
             job_config, resource_to_run, cmd_args.purpose
         )
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
@@ -190,6 +190,32 @@ def run(cmd_args):
                 + f"in GCP bucket: {mle_config.gcp.code_dir}"
             )
 
+    # Setup cluster slack bot for status updates
+    if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+        try:
+            from clusterbot import ClusterBot, activate_logger
+            activate_logger("WARNING")
+        except ImportError:
+            raise ImportError(
+                "You need to install `slack-clusterbot` to "
+                "use status notifications."
+            )
+        bot = ClusterBot(slack_token=mle_config.slack.slack_token)
+        message_id = bot.send(
+            f":rocket: Start experiment: `{new_experiment_id}` :rocket:\n"
+            f"→ Config .yaml: `{cmd_args.config_fname}`\n"
+            "→ Bash execution file:"
+            f" `{job_config.meta_job_args.base_train_fname}`\n"
+            "→ Base configuration file:"
+            f" `{job_config.meta_job_args.base_train_config}`\n"
+            f"→ Purpose: `{purpose}`\n"
+            "→ Storage:"
+            f" `{job_config.meta_job_args.experiment_dir}`\n"
+            f"→ Compute resource: `{resource_to_run}`",
+            user_name=mle_config.slack.user_name)
+    else:
+        message_id = None
+
     # 8. Perform pre-processing if arguments are provided
     if "pre_processing_args" in job_config.keys():
         print_framed("PRE-PROCESSING")
@@ -200,6 +226,12 @@ def run(cmd_args):
             job_config.meta_job_args["experiment_dir"],
         )
         logger.info("Post-processing experiment results - COMPLETED")
+
+        # Update slack bot experiment message - pre-processing
+        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+            bot.reply(message_id, ":white_check_mark:"
+                      f" Finished pre-processing for `{new_experiment_id}`",
+                      user_name=mle_config.slack.user_name)
 
     # 9. Run the main experiment
     print_framed("RUN EXPERIMENT")
@@ -220,23 +252,36 @@ def run(cmd_args):
     elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
         # Import only if needed due to optional dependency on scikit-optimize
         from ..launch import run_hyperparameter_search
+        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+            message = "Search Resources & No. of Jobs:\n"
+            for k, v in job_config.param_search_args["search_resources"].items():
+                message += f"→ {k}: `{v}` \n"
+            bot.reply(message_id, message)
 
         run_hyperparameter_search(
             resource_to_run,
             job_config.meta_job_args,
             job_config.single_job_args,
             job_config.param_search_args,
+            message_id,
         )
     # (d) Experiment: Run population-based-training for NN training
     elif job_config.meta_job_args["experiment_type"] == "population-based-training":
         from ..launch import run_population_based_training
-
         run_population_based_training(
             resource_to_run,
             job_config.meta_job_args,
             job_config.single_job_args,
             job_config.pbt_args,
         )
+
+    # Update slack bot experiment message - main experiment jobs
+    if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+        bot.reply(message_id, ":steam_locomotive: "
+                  f"Finished main experiment for `{new_experiment_id}`: "
+                  f"`{job_config.meta_job_args['experiment_type']}`"
+                  " :steam_locomotive:",
+                  user_name=mle_config.slack.user_name)
 
     # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():
@@ -249,6 +294,13 @@ def run(cmd_args):
         )
         logger.info("Post-processing experiment results - COMPLETED")
 
+        # Update slack bot experiment message - pre-processing
+        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+            bot.reply(message_id, ":white_check_mark:"
+                      f" Finished post-processing for `{new_experiment_id}`"
+                      " :white_check_mark:",
+                      user_name=mle_config.slack.user_name)
+
     # 11. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
     if not cmd_args.no_protocol:
@@ -257,9 +309,18 @@ def run(cmd_args):
                 # Import for report generating after experiment finished
                 from .report import auto_generate_reports
 
-                auto_generate_reports(new_experiment_id, logger, pdf_gen=False)
+                reporter = auto_generate_reports(new_experiment_id, logger,
+                                                 pdf_gen=True)
                 report_generated = True
-                print_framed("REPORT GENERATION")
+                print_framed("REPORT GENERATION FINISHED")
+
+                if mle_config.general.use_slack_bot:
+                    # Upload the report
+                    bot.upload(file_name=reporter.pdf_report_fname,
+                               message=":scroll: Finished report generation :scroll:\n"
+                                       f" `{reporter.pdf_report_fname}`",
+                               reply_to=message_id,
+                               user_name=mle_config.slack.user_name)
 
     # 12. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
@@ -296,6 +357,11 @@ def run(cmd_args):
         if delete_code_dir:
             # Import utility to delete directory in GCS bucket
             from mle_toolbox.remote.gcloud_transfer import delete_gcs_dir
-
             delete_gcs_dir(mle_config.gcp.code_dir)
+
     print_framed("EXPERIMENT FINISHED")
+    # Update slack bot experiment message - pre-processing
+    if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
+        bot.reply(message_id, ":cloud:"
+                  f" Finished protocol DB and GCS storage sync. :cloud:",
+                  user_name=mle_config.slack.user_name)

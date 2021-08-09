@@ -75,5 +75,6 @@ mkdocs gh-deploy --force
 
 ## Nice visualization tools
 
-- https://favicon.io/favicon-generator/
-- https://carbon.now.sh/ - for nice twitter screenshot
+- https://favicon.io/favicon-generator/ - For homepage MLE icon
+- https://carbon.now.sh/ - for code screenshots
+- https://github.com/homeport/termshot - for terminal output screenshots

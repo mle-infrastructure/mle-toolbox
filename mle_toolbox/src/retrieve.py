@@ -27,6 +27,7 @@ def retrieve(cmd_args):
                     retrieve_single_experiment(db, experiment_id)
                 else:
                     if cmd_args.local_dir_name is None:
+                        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
                         local_dir_name = input(
                             time_t + " Local results directory name:  "
                         )
@@ -44,6 +45,7 @@ def retrieve(cmd_args):
                     retrieve_single_experiment(db, experiment_id)
                 else:
                     if cmd_args.local_dir_name is None:
+                        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
                         local_dir_name = input(
                             time_t + " Local results directory name:  "
                         )
@@ -80,6 +82,7 @@ def retrieve(cmd_args):
 
     if accessed_db:
         send_gcloud_db()
+        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
         print(time_t, "Updated retrieval protocol status & " "send to gcloud storage.")
 
     return local_dir_name

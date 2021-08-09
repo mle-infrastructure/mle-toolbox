@@ -36,6 +36,7 @@ class BaseHyperOptimisation(object):
         search_params: dict,
         search_type: str = "grid",
         search_schedule: str = "sync",
+        message_id: Union[str, None] = None
     ):
         # Set up the hyperparameter search run
         self.hyper_log = hyper_log  # Hyperopt. Log Instance
@@ -62,6 +63,9 @@ class BaseHyperOptimisation(object):
         self.search_type = search_type  # random/grid/smbo
         self.search_schedule = search_schedule  # sync vs async jobs
         self.current_iter = len(hyper_log)  # get previous number its
+
+        # Store message id for slack cluster bot
+        self.message_id = message_id
 
     def run_search(
         self,
@@ -164,6 +168,7 @@ class BaseHyperOptimisation(object):
             num_seeds_per_eval,
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
+            message_id=self.message_id,
         )
         job_queue.run()
         time_elapsed = time.time() - start_t
@@ -223,6 +228,7 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
+                message_id=self.message_id,
             )
             job_queue.run()
             time_elapsed = time.time() - start_t

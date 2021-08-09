@@ -9,6 +9,9 @@ import numpy as np
 from .job import Job
 from mle_logging import merge_seed_logs
 
+# Import the MLE-Toolbox configuration
+from mle_toolbox import mle_config
+
 
 class JobQueue(object):
     """
@@ -27,6 +30,7 @@ class JobQueue(object):
         default_seed: int = 0,
         random_seeds: Union[None, List[int]] = None,
         max_running_jobs: int = 10,
+        message_id: Union[str, None] = None,
         logger_level: int = logging.WARNING,
     ):
         # Init experiment class with relevant info
@@ -37,6 +41,7 @@ class JobQueue(object):
         self.job_arguments = job_arguments  # job-specific args
         self.num_seeds = num_seeds  # number seeds to run
         self.max_running_jobs = max_running_jobs  # number of sim running jobs
+        self.message_id = message_id  # Message ts id for slack bot
 
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
@@ -125,10 +130,21 @@ class JobQueue(object):
             )
         )
 
-        # 2. Set up Progress Bar Counter of completed jobs
+        # 2. Set up Progress Bar Counter of completed jobs (& slack bot)
         self.pbar = tqdm(
             total=self.num_total_jobs, bar_format="{l_bar}{bar:45}{r_bar}{bar:-45b}"
         )
+
+        if self.message_id is not None:
+            try:
+                from clusterbot import ClusterBot
+            except ImportError:
+                raise ImportError(
+                    "You need to install `slack-clusterbot` to "
+                    "use status notifications."
+                )
+            slackbot = ClusterBot(slack_token=mle_config.slack.slack_token)
+            slackbot.init_pbar(self.num_total_jobs, ts=self.message_id)
 
         # 3. Monitor & launch new waiting jobs when resource available
         while self.num_completed_jobs < self.num_total_jobs:
@@ -143,6 +159,8 @@ class JobQueue(object):
                         self.num_running_jobs -= 1
                         job["status"] = 0
                         self.pbar.update(1)
+                        if self.message_id is not None:
+                            slackbot.update_pbar()
 
                         # Merge seeds of one eval/config if all jobs done!
                         completed_seeds = 0

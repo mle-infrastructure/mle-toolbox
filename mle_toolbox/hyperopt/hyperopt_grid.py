@@ -3,6 +3,7 @@ from functools import partial, reduce
 import operator
 from itertools import product
 import numpy as np
+from typing import Union
 from .hyperopt_base import BaseHyperOptimisation
 from .hyper_logger import HyperoptLogger
 from .hyperspace import construct_hyperparam_range
@@ -20,6 +21,7 @@ class GridHyperoptimisation(BaseHyperOptimisation):
         search_params: dict,
         search_type: str = "grid",
         search_schedule: str = "sync",
+        message_id: Union[str, None] = None,
     ):
         BaseHyperOptimisation.__init__(
             self,
@@ -32,6 +34,7 @@ class GridHyperoptimisation(BaseHyperOptimisation):
             search_params,
             search_type,
             search_schedule,
+            message_id,
         )
         # Generate all possible combinations of param configs in list & loop
         # over the list when doing the grid search

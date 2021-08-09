@@ -45,6 +45,7 @@ class MLExperiment(object):
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
             self.setup()
+            self.log_dir = self.log.experiment_dir
 
     def setup(self) -> None:
         """Set the random seed, initialize logger & reload a model."""

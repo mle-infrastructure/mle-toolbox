@@ -8,7 +8,8 @@ def run_hyperparameter_search(
     single_job_args: Dict[str, Union[str, int]],
     param_search_args: Dict[
         str, Dict[str, Union[str, bool, Dict[str, Union[str, bool]]]]
-    ],  # noqa: E501
+    ],
+    message_id: Union[str, None] = None,
 ) -> None:
     """Run a hyperparameter search experiment."""
     # Import only if used, this will raise an informative error when
@@ -30,11 +31,11 @@ def run_hyperparameter_search(
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
     if param_search_args["search_config"]["search_type"] == "random":
-        hyper_opt = RandomHyperoptimisation
+        hyperopt = RandomHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "grid":
-        hyper_opt = GridHyperoptimisation
+        hyperopt = GridHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "smbo":
-        hyper_opt = SMBOHyperoptimisation
+        hyperopt = SMBOHyperoptimisation
     else:
         raise ValueError(
             "Please provide a valid \
@@ -44,13 +45,14 @@ def run_hyperparameter_search(
         )
 
     # 4. Run the jobs
-    hyper_opt_instance = hyper_opt(
+    hyper_opt_instance = hyperopt(
         hyper_log,
         resource_to_run,
         single_job_args,
         meta_job_args["base_train_config"],
         meta_job_args["base_train_fname"],
         meta_job_args["experiment_dir"],
-        **param_search_args["search_config"]
+        **param_search_args["search_config"],
+        message_id=message_id,
     )
     hyper_opt_instance.run_search(**param_search_args["search_resources"])

@@ -55,6 +55,7 @@ class PBT_Manager(object):
         # Instantiate/connect a logger
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
+        self.message_id = None
 
         # PBT-specific arguments
         self.pbt_config = pbt_config

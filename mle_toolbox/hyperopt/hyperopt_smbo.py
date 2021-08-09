@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Union
 from .hyperopt_base import BaseHyperOptimisation
 from .hyper_logger import HyperoptLogger
 from .hyperspace import construct_hyperparam_range
@@ -21,6 +22,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
             "acq_function": "gp_hedge",
             "n_initial_points": 5,
         },
+        message_id: Union[str, None] = None,
     ):
         try:
             from skopt import Optimizer
@@ -44,6 +46,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
             search_params,
             search_type,
             search_schedule,
+            message_id,
         )
         self.param_range = construct_hyperparam_range(
             self.search_params, self.search_type

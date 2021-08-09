@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Union
 from .hyperopt_base import BaseHyperOptimisation
 from .hyper_logger import HyperoptLogger
 from .hyperspace import construct_hyperparam_range
@@ -16,6 +17,7 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
         search_params: dict,
         search_type: str = "random",
         search_schedule: str = "sync",
+        message_id: Union[str, None] = None,
     ):
         BaseHyperOptimisation.__init__(
             self,
@@ -28,6 +30,7 @@ class RandomHyperoptimisation(BaseHyperOptimisation):
             search_params,
             search_type,
             search_schedule,
+            message_id,
         )
         self.param_range = construct_hyperparam_range(
             self.search_params, self.search_type

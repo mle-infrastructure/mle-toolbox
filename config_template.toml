@@ -6,7 +6,7 @@ title = "mle-toolbox-config"
 #------------------------------------------------------------------------------#
 [general]
 # Local filename to store protocol DB in
-local_protocol_fname = '~/local_robs_mle_protocol.db'
+local_protocol_fname = '~/local_mle_protocol.db'
 
 # Syncing of protocol with GCloud
 use_gcloud_protocol_sync = true
@@ -20,6 +20,9 @@ use_credential_encryption = true
 # Whether to use conda or venv for experiment virtual environment
 use_conda_virtual_env = true
 use_venv_virtual_env = false
+
+# Whether to use slack bot notifications
+use_slack_bot = false
 
 # Set remote experiment submission environment name
 remote_env_name = 'mle-toolbox'
@@ -115,3 +118,14 @@ bucket_name = "<gcloud_bucket_name>"
 
 # Filename to retrieve from gcloud bucket & where to store
 protocol_fname = "gcloud_mle_protocol.db"
+
+
+#------------------------------------------------------------------------------#
+# 5. Slack Bot Config - OAuth Access Token & Config Path
+# https://github.com/sprekelerlab/slack-clusterbot/wiki/Installation
+# OPTIONAL: Only required if you want to slack notifications/updates
+#------------------------------------------------------------------------------#
+[slack]
+# Set authentication token and path where to automatically store
+slack_token = "xoxb-..."
+user_name = "<slack_user_name>"
