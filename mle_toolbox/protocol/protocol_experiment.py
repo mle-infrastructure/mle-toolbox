@@ -78,7 +78,7 @@ def protocol_experiment(
         db.dadd(new_experiment_id, ("job_spec_args", None))
     elif (
         db.dget(new_experiment_id, "meta_job_args")["experiment_type"]
-        == "multi-configs"
+        == "multiple-configs"
     ):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.multi_config_args))
     elif (
@@ -92,7 +92,6 @@ def protocol_experiment(
     ):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.pbt_args))
 
-
     # Add the base config - train, model, log
     base_config = load_json_config(job_config.meta_job_args["base_train_config"])
     db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
@@ -105,9 +104,7 @@ def protocol_experiment(
 
     # Add the number of seeds over which experiment is run
     if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
-        num_seeds = job_config.param_search_args.search_resources[
-            "num_seeds_per_eval"
-        ]
+        num_seeds = job_config.param_search_args.search_resources["num_seeds_per_eval"]
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         num_seeds = job_config.multi_config_args["num_seeds"]
     else:

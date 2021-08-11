@@ -126,6 +126,6 @@ protocol_fname = "gcloud_mle_protocol.db"
 # OPTIONAL: Only required if you want to slack notifications/updates
 #------------------------------------------------------------------------------#
 [slack]
-# Set authentication token and path where to automatically store
+# Set authentication token and default username messages are sent to
 slack_token = "xoxb-..."
 user_name = "<slack_user_name>"

@@ -226,7 +226,7 @@ def visualize_1D_lcurves(
     xy_labels: list = [r"# Train Iter", r"Temp Y-Label"],
     base_label: str = "{}",
     curve_labels: list = [],
-    every_nth_tick: int = 1,
+    every_nth_tick: Union[int, None] = None,
     plot_std_bar: bool = False,
     run_ids: Union[None, list] = None,
     rgb_tuples: Union[List[tuple], None] = None,
@@ -269,6 +269,7 @@ def visualize_1D_lcurves(
             smooth_mean,
             color=color_by[i],
             label=base_label.format(label),
+            alpha=0.5,
         )
 
         if plot_std_bar:
@@ -277,17 +278,25 @@ def visualize_1D_lcurves(
                 smooth_mean - smooth_std,
                 smooth_mean + smooth_std,
                 color=color_by[i],
-                alpha=0.5,
+                alpha=0.25,
             )
 
-    range_x = main_log[run_id].time[iter_to_plot]["mean"]
-    ax.set_xticks(range_x)
-    ax.set_xticklabels([str(int(label)) for label in range_x])
-    for n, label in enumerate(ax.xaxis.get_ticklabels()):
-        if n % every_nth_tick != 0:
-            label.set_visible(False)
+    full_range_x = main_log[run_id].time[iter_to_plot]["mean"]
+    # Either plot every nth time tic or 5 equally spaced ones
+    if every_nth_tick is not None:
+        ax.set_xticks(full_range_x)
+        ax.set_xticklabels([str(int(label)) for label in full_range_x])
+        for n, label in enumerate(ax.xaxis.get_ticklabels()):
+            if n % every_nth_tick != 0:
+                label.set_visible(False)
+    else:
+        idx = np.round(np.linspace(0, len(full_range_x) - 1, 5)).astype(int)
+        range_x = full_range_x[idx]
+        ax.set_xticks(range_x)
+        ax.set_xticklabels([str(int(label)) for label in range_x])
 
-    ax.legend(fontsize=15, ncol=num_legend_cols)
+    if len(run_ids) < 20:
+        ax.legend(fontsize=15, ncol=num_legend_cols)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.set_title(plot_title)

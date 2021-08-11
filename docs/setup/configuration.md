@@ -2,10 +2,11 @@
 
 By default the toolbox will run locally and without any GCS bucket backup of your experiment results. Furthermore, a lightweight PickleDB protocol database of your experiments will not be synced with the cloud version. In the following, we walkthrough how to
 
-1. Enable the execution of jobs on remote resources (cluster/storage) from your local machine.
-2. Enable the backing up of your experiment results in a GCS bucket.
-3. Enable the backing up of your PickleDB experiment meta log.
-4. Enable resource monitoring and dashboard visualization.
+1. Enable the **execution of jobs on remote resources** (cluster/storage) from your local machine or from the resource itself.
+2. Enable the **backing up of your experiment results** in a GCS bucket.
+3. Enable the **backing up of a PickleDB experiment meta log** in a GCS bucket.
+4. Enable resource **monitoring and online dashboard visualization**.
+5. Enable **slack bot notifications** for experiment completion and reporting.
 
 **Note**: There are two ways to perform the toolbox configuration:
 
@@ -21,8 +22,43 @@ The configuration procedure consists of 3 optional steps, which depend on your n
 
 ## Remote Resource Execution
 
-**TBC**
+The toolbox supports the usage of multiple different compute resources. This includes your local machine, but more importantly remote clusters such as the prominent slurm and grid engine schedulers and Google Cloud Platform VMs. In order to be able to schedule remote jobs from your local machine or retrieve the results from the cluster, you will have to provide your credentials, headnode and partition names as well as some default arguments for jobs:
 
+```toml
+#------------------------------------------------------------------------------#
+# 2. Configuration for Slurm Cluster
+#------------------------------------------------------------------------------#
+[slurm]
+    # Slurm credentials - Only if you want to retrieve results from cluster
+    [slurm.credentials]
+    user_name = '<slurm-user-name>'
+    password = '<slurm-password>'
+    aes_key = '<aes-key>'
+
+    # Slurm cluster information - Job scheduling, monitoring & retrieval
+    [slurm.info]
+    # Headnode name & partitions to monitor/run jobs on
+    head_names = ['<headnode1>']
+    node_reg_exp = ['<nodes-to-monitor1>']
+    partitions = ['<partition1>']
+
+    # Info for results retrieval & internet tunneling if local launch
+    main_server_name = '<main-server-ip>'
+    jump_server_name = '<jump-host-ip>'
+    ssh_port = 22
+    # Add proxy server for internet connection if needed!
+    http_proxy = "http://<slurm_headnode>:3128/"
+    https_proxy = "http://<slurm_headnode>:3128/"
+
+    # Default Slurm job arguments (if not supplied in job .yaml config)
+    [slurm.default_job_args]
+    num_logical_cores = 2
+    partition = '<partition1>'
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+    env_name = '<mle-default-env>'
+```
 
 ## Google Cloud Storage Backups
 
@@ -84,7 +120,7 @@ If you want to, you can add slack notifications using the [`slack-clusterbot`](h
 # OPTIONAL: Only required if you want to slack notifications/updates
 #------------------------------------------------------------------------------#
 [slack]
-# Set authentication token and path where to automatically store
-slack_token = "xoxb-..."
-slack_config_path = "~/.slack-clusterbot.json"
+# Set authentication token and default username messages are sent to
+slack_token = "xoxb-325096705189-891732090737-5Kx0njelNmBdMn1OXSCkrH2P"
+user_name = "Robert Lange"
 ```

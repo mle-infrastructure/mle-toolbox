@@ -95,6 +95,7 @@ def spawn_multiple_configs(
     experiment_dir: str,
     num_seeds: Union[None, int] = None,
     random_seeds: Union[None, List[int]] = None,
+    message_id: Union[str, None] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
@@ -126,6 +127,7 @@ def spawn_multiple_configs(
         default_seed,
         random_seeds,
         num_seeds * num_configs,
+        message_id,
     )
     multi_experiment.run()
 

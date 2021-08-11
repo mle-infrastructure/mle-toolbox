@@ -6,6 +6,7 @@
 - Adds a set of unit/integration tests for more robustness and `flake8` linting.
 - Adds code coverage with secrets token.
 - Adds `mle.ready_to_log` based on `log_every_k_updates` in `log_config`. No more modulo confusion.
+- Adds [slack clusterbot integration](https://github.com/sprekelerlab/slack-clusterbot/) which allows for notifications and report upload.
 
 ##### Changed
 - Allow logging of array data in meta log `.hdf5` file by making `tolerant_mean` work for matrices.
@@ -21,7 +22,7 @@
 - Fixed `mle retrieve` to be actually useful and work robustly.
 - Fixed `mle report` to retrieve results if they don't exist (or to use a local directory provided by the user).
 - Fixed `mle report` to generate reports via `.html` file and the dependency `xhtml2pdf`.
-- Fixed unique hash for experiment results storage. Previously this only used the content of `base_config.json`, which did not result in a unique hash when running different searches via `job_config.yaml`. Now the hash is generated based on a merged dictionary of the time string, `base_config` and `job_config` 
+- Fixed unique hash for experiment results storage. Previously this only used the content of `base_config.json`, which did not result in a unique hash when running different searches via `job_config.yaml`. Now the hash is generated based on a merged dictionary of the time string, `base_config` and `job_config`
 
 ### v0.2.9 - 06/23/2021
 

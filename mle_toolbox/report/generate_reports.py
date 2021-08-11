@@ -17,6 +17,14 @@ except ModuleNotFoundError as err:
         "to use the `mle_toolbox.report` module."
     )
 
+try:
+    from xhtml2pdf import pisa
+except ModuleNotFoundError as err:
+    raise ModuleNotFoundError(
+        f"{err}. You need to install `xhtml2pdf` "
+        "to use the `mle_toolbox.report` module."
+    )
+
 
 class ReportGenerator:
     """
@@ -270,14 +278,6 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
 def generate_pdf(pdf_report_fname, html_report_fname):
     """Generates a PDF report from the transformed html text."""
     import codecs
-
-    try:
-        from xhtml2pdf import pisa
-    except ModuleNotFoundError as err:
-        raise ModuleNotFoundError(
-            f"{err}. You need to install `xhtml2pdf` "
-            "to use the `mle_toolbox.report` module."
-        )
 
     result_file = open(pdf_report_fname, "w+b")
     # convert HTML to PDF

@@ -241,7 +241,7 @@ class PBT_Manager(object):
             subdirs = [f.path for f in os.scandir(self.experiment_dir) if f.is_dir()]
             exp_dir = [f for f in subdirs if f.endswith(run_id)]
             try:
-                _ = load_run_log(exp_dir[0])
+                _ = load_log(exp_dir[0])
                 break
             except Exception:
                 continue

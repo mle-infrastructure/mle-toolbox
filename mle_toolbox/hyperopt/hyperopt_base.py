@@ -36,7 +36,7 @@ class BaseHyperOptimisation(object):
         search_params: dict,
         search_type: str = "grid",
         search_schedule: str = "sync",
-        message_id: Union[str, None] = None
+        message_id: Union[str, None] = None,
     ):
         # Set up the hyperparameter search run
         self.hyper_log = hyper_log  # Hyperopt. Log Instance
@@ -263,14 +263,11 @@ class BaseHyperOptimisation(object):
             while True:
                 try:
                     merge_config_logs(
-                        self.experiment_dir,
-                        self.hyper_log.all_run_ids + run_ids
+                        self.experiment_dir, self.hyper_log.all_run_ids + run_ids
                     )
                     # Load in meta-results log with values meaned over seeds
-                    meta_log_fname = os.path.join(self.experiment_dir,
-                                                  "meta_log.hdf5")
-                    meta_eval_log = load_meta_log(meta_log_fname,
-                                                  aggregate_seeds=True)
+                    meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
+                    meta_eval_log = load_meta_log(meta_log_fname, aggregate_seeds=True)
                     break
                 except Exception:
                     time.sleep(1)

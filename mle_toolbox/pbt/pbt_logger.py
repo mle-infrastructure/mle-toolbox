@@ -98,7 +98,7 @@ class PBT_Logger(object):
             os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
             while True:
                 try:
-                    perf_log = load_run_log(exp_dir)
+                    perf_log = load_log(exp_dir)
                     break
                 except Exception:
                     continue
