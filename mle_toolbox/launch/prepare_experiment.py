@@ -2,35 +2,49 @@ import os
 import sys
 import logging
 from datetime import datetime
-from .. import __version__, mle_config
+from rich.table import Table
+from rich.panel import Panel
+from rich.console import Console
+from .. import mle_config
 from ..protocol import protocol_summary, load_local_protocol_db
 
 
-def welcome_to_mle_toolbox(verbose: bool = False) -> None:
-    """Let's friendly greet the next user of the MLE-Toolbox!"""
-    print(85 * "=")
-    welcome_ascii = """
-            __  _____    ______   ______            ____
-           /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
-          / /|_/ / /   / __/______/ / / __ \/ __ \/ / __ \/ __ \| |/_/
-         / /  / / /___/ /__/_____/ / / /_/ / /_/ / / /_/ / /_/ />  <
-        /_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
-    """
-    print(welcome_ascii)
-    print(44 * " " + "@RobertTLange" + 28 * " ")
-    print(44 * " " + "Docs: roberttlange.github.io/mle-toolbox/")
-    print(85 * "=")
-    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    print(
-        time_t,
-        f"Thx for using MLE-Toolbox {__version__}" f" Locally, on Clusters or Cloud.",
+def welcome_to_mle_toolbox() -> None:
+    """Display header with clock and general toolbox configurations."""
+    welcome_ascii = """    __  _____    ______   ______            ____
+   /  |/  / /   / ____/  /_  __/___  ____  / / /_  ____  _  __
+  / /|_/ / /   / __/______/ / / __ \/ __ \/ / __ \/ __ \| |/_/
+ / /  / / /___/ /__/_____/ / / /_/ / /_/ / / /_/ / /_/ />  <
+/_/  /_/_____/_____/    /_/  \____/\____/_/_.___/\____/_/|_|
+    """.splitlines()
+
+    grid = Table.grid(expand=True)
+    grid.add_column(justify="left")
+    grid.add_column(justify="right")
+    grid.add_row(
+        welcome_ascii[0],
+        datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
     )
-    if verbose:
-        print(time_t, "It implements the following experiment types:")
-        print("  - single-config: Run a single configuration experiment.")
-        print("  - multiple-configs: Run multiple configs & random seeds.")
-        print("  - hyperparameter-search: Run a hyperparameter search.")
-        print("  - population-based-training: Run a PBT search.")
+    grid.add_row(
+        welcome_ascii[1],
+        "  [link=https://tinyurl.com/srpy4nrp]You are awesome![/link] [not italic]:hugging_face:[/]",
+    )
+
+    grid.add_row(
+        welcome_ascii[2],
+        "  [link=https://twitter.com/RobertTLange]@RobertTLange[/link] :bird:",
+    )
+    grid.add_row(
+        welcome_ascii[3],
+        "  [link=https://roberttlange.github.io/mle-toolbox/]MLE-Toolbox Docs[/link] [not italic]:notebook:[/]",
+    )
+    grid.add_row(
+        welcome_ascii[4],
+        "  [link=https://github.com/RobertTLange/mle-toolbox/]MLE-Toolbox Repo[/link] [not italic]:pencil:[/]",
+    )
+    panel = Panel(grid, style="white on blue", expand=True)
+    console = Console()
+    console.print(panel)
 
 
 def prepare_logger() -> logging.Logger:

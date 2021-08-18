@@ -85,7 +85,4 @@ class MLExperiment(object):
 
     def ready_to_log(self, update_counter: int) -> bool:
         """Check whether update_counter is modulo of log_every_k_steps in logger."""
-        assert (
-            self.log.log_every_j_steps is not None
-        ), "Provide `log_every_k_steps` in your `log_config`"
-        return update_counter % self.log.log_every_j_steps == 0 or update_counter == 0
+        return self.log.ready_to_log(update_counter)

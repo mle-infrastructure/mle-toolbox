@@ -11,7 +11,7 @@ def main(mle):
 
     # Let seed determine initial condition
     x_t = [mle.train_config.x_0]
-    t_seq = np.arange(mle.train_config.dt,
+    t_seq = np.arange(0,
                       mle.train_config.t_max,
                       mle.train_config.dt).tolist()
 
@@ -22,9 +22,9 @@ def main(mle):
                           mle.train_config.dt)
         x_t.append(integral_det + integral_stoch)
 
-        # Update & save the newest log
-        if (i % mle.train_config.log_every_steps) == 0:
-            time_tick = {"step_counter": i+1}
+        # Update & save the newest log - only if i+1 % log_every_j_steps
+        if mle.ready_to_log(i + 1):
+            time_tick = {"step_counter": i + 1}
             stats_tick = {"integral": x_t[-1],
                           "noise": np.random.normal()}
             mle.update_log(time_tick, stats_tick, save=True)

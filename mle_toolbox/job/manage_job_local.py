@@ -44,8 +44,8 @@ def local_submit_conda_job(filename: str, cmd_line_arguments: str, job_arguments
             cmd = f"source $(conda info --base)/etc/profile.d/conda.sh \
                     && conda activate {env_name} \
                     && {cmd}"
-    except Exception as e:
-        print(e)
+    except Exception:
+        pass
 
     proc = submit_subprocess(cmd)
     return proc

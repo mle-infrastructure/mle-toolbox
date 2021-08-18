@@ -232,7 +232,6 @@ class BaseHyperOptimisation(object):
             )
             job_queue.run()
             time_elapsed = time.time() - start_t
-
             self.logger.info(
                 f"DONE - {self.current_iter}/"
                 f"{num_search_batches} Batch of"
@@ -267,7 +266,7 @@ class BaseHyperOptimisation(object):
                     )
                     # Load in meta-results log with values meaned over seeds
                     meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
-                    meta_eval_log = load_meta_log(meta_log_fname, aggregate_seeds=True)
+                    meta_eval_log = load_meta_log(meta_log_fname)
                     break
                 except Exception:
                     time.sleep(1)

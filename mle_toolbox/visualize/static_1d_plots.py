@@ -265,7 +265,7 @@ def visualize_1D_lcurves(
             main_log[run_id].stats[target_to_plot]["std"], smooth_window
         )
         ax.plot(
-            main_log[run_id].time[iter_to_plot]["mean"],
+            main_log[run_id].time[iter_to_plot],
             smooth_mean,
             color=color_by[i],
             label=base_label.format(label),
@@ -274,14 +274,14 @@ def visualize_1D_lcurves(
 
         if plot_std_bar:
             ax.fill_between(
-                main_log[run_id].time[iter_to_plot]["mean"],
+                main_log[run_id].time[iter_to_plot],
                 smooth_mean - smooth_std,
                 smooth_mean + smooth_std,
                 color=color_by[i],
                 alpha=0.25,
             )
 
-    full_range_x = main_log[run_id].time[iter_to_plot]["mean"]
+    full_range_x = main_log[run_id].time[iter_to_plot]
     # Either plot every nth time tic or 5 equally spaced ones
     if every_nth_tick is not None:
         ax.set_xticks(full_range_x)
@@ -297,6 +297,7 @@ def visualize_1D_lcurves(
 
     if len(run_ids) < 20:
         ax.legend(fontsize=15, ncol=num_legend_cols)
+    # ax.set_ylim(0, 0.35)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.set_title(plot_title)

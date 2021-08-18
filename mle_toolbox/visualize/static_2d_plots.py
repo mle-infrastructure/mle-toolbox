@@ -47,13 +47,14 @@ def visualize_2D_grid(
         sub_log = hyper_df.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
-            if type(v) == float:
+            if type(v) == float or type(v) == int:
                 sub_log = sub_log[sub_log[k].astype(float) == v]
             elif type(v) == str:
                 sub_log = sub_log[sub_log[k].astype(str) == v]
 
     # Subselect the desired params from the pd df
     temp_df = sub_log[p_to_plot]
+
     # Construct the 2D array using helper function
     range_x = np.unique(temp_df[p_to_plot[0]])
     range_y = np.unique(temp_df[p_to_plot[1]])

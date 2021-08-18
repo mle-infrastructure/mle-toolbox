@@ -88,8 +88,7 @@ class PBT_Logger(object):
                 if (os.path.isfile(os.path.join(log_dir, f)) and f.endswith(".hdf5"))
             ]
         except Exception as e:
-            print(e)
-            print(exp_dir)
+            print(e, exp_dir)
             log_files = []
 
         if len(log_files) > 0:
@@ -100,7 +99,8 @@ class PBT_Logger(object):
                 try:
                     perf_log = load_log(exp_dir)
                     break
-                except Exception:
+                except Exception as e:
+                    print(e, log_path)
                     continue
             perf = perf_log.stats[self.eval_metric][-1]
             num_updates = perf_log["time"]["num_updates"][-1]

@@ -165,10 +165,10 @@ def load_experiment_config(
     # Set seed for run of your choice - has to be done via command line
     if seed_id is not None:
         train_config.seed_id = int(seed_id)
-        log_config.seed_id = "seed_" + str(seed_id)
+        log_config.seed_id = seed_id
     else:
         try:
-            log_config.seed_id = "seed_" + str(train_config.seed_id)
+            log_config.seed_id = train_config.seed_id
         except Exception:
             log_config.seed_id = "seed_default"
 

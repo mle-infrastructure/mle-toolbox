@@ -23,7 +23,7 @@ param_search_args:
         num_search_batches: 2
         num_evals_per_batch: 2
         num_seeds_per_eval: 2
-        random_seeds: [1, 4]
+        random_seeds: [2, 4]
     search_config:
         search_type: "grid"
         search_schedule: "sync"
