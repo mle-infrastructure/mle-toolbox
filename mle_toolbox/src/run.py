@@ -200,7 +200,8 @@ def run(cmd_args):
             raise ImportError(
                 "You need to install `slack-clusterbot` to " "use status notifications."
             )
-        bot = ClusterBot(slack_token=mle_config.slack.slack_token)
+        bot = ClusterBot(user_name=mle_config.slack.user_name,
+                         slack_token=mle_config.slack.slack_token)
         message_id = bot.send(
             f":rocket: Start experiment: `{new_experiment_id}` :rocket:\n"
             f"→ Config .yaml: `{cmd_args.config_fname}`\n"

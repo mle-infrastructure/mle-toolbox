@@ -7,3 +7,11 @@ jaxlib
 optax
 tensorflow_datasets
 sklearn
+slack-clusterbot
+google-cloud-storage
+pycrypto
+seaborn
+xhtml2pdf
+markdown2
+psutil
+gputil

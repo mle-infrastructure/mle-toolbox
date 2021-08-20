@@ -60,6 +60,18 @@ The toolbox supports the usage of multiple different compute resources. This inc
     env_name = '<mle-default-env>'
 ```
 
+### Google Cloud Platform VM Jobs
+
+If you want to use the toolbox for orchestrating GCP VMs, you will need to have set up the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install). This will work as follows:
+
+```
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-353.0.0-linux-x86_64.tar.gz
+./google-cloud-sdk/install.sh
+./google-cloud-sdk/bin/gcloud init
+```
+
+At initialization you will be required to select a GCP project. Internally the toolbox will call different `gcloud` commands to launch new VMs and/or monitor the status of running jobs.
+
 ## Google Cloud Storage Backups
 
 If you choose so, the toolbox will sync a local version of your experiment protocol database with a GCS bucket. Furthermore, the results of your experiments will be zipped and stored via a unique hash. You can afterwards use [`mle retrieve`](../../core_api/mle_retrieve/) in order to retrieve these backed up results from the bucket. These functionalities rely on `google-cloud-storage` and you having set your `GOOGLE_APPLICATION_CREDENTIALS`. You have to follow four steps:

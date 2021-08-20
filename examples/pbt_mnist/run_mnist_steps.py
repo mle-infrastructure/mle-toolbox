@@ -16,7 +16,8 @@ def main(mle):
 
     # Define the dataloaders
     mnist_transform = transforms.Compose([transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.3081,))])
+                                          transforms.Normalize((0.1307,),
+                                                               (0.3081,))])
     train_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=True, download=True,
                        transform=mnist_transform),
@@ -75,7 +76,7 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
     update_counter = 0
     train_losses = []
 
-    model.train() # prep model for training
+    model.train()  # prep model for training
     while True:
         for data, target in train_loader:
             optimizer.zero_grad()
@@ -105,7 +106,7 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
 
 def evaluate_network(model, test_loader, device, criterion):
     # Evaluate the model performance at end of epoch
-    model.eval() # prep model for evaluation
+    model.eval()  # prep model for evaluation
     eval_loss = []
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)

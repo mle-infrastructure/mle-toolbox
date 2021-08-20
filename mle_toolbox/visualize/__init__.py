@@ -32,13 +32,14 @@ except ModuleNotFoundError as err:
 
 
 # Static plots of results
-from .static_2d_plots import visualize_2D_grid, plot_2D_heatmap, moving_smooth_ts
+from .static_2d_plots import visualize_2D_grid, plot_2D_heatmap
 from .static_1d_plots import (
     visualize_1D_lcurves,
     visualize_1D_bar,
     visualize_1D_line,
     plot_1D_bar,
     plot_1D_line,
+    moving_smooth_ts,
 )
 
 # Dynamics animations of results

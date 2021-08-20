@@ -5,14 +5,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import List, Union
 
 
-def moving_smooth_ts(ts, window_size: int = 20):
-    """Smoothes a time series using a moving average filter."""
-    smooth_df = pd.DataFrame(ts)
-    mean_ts = smooth_df[0].rolling(window_size, min_periods=1).mean()
-    std_ts = smooth_df[0].rolling(window_size, min_periods=1).std()
-    return mean_ts, std_ts
-
-
 def visualize_2D_grid(
     hyper_df: pd.core.frame.DataFrame,
     fixed_params: Union[None, dict] = None,

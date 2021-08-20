@@ -49,3 +49,4 @@ single_job_args:
     time_per_job: "00:00:05"
     extra_cmd_line_input:
         some_random_var: 1
+    #partition: "ex_scioi_node"

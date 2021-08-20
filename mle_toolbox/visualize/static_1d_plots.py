@@ -4,7 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import List, Union
 import re
-from .static_2d_plots import moving_smooth_ts
+
+
+def moving_smooth_ts(ts, window_size: int = 20):
+    """Smoothes a time series using a moving average filter."""
+    smooth_df = pd.DataFrame(ts)
+    mean_ts = smooth_df[0].rolling(window_size, min_periods=1).mean()
+    std_ts = smooth_df[0].rolling(window_size, min_periods=1).std()
+    return mean_ts, std_ts
 
 
 def visualize_1D_bar(
