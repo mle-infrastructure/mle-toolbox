@@ -1,8 +1,8 @@
-### v0.3.0 - TBD
+### v0.3.0 - 08/21/2021
 
 ##### Added
 - Adds general processing job, which generalizes the post-processing job and enables 'shared'/centralized data pre-processing before a (search) experiment and results post-processing/figure generation afterwards. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/blob/main/examples/torch_mnist/mnist_single.yaml).
-- Adds population-based training experiment type. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist) and the [simple quadratic from the paper](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_quadratic).
+- Adds population-based training experiment type (still experimental). Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist) and the [simple quadratic from the paper](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_quadratic).
 - Adds a set of unit/integration tests for more robustness and `flake8` linting.
 - Adds code coverage with secrets token.
 - Adds `mle.ready_to_log` based on `log_every_k_updates` in `log_config`. No more modulo confusion.

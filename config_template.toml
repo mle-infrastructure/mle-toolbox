@@ -58,6 +58,7 @@ random_seed = 42
     # Default Slurm job arguments (if not supplied in job .yaml config)
     [slurm.default_job_args]
     num_logical_cores = 2
+    gpu_tpye = "tesla"
     partition = '<partition1>'
     job_name = 'temp'
     log_file = 'log'
@@ -96,6 +97,7 @@ random_seed = 42
     # Default SGE job arguments (if not differently supplied)
     [sge.default_job_arguments]
     num_logical_cores = 2
+    gpu_tpye = "RTX2080"
     queue = '<sge-queue-name>'
     job_name = 'temp'
     log_file = 'log'

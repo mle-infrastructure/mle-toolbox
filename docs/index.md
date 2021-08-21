@@ -33,9 +33,11 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 You are now ready to dive deeper into the specifics of [job configuration](setup/infrastructure/) and can start running your first experiments from the cluster (or locally on your machine) with the commands:
 
-1. Setup of credentials & toolbox settings: [`mle init`](https://roberttlange.github.io/mle-toolbox/core_api/mle_init/)
-2. Start up an experiment: [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/)
-3. Monitor resource utilisation: [`mle monitor`](https://roberttlange.github.io/mle-toolbox/core_api/mle_monitor/)
-4. Retrieve an experiment result: [`mle retrieve`](https://roberttlange.github.io/mle-toolbox/core_api/mle_retrieve/)
-5. Create an experiment report with figures: [`mle report`](https://roberttlange.github.io/mle-toolbox/core_api/mle_report/)
-6. Extract all GCS-stored results to your local drive: [`mle sync-gcs`](https://roberttlange.github.io/mle-toolbox/core_api/mle_sync_gcs/)
+|   | Command              |        Description                                                        |
+|-----------| -------------------------- | -------------------------------------------------------------- |
+|⏳| [`mle init`](https://roberttlange.github.io/mle-toolbox/core_api/mle_init/)       | Start up an experiment.              |
+|🚀| [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/)       | Setup of credentials & toolbox settings.              |
+|🖥️| [`mle monitor`](https://roberttlange.github.io/mle-toolbox/core_api/mle_monitor/)       | Monitor resource utilisation.              |
+|📥	| [`mle retrieve`](https://roberttlange.github.io/mle-toolbox/core_api/mle_retrieve/)       | Retrieve an experiment result.              |
+|💌| [`mle report`](https://roberttlange.github.io/mle-toolbox/core_api/mle_report/)       | Create an experiment report with figures.              |
+|🔄| [`mle sync-gcs`](https://roberttlange.github.io/mle-toolbox/core_api/mle_sync_gcs/)       | Extract all GCS-stored results to your local drive.              |

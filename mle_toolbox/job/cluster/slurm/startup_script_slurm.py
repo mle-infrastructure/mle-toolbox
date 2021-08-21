@@ -1,6 +1,6 @@
 # Useful string lego building blocks for Slurm startup file formatting
 
-# Base qsub template
+# Base sbatch template
 slurm_base_job_config = """#!/bin/bash
 #SBATCH --job-name={job_name}                   # job name (not id)
 #SBATCH --output={log_file}.txt                 # output file

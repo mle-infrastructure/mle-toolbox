@@ -10,7 +10,7 @@ def sge_generate_startup_file(job_arguments: dict) -> str:
     # Add desired number of requested gpus
     if "num_gpus" in job_arguments:
         if job_arguments["num_gpus"] > 0:
-            base_template += '#$ -l cuda="{num_gpus}(RTX2080)" \n'
+            base_template += '#$ -l cuda="{num_gpus}({gpu_type})" \n'
 
     # Exclude specific nodes from the queue
     if "exclude_nodes" in job_arguments:

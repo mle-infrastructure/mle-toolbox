@@ -42,8 +42,9 @@ type-check:
 
 testing:
 	# Run unit tests: File loading, job template generation
-	# Run integration tests: Different experiment types
-	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml
+	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/unit
+	# Run integration tests: Different experiment types [ignore report test]
+	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/integration/experiment
 
 deploy-docs:
 	# Deploy documentation homepage: https://roberttlange.github.io/mle-toolbox/
