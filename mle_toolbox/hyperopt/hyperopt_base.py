@@ -2,6 +2,7 @@ import time
 import os
 import shutil
 import json
+import yaml
 import copy
 import logging
 from typing import Union, List
@@ -44,10 +45,10 @@ class BaseHyperOptimisation(object):
         self.resource_to_run = resource_to_run  # Compute resource to run
         self.config_fname = config_fname  # Fname base config file
         # Load base config of jobs to be manipulated by search
-        fname, fext = os.path.splitext(config_fname)
-        if fext == ".json":
+        fname, self.config_fext = os.path.splitext(config_fname)
+        if self.config_fext == ".json":
             self.base_config = load_json_config(config_fname, return_dotmap=True)
-        elif fext == ".yaml":
+        elif self.config_fext == ".yaml":
             self.base_config = load_yaml_config(config_fname, return_dotmap=True)
         else:
             raise ValueError("Job config has to be .json or .yaml file.")
@@ -63,7 +64,8 @@ class BaseHyperOptimisation(object):
             os.makedirs(self.experiment_dir)
 
         # Copy over base config .json file -  to be copied + modified in search
-        config_copy = os.path.join(self.experiment_dir, "search_base_config.json")
+        config_copy = os.path.join(self.experiment_dir,
+                                   "search_base_config" + self.config_fext)
         if not os.path.exists(config_copy):
             shutil.copy(config_fname, config_copy)
 
@@ -158,7 +160,7 @@ class BaseHyperOptimisation(object):
         # Get all hyperparameters & plug them into config dicts, store jsons
         batch_proposals = self.get_hyperparam_proposal(num_total_evals)
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
-        batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
+        batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
         # Generate a queue of jobs to launch and work through them
         # Different seed logs are merged within queue whenever all completed
@@ -217,7 +219,7 @@ class BaseHyperOptimisation(object):
             # Get a set of hyperparameters & plug them into config dicts
             batch_proposals = self.get_hyperparam_proposal(num_evals_per_batch)
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
-            batch_fnames, run_ids = self.write_configs_to_json(batch_configs)
+            batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
             self.logger.info(
                 f"START - {self.current_iter}/"
@@ -337,7 +339,7 @@ class BaseHyperOptimisation(object):
             config_params_batch.append(sample_config)
         return config_params_batch
 
-    def write_configs_to_json(self, config_params_batch: list):
+    def write_configs_to_file(self, config_params_batch: list):
         """Take batch-list of configs & write to jsons. Return fnames."""
         # Init list of config filenames to exec & base string for postproc
         config_fnames_batch = []
@@ -345,12 +347,16 @@ class BaseHyperOptimisation(object):
 
         for s_id in range(len(config_params_batch)):
             run_id = "b_" + str(self.current_iter) + "_eval_" + str(s_id)
-            s_config_fname = os.path.join(self.experiment_dir, run_id + ".json")
+            s_config_fname = os.path.join(self.experiment_dir, run_id + self.config_fext)
 
-            # Write config dictionary to json file
-            with open(s_config_fname, "w") as f:
-                json.dump(config_params_batch[s_id], f)
-
+            if self.config_fext == ".json":
+                # Write config dictionary to json file
+                with open(s_config_fname, "w") as f:
+                    json.dump(config_params_batch[s_id], f)
+            else:
+                with open(s_config_fname, "w") as f:
+                    yaml.dump(config_params_batch[s_id], f,
+                              default_flow_style=False)
             # Add config fnames to batch lists
             config_fnames_batch.append(s_config_fname)
             all_run_ids.append(run_id)

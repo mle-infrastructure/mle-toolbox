@@ -4,9 +4,13 @@
 
 ##### Changed
 
+- Configuration loading is now more toolbox specific. `load_json_config` and `load_yaml_config` are now part of `mle-logging`. The toolbox now has two "new" function `load_job_config` and `load_experiment_config`, which prepare the raw configs for future usage.
+- The `job_config` file now no longer has to be a `.json` file, but can (and probably should) be a `.yaml` file. This makes formatting easier. The hyperoptimization pipeline will generate configuration files that are of the same file type.
+
 ##### Fixed
 
 - Grid engine monitoring now also tracks waiting/pending jobs.
+- Fixes a bug in the random seed setting for synchronous batch jobs. Previously a new set of seeds was sampled for each batch. This lead to problems when aggregating different logs by their seed id. Now the first set of seeds is stored and provided as an input to all subsequent `JobQueue` startups.
 
 ### v0.3.0 - 08/21/2021
 

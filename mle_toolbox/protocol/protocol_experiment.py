@@ -95,9 +95,9 @@ def protocol_experiment(
     # Add the base config - train, model, log
     fname, fext = os.path.splitext(job_config.meta_job_args["base_train_config"])
     if fext == ".json":
-        config = load_json_config(job_config.meta_job_args["base_train_config"])
+        base_config = load_json_config(job_config.meta_job_args["base_train_config"])
     elif fext == ".yaml":
-        config = load_yaml_config(job_config.meta_job_args["base_train_config"])
+        base_config = load_yaml_config(job_config.meta_job_args["base_train_config"])
     else:
         raise ValueError("Job config has to be .json or .yaml file.")
 
