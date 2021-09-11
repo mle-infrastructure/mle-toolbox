@@ -28,10 +28,10 @@ def check_correct_results(experiment_dir: str,
                                        os.path.split(config_filename)[1]))
     # Check that log file exists
     assert os.path.exists(os.path.join(dir_to_check, "logs",
-                                       timestr + base_str + "_seed_0.hdf5"))
+                                       "log_seed_0.hdf5"))
     # Check that figure file exists
     assert os.path.exists(os.path.join(dir_to_check,
-                                       "figures/fig_1_seed_0_pde_integral.png"))
+                                       "figures/fig_1_seed_0.png"))
 
     # Check that experiment config yaml was created (reproducibility)
     if api_check:

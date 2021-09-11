@@ -248,6 +248,12 @@ class BaseHyperOptimisation(object):
             )
             time_elapsed = time.time() - start_t
 
+            # Overwrite provided seeds with the ones sampled in the JobQueue
+            # Otherwise this will resample seeds which will cause problems
+            # when aggregating the different logs across batch iterations
+            # Potential danger: Overfitting of one specific seed?
+            random_seeds = job_queue.random_seeds
+
             # Update + save hyperlog after merging eval log .hdf5 files
             perf_measures = self.update_hyper_log(
                 batch_proposals, run_ids, time_elapsed, num_seeds_per_eval

@@ -119,3 +119,5 @@ def test_api_random_sync() -> None:
     # Check generated directories for correctness
     check_correct_results(exp_dir, api_check=True)
     os.chdir('..')
+
+    #mle run numpy_pde/pde_search_random.yaml -nw -np -resource local --experiment_dir experiments/random/api_test

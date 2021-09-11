@@ -24,9 +24,9 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
-1. Follow the [instructions below](https://github.com/RobertTLange/mle-toolbox#installation-memo) to install the `mle-toolbox` and set up your credentials/configurations.
+1. Follow the [instructions below](https://github.com/RobertTLange/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configurations.
 2. Read the [docs](https://roberttlange.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples 📄](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_ode), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae).
+3. Check out the [examples 📄](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae).
 4. Run your own experiments using the [template files, project](https://github.com/RobertTLange/mle-project-template) and [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/).
 
 
