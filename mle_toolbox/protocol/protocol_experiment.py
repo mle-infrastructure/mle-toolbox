@@ -5,7 +5,7 @@ from datetime import datetime
 import sys
 import select
 from typing import Union
-from ..utils import load_json_config
+from mle_logging.utils import load_json_config, load_yaml_config
 from .protocol_helpers import load_local_protocol_db
 
 
@@ -93,7 +93,14 @@ def protocol_experiment(
         db.dadd(new_experiment_id, ("job_spec_args", job_config.pbt_args))
 
     # Add the base config - train, model, log
-    base_config = load_json_config(job_config.meta_job_args["base_train_config"])
+    fname, fext = os.path.splitext(job_config.meta_job_args["base_train_config"])
+    if fext == ".json":
+        config = load_json_config(job_config.meta_job_args["base_train_config"])
+    elif fext == ".yaml":
+        config = load_yaml_config(job_config.meta_job_args["base_train_config"])
+    else:
+        raise ValueError("Job config has to be .json or .yaml file.")
+
     db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
     # Model/Network config is not required!
     try:

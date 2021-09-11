@@ -9,7 +9,8 @@ from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
 from ..job import JobQueue
-from ..utils import load_json_config, print_framed
+from ..utils import print_framed
+from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import merge_config_logs, load_meta_log
 
 
@@ -42,7 +43,15 @@ class BaseHyperOptimisation(object):
         self.hyper_log = hyper_log  # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run  # Compute resource to run
         self.config_fname = config_fname  # Fname base config file
-        self.base_config = load_json_config(config_fname)  # Base Train Config
+        # Load base config of jobs to be manipulated by search
+        fname, fext = os.path.splitext(config_fname)
+        if fext == ".json":
+            self.base_config = load_json_config(config_fname, return_dotmap=True)
+        elif fext == ".yaml":
+            self.base_config = load_yaml_config(config_fname, return_dotmap=True)
+        else:
+            raise ValueError("Job config has to be .json or .yaml file.")
+
         self.job_fname = job_fname  # Python file to run job
         self.job_arguments = job_arguments  # SGE job info
         self.experiment_dir = experiment_dir  # Where to store all logs

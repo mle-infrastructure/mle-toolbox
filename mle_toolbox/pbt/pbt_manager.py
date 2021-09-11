@@ -9,8 +9,8 @@ from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
-from ..utils import load_json_config
 from mle_toolbox.job import Job
+from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import load_log
 
 from .pbt_logger import PBT_Logger
@@ -36,7 +36,14 @@ class PBT_Manager(object):
         self.pbt_log = pbt_log  # Hyperopt. Log Instance
         self.resource_to_run = resource_to_run  # Compute resource to run
         self.config_fname = config_fname  # Fname base config file
-        self.base_config = load_json_config(config_fname)  # Base Train Config
+        fname, fext = os.path.splitext(config_fname)
+        if fext == ".json":
+            self.base_config = load_json_config(config_fname, return_dotmap=True)
+        elif fext == ".yaml":
+            self.base_config = load_yaml_config(config_fname, return_dotmap=True)
+        else:
+            raise ValueError("Job config has to be .json or .yaml file.")
+
         self.job_fname = job_fname  # Python file to run job
         self.job_arguments = job_arguments  # Cluster/VM job info
         self.experiment_dir = experiment_dir  # Where to store all logs
@@ -48,7 +55,7 @@ class PBT_Manager(object):
             os.makedirs(self.experiment_dir)
 
         # Copy over base config .json file -  to be copied + modified in search
-        config_copy = os.path.join(self.experiment_dir, "pbt_base_config.json")
+        config_copy = os.path.join(self.experiment_dir, "pbt_base_config" + fext)
         if not os.path.exists(config_copy):
             shutil.copy(config_fname, config_copy)
 

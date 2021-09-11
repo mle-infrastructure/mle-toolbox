@@ -100,7 +100,7 @@ To cite this repository:
 ```
 @software{mle_toolbox2021github,
   author = {Robert Tjarko Lange},
-  title = {{MLE-Toolbox}: A Reproducible Workflow for Machine Learning Experiments},
+  title = {{MLE-Toolbox}: A Reproducible Workflow for Distributed Machine Learning Experiments},
   url = {http://github.com/RobertTLange/mle-toolbox},
   version = {0.3.0},
   year = {2021},

@@ -1,3 +1,13 @@
+### v0.3.1 - TBD
+
+##### Added
+
+##### Changed
+
+##### Fixed
+
+- Grid engine monitoring now also tracks waiting/pending jobs.
+
 ### v0.3.0 - 08/21/2021
 
 ##### Added

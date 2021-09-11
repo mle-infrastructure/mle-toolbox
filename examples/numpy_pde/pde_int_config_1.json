@@ -6,9 +6,8 @@
                  "dt": 0.1},
 "log_config": {"time_to_track": ["step_counter"],
                "what_to_track": ["integral", "noise"],
-               "time_to_print": ["step_counter"],
-               "what_to_print": ["integral"],
+               "verbose": true,
                "print_every_k_updates": 5,
                "log_every_j_steps": 100,
-               "overwrite_experiment_dir": 1}
+               "overwrite": 1}
 }

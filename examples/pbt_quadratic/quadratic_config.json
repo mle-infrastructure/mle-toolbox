@@ -1,6 +1,7 @@
 {
 "log_config": {"time_to_track": ["num_updates"],
-               "what_to_track": ["objective", "surrogate", "theta_0", "theta_1"],
+               "what_to_track": ["objective", "surrogate",
+                                 "theta_0", "theta_1"],
                "model_type": "numpy",
                "overwrite_experiment_dir": 1},
 "train_config": {"lrate": 0.1,

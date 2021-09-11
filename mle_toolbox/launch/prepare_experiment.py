@@ -43,7 +43,7 @@ def welcome_to_mle_toolbox() -> None:
         "  [link=https://github.com/RobertTLange/mle-toolbox/]MLE-Toolbox Repo[/link] [not italic]:pencil:[/]",
     )
     panel = Panel(grid, style="white on blue", expand=True)
-    console = Console()
+    console = Console(width=87)
     console.print(panel)
 
 

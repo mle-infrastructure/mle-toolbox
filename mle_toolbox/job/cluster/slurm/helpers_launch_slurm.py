@@ -13,13 +13,13 @@ def slurm_generate_startup_file(job_arguments: dict) -> str:
 
     # Set the max required memory per job
     if "memory_per_cpu" in job_arguments:
-        base_template += "#SBATCH --mem-per-cpu={memory_per_job}\n"
+        base_template += "#SBATCH --mem-per-cpu={memory_per_cpu}\n"
 
     # Set the max required time per job (afterwards terminate)
     if "time_per_job" in job_arguments:
         base_template += "#SBATCH --time={time_per_job}\n"
 
-    # Set the max required memory per job in MB - standardization SGE
+    # Set the max required memory per job in MB - standardization slurm
     if "memory_per_job" in job_arguments:
         base_template += "#SBATCH --mem={memory_per_job}\n"
 

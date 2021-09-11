@@ -52,7 +52,22 @@ def get_user_sge_data():
                     except Exception:
                         pass
 
-                # TODO: Add waiting in queue job collection.
+                # Get waiting jobs.
+                if queue_all != 0:
+                    waiting = len(
+                        sp.check_output(
+                            [
+                                "qstat",
+                                "-s",
+                                "p",   # pending
+                                "-u",
+                                user,
+                                "-q",
+                                mle_config.sge.info.queue,
+                            ]
+                        ).split(b"\n")[:-1]
+                    )
+                    waiting -= 2 * (waiting != 0)
 
                 # Get running jobs.
                 if queue_all != 0:

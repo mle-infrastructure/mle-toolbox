@@ -1,8 +1,7 @@
 import unittest
 import os
 from dotmap import DotMap
-from mle_toolbox.utils import (load_yaml_config,
-                               load_json_config,
+from mle_toolbox.utils import (load_experiment_config,
                                load_mle_toolbox_config,
                                load_result_logs)
 from mle_toolbox.utils import load_hyper_log
@@ -21,14 +20,9 @@ hyper_log_fname = "hyper_log.pkl"
 
 
 class TestFileLoading(unittest.TestCase):
-    def test_load_json_config(self):
-        """ Make sure that assert is raised since no `log_config` is given. """
-        with self.assertRaises(AssertionError):
-            json_config = load_json_config(cmd_args_proxy.base_train_config)
-
     def test_load_yaml_config(self):
         """ Assert manual inputs are written to experiment configuration. """
-        experiment_config = load_yaml_config(cmd_args_proxy)
+        experiment_config = load_experiment_config(cmd_args_proxy)
         assert (experiment_config.meta_job_args.base_train_fname ==
                 cmd_args_proxy.base_train_fname)
         assert (experiment_config.meta_job_args.base_train_config ==

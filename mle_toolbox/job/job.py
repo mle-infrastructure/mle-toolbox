@@ -92,7 +92,7 @@ class Job(object):
         # Add additional cmd line args if extra ones are specified
         if extra_cmd_line_input is not None:
             self.cmd_line_args = self.generate_extra_cmd_line_args(
-                self.cmd_line_args, extra_cmd_line_input
+                self.cmd_line_args, extra_cmd_line_input.copy()
             )
 
         # Instantiate/connect a logger

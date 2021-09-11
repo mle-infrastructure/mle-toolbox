@@ -9,7 +9,8 @@ import select
 from typing import Union, Tuple
 from dotmap import DotMap
 from datetime import datetime
-from .core_files_load import load_json_config, load_mle_toolbox_config
+from mle_logging.utils import load_json_config, load_yaml_config
+from .core_files_load import load_mle_toolbox_config
 
 
 # Safely import such that no import errors are thrown - reduce dependencies
@@ -123,15 +124,70 @@ def parse_experiment_args(
     return cmd_args, extra_args
 
 
-def load_experiment_config(
+def load_experiment_config(cmd_args: dict) -> DotMap:
+    """Load in YAML config file, overwrite based on cmd & wrap as DotMap."""
+    config = load_yaml_config(cmd_args.config_fname)
+
+    # Check that meta_job_args and single_job_args given in yaml config
+    for k in ["meta_job_args", "single_job_args"]:
+        assert k in config.keys(), f"Please provide {k} in .yaml config."
+
+    # Check that job-specific arguments are given in yaml config
+    experiment_type = config["meta_job_args"]["experiment_type"]
+    all_experiment_types = [
+        "single-config",
+        "multiple-configs",
+        "hyperparameter-search",
+        "population-based-training",
+    ]
+    assert (
+        experiment_type in all_experiment_types
+    ), "Job type has to be in {all_experiment_types}."
+
+    if experiment_type == "single-config":
+        assert "single_job_args" in config.keys()
+    elif experiment_type == "multiple-config":
+        assert "multi_config_args" in config.keys()
+    elif experiment_type == "hyperparameter-search":
+        assert "param_search_args" in config.keys()
+    elif experiment_type == "population-based-training":
+        assert "pbt_args" in config.keys()
+
+    # Update job config with specific cmd args (if provided)
+    if cmd_args.base_train_fname is not None:
+        config["meta_job_args"]["base_train_fname"] = cmd_args.base_train_fname
+    if cmd_args.base_train_config is not None:
+        config["meta_job_args"][
+            "base_train_config"
+        ] = cmd_args.base_train_config  # noqa: E501
+    if cmd_args.experiment_dir is not None:
+        config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
+
+    # Check that base_train_fname, base_train_config do exist
+    assert os.path.isfile(config["meta_job_args"]["base_train_fname"])
+    assert os.path.isfile(config["meta_job_args"]["base_train_config"])
+    return DotMap(config, _dynamic=False)
+
+
+def load_job_config(
     config_fname: str,
     experiment_dir: str,
     seed_id: Union[None, int],
     model_ckpt: Union[None, str],
 ) -> Tuple[DotMap, DotMap, DotMap]:
     """Prepare job config files for experiment run (add seed id, etc.)."""
-    # Load .json config file + add config fname to clone + add experiment dir
-    config = load_json_config(config_fname)
+    # Load .json/.yaml job config + add config fname/experiment dir
+    fname, fext = os.path.splitext(config_fname)
+    if fext == ".json":
+        config = load_json_config(config_fname, return_dotmap=True)
+    elif fext == ".yaml":
+        config = load_yaml_config(config_fname, return_dotmap=True)
+    else:
+        raise ValueError("Job config has to be .json or .yaml file.")
+
+    # Check that train and log config exist!
+    assert "train_config" in config.keys(), "Provide train_config key."
+    assert "log_config" in config.keys(), "Provide log_config key."
     config.log_config.config_fname = config_fname
     config.log_config.experiment_dir = experiment_dir
 

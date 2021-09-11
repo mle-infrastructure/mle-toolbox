@@ -7,7 +7,7 @@ from mle_toolbox import mle_config
 
 # Import of general tools (loading, etc.)
 from mle_toolbox.utils import (
-    load_yaml_config,
+    load_experiment_config,
     determine_resource,
     ask_for_resource_to_run,
     ask_for_binary_input,
@@ -54,7 +54,7 @@ def run(cmd_args):
         print_framed("EXPERIMENT STARTED")
 
     # Load experiment yaml config & determine exec resource
-    job_config = load_yaml_config(cmd_args)
+    job_config = load_experiment_config(cmd_args)
     current_resource = determine_resource()
     resource_to_run = cmd_args.resource_to_run
     job_config.meta_job_args.debug_mode = cmd_args.debug

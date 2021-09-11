@@ -1,5 +1,5 @@
 from .utils.core_experiment import (
-    load_experiment_config,
+    load_job_config,
     parse_experiment_args,
     get_extra_cmd_line_input,
     set_random_seeds,
@@ -24,7 +24,7 @@ class MLExperiment(object):
             default_config_fname, default_seed, default_experiment_dir
         )
         # Load the different configurations for the experiment.
-        loaded_configs = load_experiment_config(
+        loaded_configs = load_job_config(
             cmd_args.config_fname,
             cmd_args.experiment_dir,
             cmd_args.seed_id,

@@ -4,6 +4,19 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import List, Union
 
+import seaborn as sns
+
+# Set overall plots appearance sns style
+sns.set(
+    context="poster",
+    style="white",
+    palette="Paired",
+    font="sans-serif",
+    font_scale=1.05,
+    color_codes=True,
+    rc=None,
+)
+
 
 def visualize_2D_grid(
     hyper_df: pd.core.frame.DataFrame,

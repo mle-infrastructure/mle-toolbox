@@ -38,7 +38,7 @@ class JobQueue(object):
         self.job_filename = job_filename  # path to train script
         self.config_filenames = config_filenames  # path to config json
         self.experiment_dir = experiment_dir  # main results dir (create)
-        self.job_arguments = job_arguments  # job-specific args
+        self.job_arguments = job_arguments.copy()  # job-specific args
         self.num_seeds = num_seeds  # number seeds to run
         self.max_running_jobs = max_running_jobs  # number of sim running jobs
         self.message_id = message_id  # Message ts id for slack bot
