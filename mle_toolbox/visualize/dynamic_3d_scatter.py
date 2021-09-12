@@ -1,12 +1,15 @@
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from mpl_toolkits.mplot3d import Axes3D
 
 
-def animate_2D_scatter(
+def animate_3D_scatter(
     data,
     dt=1,
     ylabel="y-Axis Label",
     xlabel="x-Axis Label",
+    zlabel="z-Axis Label",
     title="Animated Scatter",
     no_axis=False,
     interval=100,
@@ -15,13 +18,15 @@ def animate_2D_scatter(
     direct_save=True,
 ):
     """Generate a gif animation of a set of 1d curves."""
-    animator = Animated2DScatter(data, dt, title, ylabel, xlabel, no_axis, interval)
+    animator = Animated3DScatter(data, dt, title,
+                                 ylabel, xlabel, zlabel,
+                                 no_axis, interval)
     if direct_save:
         animator.ani.save(fname, fps=fps, writer="imagemagick")
     return animator
 
 
-class Animated2DScatter(object):
+class Animated3DScatter(object):
     """An animated line plot of all lines in provided data over time."""
 
     def __init__(
@@ -31,6 +36,7 @@ class Animated2DScatter(object):
         title="Animated Scatter",
         ylabel="y-Axis",
         xlabel="x-Axis",
+        zlabel="z-Axis",
         no_axis=False,
         interval=100,
     ):
@@ -42,29 +48,22 @@ class Animated2DScatter(object):
         self.title = title
 
         # Setup the figure and axes...
-        self.fig, self.ax = plt.subplots(figsize=(7, 7))
+        self.fig = plt.figure(figsize=(7, 7))
+        self.ax = self.fig.add_subplot(111, projection='3d')
         self.fig.tight_layout()
-        self.ax.set_ylabel(ylabel, fontsize=20)
-        self.ax.set_xlabel(xlabel, fontsize=20)
+        self.ax.set_ylabel(ylabel, fontsize=20, labelpad=12)
+        self.ax.set_xlabel(xlabel, fontsize=20, labelpad=12)
+        self.ax.set_zlabel(zlabel, fontsize=20, labelpad=12)
+        self.ax.dist = 11
         self.fig.tight_layout()
 
         if no_axis:
             self.ax.axis("off")
 
         # Plot the initial image
-        x, y = data[0, :, 0], data[0, :, 1]
-        self.scat = self.ax.scatter(
-            x, y, s=5, vmin=0, vmax=1, cmap="jet", edgecolor="k"
-        )
-        # orient = ax.quiver(x, y, -np.cos(theta), -np.sin(theta),
-        #                    headwidth=1, headlength=3, headaxislength=3)
+        x, y, z = data[0, :, 0], data[0, :, 1], data[0, :, 2]
 
-        # if annotate_agents:
-        #     num_agents = x.shape[0]
-        #     annotate = []
-        #     for i in range(num_agents):
-        #         temp = ax.text(x[i]+0.2, y[i]+0.2, str(i), fontsize=10)
-        #         annotate.append(temp)
+        self.scat, = self.ax.plot(x, y, z, linestyle="", marker="o")
 
         # Then setup FuncAnimation.
         self.ani = animation.FuncAnimation(
@@ -78,25 +77,20 @@ class Animated2DScatter(object):
 
     def setup_plot(self):
         """Initial drawing of the heatmap plot."""
-        self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=40)
-        self.ax.axis([-7.5, 7.5, -7.5, 7.5])
+        self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=40, pad=-25)
+        #print(x_coord, y_coord, z_coord)
+        self.ax.axis([np.min(self.data[:, :, 0]), np.max(self.data[:, :, 0]),
+                      np.min(self.data[:, :, 1]), np.max(self.data[:, :, 1])])
+        self.ax.set_zlim(np.min(self.data[:, :, 2]), np.max(self.data[:, :, 2]))
         return
 
     def update(self, i):
         self.t += self.dt
-        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
-
-        coord = self.data[i, :, :2]
-        # theta = self.data[i, :, 2]
-        self.scat.set_offsets(coord)
-        # orient.set_offsets(coord)
-        # orient.set_UVC(-np.cos(theta), -np.sin(theta))
-
-        # # Update agent id annotation
-        # if annotate_agents:
-        #     for i in range(num_agents):
-        #         annotate[i].set_position(coord[i]+0.2)
-
+        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t),
+                          fontsize=25, pad=-25)
+        coord = self.data[i, :, :3]
+        self.scat.set_data(coord[:, 0], coord[:, 1])
+        self.scat.set_3d_properties(coord[:, 2])
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
         return (self.scat,)

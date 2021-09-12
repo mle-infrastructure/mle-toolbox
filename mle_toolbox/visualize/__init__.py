@@ -46,6 +46,8 @@ from .static_1d_plots import (
 from .dynamic_1d_anims import animate_1D_lines
 from .dynamic_2d_grid import animate_2D_grid
 from .dynamic_2d_scatter import animate_2D_scatter
+from .dynamic_3d_scatter import animate_3D_scatter
+from .dynamic_3d_surface import animate_3D_surface
 
 
 __all__ = [
@@ -60,4 +62,6 @@ __all__ = [
     "animate_1D_lines",
     "animate_2D_grid",
     "animate_2D_scatter",
+    "animate_3D_scatter",
+    "animate_3D_surface",
 ]
