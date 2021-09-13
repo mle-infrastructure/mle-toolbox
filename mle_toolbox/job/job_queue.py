@@ -143,8 +143,10 @@ class JobQueue(object):
                     "You need to install `slack-clusterbot` to "
                     "use status notifications."
                 )
-            slackbot = ClusterBot(slack_token=mle_config.slack.slack_token,
-                                  user_name=mle_config.slack.user_name)
+            slackbot = ClusterBot(
+                slack_token=mle_config.slack.slack_token,
+                user_name=mle_config.slack.user_name,
+            )
             slackbot.init_pbar(self.num_total_jobs, ts=self.message_id)
 
         # 3. Monitor & launch new waiting jobs when resource available

@@ -59,7 +59,7 @@ def get_user_sge_data():
                             [
                                 "qstat",
                                 "-s",
-                                "p",   # pending
+                                "p",  # pending
                                 "-u",
                                 user,
                                 "-q",

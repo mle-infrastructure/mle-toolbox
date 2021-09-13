@@ -1,9 +1,8 @@
 import os
 import toml
-import commentjson
 import pickle
 from dotmap import DotMap
-from typing import Union, Dict, Tuple, Any
+from typing import Tuple, Any
 
 # Import helpers for loading meta-log and hyper-log files
 from .load_hyper_log import load_hyper_log, HyperLog
@@ -80,11 +79,12 @@ def load_result_logs(
     experiment_dir: str = "experiments",
     meta_log_fname: str = "meta_log.hdf5",
     hyper_log_fname: str = "hyper_log.pkl",
-    aggregate_seeds: bool = True
+    aggregate_seeds: bool = True,
 ) -> Tuple[MetaLog, HyperLog]:
     """Load both meta and hyper logs for an experiment."""
-    meta_log = load_meta_log(os.path.join(experiment_dir, meta_log_fname),
-                             aggregate_seeds)
+    meta_log = load_meta_log(
+        os.path.join(experiment_dir, meta_log_fname), aggregate_seeds
+    )
     hyper_log = load_hyper_log(os.path.join(experiment_dir, hyper_log_fname))
     # Reconstruct search variables and evaluation metrics
     hyper_log.set_search_metrics(

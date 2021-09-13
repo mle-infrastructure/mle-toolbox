@@ -28,7 +28,7 @@ def visualize_1D_bar(
     ax=None,
     figsize: tuple = (9, 6),
     hline: Union[None, float] = None,
-    fname: Union[None, str] = None
+    fname: Union[None, str] = None,
 ):
     """Plot 1d Bar for single variable and y - select from df."""
     if fig is None or ax is None:
@@ -128,7 +128,7 @@ def visualize_1D_line(
     hline: Union[None, float] = None,
     fig=None,
     ax=None,
-    fname: Union[None, str] = None
+    fname: Union[None, str] = None,
 ):
     """Plot a 1d Line w. dots for single var. and its y mapping."""
     if fig is None or ax is None:
@@ -150,7 +150,8 @@ def visualize_1D_line(
     plot_1D_line(
         param_array,
         target_array,
-        fig, ax,
+        fig,
+        ax,
         plot_title,
         xy_labels,
         every_nth_tick,
@@ -203,9 +204,7 @@ def plot_1D_line(
         if j % every_nth_tick == 0
     ]
     xticks = [
-        param_array[j]
-        for j, i in enumerate(param_array)
-        if j % every_nth_tick == 0
+        param_array[j] for j, i in enumerate(param_array) if j % every_nth_tick == 0
     ]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
@@ -257,7 +256,7 @@ def visualize_1D_lcurves(
     fig=None,
     ax=None,
     figsize: tuple = (9, 6),
-    fname: Union[None, str] = None
+    fname: Union[None, str] = None,
 ):
     """Plot learning curves from meta_log. Select data and customize plot."""
     if fig is None or ax is None:

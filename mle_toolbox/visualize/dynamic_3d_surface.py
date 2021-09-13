@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def animate_3D_surface(
@@ -20,9 +19,9 @@ def animate_3D_surface(
     direct_save=True,
 ):
     """Generate a gif animation of a set of 1d curves."""
-    animator = Animated3DSurface(x, y, data, dt,
-                                 title, ylabel, xlabel, zlabel,
-                                 no_axis, interval)
+    animator = Animated3DSurface(
+        x, y, data, dt, title, ylabel, xlabel, zlabel, no_axis, interval
+    )
     if direct_save:
         animator.ani.save(fname, fps=fps, writer="imagemagick")
     return animator
@@ -55,13 +54,13 @@ class Animated3DSurface(object):
 
         # Setup the figure and axes...
         self.fig = plt.figure(figsize=(7, 7))
-        self.ax = self.fig.add_subplot(111, projection='3d')
-        #self.fig.tight_layout()
+        self.ax = self.fig.add_subplot(111, projection="3d")
+        # self.fig.tight_layout()
         self.ax.set_ylabel(ylabel, fontsize=20, labelpad=12)
         self.ax.set_xlabel(xlabel, fontsize=20, labelpad=12)
         self.ax.set_zlabel(zlabel, fontsize=20, labelpad=12)
-        #self.ax.dist = 12
-        #self.fig.tight_layout()
+        # self.ax.dist = 12
+        # self.fig.tight_layout()
 
         if no_axis:
             self.ax.axis("off")
@@ -71,15 +70,16 @@ class Animated3DSurface(object):
         self.ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         self.ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         # make the grid lines transparent
-        self.ax.xaxis._axinfo["grid"]['color'] = (1, 1, 1, 0)
-        self.ax.yaxis._axinfo["grid"]['color'] = (1, 1, 1, 0)
-        self.ax.zaxis._axinfo["grid"]['color'] = (1, 1, 1, 0)
+        self.ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+        self.ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+        self.ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
 
         # Plot the initial image
-        self.surface = [self.ax.plot_surface(self.x, self.y,
-                                             self.data[0, :, :],
-                        color='0.75', rstride=1, cstride=1)]
-
+        self.surface = [
+            self.ax.plot_surface(
+                self.x, self.y, self.data[0, :, :], color="0.75", rstride=1, cstride=1
+            )
+        ]
 
         # Then setup FuncAnimation.
         self.ani = animation.FuncAnimation(
@@ -93,20 +93,20 @@ class Animated3DSurface(object):
 
     def setup_plot(self):
         """Initial drawing of the heatmap plot."""
-        self.ax.set_title(self.title + "Time: {}".format(self.dt),
-                          fontsize=25, pad=-55)
-        #print(x_coord, y_coord, z_coord)
+        self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=25, pad=-55)
+        # print(x_coord, y_coord, z_coord)
         self.ax.set_zlim(np.min(self.data), np.max(self.data))
         return
 
     def update(self, i):
         self.t += self.dt
-        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t),
-                          fontsize=25, pad=-55)
+        self.ax.set_title(
+            self.title + r" $t={:.1f}$".format(self.t), fontsize=25, pad=-55
+        )
         self.surface[0].remove()
-        self.surface[0] = self.ax.plot_surface(self.x, self.y,
-                                               self.data[i, :, :],
-                                               cmap="magma")
+        self.surface[0] = self.ax.plot_surface(
+            self.x, self.y, self.data[i, :, :], cmap="magma"
+        )
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
         return (self.surface,)

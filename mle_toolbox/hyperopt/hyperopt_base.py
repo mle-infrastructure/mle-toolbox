@@ -64,8 +64,9 @@ class BaseHyperOptimisation(object):
             os.makedirs(self.experiment_dir)
 
         # Copy over base config .json file -  to be copied + modified in search
-        config_copy = os.path.join(self.experiment_dir,
-                                   "search_base_config" + self.config_fext)
+        config_copy = os.path.join(
+            self.experiment_dir, "search_base_config" + self.config_fext
+        )
         if not os.path.exists(config_copy):
             shutil.copy(config_fname, config_copy)
 
@@ -347,7 +348,9 @@ class BaseHyperOptimisation(object):
 
         for s_id in range(len(config_params_batch)):
             run_id = "b_" + str(self.current_iter) + "_eval_" + str(s_id)
-            s_config_fname = os.path.join(self.experiment_dir, run_id + self.config_fext)
+            s_config_fname = os.path.join(
+                self.experiment_dir, run_id + self.config_fext
+            )
 
             if self.config_fext == ".json":
                 # Write config dictionary to json file
@@ -355,8 +358,7 @@ class BaseHyperOptimisation(object):
                     json.dump(config_params_batch[s_id], f)
             else:
                 with open(s_config_fname, "w") as f:
-                    yaml.dump(config_params_batch[s_id], f,
-                              default_flow_style=False)
+                    yaml.dump(config_params_batch[s_id], f, default_flow_style=False)
             # Add config fnames to batch lists
             config_fnames_batch.append(s_config_fname)
             all_run_ids.append(run_id)

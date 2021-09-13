@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def animate_3D_scatter(
@@ -18,9 +17,9 @@ def animate_3D_scatter(
     direct_save=True,
 ):
     """Generate a gif animation of a set of 1d curves."""
-    animator = Animated3DScatter(data, dt, title,
-                                 ylabel, xlabel, zlabel,
-                                 no_axis, interval)
+    animator = Animated3DScatter(
+        data, dt, title, ylabel, xlabel, zlabel, no_axis, interval
+    )
     if direct_save:
         animator.ani.save(fname, fps=fps, writer="imagemagick")
     return animator
@@ -49,7 +48,7 @@ class Animated3DScatter(object):
 
         # Setup the figure and axes...
         self.fig = plt.figure(figsize=(7, 7))
-        self.ax = self.fig.add_subplot(111, projection='3d')
+        self.ax = self.fig.add_subplot(111, projection="3d")
         self.fig.tight_layout()
         self.ax.set_ylabel(ylabel, fontsize=20, labelpad=12)
         self.ax.set_xlabel(xlabel, fontsize=20, labelpad=12)
@@ -63,7 +62,7 @@ class Animated3DScatter(object):
         # Plot the initial image
         x, y, z = data[0, :, 0], data[0, :, 1], data[0, :, 2]
 
-        self.scat, = self.ax.plot(x, y, z, linestyle="", marker="o")
+        (self.scat,) = self.ax.plot(x, y, z, linestyle="", marker="o")
 
         # Then setup FuncAnimation.
         self.ani = animation.FuncAnimation(
@@ -78,16 +77,23 @@ class Animated3DScatter(object):
     def setup_plot(self):
         """Initial drawing of the heatmap plot."""
         self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=40, pad=-25)
-        #print(x_coord, y_coord, z_coord)
-        self.ax.axis([np.min(self.data[:, :, 0]), np.max(self.data[:, :, 0]),
-                      np.min(self.data[:, :, 1]), np.max(self.data[:, :, 1])])
+        # print(x_coord, y_coord, z_coord)
+        self.ax.axis(
+            [
+                np.min(self.data[:, :, 0]),
+                np.max(self.data[:, :, 0]),
+                np.min(self.data[:, :, 1]),
+                np.max(self.data[:, :, 1]),
+            ]
+        )
         self.ax.set_zlim(np.min(self.data[:, :, 2]), np.max(self.data[:, :, 2]))
         return
 
     def update(self, i):
         self.t += self.dt
-        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t),
-                          fontsize=25, pad=-25)
+        self.ax.set_title(
+            self.title + r" $t={:.1f}$".format(self.t), fontsize=25, pad=-25
+        )
         coord = self.data[i, :, :3]
         self.scat.set_data(coord[:, 0], coord[:, 1])
         self.scat.set_3d_properties(coord[:, 2])
