@@ -16,6 +16,7 @@ def moving_smooth_ts(ts, window_size: int = 20):
 
 def visualize_1D_bar(
     hyper_df: pd.core.frame.DataFrame,
+    fixed_params: Union[None, dict] = None,
     param_to_plot: str = "param",
     target_to_plot: str = "target",
     plot_title: str = "Temp Title",
@@ -27,7 +28,7 @@ def visualize_1D_bar(
     ax=None,
     figsize: tuple = (9, 6),
     hline: Union[None, float] = None,
-    fixed_params: Union[None, dict] = None,
+    fname: Union[None, str] = None
 ):
     """Plot 1d Bar for single variable and y - select from df."""
     if fig is None or ax is None:
@@ -47,7 +48,7 @@ def visualize_1D_bar(
     target_array = temp_df[target_to_plot]
 
     # Plot the data
-    plot_1D_bar(
+    fig, ax = plot_1D_bar(
         param_array,
         target_array,
         fig,
@@ -59,6 +60,11 @@ def visualize_1D_bar(
         round_ticks,
         hline,
     )
+    # Save the figure if a filename was provided
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
+    else:
+        return fig, ax
 
 
 def plot_1D_bar(
@@ -104,13 +110,15 @@ def plot_1D_bar(
     # Add a horizontal line for some baseline level
     if hline is not None:
         ax.axhline(hline, ls="--", c="r", alpha=0.5)
+
     return fig, ax
 
 
 def visualize_1D_line(
     hyper_df: pd.core.frame.DataFrame,
-    param_to_plot: str,
-    target_to_plot: str,
+    fixed_params: Union[None, dict] = None,
+    param_to_plot: str = "param",
+    target_to_plot: str = "target",
     plot_title: str = "Temp Title",
     xy_labels: list = ["x", "y"],
     every_nth_tick: int = 1,
@@ -120,37 +128,42 @@ def visualize_1D_line(
     hline: Union[None, float] = None,
     fig=None,
     ax=None,
+    fname: Union[None, str] = None
 ):
     """Plot a 1d Line w. dots for single var. and its y mapping."""
     if fig is None or ax is None:
         fig, ax = plt.subplots(1, 1, figsize=figsize)
-    ax.plot(hyper_df[param_to_plot], hyper_df[target_to_plot])
-    ax.scatter(hyper_df[param_to_plot], hyper_df[target_to_plot], zorder=5)
 
-    xlabels = [
-        str(round(i, round_ticks))
-        for j, i in enumerate(hyper_df[param_to_plot])
-        if j % every_nth_tick == 0
-    ]
-    xticks = [
-        hyper_df[param_to_plot].iloc[j]
-        for j, i in enumerate(hyper_df[param_to_plot])
-        if j % every_nth_tick == 0
-    ]
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xlabels)
+    # Select the data to plot - max. fix 2 other vars
+    p_to_plot = [param_to_plot] + [target_to_plot]
 
-    ax.set_title(plot_title)
-    ax.set_ylabel(xy_labels[1])
-    ax.set_xlabel(xy_labels[0])
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    if ylims is not None:
-        ax.set_ylim(ylims)
+    sub_log = hyper_df.hyper_log.copy()
+    if fixed_params is not None:
+        for k, v in fixed_params.items():
+            sub_log = sub_log[sub_log[k].astype(float) == v]
 
-    if hline is not None:
-        ax.axhline(hline, ls="--", c="r", alpha=0.5)
-    return fig, ax
+    # Subselect the desired params from the pd df
+    temp_df = sub_log[p_to_plot]
+    param_array = temp_df[param_to_plot].to_numpy()
+    target_array = temp_df[target_to_plot].to_numpy()
+
+    plot_1D_line(
+        param_array,
+        target_array,
+        fig, ax,
+        plot_title,
+        xy_labels,
+        every_nth_tick,
+        ylims,
+        round_ticks,
+        hline,
+    )
+
+    # Save the figure if a filename was provided
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
+    else:
+        return fig, ax
 
 
 def plot_1D_line(
@@ -190,7 +203,9 @@ def plot_1D_line(
         if j % every_nth_tick == 0
     ]
     xticks = [
-        param_array[j] for j, i in enumerate(param_array) if j % every_nth_tick == 0
+        param_array[j]
+        for j, i in enumerate(param_array)
+        if j % every_nth_tick == 0
     ]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
@@ -210,6 +225,7 @@ def plot_1D_line(
     # Add a horizontal line for some baseline level
     if hline is not None:
         ax.axhline(hline, ls="--", c="r", alpha=0.5)
+
     return fig, ax
 
 
@@ -241,6 +257,7 @@ def visualize_1D_lcurves(
     fig=None,
     ax=None,
     figsize: tuple = (9, 6),
+    fname: Union[None, str] = None
 ):
     """Plot learning curves from meta_log. Select data and customize plot."""
     if fig is None or ax is None:
@@ -311,4 +328,9 @@ def visualize_1D_lcurves(
     ax.set_xlabel(xy_labels[0])
     ax.set_ylabel(xy_labels[1])
     fig.tight_layout()
-    return fig, ax
+
+    # Save the figure if a filename was provided
+    if fname is not None:
+        fig.savefig(fname, dpi=300)
+    else:
+        return fig, ax

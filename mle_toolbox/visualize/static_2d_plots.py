@@ -40,6 +40,7 @@ def visualize_2D_grid(
     ax=None,
     figsize: tuple = (10, 8),
     cmap="magma",
+    fname: Union[None, str] = None,
 ):
     """Fix certain params & visualize grid target value over other two."""
     assert len(params_to_plot) == 2, "You can only plot 2 variables!"
@@ -90,7 +91,12 @@ def visualize_2D_grid(
             ax=ax,
             cmap=cmap,
         )
-        return fig, ax
+
+        # Save the figure if a filename was provided
+        if fname is not None:
+            fig.savefig(fname, dpi=300)
+        else:
+            return fig, ax
 
 
 def get_heatmap_array(
