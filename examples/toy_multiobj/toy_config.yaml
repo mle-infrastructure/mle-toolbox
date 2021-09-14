@@ -1,0 +1,13 @@
+train_config:
+    lrate: 0.1
+    batch_size: 32
+    architecture: "cnn"
+log_config:
+    time_to_track:
+        - "step_counter"
+    what_to_track:
+        - "objective_1"
+        - "objective_2"
+    verbose: true
+    print_every_k_updates: 1
+    overwrite: 1

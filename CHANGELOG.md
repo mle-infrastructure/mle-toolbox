@@ -3,7 +3,7 @@
 ##### Added
 
 - 3D animation post-processing helpers (`animate_3D_scatter` and `animate_3D_surface`) and test coverage for visualizations (static/dynamic).
-- [`nevergrad`](https://facebookresearch.github.io/nevergrad/index.html) multi-objective hyperparameter optimization.
+- [`nevergrad`](https://facebookresearch.github.io/nevergrad/index.html) multi-objective hyperparameter optimization. Checkout the toy [example](examples/toy_multiobj).
 
 ##### Changed
 

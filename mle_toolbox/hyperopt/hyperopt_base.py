@@ -351,14 +351,14 @@ class BaseHyperOptimisation(object):
             s_config_fname = os.path.join(
                 self.experiment_dir, run_id + self.config_fext
             )
-
             if self.config_fext == ".json":
                 # Write config dictionary to json file
                 with open(s_config_fname, "w") as f:
-                    json.dump(config_params_batch[s_id], f)
+                    json.dump(config_params_batch[s_id].toDict(), f)
             else:
                 with open(s_config_fname, "w") as f:
-                    yaml.dump(config_params_batch[s_id], f, default_flow_style=False)
+                    yaml.dump(config_params_batch[s_id].toDict(),
+                              f, default_flow_style=False)
             # Add config fnames to batch lists
             config_fnames_batch.append(s_config_fname)
             all_run_ids.append(run_id)

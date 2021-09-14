@@ -88,7 +88,7 @@ def construct_hyperparam_range(params_to_search: dict, search_type: str) -> dict
                         lower=float(v["begin"]),
                         upper=float(v["end"])
                     )
-                elif v["prior"] == "log":
+                elif v["prior"] == "log-uniform":
                     param_dict[k] = ng.p.Log(
                         lower=float(v["begin"]),
                         upper=float(v["end"])
@@ -100,7 +100,7 @@ def construct_hyperparam_range(params_to_search: dict, search_type: str) -> dict
                         lower=float(v["begin"]),
                         upper=float(v["end"])
                     ).set_integer_casting()
-                elif v["prior"] == "log":
+                elif v["prior"] == "log-uniform":
                     param_dict[k] = ng.p.Log(
                         lower=float(v["begin"]),
                         upper=float(v["end"])

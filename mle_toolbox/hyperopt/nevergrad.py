@@ -70,7 +70,7 @@ class NevergradHyperoptimisation(BaseHyperOptimisation):
         """Get proposals to eval next (in batches) - Random Sampling."""
         # Generate list of dictionaries with different hyperparams to evaluate
         self.last_batch_params = [self.hyper_optimizer.ask()
-                                  for i in range(num_iter_batch)]
+                                  for i in range(num_iter_per_batch)]
         param_batch = [params.value[1] for params in self.last_batch_params]
         return param_batch
 
