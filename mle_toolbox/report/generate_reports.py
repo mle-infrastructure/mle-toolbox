@@ -6,7 +6,6 @@ from dotmap import DotMap
 from .generate_markdown import MarkdownGenerator
 from .generate_figures import FigureGenerator
 from ..launch.prepare_experiment import prepare_logger
-from ..src.retrieve import retrieve
 
 
 try:
@@ -58,6 +57,7 @@ class ReportGenerator:
             pull_bool = pull_question == "Y"
             # Pull results from remote resource
             if pull_bool:
+                from ..src.retrieve import retrieve
                 self.experiment_dir = retrieve(
                     DotMap(
                         {

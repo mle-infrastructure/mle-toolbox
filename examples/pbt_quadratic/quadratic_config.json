@@ -3,7 +3,7 @@
                "what_to_track": ["objective", "surrogate",
                                  "theta_0", "theta_1"],
                "model_type": "numpy",
-               "overwrite_experiment_dir": 1},
+               "overwrite": 1},
 "train_config": {"lrate": 0.1,
                  "h0": 0,
                  "h1": 1,

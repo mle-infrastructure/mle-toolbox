@@ -250,7 +250,7 @@ class PBT_Manager(object):
             try:
                 _ = load_log(exp_dir[0])
                 break
-            except Exception:
+            except Exception as e:
                 continue
         return worker_data
 
