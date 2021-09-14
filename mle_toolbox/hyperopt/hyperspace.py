@@ -66,6 +66,46 @@ def construct_hyperparam_range(params_to_search: dict, search_type: str) -> dict
                 param_range[k] = Integer(
                     int(v["begin"]), int(v["end"]), prior=v["prior"], name=k
                 )
+
+    # For Nevergrad-based hyperopt generate spaces with parametrization
+    elif search_type == "nevergrad":
+        try:
+            import nevergrad as ng
+        except ModuleNotFoundError as err:
+            raise ModuleNotFoundError(
+                f"{err}. You need to"
+                "install `nevergrad` to use "
+                "the `mle_toolbox.hyperopt.nevergrad` module."
+            )
+        param_dict = {}
+        if "categorical" in params_to_search.keys():
+            for k, v in params_to_search["categorical"].items():
+                param_dict[k] = ng.p.Choice(v)
+        if "real" in params_to_search.keys():
+            for k, v in params_to_search["real"].items():
+                if v["prior"] == "uniform":
+                    param_dict[k] = ng.p.Scalar(
+                        lower=float(v["begin"]),
+                        upper=float(v["end"])
+                    )
+                elif v["prior"] == "log":
+                    param_dict[k] = ng.p.Log(
+                        lower=float(v["begin"]),
+                        upper=float(v["end"])
+                    )
+        if "integer" in params_to_search.keys():
+            for k, v in params_to_search["integer"].items():
+                if v["prior"] == "uniform":
+                    param_dict[k] = ng.p.Scalar(
+                        lower=float(v["begin"]),
+                        upper=float(v["end"])
+                    ).set_integer_casting()
+                elif v["prior"] == "log":
+                    param_dict[k] = ng.p.Log(
+                        lower=float(v["begin"]),
+                        upper=float(v["end"])
+                    ).set_integer_casting()
+        param_range = ng.p.Instrumentation(**param_dict)
     else:
         raise ValueError("Please provide a valid hyperparam search type.")
     return param_range

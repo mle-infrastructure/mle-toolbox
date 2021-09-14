@@ -1,5 +1,6 @@
 import os
 from typing import Dict, Union
+from ..hyperopt import HyperoptLogger
 
 
 def run_hyperparameter_search(
@@ -12,15 +13,6 @@ def run_hyperparameter_search(
     message_id: Union[str, None] = None,
 ) -> None:
     """Run a hyperparameter search experiment."""
-    # Import only if used, this will raise an informative error when
-    # scikit-optimize is not installed.
-    from ..hyperopt import (
-        HyperoptLogger,
-        RandomHyperoptimisation,
-        GridHyperoptimisation,
-        SMBOHyperoptimisation,
-    )
-
     # 1. Setup the hyperlogger for the experiment
     hyperlog_fname = os.path.join(meta_job_args["experiment_dir"], "hyper_log.pkl")
     # If experiment does not use meta_log .hdf5 file system - no metric logging
@@ -31,11 +23,25 @@ def run_hyperparameter_search(
     # 2. Initialize the hyperparameter optimizer class
     search_types = ["random", "grid", "smbo"]
     if param_search_args["search_config"]["search_type"] == "random":
+        from ..hyperopt import RandomHyperoptimisation
         hyperopt = RandomHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "grid":
+        from ..hyperopt import GridHyperoptimisation
         hyperopt = GridHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "smbo":
+        from ..hyperopt import SMBOHyperoptimisation
         hyperopt = SMBOHyperoptimisation
+    elif param_search_args["search_config"]["search_type"] == "nevergrad":
+        from ..hyperopt import NevergradHyperoptimisation
+        hyperopt = NevergradHyperoptimisation
+        # Add resource budget to nevergrad configuration
+        param_search_args["search_config"]["nevergrad_config"]["num_workers"] = (
+            param_search_args["search_resources"]["num_evals_per_batch"]
+        )
+        param_search_args["search_config"]["nevergrad_config"]["budget_size"] = (
+            param_search_args["search_resources"]["num_evals_per_batch"] *
+            param_search_args["search_resources"]["num_search_batches"]
+        )
     else:
         raise ValueError(
             "Please provide a valid \

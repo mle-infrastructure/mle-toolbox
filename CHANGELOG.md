@@ -2,6 +2,9 @@
 
 ##### Added
 
+- 3D animation post-processing helpers (`animate_3D_scatter` and `animate_3D_surface`) and test coverage for visualizations (static/dynamic).
+- [`nevergrad`](https://facebookresearch.github.io/nevergrad/index.html) multi-objective hyperparameter optimization.
+
 ##### Changed
 
 - Configuration loading is now more toolbox specific. `load_json_config` and `load_yaml_config` are now part of `mle-logging`. The toolbox now has two "new" function `load_job_config` and `load_experiment_config`, which prepare the raw configs for future usage.
@@ -9,6 +12,7 @@
 
 ##### Fixed
 
+- Fixed unique file naming of zip files stored in GCS bucket. Now based on the time string.
 - Grid engine monitoring now also tracks waiting/pending jobs.
 - Fixes a bug in the random seed setting for synchronous batch jobs. Previously a new set of seeds was sampled for each batch. This lead to problems when aggregating different logs by their seed id. Now the first set of seeds is stored and provided as an input to all subsequent `JobQueue` startups.
 

@@ -30,7 +30,7 @@ class SMBOHyperoptimisation(BaseHyperOptimisation):
             raise ModuleNotFoundError(
                 f"{err}. You need to"
                 "install `scikit-optimize` to use "
-                "the `mle_toolbox.hyperopt` module."
+                "the `mle_toolbox.hyperopt.smbo` module."
             )
 
         # Check that SMBO uses synchronous scheduling
