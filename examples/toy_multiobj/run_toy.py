@@ -23,7 +23,7 @@ def main(mle):
     stats_tick = {"objective_1": objective_1,
                   "objective_2": objective_2}
     mle.update_log(time_tick, stats_tick, save=True)
-    time.sleep(5)
+    time.sleep(2)
     return
 
 
