@@ -19,8 +19,7 @@ from mle_toolbox.utils import (
 from mle_toolbox.protocol import (
     protocol_summary,
     update_protocol_var,
-    delete_protocol_from_input,
-    abort_protocol_from_input,
+    manipulate_protocol_from_input,
     protocol_experiment,
 )
 
@@ -133,8 +132,8 @@ def run(cmd_args):
 
         # Only ask to delete if no purpose given!
         if cmd_args.purpose is None and protocol_df is not None:
-            delete_protocol_from_input()
-            abort_protocol_from_input()
+            manipulate_protocol_from_input(delete=True)
+            manipulate_protocol_from_input(abort=True)
         new_experiment_id, purpose = protocol_experiment(
             job_config, resource_to_run, cmd_args.purpose
         )

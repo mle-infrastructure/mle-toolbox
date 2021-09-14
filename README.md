@@ -84,6 +84,7 @@ You are now ready to dive deeper into the specifics of [job configuration](https
 | 📄 **[Euler PDE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde)** |  `multi-configs`, `hyperparameter-search`     | Integrate a PDE using forward Euler.              |
 | 📄 **[MNIST CNN](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/mnist)**      | `multi-configs`, `hyperparameter-search`     |Train PyTorch MNIST-CNNs.                             |
 | 📄 **[JAX VAE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae)**       | `hyperparameter-search`     | Train a JAX-based MNIST VAE. |
+| 📄 **[Multi-Objective](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/toy_multiobj)**       | `hyperparameter-search`     | Multi-objective tuning with `nevergrad`. |
 | 📄 **[Sklearn SVM](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/sklearn_svm)** | `single-config`     | Train a Sklearn SVM classifier.            |
 |  📄 **[Multi Bash](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/bash_configs)**      | `multi-configs`     | Bash based jobs.                        |
 | 📄 **[Quadratic PBT](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `population-based-training`    | PBT on toy quadratic surrogate.                          |

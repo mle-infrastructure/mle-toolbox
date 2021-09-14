@@ -21,6 +21,19 @@ parsers:
           target: auto # auto % coverage target
           threshold: 5%  # allow for 5% reduction of coverage without failing
 
+
+# Ignoring Paths
+# --------------
+# which folders/files to ignore
+ignore:
+  - */tests/.*
+  - */_version.py
+  - setup.py
+  - requirements/*
+  - notebooks/*
+  - examples/*
+  - docs/
+
 comment:
   layout: "reach,diff,flags,files,footer"
   behavior: default

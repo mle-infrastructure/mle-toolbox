@@ -25,6 +25,7 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
                     "use_conda_virtual_env": False,
                     "use_venv_virtual_env": False,
                     "use_credential_encryption": False,
+                    "use_slack_bot": False,
                     "random_seed": 42,
                     "use_gcloud_protocol_sync": False,
                     "local_protocol_fname": "~/local_mle_protocol.db",

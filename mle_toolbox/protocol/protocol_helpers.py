@@ -149,10 +149,13 @@ def update_protocol_var(
     return db
 
 
-def delete_protocol_from_input():
+def manipulate_protocol_from_input(delete: bool = False, abort: bool = False):
     """Ask user if they want to delete previous experiment by id."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    q_str = "{} Want to delete experiment? - state its id: [e_id/N]"
+    if delete:
+        q_str = "{} Want to delete experiment? - state its id: [e_id/N]"
+    elif abort:
+        q_str = "{} Want to set exp. status to aborted? - state its id: [e_id/N]"
     print(q_str.format(time_t), end=" ")
     sys.stdout.flush()
     # Loop over experiments to delete until "N" given or timeout after 60 secs
@@ -173,45 +176,10 @@ def delete_protocol_from_input():
         db, all_experiment_ids, _ = load_local_protocol_db()
         # Delete the dictionary in DB corresponding to e-id
         try:
-            db.drem(e_id)
-            db.dump()
-            print(
-                "{} Another one? - state the next id: [e_id/N]".format(time_t), end=" "
-            )
-        except Exception:
-            print(
-                "\n{} The e_id is not in the protocol db. "
-                "Please try again: [e_id/N]".format(time_t),
-                end=" ",
-            )
-        sys.stdout.flush()
-
-
-def abort_protocol_from_input():
-    """Ask user if they want to change experiment status to 'aborted'."""
-    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-    q_str = "{} Want to set exp. status to aborted? - state its id: [e_id/N]"
-    print(q_str.format(time_t), end=" ")
-    sys.stdout.flush()
-    # Loop over experiments to delete until "N" given or timeout after 60 secs
-    while True:
-        i, o, e = select.select([sys.stdin], [], [], 60)
-        if i:
-            e_id = sys.stdin.readline().strip()
-            if e_id == "N":
-                break
-        else:
-            break
-
-        # Make sure e_id can access db via key
-        if e_id[:5] != "e-id-":
-            e_id = "e-id-" + e_id
-
-        # Load in the experiment protocol DB
-        db, all_experiment_ids, _ = load_local_protocol_db()
-        # Delete the dictionary in DB corresponding to e-id
-        try:
-            db.dadd(e_id, ("job_status", "aborted"))
+            if delete:
+                db.drem(e_id)
+            elif abort:
+                db.dadd(e_id, ("job_status", "aborted"))
             db.dump()
             print(
                 "{} Another one? - state the next id: [e_id/N]".format(time_t), end=" "
