@@ -57,26 +57,28 @@ class NevergradHyperoptimisation(BaseHyperOptimisation):
             self.hyper_optimizer = ng.optimizers.CMA(
                 parametrization=self.param_range,
                 budget=self.nevergrad_config["budget_size"],
-                num_workers=self.nevergrad_config["num_workers"])
+                num_workers=self.nevergrad_config["num_workers"],
+            )
         elif self.nevergrad_config["optimizer"] == "NGOpt":
             self.hyper_optimizer = ng.optimizers.NGOpt(
                 parametrization=self.param_range,
                 budget=self.nevergrad_config["budget_size"],
-                num_workers=self.nevergrad_config["num_workers"])
+                num_workers=self.nevergrad_config["num_workers"],
+            )
         else:
             raise ValueError("Please provide valid nevergrad optimizer type.")
 
     def get_hyperparam_proposal(self, num_iter_per_batch: int):
         """Get proposals to eval next (in batches) - Random Sampling."""
         # Generate list of dictionaries with different hyperparams to evaluate
-        self.last_batch_params = [self.hyper_optimizer.ask()
-                                  for i in range(num_iter_per_batch)]
+        self.last_batch_params = [
+            self.hyper_optimizer.ask() for i in range(num_iter_per_batch)
+        ]
         param_batch = [params.value[1] for params in self.last_batch_params]
         return param_batch
 
     def clean_up_after_batch_iteration(self, batch_proposals, perf_measures):
         """Perform post-iteration clean-up by updating surrogate model."""
-        x, y = [], []
         # First key of all metrics is used to update the surrogate!
         to_model = list(perf_measures.keys())
         eval_ids = list(perf_measures[to_model[0]].keys())

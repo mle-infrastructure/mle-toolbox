@@ -33,10 +33,10 @@ pbt_config = {
         }
     },
     "exploration": {
-        "strategy": "additive-noise"
+        "strategy": "perturb"
     },
     "selection": {
-        "strategy": "truncation"
+        "strategy": "binary_tournament"
     }
 }
 

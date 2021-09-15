@@ -91,10 +91,12 @@ class HypothesisTester(object):
         matrix_new = matrix_new.reshape(-1)[:-d].reshape(d, d)
         return np.flip(matrix_new, axis=0)
 
-    def plot(self,
-             corrected: bool = False,
-             method: str = "bonferroni",
-             fname: Union[None, str] = None):
+    def plot(
+        self,
+        corrected: bool = False,
+        method: str = "bonferroni",
+        fname: Union[None, str] = None,
+    ):
         """Helper plot function for p-values (corrected with method)."""
         from mle_toolbox.visualize import plot_2D_heatmap
 

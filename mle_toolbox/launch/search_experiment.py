@@ -24,23 +24,27 @@ def run_hyperparameter_search(
     search_types = ["random", "grid", "smbo"]
     if param_search_args["search_config"]["search_type"] == "random":
         from ..hyperopt import RandomHyperoptimisation
+
         hyperopt = RandomHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "grid":
         from ..hyperopt import GridHyperoptimisation
+
         hyperopt = GridHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "smbo":
         from ..hyperopt import SMBOHyperoptimisation
+
         hyperopt = SMBOHyperoptimisation
     elif param_search_args["search_config"]["search_type"] == "nevergrad":
         from ..hyperopt import NevergradHyperoptimisation
+
         hyperopt = NevergradHyperoptimisation
         # Add resource budget to nevergrad configuration
-        param_search_args["search_config"]["nevergrad_config"]["num_workers"] = (
-            param_search_args["search_resources"]["num_evals_per_batch"]
-        )
+        param_search_args["search_config"]["nevergrad_config"][
+            "num_workers"
+        ] = param_search_args["search_resources"]["num_evals_per_batch"]
         param_search_args["search_config"]["nevergrad_config"]["budget_size"] = (
-            param_search_args["search_resources"]["num_evals_per_batch"] *
-            param_search_args["search_resources"]["num_search_batches"]
+            param_search_args["search_resources"]["num_evals_per_batch"]
+            * param_search_args["search_resources"]["num_search_batches"]
         )
     else:
         raise ValueError(

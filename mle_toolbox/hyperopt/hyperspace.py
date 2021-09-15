@@ -85,25 +85,21 @@ def construct_hyperparam_range(params_to_search: dict, search_type: str) -> dict
             for k, v in params_to_search["real"].items():
                 if v["prior"] == "uniform":
                     param_dict[k] = ng.p.Scalar(
-                        lower=float(v["begin"]),
-                        upper=float(v["end"])
+                        lower=float(v["begin"]), upper=float(v["end"])
                     )
                 elif v["prior"] == "log-uniform":
                     param_dict[k] = ng.p.Log(
-                        lower=float(v["begin"]),
-                        upper=float(v["end"])
+                        lower=float(v["begin"]), upper=float(v["end"])
                     )
         if "integer" in params_to_search.keys():
             for k, v in params_to_search["integer"].items():
                 if v["prior"] == "uniform":
                     param_dict[k] = ng.p.Scalar(
-                        lower=float(v["begin"]),
-                        upper=float(v["end"])
+                        lower=float(v["begin"]), upper=float(v["end"])
                     ).set_integer_casting()
                 elif v["prior"] == "log-uniform":
                     param_dict[k] = ng.p.Log(
-                        lower=float(v["begin"]),
-                        upper=float(v["end"])
+                        lower=float(v["begin"]), upper=float(v["end"])
                     ).set_integer_casting()
         param_range = ng.p.Instrumentation(**param_dict)
     else:

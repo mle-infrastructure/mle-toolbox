@@ -58,6 +58,7 @@ class ReportGenerator:
             # Pull results from remote resource
             if pull_bool:
                 from ..src.retrieve import retrieve
+
                 self.experiment_dir = retrieve(
                     DotMap(
                         {
