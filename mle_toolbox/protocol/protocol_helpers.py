@@ -82,15 +82,22 @@ def protocol_summary(tail: int = 5, verbose: bool = True):
             job_spec_args = db.dget(e_id, "job_spec_args")
             if meta_args["experiment_type"] == "hyperparameter-search":
                 search_resources = job_spec_args["search_resources"]
-                if job_spec_args["search_config"]["search_schedule"] == "sync":
+                try:
+                    if job_spec_args["search_config"]["search_schedule"] == "sync":
+                        total_jobs.append(
+                            search_resources["num_search_batches"]
+                            * search_resources["num_evals_per_batch"]
+                            * search_resources["num_seeds_per_eval"]
+                        )
+                    else:
+                        total_jobs.append(
+                            search_resources["num_total_evals"]
+                            * search_resources["num_seeds_per_eval"]
+                        )
+                except Exception:
                     total_jobs.append(
                         search_resources["num_search_batches"]
                         * search_resources["num_evals_per_batch"]
-                        * search_resources["num_seeds_per_eval"]
-                    )
-                else:
-                    total_jobs.append(
-                        search_resources["num_total_evals"]
                         * search_resources["num_seeds_per_eval"]
                     )
             elif meta_args["experiment_type"] == "multiple-experiments":

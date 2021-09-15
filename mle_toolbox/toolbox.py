@@ -189,6 +189,13 @@ def report_build_subparser(subparsers):
         default="no-id-given",
         help="Experiment ID",
     )
+    parser_report.add_argument(
+        "-use_last",
+        "--use_last_id",
+        default=False,
+        action="store_true",
+        help="Report on last Experiment ID",
+    )
     return parser_report
 
 
