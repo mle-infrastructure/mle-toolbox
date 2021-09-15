@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Union
 
 try:
     from statsmodels.stats.weightstats import ztest
@@ -13,7 +14,7 @@ from statsmodels.stats.multitest import multipletests
 class HypothesisTester(object):
     """
     Helper for Testing Hypotheses & Correcting for Multiple Testing and FDR.
-    TODO: Add more than just z-test.
+    TODO: Add more tests: Rank sum test.
     """
 
     def __init__(self, meta_log):
@@ -90,7 +91,10 @@ class HypothesisTester(object):
         matrix_new = matrix_new.reshape(-1)[:-d].reshape(d, d)
         return np.flip(matrix_new, axis=0)
 
-    def plot(self, corrected: bool = False, method: str = "bonferroni"):
+    def plot(self,
+             corrected: bool = False,
+             method: str = "bonferroni",
+             fname: Union[None, str] = None):
         """Helper plot function for p-values (corrected with method)."""
         from mle_toolbox.visualize import plot_2D_heatmap
 
@@ -114,3 +118,9 @@ class HypothesisTester(object):
             variable_name="Corrected P-Values",
             figsize=(12, 10),
         )
+
+        # Save the figure if a filename was provided
+        if fname is not None:
+            fig.savefig(fname, dpi=300)
+        else:
+            return fig, ax
