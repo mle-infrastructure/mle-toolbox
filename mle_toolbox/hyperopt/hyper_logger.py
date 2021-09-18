@@ -46,7 +46,6 @@ class HyperoptLogger(object):
             self.logger.info(f"Metrics: {self.eval_metrics}")
 
         # Reload previous log if desired!
-        # TODO: Compute residual amount of evaluations to run and pass back
         if reload_log:
             self.reload_log()
             self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")

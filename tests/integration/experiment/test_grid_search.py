@@ -32,13 +32,13 @@ search_config = {
     "search_params": {
         "real": {"x_0": {"begin": 1,
                          "end": 10,
-                         "bins": 2},
-                 "noise_mean": {"begin": 0,
-                                "end": 0.01,
-                                "bins": 2}
-                 }
+                         "bins": 2}},
+        "integer": {"noise_mean": {"begin": 1,
+                                   "end": 4,
+                                   "spacing": 1}}
     }
 }
+
 
 single_job_args = {}
 

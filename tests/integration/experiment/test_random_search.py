@@ -13,7 +13,7 @@ search_logging = {"reload_log": False,
                   "verbose_log": True,
                   "max_objective": True,
                   "aggregate_seeds": "p50",
-                  "problem_type": "final",
+                  "problem_type": "best",
                   "eval_metrics": ["integral", "noise"]}
 
 search_resources_sync = {"num_search_batches": 2,
@@ -31,10 +31,8 @@ search_config = {
     "search_schedule": "sync",
     "search_params": {
         "real": {"x_0": {"begin": 1,
-                         "end": 10},
-                 "noise_mean": {"begin": 0,
-                                "end": 0.01}
-                 }
+                         "end": 10}},
+        "categorical": {"noise_mean": [0.5, 1, 2, 4]}
     }
 }
 

@@ -3,8 +3,9 @@ import os
 from dotmap import DotMap
 from mle_toolbox.utils import (load_experiment_config,
                                load_mle_toolbox_config,
-                               load_result_logs)
-from mle_toolbox.utils import load_hyper_log
+                               load_result_logs,
+                               load_hyper_log)
+from mle_toolbox.hyperopt import HyperoptLogger
 from mle_logging.load import load_meta_log
 
 
@@ -42,9 +43,24 @@ class TestFileLoading(unittest.TestCase):
                                        hyper_log_fname)
 
     def test_load_meta_log(self):
+        """ Assert correct loading of meta log files. """
         meta = load_meta_log(os.path.join("tests/unit/fixtures",
                                           meta_log_fname))
 
     def test_load_hyper_log(self):
+        """ Assert correct loading of hyper log files. """
         hyper = load_hyper_log(os.path.join("tests/unit/fixtures",
                                             hyper_log_fname))
+
+    def test_reload_hyper_log(self):
+        """ Assert correct reloading of hyper log files for continuation. """
+        hyper = HyperoptLogger(
+            hyperlog_fname=os.path.join("tests/unit/fixtures", hyper_log_fname),
+            eval_metrics="integral",
+            reload_log=True
+        )
+        assert hyper.iter_id == 4
+        assert hyper.best_per_metric == {'integral': {'run_id': 4,
+                                                      'score': 4.274364709854126,
+                                                      'params': {'noise_mean': 0.01,
+                                                                 'x_0': 10.0}}}

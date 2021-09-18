@@ -54,7 +54,7 @@ def run_hyperparameter_search(
             )
         )
 
-    # 4. Run the jobs
+    # 4. Run the jobs (only remaining jobs if hyper_log was reloaded)
     hyper_opt_instance = hyperopt(
         hyper_log,
         resource_to_run,
@@ -65,4 +65,25 @@ def run_hyperparameter_search(
         **param_search_args["search_config"],
         message_id=message_id,
     )
+
+    # Compute remaining jobs/batches for sync/async scheduling of jobs
+    if "search_schedule" in param_search_args["search_config"].keys():
+        if param_search_args["search_config"]["search_schedule"] == "async":
+            param_search_args["search_resources"][
+                "num_total_evals"
+            ] -= hyper_log.iter_id
+        elif param_search_args["search_config"]["search_schedule"] == "sync":
+            completed_batches = int(
+                hyper_log.iter_id
+                / param_search_args["search_resources"]["num_evals_per_batch"]
+            )
+            param_search_args["search_resources"][
+                "num_search_batches"
+            ] -= completed_batches
+    else:
+        completed_batches = int(
+            hyper_log.iter_id
+            / param_search_args["search_resources"]["num_evals_per_batch"]
+        )
+        param_search_args["search_resources"]["num_search_batches"] -= completed_batches
     hyper_opt_instance.run_search(**param_search_args["search_resources"])
