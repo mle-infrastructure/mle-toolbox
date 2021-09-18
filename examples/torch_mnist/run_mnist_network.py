@@ -25,7 +25,8 @@ def main(mle):
         num_workers=5, pin_memory=True, shuffle=True)
 
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False, transform=transforms.Compose([
+        datasets.MNIST('../data', train=False,
+                       transform=transforms.Compose([
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
@@ -130,7 +131,7 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
 
 def evaluate_network(model, test_loader, device, criterion):
     # Evaluate the model performance at end of epoch
-    model.eval() # prep model for evaluation
+    model.eval()  # prep model for evaluation
     eval_loss = []
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)

@@ -29,5 +29,5 @@ def main(mle):
 
 if __name__ == "__main__":
     # Run the simulation/Experiment
-    mle = MLExperiment(default_config_fname="toy_multiobj/toy_config.yaml")
+    mle = MLExperiment(config_fname="toy_multiobj/toy_config.yaml")
     main(mle)

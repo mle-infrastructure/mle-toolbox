@@ -21,8 +21,7 @@ def report(cmd_args):
     auto_generate_reports(experiment_id, pdf_gen=True)
 
 
-def auto_generate_reports(e_id: Union[str, None],
-                          logger=None, pdf_gen: bool = False):
+def auto_generate_reports(e_id: Union[str, None], logger=None, pdf_gen: bool = False):
     """Default auto-generation of reports for latest experiment."""
     # Load in experiment protocol db
     db, all_experiment_ids, last_experiment_id = load_local_protocol_db()

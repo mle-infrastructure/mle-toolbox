@@ -4,6 +4,20 @@
 
 - 3D animation post-processing helpers (`animate_3D_scatter` and `animate_3D_surface`) and test coverage for visualizations (static/dynamic).
 - [`nevergrad`](https://facebookresearch.github.io/nevergrad/index.html) multi-objective hyperparameter optimization. Checkout the toy [example](examples/toy_multiobj).
+- Adds `@experiment` decorator for easy integration:
+
+```python
+from mle_toolbox import experiment
+
+@experiment("configs/abc.json", model_config={"num_layers": 2})
+def run(mle, a):
+    print(mle.model_config)
+    print(mle.log)
+    print(a)
+
+if __name__ == "__main__":
+  run(a=2)
+```
 
 ##### Changed
 

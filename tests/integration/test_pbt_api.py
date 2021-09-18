@@ -60,19 +60,24 @@ def check_correct_results(experiment_dir: str,
         assert os.path.exists(os.path.join(experiment_dir, "experiment_config.yaml"))
 
 
-def test_run_pbt() -> None:
-    """ Test job launch wrapper - Run PDE experiment on local machine. """
-    exp_dir = os.path.join(experiment_dir, "run_test")
-    meta_job_args["experiment_dir"] = exp_dir
+def test_api_pbt() -> None:
+    """ Execute `mle run pde_grid_sync.yaml` and check running pipeline. """
+    os.chdir('./examples')
+    exp_dir = "experiments/pbt/api_test"
     # Remove experiment dir at start of test
     if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
         shutil.rmtree(exp_dir)
 
-    run_population_based_training(
-        resource_to_run,
-        meta_job_args,
-        single_job_args,
-        pbt_args)
+    # Execute the mle api command
+    bashCommand = ("mle run pbt_quadratic/quadratic_pbt.yaml"
+                   " -nw -np -resource local"
+                   f" --experiment_dir {exp_dir}")
+
+    process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
+    output, error = process.communicate()
 
     # Check generated directories for correctness
-    check_correct_results(exp_dir)
+    check_correct_results(exp_dir, api_check=True)
+    os.chdir('..')
+
+    #mle run pbt_quadratic/quadratic_pbt.yaml -nw -np -resource local --experiment_dir experiments/pbt/api_test

@@ -13,8 +13,6 @@ def check_correct_results(experiment_dir: str) -> None:
     # Check that figures and report files were correctly generated
     assert os.path.exists(os.path.join(experiment_dir, "figures/integral_1d.png"))
     assert os.path.exists(os.path.join(experiment_dir, "figures/noise_1d.png"))
-    assert os.path.exists(os.path.join(experiment_dir, "figures/integral_x_0_noise_mean_r_var_1_2d.png"))
-    assert os.path.exists(os.path.join(experiment_dir, "figures/noise_x_0_noise_mean_r_var_1_2d.png"))
 
     report_path = os.path.join(experiment_dir, "reports")
     assert os.path.exists(report_path)

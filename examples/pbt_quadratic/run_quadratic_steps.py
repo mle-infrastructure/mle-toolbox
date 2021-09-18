@@ -22,7 +22,6 @@ def main(mle):
                       "theta_0": theta[0],
                       "theta_1": theta[1]}
         mle.update_log(time_tick, stats_tick, model=theta, save=True)
-        train_losses = []
 
     # Stop training if number of steps is 'ready' number reached!
     if (update_counter + 1) == mle.train_config.num_steps_until_ready:

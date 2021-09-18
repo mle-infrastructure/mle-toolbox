@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mle_toolbox import MLExperiment
+from mle_toolbox import experiment
 
 
+# @experiment decorator allows you to set the default configuration to load
+# if no other configuration path is provided by command line input
+@experiment("numpy_pde/pde_int_config_1.json")
 def main(mle):
     """ Euler integrate a simple ODE for a specified length of time steps. """
     # Define function to integrate & run the integration
     def func(x):
-        return -0.01*x
+        return -0.01 * x
 
     # Let seed determine initial condition
     x_t = [mle.train_config.x_0]
@@ -18,7 +21,7 @@ def main(mle):
     for i, t in enumerate(t_seq):
         integral_det = x_t[-1] + func(x_t[-1]) * mle.train_config.dt
         integral_stoch = ((mle.train_config.noise_mean +
-                          mle.train_config.noise_std* np.random.normal()) *
+                          mle.train_config.noise_std * np.random.normal()) *
                           mle.train_config.dt)
         x_t.append(integral_det + integral_stoch)
 
@@ -47,6 +50,7 @@ def plot_pde(x_t):
 
 
 if __name__ == "__main__":
-    # Run the simulation/Experiment
-    mle = MLExperiment(default_config_fname="numpy_pde/pde_int_config_1.json")
-    main(mle)
+    # Run the simulation/Experiment - if the @experiment decorator is used you
+    # don't have to manually provide the mle class instance as an input
+    # This will be automatically taken care off by the decorator
+    main()

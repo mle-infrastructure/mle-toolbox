@@ -15,12 +15,13 @@ def animate_3D_surface(
     no_axis=False,
     interval=100,
     fps=60,
+    cmap="magma",
     fname="test_anim.gif",
     direct_save=True,
 ):
     """Generate a gif animation of a set of 1d curves."""
     animator = Animated3DSurface(
-        x, y, data, dt, title, ylabel, xlabel, zlabel, no_axis, interval
+        x, y, data, dt, title, ylabel, xlabel, zlabel, no_axis, interval, cmap
     )
     if direct_save:
         animator.ani.save(fname, fps=fps, writer="imagemagick")
@@ -42,6 +43,7 @@ class Animated3DSurface(object):
         zlabel="z-Axis",
         no_axis=False,
         interval=100,
+        cmap="magma",
     ):
         self.num_steps = data.shape[0]
         # Data shape: Time, Points, (x, y)
@@ -51,6 +53,7 @@ class Animated3DSurface(object):
         self.t = 0
         self.dt = dt
         self.title = title
+        self.cmap = cmap
 
         # Setup the figure and axes...
         self.fig = plt.figure(figsize=(7, 7))
@@ -93,19 +96,19 @@ class Animated3DSurface(object):
 
     def setup_plot(self):
         """Initial drawing of the heatmap plot."""
-        self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=25, pad=-55)
+        timestr = self.title + r" $t={:.1f}$".format(self.t)
+        self.ax.set_title(timestr.ljust(30), fontsize=25, pad=-55)
         # print(x_coord, y_coord, z_coord)
         self.ax.set_zlim(np.min(self.data), np.max(self.data))
         return
 
     def update(self, i):
         self.t += self.dt
-        self.ax.set_title(
-            self.title + r" $t={:.1f}$".format(self.t), fontsize=25, pad=-55
-        )
+        timestr = self.title + r" $t={:.1f}$".format(self.t)
+        self.ax.set_title(timestr.ljust(30), fontsize=25, pad=-55)
         self.surface[0].remove()
         self.surface[0] = self.ax.plot_surface(
-            self.x, self.y, self.data[i, :, :], cmap="magma"
+            self.x, self.y, self.data[i, :, :], cmap=self.cmap
         )
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
