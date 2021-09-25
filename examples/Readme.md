@@ -43,8 +43,20 @@ mle run sklearn_svm/svm_single.yaml           # Run single .json configuration
 mle run bash_configs/bash_configs.yaml        # Run two configs for 5 seeds each
 ```
 
+* :page_facing_up: [Quadratic PBT](pbt_quadratic) - Population-Based Training for a quadratic surrogate as in [Jaderberg et al. (2017)](https://arxiv.org/abs/1711.09846).
+
+```
+mle run pbt_quadratic/quadratic_pbt.yaml      # Run Population-Based Training on `h` params
+```
+
 * :page_facing_up: [MNIST PBT](pbt_mnist) - Population-Based Training for a MNIST MLP network.
 
 ```
 mle run pbt_mnist/mnist_pbt.yaml              # Run Population-Based Training on Lrate
+```
+
+* :page_facing_up: [Nevergrad Multi-Objective](toy_multiobj) - [Nevergrad](https://github.com/facebookresearch/nevergrad) hyperparameter tuning for multi-objective optimization.
+
+```
+mle run toy_multiobj/toy_nevergrad.yaml       # Run Population-Based Training on Lrate
 ```

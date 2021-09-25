@@ -11,7 +11,7 @@ def test_1d_bar_static():
     if os.path.exists(fname):
         os.remove(fname)
 
-    experiment_dir = "tests/unit/fixtures/"
+    experiment_dir = "tests/unit/fixtures/experiment_1"
     meta_log, hyper_log = load_result_logs(experiment_dir)
 
     target_to_plot = "integral"
@@ -41,7 +41,7 @@ def test_1d_line_static():
     if os.path.exists(fname):
         os.remove(fname)
 
-    experiment_dir = "tests/unit/fixtures/"
+    experiment_dir = "tests/unit/fixtures/experiment_1"
     meta_log, hyper_log = load_result_logs(experiment_dir)
     param_to_plot = "noise_mean"
     target_to_plot = "integral"
@@ -69,7 +69,7 @@ def test_1d_lcurves_static():
     if os.path.exists(fname):
         os.remove(fname)
 
-    experiment_dir = "tests/unit/fixtures/"
+    experiment_dir = "tests/unit/fixtures/experiment_1"
     meta_log, hyper_log = load_result_logs(experiment_dir)
     visualize_1D_lcurves(meta_log,
                          iter_to_plot="step_counter",
@@ -94,7 +94,7 @@ def test_2d_grid_static():
     if os.path.exists(fname):
         os.remove(fname)
 
-    experiment_dir = "tests/unit/fixtures/"
+    experiment_dir = "tests/unit/fixtures/experiment_1"
     meta_log, hyper_log = load_result_logs(experiment_dir)
     params_to_plot = ["noise_mean", "x_0"]
     target_to_plot = "integral"

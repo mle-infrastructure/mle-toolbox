@@ -78,7 +78,7 @@ def test_api_nevergrad() -> None:
         shutil.rmtree(exp_dir)
 
     # Execute the mle api command
-    bashCommand = ("mle run toy_multiobj/toy_search_nevergrad.yaml -nw -np -resource local"
+    bashCommand = ("mle run toy_multiobj/toy_nevergrad.yaml -nw -np -resource local"
                    f" --experiment_dir {exp_dir}")
 
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)

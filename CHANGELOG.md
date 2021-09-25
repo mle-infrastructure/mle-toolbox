@@ -19,6 +19,13 @@ if __name__ == "__main__":
   run(a=2)
 ```
 
+- Adds `combine_experiments` which loads different `meta_log` and `hyper_log` objects and makes them "dot"-accessible:
+```python
+experiment_dirs = ["../tests/unit/fixtures/experiment_1",
+                   "../tests/unit/fixtures/experiment_2"]
+meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
+```
+
 ##### Changed
 
 - Configuration loading is now more toolbox specific. `load_json_config` and `load_yaml_config` are now part of `mle-logging`. The toolbox now has two "new" function `load_job_config` and `load_experiment_config`, which prepare the raw configs for future usage.

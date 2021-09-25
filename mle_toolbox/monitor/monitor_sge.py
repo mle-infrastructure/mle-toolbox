@@ -148,18 +148,18 @@ def get_host_sge_data():
                 except Exception:
                     pass
 
-            if queue_spare != 0:
-                cmd = ["qstat", "-s", "r", "-q", mle_config.sge.info.spare] + user_cmd
-                ps = sp.Popen(cmd, stdout=sp.PIPE)
-                try:
-                    qlogins = sp.check_output(
-                        ("grep", mle_config.sge.info.node_reg_exp[0] + host_id),
-                        stdin=ps.stdout,
-                    )
-                    ps.wait()
-                    qlogins = len(qlogins.split(b"\n")[:-1])
-                except Exception:
-                    pass
+            # if queue_spare != 0:
+            #     cmd = ["qstat", "-s", "r", "-q", mle_config.sge.info.spare] + user_cmd
+            #     ps = sp.Popen(cmd, stdout=sp.PIPE)
+            #     try:
+            #         qlogins = sp.check_output(
+            #             ("grep", mle_config.sge.info.node_reg_exp[0] + host_id),
+            #             stdin=ps.stdout,
+            #         )
+            #         ps.wait()
+            #         qlogins = len(qlogins.split(b"\n")[:-1])
+            #     except Exception:
+            #         pass
 
             # TODO: Figure out double grep and why only my jobs are found
             total_jobs = running + qlogins

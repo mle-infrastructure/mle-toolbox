@@ -4,7 +4,7 @@ from mle_toolbox.hypothesis import HypothesisTester
 
 
 def test_corrected_pairwise():
-    meta_log, hyper_log = load_result_logs("tests/unit/fixtures/")
+    meta_log, hyper_log = load_result_logs("tests/unit/fixtures/experiment_1")
     hypo_tester = HypothesisTester(meta_log)
     hypo_tester.run_pairwise('integral')
     hypo_tester.run_corrections()
@@ -25,7 +25,7 @@ def test_corrected_pairwise():
 
 
 def test_plot_p_values():
-    meta_log, hyper_log = load_result_logs("tests/unit/fixtures/")
+    meta_log, hyper_log = load_result_logs("tests/unit/fixtures/experiment_1")
     hypo_tester = HypothesisTester(meta_log)
     hypo_tester.run_pairwise('integral')
     hypo_tester.run_corrections()
