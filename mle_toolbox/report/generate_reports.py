@@ -245,15 +245,18 @@ def generate_markdown(e_id, md_report_fname, report_data):
         # Base Configuration Hyperparameters used in the Experiment
         doc.addHeader(2, "Base Config Hyperparameters.")
         doc.addHeader(3, "Train Configuration.")
-        train_table = construct_markdown_table(report_data["train_config"])
+        train_table = construct_markdown_table(report_data["train_config"][0])
         doc.addTable(dictionary_list=train_table)
 
         doc.addHeader(3, "Model Configuration.")
-        model_table = construct_markdown_table(report_data["model_config"])
-        doc.addTable(dictionary_list=model_table)
+        try:
+            model_table = construct_markdown_table(report_data["model_config"][0])
+            doc.addTable(dictionary_list=model_table)
+        except:
+            pass
 
         doc.addHeader(3, "Logging Configuration.")
-        log_table = construct_markdown_table(report_data["log_config"])
+        log_table = construct_markdown_table(report_data["log_config"][0])
         doc.addTable(dictionary_list=log_table)
 
         # Generated header for figures of the Experiment

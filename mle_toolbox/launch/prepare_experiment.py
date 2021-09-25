@@ -80,7 +80,7 @@ def prepare_logger() -> logging.Logger:
     return logger
 
 
-def check_job_config(job_config: dict) -> None:
+def check_experiment_config(job_config: dict) -> None:
     """Check if config has all necessary ingredients for job to run."""
     # Compile list of required arguments for specific job types
     necessary_ingredients = ["meta_job_args", "single_job_args"]

@@ -37,7 +37,7 @@ from mle_toolbox.launch import (
     run_processing_job,
     welcome_to_mle_toolbox,
     prepare_logger,
-    check_job_config,
+    check_experiment_config,
 )
 
 
@@ -100,7 +100,7 @@ def run(cmd_args):
     logger.info(f"Run on resource: {resource_to_run}")
 
     # 4. Check experiment config to comply/include necessary ingredients
-    check_job_config(job_config)
+    check_experiment_config(job_config)
 
     # 5. Protocol experiment if desired (can also only be locally)!
     if not cmd_args.no_protocol:

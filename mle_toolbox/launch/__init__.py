@@ -6,7 +6,7 @@ from .pbt_experiment import run_population_based_training
 from .prepare_experiment import (
     welcome_to_mle_toolbox,
     prepare_logger,
-    check_job_config,
+    check_experiment_config,
     ask_for_experiment_id,
 )
 
@@ -18,6 +18,6 @@ __all__ = [
     "run_population_based_training",
     "welcome_to_mle_toolbox",
     "prepare_logger",
-    "check_job_config",
+    "check_experiment_config",
     "ask_for_experiment_id",
 ]

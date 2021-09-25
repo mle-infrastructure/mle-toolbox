@@ -26,6 +26,8 @@ experiment_dirs = ["../tests/unit/fixtures/experiment_1",
 meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 ```
 
+- Adds option to run grid search for multiple base configurations without having to create individual experiment configuration files.
+
 ##### Changed
 
 - Configuration loading is now more toolbox specific. `load_json_config` and `load_yaml_config` are now part of `mle-logging`. The toolbox now has two "new" function `load_job_config` and `load_experiment_config`, which prepare the raw configs for future usage.

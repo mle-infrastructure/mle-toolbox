@@ -92,22 +92,31 @@ def protocol_experiment(
     ):
         db.dadd(new_experiment_id, ("job_spec_args", job_config.pbt_args))
 
-    # Add the base config - train, model, log
-    fname, fext = os.path.splitext(job_config.meta_job_args["base_train_config"])
-    if fext == ".json":
-        base_config = load_json_config(job_config.meta_job_args["base_train_config"])
-    elif fext == ".yaml":
-        base_config = load_yaml_config(job_config.meta_job_args["base_train_config"])
+    # Add the base config - train, model, log for each given config file
+    if type(job_config.meta_job_args["base_train_config"]) == str:
+        all_config_paths = [job_config.meta_job_args["base_train_config"]]
     else:
-        raise ValueError("Job config has to be .json or .yaml file.")
+        all_config_paths = job_config.meta_job_args["base_train_config"]
 
-    db.dadd(new_experiment_id, ("train_config", base_config["train_config"]))
-    # Model/Network config is not required!
-    try:
-        db.dadd(new_experiment_id, ("model_config", base_config["model_config"]))
-    except Exception:
-        pass
-    db.dadd(new_experiment_id, ("log_config", base_config["log_config"]))
+    for config_path in all_config_paths:
+        train_configs, model_configs, log_configs = [], [], []
+        fname, fext = os.path.splitext(config_path)
+        if fext == ".json":
+            base_config = load_json_config(config_path)
+        elif fext == ".yaml":
+            base_config = load_yaml_config(config_path)
+        else:
+            raise ValueError("Job config has to be .json or .yaml file.")
+        train_configs.append(base_config["train_config"])
+        try:
+            model_configs.append(base_config["model_config"])
+        except Exception:
+            pass
+        log_configs.append(base_config["log_config"])
+
+    db.dadd(new_experiment_id, ("train_config", train_configs))
+    db.dadd(new_experiment_id, ("model_config", model_configs))
+    db.dadd(new_experiment_id, ("log_config", log_configs))
 
     # Add the number of seeds over which experiment is run
     if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":

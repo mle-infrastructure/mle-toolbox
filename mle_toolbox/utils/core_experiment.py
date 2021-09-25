@@ -83,8 +83,11 @@ def load_experiment_config(cmd_args: dict) -> DotMap:
         config["meta_job_args"]["experiment_dir"] = cmd_args.experiment_dir
 
     # Check that base_train_fname, base_train_config do exist
-    assert os.path.isfile(config["meta_job_args"]["base_train_fname"])
-    assert os.path.isfile(config["meta_job_args"]["base_train_config"])
+    if type(config["meta_job_args"]["base_train_config"]) == str:
+        assert os.path.isfile(config["meta_job_args"]["base_train_config"])
+    elif type(config["meta_job_args"]["base_train_config"]) == list:
+        for train_config in config["meta_job_args"]["base_train_config"]:
+            assert os.path.isfile(train_config)
     return DotMap(config, _dynamic=False)
 
 
