@@ -6,3 +6,4 @@ seaborn
 xhtml2pdf
 markdown2
 nevergrad
+scikit-learn==0.24.2

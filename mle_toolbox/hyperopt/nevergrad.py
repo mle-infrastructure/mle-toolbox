@@ -17,9 +17,9 @@ class NevergradHyperoptimisation(BaseHyperOptimisation):
         search_type: str = "nevergrad",
         search_schedule: str = "sync",
         nevergrad_config: dict = {
-            "base_estimator": "GP",
-            "acq_function": "gp_hedge",
-            "n_initial_points": 5,
+            "optimizer": "NGOpt",
+            "budget_size": 100,
+            "num_workers": 10,
         },
         message_id: Union[str, None] = None,
     ):
@@ -32,7 +32,7 @@ class NevergradHyperoptimisation(BaseHyperOptimisation):
                 "the `mle_toolbox.hyperopt.nevergrad` module."
             )
 
-        # Check that SMBO uses synchronous scheduling
+        # Check that nevergrad uses synchronous scheduling
         assert search_schedule == "sync", "Batch nevergrad schedules jobs synchronously"
         BaseHyperOptimisation.__init__(
             self,
@@ -79,7 +79,7 @@ class NevergradHyperoptimisation(BaseHyperOptimisation):
 
     def clean_up_after_batch_iteration(self, batch_proposals, perf_measures):
         """Perform post-iteration clean-up by updating surrogate model."""
-        # First key of all metrics is used to update the surrogate!
+        # Use all metrics is used to update the surrogate!
         to_model = list(perf_measures.keys())
         eval_ids = list(perf_measures[to_model[0]].keys())
 

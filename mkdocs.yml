@@ -47,13 +47,15 @@ nav:
     - core_api/mle_sync_gcs.md
     - core_api/mle_monitor.md
     - core_api/mle_init.md
-  - MLE Logger:
-    - logging/mle_logging.md
   - Experiments:
     - experiment_types/single_pre_post.md
     - experiment_types/multiple_configs.md
     - experiment_types/hyperparameter_search.md
     - experiment_types/population_based_training.md
+  - MLE Logger:
+    - logging/mle_logging.md
+  - MLE Logger:
+    - hyperopt/mle_hyperopt.md
   - Examples: examples.md
   - Development:
     - dev/infrastructure.md

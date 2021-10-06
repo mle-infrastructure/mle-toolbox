@@ -14,10 +14,10 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
 2. Common machine learning research experiment setups:
-    - Launching and collecting multiple random seeds in parallel/batches.
-    - Hyperparameter searches: Random, Grid, SMBO, Population-Based Training.
+    - Launching and collecting multiple random seeds in parallel/batches or async.
+    - Hyperparameter searches: Random, Grid, SMBO, PBT and Nevergrad.
     - Pre- and post-processing pipelines for data preparation/result visualization.
-3. Automated report generation for hyperparameter searches.
+3. Automated report generation for hyperparameter search experiments.
 4. Storage of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
@@ -46,7 +46,7 @@ cd mle-toolbox
 pip install -e .
 ```
 
-By default this will only install the minimal dependencies (not including specialized packages such as `scikit-optimize`, `statsmodels`, etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/).
+By default this will only install the minimal dependencies (not including specialized packages such as `scikit-optimize`, `statsmodels`, `nevergrad` etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/).
 
 
 #### Setting Up Your Remote Credentials 🙈
