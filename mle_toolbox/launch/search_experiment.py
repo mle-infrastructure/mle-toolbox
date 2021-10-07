@@ -61,10 +61,10 @@ def run_single_config_search(
 
     # Add resource budget to nevergrad configuration
     if param_search_args["search_config"]["search_type"] == "nevergrad":
-        param_search_args["search_config"]["nevergrad_config"][
+        param_search_args["search_config"]["search_config"][
             "num_workers"
         ] = param_search_args["search_resources"]["num_evals_per_batch"]
-        param_search_args["search_config"]["nevergrad_config"]["budget_size"] = (
+        param_search_args["search_config"]["search_config"]["budget_size"] = (
             param_search_args["search_resources"]["num_evals_per_batch"]
             * param_search_args["search_resources"]["num_search_batches"]
         )

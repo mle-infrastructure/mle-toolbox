@@ -33,7 +33,8 @@ search_config = {
                                 "prior": "uniform"}
                  }
     },
-    "smbo_config": {
+    "search_config": {
+        "metric_to_model": "integral",     # Which of the eval metrics to model
         "base_estimator": "GP",            # "GP", "RF", "ET", "GBRT"
         "acq_function": "gp_hedge",        # "LCB", "EI", "PI", "gp_hedge" (samples)
         "n_initial_points": 1              # Init points >= than batch size!

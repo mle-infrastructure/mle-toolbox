@@ -21,6 +21,7 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
         search_params: dict,
         search_type: str = "grid",
         search_schedule: str = "sync",
+        search_config: Union[None, dict] = None,
         message_id: Union[str, None] = None,
     ):
         BaseHyperOptimisation.__init__(
@@ -41,15 +42,19 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
                                        seed_id=mle_config.general.random_seed)
         elif search_type == "random":
             self.strategy = RandomSearch(**search_params,
+                                         search_config=search_config,
                                          seed_id=mle_config.general.random_seed)
         elif search_type == "smbo":
             self.strategy = SMBOSearch(**search_params,
+                                       search_config=search_config,
                                        seed_id=mle_config.general.random_seed)
         elif search_type == "nevergrad":
             self.strategy = NevergradSearch(**search_params,
+                                            search_config=search_config,
                                             seed_id=mle_config.general.random_seed)
         elif search_type == "coordinate":
             self.strategy = CoordinateSearch(**search_params,
+                                             search_config=search_config,
                                              seed_id=mle_config.general.random_seed)
 
         # Reload data to strategy if applicable

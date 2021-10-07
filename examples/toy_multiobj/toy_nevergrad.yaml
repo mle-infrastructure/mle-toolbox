@@ -34,7 +34,7 @@ param_search_args:
                     begin: 1
                     end: 10
                     prior: "uniform"
-        nevergrad_config:
+        search_config:
             optimizer: "CMA"            # "CMA", "NGOpt"
 
 # Parameters specific to an individual job

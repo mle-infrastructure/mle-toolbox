@@ -27,7 +27,7 @@ search_config = {
                                    "end": 10,
                                    "prior": "uniform"}},
     },
-    "nevergrad_config": {"optimizer": "CMA"}
+    "search_config": {"optimizer": "CMA"}
 }
 
 single_job_args = {}

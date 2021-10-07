@@ -318,12 +318,29 @@ class BaseHyperOptimisation(object):
     def tell(self, run_ids, batch_proposals, perf_measures):
         """Perform post-iteration clean-up. (E.g. update surrogate model)"""
         proposals, measures = [], []
+        # Collect all performance data for strategy update
         for i, id in enumerate(run_ids):
             proposals.append(batch_proposals[i])
             metrics = []
             for k in self.hyper_log.eval_metrics:
-                metrics.append(perf_measures[k][id])
+                # Differentiate between max and min of evaluation metric
+                effective_perf = (
+                    -1 * perf_measures[k][id]
+                    if self.hyper_log.max_objective
+                    else perf_measures[k][id]
+                )
+                # If we use surrogate model - select variables to be modelled
+                if self.search_type == "smbo":
+                    if k == self.strategy.search_config["metric_to_model"]:
+                        metrics = effective_perf
+                elif (self.search_type == "nevergrad" and
+                      "metric_to_model" in self.strategy.search_config.keys()):
+                    if k == self.strategy.search_config["metric_to_model"]:
+                        metrics = effective_perf
+                else:
+                    metrics.append(effective_perf)
             measures.append(metrics)
+
         self.strategy.tell(proposals, measures)
         self.strategy.save(self.search_log_path)
 
