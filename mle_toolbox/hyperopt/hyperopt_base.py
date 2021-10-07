@@ -159,7 +159,7 @@ class BaseHyperOptimisation(object):
         # Does not work with Batch SMBO since proposals rely on GP!
         assert self.search_type != "smbo", "Async scheduling - No SMBO support"
         # Get all hyperparameters & plug them into config dicts, store jsons
-        batch_proposals = self.get_hyperparam_proposal(num_total_evals)
+        batch_proposals = self.ask(num_total_evals)
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
         batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -198,7 +198,7 @@ class BaseHyperOptimisation(object):
         self.hyper_log.save_log()
 
         # Clean up after search batch iteration
-        self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
+        self.tell(run_ids, batch_proposals, perf_measures)
         for f in batch_fnames:
             os.remove(f)
         print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
@@ -218,7 +218,7 @@ class BaseHyperOptimisation(object):
             self.current_iter += 1
 
             # Get a set of hyperparameters & plug them into config dicts
-            batch_proposals = self.get_hyperparam_proposal(num_evals_per_batch)
+            batch_proposals = self.ask(num_evals_per_batch)
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -264,7 +264,7 @@ class BaseHyperOptimisation(object):
             self.hyper_log.save_log()
 
             # Clean up after search batch iteration - delete redundant configs
-            self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
+            self.tell(run_ids, batch_proposals, perf_measures)
             for f in batch_fnames:
                 os.remove(f)
             print_framed(
@@ -310,13 +310,20 @@ class BaseHyperOptimisation(object):
             )
         return perf_measures
 
-    def get_hyperparam_proposal(self, num_iter_batch: int):
+    def ask(self, num_iter_batch: int):
         """Get proposals to eval - implemented by specific hyperopt algo"""
-        raise NotImplementedError
+        return self.strategy.ask(num_iter_batch)
 
-    def clean_up_after_batch_iteration(self, batch_proposals, perf_measures):
+    def tell(self, run_ids, batch_proposals, perf_measures):
         """Perform post-iteration clean-up. (E.g. update surrogate model)"""
-        return
+        proposals, measures = [], []
+        for i, id in enumerate(run_ids):
+            proposals.append(batch_proposals[i])
+            metrics = []
+            for k in self.hyper_log.eval_metrics:
+                metrics.append(perf_measures[k][id])
+            measures.append(metrics)
+        return self.strategy.tell(proposals, measures)
 
     def gen_hyperparam_configs(self, proposals: list):
         """Generate config file for a specific proposal to evaluate"""

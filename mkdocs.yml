@@ -54,9 +54,9 @@ nav:
     - experiment_types/population_based_training.md
   - MLE Logger:
     - logging/mle_logging.md
-  - MLE Logger:
+  - MLE Hyperopt:
     - hyperopt/mle_hyperopt.md
-  - Examples: examples.md
+  #- Examples: examples.md
   - Development:
     - dev/infrastructure.md
     - dev/remote_backends.md

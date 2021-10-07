@@ -2,7 +2,7 @@ import numpy as np
 from typing import Union
 from .hyperopt_base import BaseHyperOptimisation
 from .hyper_logger import HyperoptLogger
-from .hyperspace import construct_hyperparam_range
+#from .hyperspace import construct_hyperparam_range
 
 
 class RandomHyperoptimisation(BaseHyperOptimisation):
