@@ -59,9 +59,10 @@ class BaseHyperOptimisation(object):
         if self.experiment_dir[-1] != "/":
             self.experiment_dir += "/"
 
-        # Create the directory if it doesn't exist yet
+        # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
+        self.search_log_path = os.path.join(self.experiment_dir, "search_log.json")
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -323,7 +324,8 @@ class BaseHyperOptimisation(object):
             for k in self.hyper_log.eval_metrics:
                 metrics.append(perf_measures[k][id])
             measures.append(metrics)
-        return self.strategy.tell(proposals, measures)
+        self.strategy.tell(proposals, measures)
+        self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):
         """Generate config file for a specific proposal to evaluate"""

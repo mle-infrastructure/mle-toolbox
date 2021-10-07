@@ -50,11 +50,13 @@ class HyperoptLogger(object):
             self.reload_log()
             self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")
             self.print_log_state()
+            self.reloaded = True
         else:
             self.opt_log = {}  # List of dict of evals
             self.iter_id = 0  # How many iterations already eval
             self.all_run_ids = []  # All run ids of evals
             self.all_evaluated_params = []  # All evaluated parameters
+            self.reloaded = False
         self.batch_id = 0  # Batch evaluation tracker
 
         print_framed("HYPEROPT LOGGER INITIALIZED")
