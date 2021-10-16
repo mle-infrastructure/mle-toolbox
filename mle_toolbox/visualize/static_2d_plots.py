@@ -129,7 +129,7 @@ def plot_2D_heatmap(
     range_x: np.ndarray,
     range_y: np.ndarray,
     heat_array: np.ndarray,
-    title: str = "Placeholder Title",
+    title: Union[None, str] = "Placeholder Title",
     subtitle: Union[None, str] = None,
     xy_labels: list = ["x-label", "y-label"],
     variable_name: Union[None, str] = None,
@@ -199,10 +199,11 @@ def plot_2D_heatmap(
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
-    if subtitle is None:
-        ax.set_title(title)
-    else:
-        ax.set_title(title + "\n" + str(subtitle))
+    if title is not None:
+        if subtitle is None:
+            ax.set_title(title)
+        else:
+            ax.set_title(title + "\n" + str(subtitle))
     if len(range_x) != 0:
         ax.set_xlabel(xy_labels[0])
     if len(range_y) != 0:
