@@ -6,7 +6,6 @@ import yaml
 import copy
 import logging
 from typing import Union, List
-from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
 from ..job import JobQueue
@@ -59,9 +58,10 @@ class BaseHyperOptimisation(object):
         if self.experiment_dir[-1] != "/":
             self.experiment_dir += "/"
 
-        # Create the directory if it doesn't exist yet
+        # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
+        self.search_log_path = os.path.join(self.experiment_dir, "search_log.json")
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -116,8 +116,8 @@ class BaseHyperOptimisation(object):
             f"Hyperoptimisation ({self.search_schedule} - "
             + f"{self.search_type}) Run - Range of Parameters:"
         )
-        for line in pformat(self.search_params).split("\n"):
-            self.logger.info(line)
+        print()
+        self.strategy.print_hello()
 
         # Start Launching Jobs Depending on the Scheduling Setup
         if self.search_schedule == "sync":
@@ -159,7 +159,7 @@ class BaseHyperOptimisation(object):
         # Does not work with Batch SMBO since proposals rely on GP!
         assert self.search_type != "smbo", "Async scheduling - No SMBO support"
         # Get all hyperparameters & plug them into config dicts, store jsons
-        batch_proposals = self.get_hyperparam_proposal(num_total_evals)
+        batch_proposals = self.ask(num_total_evals)
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
         batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -198,7 +198,7 @@ class BaseHyperOptimisation(object):
         self.hyper_log.save_log()
 
         # Clean up after search batch iteration
-        self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
+        self.tell(run_ids, batch_proposals, perf_measures)
         for f in batch_fnames:
             os.remove(f)
         print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
@@ -218,7 +218,7 @@ class BaseHyperOptimisation(object):
             self.current_iter += 1
 
             # Get a set of hyperparameters & plug them into config dicts
-            batch_proposals = self.get_hyperparam_proposal(num_evals_per_batch)
+            batch_proposals = self.ask(num_evals_per_batch)
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -264,7 +264,7 @@ class BaseHyperOptimisation(object):
             self.hyper_log.save_log()
 
             # Clean up after search batch iteration - delete redundant configs
-            self.clean_up_after_batch_iteration(batch_proposals, perf_measures)
+            self.tell(run_ids, batch_proposals, perf_measures)
             for f in batch_fnames:
                 os.remove(f)
             print_framed(
@@ -310,13 +310,38 @@ class BaseHyperOptimisation(object):
             )
         return perf_measures
 
-    def get_hyperparam_proposal(self, num_iter_batch: int):
+    def ask(self, num_iter_batch: int):
         """Get proposals to eval - implemented by specific hyperopt algo"""
-        raise NotImplementedError
+        return self.strategy.ask(num_iter_batch)
 
-    def clean_up_after_batch_iteration(self, batch_proposals, perf_measures):
+    def tell(self, run_ids, batch_proposals, perf_measures):
         """Perform post-iteration clean-up. (E.g. update surrogate model)"""
-        return
+        proposals, measures = [], []
+        # Collect all performance data for strategy update
+        for i, id in enumerate(run_ids):
+            proposals.append(batch_proposals[i])
+            metrics = []
+            for k in self.hyper_log.eval_metrics:
+                # Differentiate between max and min of evaluation metric
+                effective_perf = (
+                    -1 * perf_measures[k][id]
+                    if self.hyper_log.max_objective
+                    else perf_measures[k][id]
+                )
+                # If we use surrogate model - select variables to be modelled
+                if self.search_type == "smbo":
+                    if k == self.strategy.search_config["metric_to_model"]:
+                        metrics = effective_perf
+                elif (self.search_type == "nevergrad" and
+                      "metric_to_model" in self.strategy.search_config.keys()):
+                    if k == self.strategy.search_config["metric_to_model"]:
+                        metrics = effective_perf
+                else:
+                    metrics.append(effective_perf)
+            measures.append(metrics)
+
+        self.strategy.tell(proposals, measures)
+        self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):
         """Generate config file for a specific proposal to evaluate"""

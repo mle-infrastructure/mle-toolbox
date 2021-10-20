@@ -1,6 +1,6 @@
 import os
 from typing import Dict, Union
-from ..hyperopt import HyperoptLogger
+from ..hyperopt import HyperoptLogger, MLE_Hyperoptimisation
 from pathlib import Path
 
 
@@ -56,37 +56,17 @@ def run_single_config_search(
     hyper_log = HyperoptLogger(hyperlog_fname, **param_search_args["search_logging"])
 
     # 2. Initialize the hyperparameter optimizer class
-    search_types = ["random", "grid", "smbo"]
-    if param_search_args["search_config"]["search_type"] == "random":
-        from ..hyperopt import RandomHyperoptimisation
+    search_types = ["random", "grid", "smbo", "nevergrad", "coordinate"]
+    assert param_search_args["search_config"]["search_type"] in search_types
 
-        hyperopt = RandomHyperoptimisation
-    elif param_search_args["search_config"]["search_type"] == "grid":
-        from ..hyperopt import GridHyperoptimisation
-
-        hyperopt = GridHyperoptimisation
-    elif param_search_args["search_config"]["search_type"] == "smbo":
-        from ..hyperopt import SMBOHyperoptimisation
-
-        hyperopt = SMBOHyperoptimisation
-    elif param_search_args["search_config"]["search_type"] == "nevergrad":
-        from ..hyperopt import NevergradHyperoptimisation
-
-        hyperopt = NevergradHyperoptimisation
-        # Add resource budget to nevergrad configuration
-        param_search_args["search_config"]["nevergrad_config"][
+    # Add resource budget to nevergrad configuration
+    if param_search_args["search_config"]["search_type"] == "nevergrad":
+        param_search_args["search_config"]["search_config"][
             "num_workers"
         ] = param_search_args["search_resources"]["num_evals_per_batch"]
-        param_search_args["search_config"]["nevergrad_config"]["budget_size"] = (
+        param_search_args["search_config"]["search_config"]["budget_size"] = (
             param_search_args["search_resources"]["num_evals_per_batch"]
             * param_search_args["search_resources"]["num_search_batches"]
-        )
-    else:
-        raise ValueError(
-            "Please provide a valid \
-                          hyperparam search type: {}.".format(
-                search_types
-            )
         )
 
     # 4. Compute remaining jobs/batches for sync/async scheduling of jobs
@@ -111,7 +91,7 @@ def run_single_config_search(
         param_search_args["search_resources"]["num_search_batches"] -= completed_batches
 
     # 5. Run the jobs (only remaining jobs if reloaded)
-    hyper_opt_instance = hyperopt(
+    hyper_opt_instance = MLE_Hyperoptimisation(
         hyper_log,
         resource_to_run,
         single_job_args,

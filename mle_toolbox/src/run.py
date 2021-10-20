@@ -50,7 +50,7 @@ def run(cmd_args):
     if not cmd_args.no_welcome:
         welcome_to_mle_toolbox()
     else:
-        print_framed("EXPERIMENT STARTED")
+        print_framed("EXPERIMENT START-UP")
 
     # Load experiment yaml config & determine exec resource
     job_config = load_experiment_config(cmd_args)
@@ -60,7 +60,7 @@ def run(cmd_args):
 
     # 2. Set up logging config for experiment instance
     logger = prepare_logger()
-    logger.info(f"Loaded experiment config YAML: {cmd_args.config_fname}")
+    logger.info(f"Loaded configuration: {cmd_args.config_fname}")
 
     # 3. If local - check if experiment should be run on remote resource
     if current_resource not in ["sge-cluster", "slurm-cluster"] or (

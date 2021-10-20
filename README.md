@@ -1,10 +1,11 @@
-![MLE_Toolbox_Banner](https://roberttlange.github.io/mle-toolbox/thumbnails/mle_thumbnail.png)
+## Lightweight Infrastructure for Distributed ML Experiments 🚜
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://roberttlange.github.io/mle-toolbox/)
 [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Status](https://github.com/RobertTLange/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/RobertTLange/mle-toolbox/actions?query=workflow%3A"Python+tests")
 [![codecov](https://codecov.io/gh/RobertTLange/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/RobertTLange/mle-toolbox)
+<a href="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png" width="200" align="right" /></a>
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 

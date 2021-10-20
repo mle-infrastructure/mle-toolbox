@@ -1,6 +1,6 @@
 # Welcome to the MLE-Toolbox
 
-<a href="thumbnails/mle_thumbnail.png"><img src="thumbnails/mle_thumbnail.png" width=900 align="center" /></a>
+<a href="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png" width="200" align="right" /></a>
 
 > Coming up with the right research hypotheses is hard - testing them should be easy.
 

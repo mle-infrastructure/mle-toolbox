@@ -49,7 +49,7 @@ Alternatively, you can clone this repository and afterwards 'manually' install i
 
 ```
 git clone https://github.com/RobertTLange/mle-hyperopt.git
-cd mle-logging
+cd mle-hyperopt
 pip install -e .
 ```
 

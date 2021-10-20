@@ -1,4 +1,4 @@
-### v0.3.1 - TBD
+### v0.3.1 - 10/20/2021
 
 ##### Added
 
@@ -32,6 +32,8 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 
 - Configuration loading is now more toolbox specific. `load_json_config` and `load_yaml_config` are now part of `mle-logging`. The toolbox now has two "new" function `load_job_config` and `load_experiment_config`, which prepare the raw configs for future usage.
 - The `job_config` file now no longer has to be a `.json` file, but can (and probably should) be a `.yaml` file. This makes formatting easier. The hyperoptimization pipeline will generate configuration files that are of the same file type.
+- Moves core hyperparameter optimization functionality to [`mle-hyperopt`](https://github.com/RobertTLange/mle-hyperopt). At this point the toolbox wraps around the search strategies and handles the `mle-logging` log loading/data retrieval.
+- Reduces test suite since all hyperopt strategy-internal tests are taken care of in `mle-hyperopt`.
 
 ##### Fixed
 

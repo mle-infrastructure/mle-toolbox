@@ -32,7 +32,8 @@ param_search_args:
                 r_var:
                     - 0
                     - 1
-        smbo_config:
+        search_config:
+            metric_to_model: "integral"     # Which of the eval metrics to model
             base_estimator: "GP"            # "GP", "RF", "ET", "GBRT"
             acq_function: "gp_hedge"        # "LCB", "EI", "PI", "gp_hedge"
             # Number init points have to be larger than batch size!

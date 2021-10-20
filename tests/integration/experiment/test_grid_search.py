@@ -35,7 +35,7 @@ search_config = {
                          "bins": 2}},
         "integer": {"noise_mean": {"begin": 1,
                                    "end": 4,
-                                   "spacing": 1}}
+                                   "bins": 4}}
     }
 }
 

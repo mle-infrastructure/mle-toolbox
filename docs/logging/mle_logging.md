@@ -1,8 +1,8 @@
-# The `MLELogger` Class
+# The `mle-logging` Package
 
 ## Logging made easy :book:
 
-Each Python based experiment is assumed to use a custom logger: The `MLELogger`. This enables the standardization needed to automatically aggregate multiple random runs and to log performance across hyperparameter searches. For a quickstart checkout the [notebook blog](https://github.com/RobertTLange/mle-logging/blob/main/examples/getting_started.ipynb) :rocket:
+Each Python-based experiment is assumed to use a custom logger: The `MLELogger`. This enables the standardization needed to automatically aggregate multiple random runs and to log performance across hyperparameter searches. For a quickstart checkout the [notebook blog](https://github.com/RobertTLange/mle-logging/blob/main/examples/getting_started.ipynb) :rocket:
 
 ![](https://github.com/RobertTLange/mle-logging/blob/main/docs/mle_logger_structure.png?raw=true)
 
