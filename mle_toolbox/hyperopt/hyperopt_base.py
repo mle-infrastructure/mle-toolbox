@@ -6,7 +6,6 @@ import yaml
 import copy
 import logging
 from typing import Union, List
-from pprint import pformat
 
 from .hyper_logger import HyperoptLogger
 from ..job import JobQueue
@@ -117,8 +116,8 @@ class BaseHyperOptimisation(object):
             f"Hyperoptimisation ({self.search_schedule} - "
             + f"{self.search_type}) Run - Range of Parameters:"
         )
-        for line in pformat(self.search_params).split("\n"):
-            self.logger.info(line)
+        print()
+        self.strategy.print_hello()
 
         # Start Launching Jobs Depending on the Scheduling Setup
         if self.search_schedule == "sync":

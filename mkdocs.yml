@@ -40,7 +40,11 @@ nav:
     - setup/configuration.md
     - setup/template.md
     - setup/video_tutorials.md
-  - Core API:
+  - Logging:
+    - logging/mle_logging.md
+  - HyperOpt:
+    - hyperopt/mle_hyperopt.md
+  - Toolbox:
     - core_api/mle_run.md
     - core_api/mle_retrieve.md
     - core_api/mle_report.md
@@ -52,11 +56,6 @@ nav:
     - experiment_types/multiple_configs.md
     - experiment_types/hyperparameter_search.md
     - experiment_types/population_based_training.md
-  - MLE Logger:
-    - logging/mle_logging.md
-  - MLE Hyperopt:
-    - hyperopt/mle_hyperopt.md
-  #- Examples: examples.md
   - Development:
     - dev/infrastructure.md
     - dev/remote_backends.md

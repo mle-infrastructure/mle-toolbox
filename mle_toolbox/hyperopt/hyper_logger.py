@@ -36,7 +36,7 @@ class HyperoptLogger(object):
         self.logger.setLevel(logging.INFO)
 
         # Log initialization status and what/how we log
-        self.logger.info(f"HyperoptLogger Initialized ({self.hyperlog_fname})")
+        self.logger.info(f"Log Init: {self.hyperlog_fname}")
         if not self.no_results_logging:
             self.logger.info(
                 f"Scoring: {self.problem_type} "
