@@ -1,14 +1,16 @@
 # Installation
 
-If you want to use the toolbox on your local machine follow the instructions locally. Otherwise do so on your respective cluster resource (Slurm/SGE).
+If you want to use the toolbox on your local machine or on a GCP cloud VM follow the instructions locally. Otherwise do so on your respective cluster resource (Slurm/SGE).
 
 ## PyPI Installation
 
-The latest release of the toolbox can be installed via [PyPi](https://pypi.org/project/mle-toolbox/):
+The latest release of the toolbox can be installed via [PyPI](https://pypi.org/project/mle-toolbox/):
 
 ```
 pip install mle-toolbox
 ```
+
+This will by default also install the subpackages `mle-logging`, `mle-hyperopt` & `mle-monitor`. Note that all of these are also available as standalone PyPI installations.
 
 ## GitHub Installation
 
@@ -26,24 +28,6 @@ By default this will only install the minimal dependencies (not including specia
 pip install -r requirements/requirements-test.txt
 ```
 
-## :fire: Future Support
+## :fire: Future Installation Support
 
 In the future I plan to add an installation via `conda-forge` and Docker/Singularity images for the `mle-toolbox`.
-
-#### Conda Installation
-
-```
-conda install mle-toolbox
-```
-
-#### Docker Image
-
-```
-docker run...
-```
-
-#### Singularity Image
-
-```
-singularity pull docker://RobertTLange/...
-```
