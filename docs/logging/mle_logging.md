@@ -1,12 +1,12 @@
 # The `mle-logging` Package
 
-## Logging made easy :book:
+<a href="https://github.com/RobertTLange/mle-logging/blob/main/docs/logo_transparent.png?raw=true"><img src="https://github.com/RobertTLange/mle-logging/blob/main/docs/logo_transparent.png?raw=true" width="200" align="right" /></a>
 
-Each Python-based experiment is assumed to use a custom logger: The `MLELogger`. This enables the standardization needed to automatically aggregate multiple random runs and to log performance across hyperparameter searches. For a quickstart checkout the [notebook blog](https://github.com/RobertTLange/mle-logging/blob/main/examples/getting_started.ipynb) :rocket:
+## Experiment logging made easy 📖
 
-![](https://github.com/RobertTLange/mle-logging/blob/main/docs/mle_logger_structure.png?raw=true)
+Each Python-based experiment is assumed to use a custom logger: The `MLELogger`. This enables the standardization needed to automatically aggregate multiple random runs and to log performance across hyperparameter searches. For a quickstart checkout the [notebook blog](https://github.com/RobertTLange/mle-logging/blob/main/examples/getting_started.ipynb) 🚀
 
-## The API :video_game:
+## The API 🎮
 
 ```python
 from mle_logging import MLELogger
@@ -48,7 +48,9 @@ Or do everything in a single line...
 log.update(time_tic, stats_tic, model, fig, extra, save=True)
 ```
 
-### File Structure & Re-Loading :books:
+### File Structure & Re-Loading 📚
+
+![](https://github.com/RobertTLange/mle-logging/blob/main/docs/mle_logger_structure.png?raw=true)
 
 The `MLELogger` will create a nested directory, which looks as follows:
 
@@ -58,6 +60,7 @@ experiment_dir
 ├── figures: Stores saved .png figures
 ├── logs: Stores .hdf5 log files (meta, stats, time)
 ├── models: Stores different model checkpoints
+    ├── init: Stores initial checkpoint
     ├── final: Stores most recent checkpoint
     ├── every_k: Stores every k-th checkpoint provided in update
     ├── top_k: Stores portfolio of top-k checkpoints based on performance
@@ -76,7 +79,7 @@ log_out = load_log("experiment_dir/")
 # >>> log_out.stats.keys()
 # odict_keys(['test_loss', 'train_loss'])
 # >>> log_out.time.keys()
-# odict_keys(['num_epochs', 'num_updates', 'time_elapsed'])
+# odict_keys(['time', 'num_epochs', 'num_updates', 'time_elapsed'])
 ```
 
 If an experiment was aborted, you can reload and continue the previous run via the `reload=True` option:
@@ -89,7 +92,7 @@ log = MLELogger(time_to_track=['num_updates', 'num_epochs'],
                 reload=True)
 ```
 
-## Installation :pencil:
+## Installation ⏳
 
 A PyPI installation is available via:
 
@@ -106,11 +109,11 @@ pip install -e .
 ```
 
 
-## Advanced Options :bicyclist:
+## Advanced Options 🚴
 
-### Merging Multiple Logs :couple:
+### Merging Multiple Logs 👫
 
-**Merging Multiple Random Seeds** :seedling: + :seedling:
+**Merging Multiple Random Seeds** 🌱 + 🌱
 
 ```python
 from mle_logging import merge_seed_logs
@@ -120,7 +123,7 @@ log_out = load_log("experiment_dir/")
 # ['seed_1', 'seed_2']
 ```
 
-**Merging Multiple Configurations** :bookmark: + :bookmark:
+**Merging Multiple Configurations** 🔖 + 🔖
 
 ```python
 from mle_logging import merge_config_logs, load_meta_log
@@ -133,9 +136,17 @@ meta_log = load_meta_log("multi_config_dir/meta_log.hdf5")
 # odict_keys(['mean', 'std', 'p50', 'p10', 'p25', 'p75', 'p90']))
 ```
 
-### Storing Checkpoint Portfolios :file_cabinet:
 
-**Logging every k-th checkpoint update** :exclamation: :arrow_right: ... :arrow_right: :exclamation:
+### Plotting of Logs 🧑‍🎨
+
+```python
+meta_log = load_meta_log("multi_config_dir/meta_log.hdf5")
+meta_log.plot("train_loss", "num_updates")
+```
+
+### Storing Checkpoint Portfolios 📂
+
+**Logging every k-th checkpoint update** ❗ ⏩ ... ⏩ ❗
 
 ```python
 # Save every second checkpoint provided in log.update (stored in models/every_k)
@@ -147,7 +158,7 @@ log = MLELogger(time_to_track=['num_updates', 'num_epochs'],
                 save_every_k_ckpt=2)
 ```
 
-**Logging top-k checkpoints based on metric** :trident:
+**Logging top-k checkpoints based on metric** 🔱
 
 ```python
 # Save top-3 checkpoints provided in log.update (stored in models/top_k)

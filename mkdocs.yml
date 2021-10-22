@@ -1,5 +1,5 @@
-site_name: Machine Learning Experiment Toolbox
-site_url: https://roberttlange.github.io/mle-toolbox/
+site_name: Machine Learning Experiment Infrastructure
+site_url: https://roberttlange.github.io/mle-infrastructure/
 site_description: 'Remote ML experiments with Google Cloud Storage logging.'
 site_author: Robert Tjarko Lange
 
@@ -30,38 +30,31 @@ theme:
   favicon: thumbnails/favicon.ico
   logo: thumbnails/favicon.png
 
-plugins:
- - mkdocs-jupyter
+# plugins:
+#  - mkdocs-jupyter
 
 nav:
   - Home: index.md
+  - Logging:
+    - logging/mle_logging.md
+  - HyperOpt:
+    - hyperopt/mle_hyperopt.md
+  - Monitor:
+    - monitor/mle_monitor.md
+  - Toolbox:
+    - toolbox/mle_toolbox.md
+    - toolbox/mle_run.md
+    - toolbox/mle_retrieve.md
+    - toolbox/mle_report.md
+    - toolbox/mle_sync_gcs.md
+    - toolbox/mle_monitor.md
+    - toolbox/mle_init.md
+    - toolbox/experiments.md
   - Getting Started:
     - setup/installation.md
     - setup/configuration.md
     - setup/template.md
     - setup/video_tutorials.md
-  - Logging:
-    - logging/mle_logging.md
-  - HyperOpt:
-    - hyperopt/mle_hyperopt.md
-  - Toolbox:
-    - core_api/mle_run.md
-    - core_api/mle_retrieve.md
-    - core_api/mle_report.md
-    - core_api/mle_sync_gcs.md
-    - core_api/mle_monitor.md
-    - core_api/mle_init.md
-  - Experiments:
-    - experiment_types/single_pre_post.md
-    - experiment_types/multiple_configs.md
-    - experiment_types/hyperparameter_search.md
-    - experiment_types/population_based_training.md
-  - Development:
-    - dev/infrastructure.md
-    - dev/remote_backends.md
-    - dev/testing.md
-    - dev/notes.md
-    - dev/future_plans.md
 
 
 markdown_extensions:

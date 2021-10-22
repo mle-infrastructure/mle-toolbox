@@ -5,9 +5,9 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Status](https://github.com/RobertTLange/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/RobertTLange/mle-toolbox/actions?query=workflow%3A"Python+tests")
 [![codecov](https://codecov.io/gh/RobertTLange/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/RobertTLange/mle-toolbox)
-<a href="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/toolbox_logo.png" width="200" align="right" /></a>
+<a href="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_transparent.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_transparent.png" width="200" align="right" /></a>
 
-> Coming up with the right research hypotheses is hard - testing them should be easy.
+> Coming up with the right hypothesis is hard - testing it should be easy.
 
 ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported as `.md`/`.html` files.
 
