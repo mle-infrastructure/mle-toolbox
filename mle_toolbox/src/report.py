@@ -1,7 +1,7 @@
 from typing import Union
 from mle_toolbox.report import ReportGenerator
 from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
-from mle_toolbox.protocol import load_local_protocol_db
+from mle_monitor import load_local_protocol_db
 
 
 def report(cmd_args):

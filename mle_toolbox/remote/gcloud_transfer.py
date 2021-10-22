@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Union
 
 from mle_toolbox import mle_config
-from ..protocol import load_local_protocol_db
+from mle_monitor import load_local_protocol_db
 from .ssh_manager import setup_proxy_server
 
 try:

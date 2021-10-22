@@ -1,6 +1,6 @@
 # Welcome to the MLE-Infrastructure
 
-<a href="https://roberttlange.github.io/mle-infrastructure/thumbnails/logo_overview.png"><img src="https://roberttlange.github.io/mle-infrastructure/thumbnails/logo_overview.png" width="500" align="center" /></a>
+<a href="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_overview.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_overview.png" width="500" align="center" /></a>
 
 The MLE-Infrastructure is meant to provide a reproducible workflow for running Machine Learning experiments (MLE) with minimal overhead. The core consists of 4 packages:
 

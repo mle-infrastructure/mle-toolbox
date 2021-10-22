@@ -15,14 +15,6 @@ from mle_toolbox.utils import (
     set_random_seeds,
 )
 
-# Import of helpers for protocoling experiments
-from mle_toolbox.protocol import (
-    protocol_summary,
-    update_protocol_var,
-    manipulate_protocol_from_input,
-    protocol_experiment,
-)
-
 # Import of local-to-remote helpers (verify, rsync, exec)
 from mle_toolbox.remote.ssh_execute import (
     SSH_Manager,
@@ -38,6 +30,14 @@ from mle_toolbox.launch import (
     welcome_to_mle_toolbox,
     prepare_logger,
     check_experiment_config,
+)
+
+# Import of helpers for protocoling experiments
+from mle_monitor import (
+    protocol_summary,
+    update_protocol_var,
+    manipulate_protocol_from_input,
+    protocol_experiment,
 )
 
 

@@ -14,6 +14,9 @@ sshtunnel
 pickle5
 plotext==2.3.1
 rich==9.13.0
+
+pycrypto
+
 mle-logging
 mle-hyperopt
-pycrypto
+mle-monitor

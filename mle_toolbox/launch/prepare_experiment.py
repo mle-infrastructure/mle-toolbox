@@ -6,7 +6,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.console import Console
 from .. import mle_config
-from ..protocol import protocol_summary, load_local_protocol_db
+from mle_monitor import protocol_summary, load_local_protocol_db
 
 
 def welcome_to_mle_toolbox() -> None:

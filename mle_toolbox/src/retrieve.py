@@ -3,7 +3,7 @@ from mle_toolbox.utils import print_framed
 from mle_toolbox.remote.ssh_manager import SSH_Manager
 from mle_toolbox.remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip_experiment
 from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
-from mle_toolbox.protocol import load_local_protocol_db
+from mle_monitor import load_local_protocol_db
 
 
 def retrieve(cmd_args):
