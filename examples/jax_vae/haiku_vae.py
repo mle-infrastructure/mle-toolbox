@@ -10,6 +10,7 @@ from mle_toolbox import MLExperiment
 # Adapted from dm-haiku example:
 # https://github.com/deepmind/dm-haiku/blob/master/examples/vae.py
 
+
 def load_dataset(split, batch_size):
     ds = tfds.load("binarized_mnist", split=split, shuffle_files=True)
     ds = ds.shuffle(buffer_size=10 * batch_size)
@@ -21,7 +22,8 @@ def load_dataset(split, batch_size):
 
 class Encoder(hk.Module):
     """Encoder model."""
-    def __init__(self, hidden_size = 512, latent_size = 10):
+
+    def __init__(self, hidden_size=512, latent_size=10):
         super().__init__()
         self._hidden_size = hidden_size
         self._latent_size = latent_size
@@ -38,7 +40,8 @@ class Encoder(hk.Module):
 
 class Decoder(hk.Module):
     """Decoder model."""
-    def __init__(self, hidden_size = 512, output_shape = (28, 28, 1)):
+
+    def __init__(self, hidden_size=512, output_shape=(28, 28, 1)):
         super().__init__()
         self._hidden_size = hidden_size
         self._output_shape = output_shape
@@ -60,8 +63,8 @@ class VAEOutput(NamedTuple):
 
 class VariationalAutoEncoder(hk.Module):
     """Main VAE model class, uses Encoder & Decoder under the hood."""
-    def __init__(self, hidden_size = 512, latent_size = 10,
-               output_shape = (28, 28, 1)):
+
+    def __init__(self, hidden_size=512, latent_size=10, output_shape=(28, 28, 1)):
         super().__init__()
         self._hidden_size = hidden_size
         self._latent_size = latent_size
@@ -86,7 +89,7 @@ def binary_cross_entropy(x, logits):
 
 
 def kl_gaussian(mean: jnp.ndarray, var: jnp.ndarray) -> jnp.ndarray:
-    return 0.5 * jnp.sum(-jnp.log(var) - 1.0 + var + mean**2, axis=-1)
+    return 0.5 * jnp.sum(-jnp.log(var) - 1.0 + var + mean ** 2, axis=-1)
 
 
 def main(mle):
@@ -98,7 +101,7 @@ def main(mle):
         """ELBO loss: E_p[log(x)] - KL(d||q), where p ~ Be(0.5), q ~ N(0,1)."""
         outputs: VAEOutput = model.apply(params, rng_key, batch["image"])
         log_likelihood = -binary_cross_entropy(batch["image"], outputs.logits)
-        kl = kl_gaussian(outputs.mean, outputs.stddev**2)
+        kl = kl_gaussian(outputs.mean, outputs.stddev ** 2)
         elbo = log_likelihood - kl
         return -jnp.mean(elbo)
 
@@ -125,8 +128,7 @@ def main(mle):
             # Log the results to the logger
             time_tic = {"step_counter": step}
             stats_tic = {"val_loss": float(val_loss)}
-            mle.update_log(time_tic, stats_tic,
-                           model=params, save=True)
+            mle.update_log(time_tic, stats_tic, model=params, save=True)
 
 
 if __name__ == "__main__":

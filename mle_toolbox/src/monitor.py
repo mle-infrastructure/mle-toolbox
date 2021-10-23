@@ -2,7 +2,11 @@ import time
 from rich.live import Live
 from mle_toolbox import mle_config
 from mle_toolbox.utils import determine_resource
-from mle_monitor import load_local_protocol_db, layout_mle_dashboard, update_mle_dashboard
+from mle_monitor import (
+    load_local_protocol_db,
+    layout_mle_dashboard,
+    update_mle_dashboard,
+)
 
 
 def monitor():

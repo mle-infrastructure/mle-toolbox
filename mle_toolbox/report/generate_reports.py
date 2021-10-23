@@ -34,14 +34,13 @@ class ReportGenerator:
     def __init__(
         self,
         e_id,
-        db,
+        experiment_data,
         logger: Union[None, logging.Logger] = None,
         pdf_gen: bool = False,
     ):
         # Get the experiment data from the protocol db
         self.e_id = e_id
-        self.db = db
-        self.report_data = DotMap(self.db.get(self.e_id))
+        self.report_data = DotMap(experiment_data)
 
         # Check whether the experiment dir exists - if not ask whether
         # to pull from remote storage or to use a different directory

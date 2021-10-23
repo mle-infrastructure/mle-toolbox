@@ -111,8 +111,7 @@ random_seed = 42
 #------------------------------------------------------------------------------#
 [gcp]
 # Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
-slurm_credentials_path = "~/<slurm_path_to_gcloud_credentials>.json"
-sge_credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
+credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
 
 # Set GCloud project and bucket name for storage/compute instances
 project_name = "<gcloud_project_name>"

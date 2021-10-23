@@ -332,8 +332,10 @@ class BaseHyperOptimisation(object):
                 if self.search_type == "smbo":
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
-                elif (self.search_type == "nevergrad" and
-                      "metric_to_model" in self.strategy.search_config.keys()):
+                elif (
+                    self.search_type == "nevergrad"
+                    and "metric_to_model" in self.strategy.search_config.keys()
+                ):
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
                 else:

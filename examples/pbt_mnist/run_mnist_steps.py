@@ -7,48 +7,54 @@ from mle_toolbox import MLExperiment
 
 
 def main(mle):
-    """ Train a network on MNIST dataset. """
+    """Train a network on MNIST dataset."""
     # Start by setting number of cores available to torch processes
     torch.set_num_threads(mle.train_config.torch_num_threads)
 
     # Set the training seed as well as the device to train on
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Define the dataloaders
-    mnist_transform = transforms.Compose([transforms.ToTensor(),
-                                          transforms.Normalize((0.1307,),
-                                                               (0.3081,))])
+    mnist_transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+    )
     train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, download=True,
-                       transform=mnist_transform),
+        datasets.MNIST("../data", train=True, download=True, transform=mnist_transform),
         batch_size=mle.train_config.train_batch_size,
-        num_workers=5, pin_memory=True, shuffle=True)
+        num_workers=5,
+        pin_memory=True,
+        shuffle=True,
+    )
 
     test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False,
-                       transform=mnist_transform),
+        datasets.MNIST("../data", train=False, transform=mnist_transform),
         batch_size=mle.train_config.test_batch_size,
-        num_workers=5, pin_memory=True, shuffle=True)
+        num_workers=5,
+        pin_memory=True,
+        shuffle=True,
+    )
 
     # Define the network architecture, loss function, optimizer & logger
-    mnist_net = MNIST_MLP(mle.model_config.dropout_prob,
-                          mle.model_config.hidden_fc_dim).to(device)
+    mnist_net = MNIST_MLP(
+        mle.model_config.dropout_prob, mle.model_config.hidden_fc_dim
+    ).to(device)
 
     if mle.model_ckpt is not None:
         mnist_net.load_state_dict(mle.model_ckpt)
 
     nll_loss = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(mnist_net.parameters(),
-                                 lr=mle.train_config.l_rate)
+    optimizer = torch.optim.Adam(mnist_net.parameters(), lr=mle.train_config.l_rate)
 
     # Train the MNIST Network using the training loop
-    train_mnist_network(mle,
-                        model=mnist_net,
-                        optimizer=optimizer,
-                        criterion=nll_loss,
-                        device=device,
-                        train_loader=train_loader,
-                        test_loader=test_loader)
+    train_mnist_network(
+        mle,
+        model=mnist_net,
+        optimizer=optimizer,
+        criterion=nll_loss,
+        device=device,
+        train_loader=train_loader,
+        test_loader=test_loader,
+    )
     return
 
 
@@ -70,9 +76,10 @@ class MNIST_MLP(nn.Module):
         return x
 
 
-def train_mnist_network(mle, model, optimizer, criterion, device,
-                        train_loader, test_loader):
-    """ Run the training loop over a set of epochs. """
+def train_mnist_network(
+    mle, model, optimizer, criterion, device, train_loader, test_loader
+):
+    """Run the training loop over a set of epochs."""
     update_counter = 0
     train_losses = []
 
@@ -91,11 +98,12 @@ def train_mnist_network(mle, model, optimizer, criterion, device,
 
             # Update log with latest evaluation results
             if update_counter % mle.train_config.num_steps_until_eval == 0:
-                test_loss = evaluate_network(model, test_loader,
-                                             device, criterion)
+                test_loss = evaluate_network(model, test_loader, device, criterion)
                 time_tick = {"num_updates": update_counter}
-                stats_tick = {"train_loss": np.mean(train_losses),
-                              "test_loss": test_loss}
+                stats_tick = {
+                    "train_loss": np.mean(train_losses),
+                    "test_loss": test_loss,
+                }
                 mle.update_log(time_tick, stats_tick, model=model, save=True)
                 train_losses = []
 

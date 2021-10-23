@@ -1,11 +1,13 @@
 from typing import Union
 from .hyperopt_base import BaseHyperOptimisation
 from .hyper_logger import HyperoptLogger
-from mle_hyperopt import (GridSearch,
-                          RandomSearch,
-                          SMBOSearch,
-                          NevergradSearch,
-                          CoordinateSearch)
+from mle_hyperopt import (
+    GridSearch,
+    RandomSearch,
+    SMBOSearch,
+    NevergradSearch,
+    CoordinateSearch,
+)
 from mle_toolbox import mle_config
 
 
@@ -38,24 +40,33 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
             message_id,
         )
         if search_type == "grid":
-            self.strategy = GridSearch(**search_params,
-                                       seed_id=mle_config.general.random_seed)
+            self.strategy = GridSearch(
+                **search_params, seed_id=mle_config.general.random_seed
+            )
         elif search_type == "random":
-            self.strategy = RandomSearch(**search_params,
-                                         search_config=search_config,
-                                         seed_id=mle_config.general.random_seed)
+            self.strategy = RandomSearch(
+                **search_params,
+                search_config=search_config,
+                seed_id=mle_config.general.random_seed
+            )
         elif search_type == "smbo":
-            self.strategy = SMBOSearch(**search_params,
-                                       search_config=search_config,
-                                       seed_id=mle_config.general.random_seed)
+            self.strategy = SMBOSearch(
+                **search_params,
+                search_config=search_config,
+                seed_id=mle_config.general.random_seed
+            )
         elif search_type == "nevergrad":
-            self.strategy = NevergradSearch(**search_params,
-                                            search_config=search_config,
-                                            seed_id=mle_config.general.random_seed)
+            self.strategy = NevergradSearch(
+                **search_params,
+                search_config=search_config,
+                seed_id=mle_config.general.random_seed
+            )
         elif search_type == "coordinate":
-            self.strategy = CoordinateSearch(**search_params,
-                                             search_config=search_config,
-                                             seed_id=mle_config.general.random_seed)
+            self.strategy = CoordinateSearch(
+                **search_params,
+                search_config=search_config,
+                seed_id=mle_config.general.random_seed
+            )
 
         # Reload data to strategy if applicable
         if self.hyper_log.reloaded:

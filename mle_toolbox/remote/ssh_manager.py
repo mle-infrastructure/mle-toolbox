@@ -9,17 +9,15 @@ from mle_toolbox import mle_config
 
 def setup_proxy_server():
     """Set Gcloud creds & port to tunnel for internet connection."""
-    if determine_resource() == "slurm-cluster":
+    if mle_config.gcp.credentials_path != "":
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-            mle_config.slurm.credentials.gcp_credentials_path
+            mle_config.gcp.credentials_path
         )
+    if determine_resource() == "slurm-cluster":
         if mle_config.slurm.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.slurm.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.slurm.info.https_proxy
     elif determine_resource() == "sge-cluster":
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
-            mle_config.sge.credentials.gcp_credentials_path
-        )
         if mle_config.sge.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.sge.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.sge.info.https_proxy

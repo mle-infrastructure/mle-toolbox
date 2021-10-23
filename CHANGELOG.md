@@ -1,3 +1,16 @@
+### v0.3.2 - TBD
+
+##### Added
+
+- [ ] Introduces notebook-friendly `MLELauncher` which allows you to schedule experiments from within a local notebook.
+
+##### Changed
+
+- [ ] Refactors out monitoring and protocol database to `mle-monitor` sub-package.
+
+##### Fixed
+
+
 ### v0.3.1 - 10/20/2021
 
 ##### Added

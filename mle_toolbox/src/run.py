@@ -33,12 +33,7 @@ from mle_toolbox.launch import (
 )
 
 # Import of helpers for protocoling experiments
-from mle_monitor import (
-    protocol_summary,
-    update_protocol_var,
-    manipulate_protocol_from_input,
-    protocol_experiment,
-)
+from mle_monitor import MLEProtocol
 
 
 def run(cmd_args):
@@ -111,7 +106,7 @@ def run(cmd_args):
                 from ..remote.gcloud_transfer import (
                     get_gcloud_db,
                     send_gcloud_db,
-                    send_gcloud_zip_experiment,
+                    send_gcloud_zip,
                 )
             except ImportError:
                 raise ImportError(
@@ -128,13 +123,14 @@ def run(cmd_args):
             accessed_remote_db = False
 
         # 5c. Meta-protocol experiment - Print last ones - Delete from input
-        protocol_df = protocol_summary(tail=10, verbose=True)
+        protocol_db = MLEProtocol(mle_config.general.local_protocol_fname)
+        protocol_db.summary(tail=10, verbose=True)
 
         # Only ask to delete if no purpose given!
-        if cmd_args.purpose is None and protocol_df is not None:
-            manipulate_protocol_from_input(delete=True)
-            manipulate_protocol_from_input(abort=True)
-        new_experiment_id, purpose = protocol_experiment(
+        if cmd_args.purpose is None and len(protocol_db) > 0:
+            protocol_db.ask_user(delete=True)
+            protocol_db.ask_user(abort=True)
+        new_experiment_id, purpose = protocol_db.add(
             job_config, resource_to_run, cmd_args.purpose
         )
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
@@ -337,7 +333,7 @@ def run(cmd_args):
                 from .report import auto_generate_reports
 
                 reporter = auto_generate_reports(
-                    new_experiment_id, logger, pdf_gen=True
+                    new_experiment_id, protocol_db, logger, pdf_gen=True
                 )
                 report_generated = True
                 print_framed("REPORT GENERATION FINISHED")
@@ -357,25 +353,29 @@ def run(cmd_args):
         # (a) Get most recent/up-to-date experiment DB to GCS
         if mle_config.general.use_gcloud_protocol_sync:
             get_gcloud_db()
+            protocol_db.load()
 
         # (b) Store experiment directory in GCS bucket under hash
         if (
             mle_config.general.use_gcloud_results_storage
             and mle_config.general.use_gcloud_protocol_sync
         ):
-            send_gcloud_zip_experiment(
+            zip_to_store = protocol_db.get(new_experiment_id, "e-hash") + ".zip"
+            send_gcloud_zip(
                 job_config.meta_job_args["experiment_dir"],
-                new_experiment_id,
+                zip_to_store,
                 cmd_args.delete_after_upload,
             )
+            # Update protocol with GCS send info
+            protocol_db.update(new_experiment_id, "stored_in_gcloud", True)
 
         # (c) Update the experiment protocol status
         logger.info(f"Updated protocol - COMPLETED: {new_experiment_id}")
         time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-        update_protocol_var(
+        protocol_db.update(
             new_experiment_id,
-            db_var_name=["job_status", "stop_time", "report_generated"],
-            db_var_value=["completed", time_t, report_generated],
+            var_name=["job_status", "stop_time", "report_generated"],
+            var_value=["completed", time_t, report_generated],
         )
 
         # (d) Send most recent/up-to-date experiment DB to GCS
