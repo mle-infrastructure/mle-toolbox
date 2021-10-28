@@ -5,7 +5,6 @@ from datetime import datetime
 from rich.table import Table
 from rich.panel import Panel
 from rich.console import Console
-from .. import mle_config
 from mle_monitor import MLEProtocol
 
 

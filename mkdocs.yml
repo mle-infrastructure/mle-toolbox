@@ -37,10 +37,12 @@ nav:
   - Home: index.md
   - Logging:
     - logging/mle_logging.md
-  - HyperOpt:
+  - Hyperopt:
     - hyperopt/mle_hyperopt.md
   - Monitor:
     - monitor/mle_monitor.md
+  - Launcher:
+    - launcher/mle_launcher.md
   - Toolbox:
     - toolbox/mle_toolbox.md
     - toolbox/mle_run.md

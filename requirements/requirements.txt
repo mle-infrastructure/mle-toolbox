@@ -6,7 +6,6 @@ h5py
 toml
 pyyaml
 commentjson
-pickledb
 gitpython
 scp
 paramiko

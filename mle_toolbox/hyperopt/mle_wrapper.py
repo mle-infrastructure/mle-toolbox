@@ -26,6 +26,7 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
         search_config: Union[None, dict] = None,
         message_id: Union[str, None] = None,
     ):
+        """Simple wrapper around `mle-hyperopt` strategies."""
         BaseHyperOptimisation.__init__(
             self,
             hyper_log,

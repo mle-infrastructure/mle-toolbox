@@ -7,16 +7,15 @@ from mle_monitor import MLEProtocol
 
 def report(cmd_args):
     """Interface for user-defined generation of experiment report."""
-    if mle_config.general.use_gcloud_protocol_sync:
-        from ..remote.gcloud_transfer import get_gcloud_db
-
-        accessed_remote_db = get_gcloud_db()
-        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        if accessed_remote_db:
-            print(time_t, "Successfully pulled latest experiment protocol from gcloud.")
-        else:
-            print(time_t, "Careful - you are using local experiment protocol.")
-    protocol_db = MLEProtocol(mle_config.general.local_protocol_fname)
+    protocol_db = MLEProtocol(
+        mle_config.general.local_protocol_fname,
+        mle_config.general.use_gcloud_protocol_sync,
+        mle_config.gcp.project_name,
+        mle_config.gcp.bucket_name,
+        mle_config.gcp.protocol_fname,
+        mle_config.general.local_protocol_fname,
+        mle_config.gcp.credentials_path,
+    )
 
     if not cmd_args.use_last_id:
         # 0. Get command line input for experiment id

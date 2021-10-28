@@ -1,7 +1,7 @@
 from datetime import datetime
 from mle_toolbox.utils import print_framed
 from mle_toolbox.remote.ssh_manager import SSH_Manager
-from mle_toolbox.remote.gcloud_transfer import send_gcloud_db, get_gcloud_zip
+from mle_toolbox.remote.gcloud_transfer import get_gcloud_zip
 from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
 from mle_toolbox import mle_config
 from mle_monitor import MLEProtocol
@@ -12,18 +12,15 @@ def retrieve(cmd_args):
     experiment_id = cmd_args.experiment_id
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
 
-    if mle_config.general.use_gcloud_protocol_sync:
-        from ..remote.gcloud_transfer import get_gcloud_db
-
-        accessed_remote_db = get_gcloud_db()
-        if accessed_remote_db:
-            print(time_t, "Successfully pulled latest experiment protocol from gcloud.")
-        else:
-            print(time_t, "Be careful - you are using local experiment protocol.")
-    else:
-        accessed_remote_db = False
-
-    protocol_db = MLEProtocol(mle_config.general.local_protocol_fname)
+    protocol_db = MLEProtocol(
+        mle_config.general.local_protocol_fname,
+        mle_config.general.use_gcloud_protocol_sync,
+        mle_config.gcp.project_name,
+        mle_config.gcp.bucket_name,
+        mle_config.gcp.protocol_fname,
+        mle_config.general.local_protocol_fname,
+        mle_config.gcp.credentials_path,
+    )
 
     # Retrieve results for a single experiment
     if not cmd_args.retrieve_all_new:
@@ -83,10 +80,14 @@ def retrieve(cmd_args):
                 get_gcloud_zip(protocol_db, experiment_id, protocol_db.experiment_ids)
             print_framed(f"COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}")
 
-    if accessed_remote_db:
-        send_gcloud_db()
-        time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-        print(time_t, "Updated retrieval protocol status & " "send to gcloud storage.")
+    # (d) Send most recent/up-to-date experiment DB to GCS
+    if mle_config.general.use_gcloud_protocol_sync:
+        if protocol_db.accessed_gcs:
+            protocol_db.gcs_send()
+            time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+            print(
+                time_t, "Updated retrieval protocol status & " "send to gcloud storage."
+            )
 
     return local_dir_name
 

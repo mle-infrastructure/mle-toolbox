@@ -1,10 +1,8 @@
 # The `mle-hyperopt` Package
-
+<a href="https://github.com/RobertTLange/mle-hyperopt/blob/main/docs/logo_transparent.png?raw=true"><img src="https://github.com/RobertTLange/mle-hyperopt/blob/main/docs/logo_transparent.png?raw=true" width="200" align="right" /></a>
 ## Hyperparameter optimization made easy 🚀
 
-<a href="https://github.com/RobertTLange/mle-hyperopt/blob/main/docs/logo_transparent.png?raw=true"><img src="https://github.com/RobertTLange/mle-hyperopt/blob/main/docs/logo_transparent.png?raw=true" width="200" align="right" /></a>
-
-The `mle-hyperopt` package provides a simple and intuitive API for hyperparameter optimization of your Machine Learning Experiment (MLE) pipeline. It supports real, integer & categorical search variables and single- or multi-objective optimization. Core features include the following:
+The `mle-hyperopt` package provides the backbone for all search experiments in the `mle-toolbox`. It comes with a simple and intuitive API for hyperparameter optimization of your pipeline and will be called internally. Nonetheless, it is a standalone package which can simply be imported. It supports real, integer & categorical search variables and single- or multi-objective optimization. Core features include the following:
 
 - **API Simplicity**: `strategy.ask()`, `strategy.tell()` interface & space definition.
 - **Strategy Diversity**: Grid, random, coordinate search, SMBO & wrapping around FAIR's [`nevergrad`](https://facebookresearch.github.io/nevergrad/).

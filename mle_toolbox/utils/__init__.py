@@ -16,6 +16,7 @@ from .core_files_load import (
 )
 from .load_hyper_log import load_hyper_log
 from .helpers import print_framed, get_jax_os_ready, save_pkl_object
+from .protocol_data import compose_protocol_data
 
 __all__ = [
     "parse_experiment_args",
@@ -34,4 +35,5 @@ __all__ = [
     "print_framed",
     "get_jax_os_ready",
     "save_pkl_object",
+    "compose_protocol_data",
 ]

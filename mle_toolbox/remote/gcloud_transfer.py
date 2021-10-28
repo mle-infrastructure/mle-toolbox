@@ -25,73 +25,6 @@ except ModuleNotFoundError as err:
 setup_proxy_server()
 
 
-def get_gcloud_db(number_of_connect_tries: int = 5) -> int:
-    """Pull latest experiment database from gcloud storage."""
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    for i in range(number_of_connect_tries):
-        try:
-            # Connect to project and bucket
-            client = storage.Client(mle_config.gcp.project_name)
-            bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-            # Download blob to db file
-            blob = bucket.blob(mle_config.gcp.protocol_fname)
-            with open(
-                expanduser(mle_config.general.local_protocol_fname), "wb"
-            ) as file_obj:
-                blob.download_to_file(file_obj)
-            logger.info(
-                f"Pulled from GCloud Storage - " f"{mle_config.gcp.protocol_fname}"
-            )
-            return 1
-        except Exception as ex:
-            # Remove empty file - causes error otherwise when trying to load
-            os.remove(expanduser(mle_config.general.local_protocol_fname))
-            if type(ex).__name__ == "NotFound":
-                logger.info(
-                    f"No DB found in GCloud Storage"
-                    f" - {mle_config.gcp.protocol_fname}"
-                )
-                logger.info(
-                    "New DB will be created - "
-                    f"{mle_config.gcp.project_name}/"
-                    f"{mle_config.gcp.bucket_name}"
-                )
-                return 1
-            else:
-                logger.info(
-                    f"Attempt {i+1}/{number_of_connect_tries}"
-                    f" - Failed pulling from GCloud Storage"
-                    f" - {type(ex).__name__}"
-                )
-    # If after 5 pulls no successful connection established - return failure
-    return 0
-
-
-def send_gcloud_db(number_of_connect_tries: int = 5):
-    """Send updated database back to gcloud storage."""
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    for i in range(number_of_connect_tries):
-        try:
-            # Connect to project and bucket
-            client = storage.Client(mle_config.gcp.project_name)
-            bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-            blob = bucket.blob(mle_config.gcp.protocol_fname)
-            blob.upload_from_filename(
-                filename=expanduser(mle_config.general.local_protocol_fname)
-            )
-            logger.info(f"Send to GCloud Storage - " f"{mle_config.gcp.protocol_fname}")
-            return 1
-        except Exception:
-            logger.info(
-                f"Attempt {i+1}/{number_of_connect_tries}"
-                f" - Failed sending to GCloud Storage"
-            )
-    # If after 5 pulls no successful connection established - return failure
-    return 0
-
-
 def delete_gcs_dir(gcs_path: str, number_of_connect_tries: int = 5):
     """Delete a directory in a GCS bucket."""
     logger = logging.getLogger(__name__)
@@ -228,7 +161,7 @@ def send_gcloud_zip(
 
     # 3. Upload the zip file to the GCS bucket
     upload_local_dir_to_gcs(local_path=local_zip_fname, gcs_path=gcloud_hash_fname)
-    logger.info(f"UPLOAD TO GCS BUCKET - {gcloud_hash_fname}")
+    logger.info(f"UPLOAD GCS - {gcloud_hash_fname}")
 
     # 4. Delete the .zip file & the folder if desired
     if delete_after_upload:
