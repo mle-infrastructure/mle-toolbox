@@ -6,7 +6,9 @@
 
 ##### Changed
 
-- [ ] Refactors out monitoring and protocol database to `mle-monitor` sub-package.
+- [ ] Refactors out resource monitoring and protocol database to `mle-monitor` sub-package.
+- [ ] Refactors out job launching and status monitoring to `mle-launcher` sub-package.
+- [ ] Moves population-based training and hypothesis testing into `experimental` submodule.
 
 ##### Fixed
 

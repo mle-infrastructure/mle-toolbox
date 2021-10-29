@@ -9,7 +9,7 @@ def run_population_based_training(
     pbt_args: Dict[str, Union[str, Dict[str, Union[str, int]]]],
 ) -> None:
     """Run a PBT experiment."""
-    from ..pbt import PBT_Logger, PBT_Manager
+    from .pbt import PBT_Logger, PBT_Manager
 
     # 1. Setup the hyperlogger for the experiment
     pbt_log_fname = os.path.join(meta_job_args["experiment_dir"], "pbt_log.pkl")

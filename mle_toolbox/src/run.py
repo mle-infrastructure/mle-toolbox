@@ -269,7 +269,7 @@ def run(cmd_args):
         )
     # (d) Experiment: Run population-based-training for NN training
     elif job_config.meta_job_args["experiment_type"] == "population-based-training":
-        from ..launch import run_population_based_training
+        from ..experimental.pbt_experiment import run_population_based_training
 
         if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
             message = "PBT Resources & No. of Jobs:\n"
