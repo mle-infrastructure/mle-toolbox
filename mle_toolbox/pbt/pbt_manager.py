@@ -9,7 +9,7 @@ from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
-from mle_toolbox.job import Job
+from mle_launcher import MLEJob
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import load_log
 
@@ -218,7 +218,7 @@ class PBT_Manager(object):
         cmd_line_input = {"seed_id": seed_id}
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
-        job = Job(
+        job = MLEJob(
             self.resource_to_run,
             self.job_fname,
             config_fname,

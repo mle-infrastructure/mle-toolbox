@@ -8,8 +8,9 @@ import logging
 from typing import Union, List
 
 from .hyper_logger import HyperoptLogger
-from ..job import JobQueue
 from ..utils import print_framed
+
+from mle_launcher import MLEQueue
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import merge_config_logs, load_meta_log
 
@@ -171,7 +172,7 @@ class BaseHyperOptimisation(object):
             f" {num_seeds_per_eval} Seeds"
         )
         start_t = time.time()
-        job_queue = JobQueue(
+        job_queue = MLEQueue(
             self.resource_to_run,
             self.job_fname,
             batch_fnames,
@@ -231,7 +232,7 @@ class BaseHyperOptimisation(object):
             # Training w. prev. specified hyperparams & eval, get time taken
             max_jobs = num_seeds_per_eval * num_evals_per_batch
             start_t = time.time()
-            job_queue = JobQueue(
+            job_queue = MLEQueue(
                 self.resource_to_run,
                 self.job_fname,
                 batch_fnames,

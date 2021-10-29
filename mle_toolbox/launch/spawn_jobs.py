@@ -1,7 +1,6 @@
 import logging
 from typing import Union, List
-from .job import Job
-from .job_queue import JobQueue
+from mle_launcher import MLEJob, MLEQueue
 
 
 def spawn_single_job(
@@ -22,7 +21,7 @@ def spawn_single_job(
             extra_cmd_line_input = None
 
     # 1. Instantiate the experiment class
-    experiment = Job(
+    experiment = MLEJob(
         resource_to_run,
         job_filename,
         config_filename,
@@ -48,7 +47,7 @@ def spawn_processing_job(
     data, etc.. No .json configuration file required here!
     """
     # 1. Instantiate the experiment class
-    experiment = Job(
+    experiment = MLEJob(
         resource_to_run=resource_to_run,
         job_filename=job_filename,
         config_filename=None,
@@ -74,7 +73,7 @@ def spawn_multiple_seeds(
     logger_level: int = logging.WARNING,
 ):
     """Spawn same experiment w. diff. seeds multiple times locally/remote."""
-    multi_experiment = JobQueue(
+    multi_experiment = MLEQueue(
         resource_to_run,
         job_filename,
         [config_filename],
@@ -117,7 +116,7 @@ def spawn_multiple_configs(
 
     # Run Experiment Jobs in Batch mode!
     default_seed = 0
-    multi_experiment = JobQueue(
+    multi_experiment = MLEQueue(
         resource_to_run,
         job_filename,
         config_filenames,

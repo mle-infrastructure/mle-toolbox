@@ -1,6 +1,6 @@
 import logging
 from typing import Union
-from ..job import spawn_multiple_configs
+from .spawn_jobs import spawn_multiple_configs
 
 
 def run_multiple_configs(

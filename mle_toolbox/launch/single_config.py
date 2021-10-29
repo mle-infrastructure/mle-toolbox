@@ -1,4 +1,4 @@
-from ..job import Job
+from mle_launcher import MLEJob
 
 
 def run_single_config(
@@ -17,7 +17,7 @@ def run_single_config(
 
     """
     # 1. Instantiate the experiment class
-    experiment = Job(
+    experiment = MLEJob(
         resource_to_run,
         meta_job_args["base_train_fname"],
         meta_job_args["base_train_config"],
