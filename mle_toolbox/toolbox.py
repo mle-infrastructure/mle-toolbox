@@ -10,6 +10,8 @@ def main():
     - `monitor`: Monitor a compute resource and view experiment protocol.
     - `sync-gcs`: Sync all new results from Google Cloud Storage.
     - `init`: Setup the toolbox .toml config with credentials/defaults.
+    - `project`: Clone project template repository and rename it.
+    - `protocol`: List protocol summary of recent experiments
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
@@ -24,6 +26,7 @@ def main():
     sync_gcs_build_subparser(subparsers)
     init_build_subparser(subparsers)
     project_build_subparser(subparsers)
+    protocol_build_subparser(subparsers)
 
     # Parse arguments and executed provided subcommand
     args = parser.parse_args()
@@ -55,6 +58,10 @@ def main():
         from .src.project import project
 
         project(args)
+    elif args.command == "protocol":
+        from .src.protocol import protocol
+
+        protocol()
     else:
         parser.parse_args(["--help"])
     return
@@ -237,7 +244,7 @@ def init_build_subparser(subparsers):
 
 
 def project_build_subparser(subparsers):
-    """Build subparser arguments for `init` subcommand."""
+    """Build subparser arguments for `project` subcommand."""
     parser_project = subparsers.add_parser(
         "project",
         help="Clone the base project repository and rename the directory.",
@@ -250,3 +257,11 @@ def project_build_subparser(subparsers):
         help="New project name",
     )
     return parser_project
+
+
+def protocol_build_subparser(subparsers):
+    """Build subparser arguments for `protocol` subcommand."""
+    parser_protocol = subparsers.add_parser(
+        "protocol", help="List experiment protocol."
+    )
+    return parser_protocol
