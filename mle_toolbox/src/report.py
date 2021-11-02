@@ -1,6 +1,5 @@
 from typing import Union
 from mle_toolbox.report import ReportGenerator
-from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
 from mle_toolbox import mle_config
 from mle_monitor import MLEProtocol
 
@@ -13,7 +12,6 @@ def report(cmd_args):
         mle_config.gcp.project_name,
         mle_config.gcp.bucket_name,
         mle_config.gcp.protocol_fname,
-        mle_config.general.local_protocol_fname,
         mle_config.gcp.credentials_path,
     )
 
@@ -22,10 +20,8 @@ def report(cmd_args):
         experiment_id = cmd_args.experiment_id
         # 1. Load db and show recent experiments + let user choose an e_id.
         if experiment_id == "no-id-given":
-            experiment_id = ask_for_experiment_id(protocol_db)
-        else:
-            if experiment_id[:5] != "e-id-":
-                experiment_id = "e-id-" + experiment_id
+            protocol_db.summary(tail=10, verbose=True)
+            experiment_id = protocol_db.ask_for_e_id("report")
     else:
         experiment_id = None
     # 2. Create 'reporter' instance and write reports

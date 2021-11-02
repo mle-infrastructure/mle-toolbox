@@ -10,6 +10,7 @@ from typing import Union, List
 from .hyper_logger import HyperoptLogger
 from ..utils import print_framed
 
+from mle_toolbox import mle_config
 from mle_launcher import MLEQueue
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import merge_config_logs, load_meta_log
@@ -181,7 +182,12 @@ class BaseHyperOptimisation(object):
             num_seeds_per_eval,
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
-            message_id=self.message_id,
+            use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+            use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+            gcp_code_dir=mle_config.gcp.code_dir,
+            slack_message_id=self.message_id,
+            slack_user_name=mle_config.slack.user_name,
+            slack_auth_token=mle_config.slack.slack_token,
         )
         job_queue.run()
         time_elapsed = time.time() - start_t
@@ -241,7 +247,12 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
-                message_id=self.message_id,
+                use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+                use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+                gcp_code_dir=mle_config.gcp.code_dir,
+                slack_message_id=self.message_id,
+                slack_user_name=mle_config.slack.user_name,
+                slack_auth_token=mle_config.slack.slack_token,
             )
             job_queue.run()
             time_elapsed = time.time() - start_t

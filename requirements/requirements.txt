@@ -20,3 +20,4 @@ mle-logging
 mle-hyperopt
 mle-monitor
 mle-launcher
+slack-clusterbot

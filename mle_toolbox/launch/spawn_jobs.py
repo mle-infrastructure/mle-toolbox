@@ -1,6 +1,7 @@
 import logging
 from typing import Union, List
 from mle_launcher import MLEJob, MLEQueue
+from mle_toolbox import mle_config
 
 
 def spawn_single_job(
@@ -29,6 +30,9 @@ def spawn_single_job(
         experiment_dir,
         cmd_line_input,
         extra_cmd_line_input,
+        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+        gcp_code_dir=mle_config.gcp.code_dir,
     )
     # 2. Run the single experiment
     status_out = experiment.run()
@@ -55,6 +59,9 @@ def spawn_processing_job(
         experiment_dir=experiment_dir,
         cmd_line_input={},
         extra_cmd_line_input=extra_cmd_line_input,
+        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+        gcp_code_dir=mle_config.gcp.code_dir,
     )
     # 2. Run the single pre/post-processing job
     status_out = experiment.run()
@@ -82,6 +89,9 @@ def spawn_multiple_seeds(
         num_seeds,
         random_seeds=random_seeds,
         max_running_jobs=num_seeds,
+        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+        gcp_code_dir=mle_config.gcp.code_dir,
     )
     multi_experiment.run()
 
@@ -94,7 +104,9 @@ def spawn_multiple_configs(
     experiment_dir: str,
     num_seeds: Union[None, int] = None,
     random_seeds: Union[None, List[int]] = None,
-    message_id: Union[str, None] = None,
+    slack_message_id: Union[str, None] = None,
+    slack_user_name: Union[str, None] = None,
+    slack_auth_token: Union[str, None] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
@@ -126,7 +138,12 @@ def spawn_multiple_configs(
         default_seed,
         random_seeds,
         num_seeds * num_configs,
-        message_id,
+        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+        gcp_code_dir=mle_config.gcp.code_dir,
+        slack_message_id=slack_message_id,
+        slack_user_name=slack_user_name,
+        slack_auth_token=slack_auth_token,
     )
     multi_experiment.run()
 

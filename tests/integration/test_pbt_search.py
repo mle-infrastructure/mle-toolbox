@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess as sp
-from mle_toolbox.launch.pbt_experiment import run_population_based_training
+from mle_toolbox.experimental.pbt_experiment import run_population_based_training
 
 
 resource_to_run = "local"

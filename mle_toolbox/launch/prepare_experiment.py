@@ -5,7 +5,6 @@ from datetime import datetime
 from rich.table import Table
 from rich.panel import Panel
 from rich.console import Console
-from mle_monitor import MLEProtocol
 
 
 def welcome_to_mle_toolbox() -> None:
@@ -115,35 +114,4 @@ def check_experiment_config(job_config: dict) -> None:
             not in job_config["param_search_args"]["search_resources"].keys()
         ):
             job_config["param_search_args"]["search_resources"]["random_seeds"] = None
-
-
-def ask_for_experiment_id(protocol_db: MLEProtocol, repeated_question: bool = False):
-    """Helper function asking user for experiment id from protocol log."""
-    # Print the last 10 experiments
-    if not repeated_question:
-        protocol_db.summary(tail=10)
-
-    time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-
-    if not repeated_question:
-        experiment_id = input(
-            time_t + " Which experiment id do you " + "want to use? [E-ID/N]:  "
-        )
-    else:
-        experiment_id = input(
-            time_t + " Which experiment id do you " + "want to use next? [E-ID/N]:  "
-        )
-
-    while True:
-        if experiment_id == "N":
-            break
-
-        if experiment_id[:5] != "e-id-":
-            experiment_id = "e-id-" + experiment_id
-
-        if experiment_id not in protocol_db.experiment_ids:
-            print(time_t, "The provided experiment id does not exist")
-            experiment_id = input(time_t + " Which experiment did you mean?")
-        else:
-            break
-    return experiment_id
+    return job_config

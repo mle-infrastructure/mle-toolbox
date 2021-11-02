@@ -30,12 +30,17 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
                     * search_resources["num_seeds_per_eval"]
                 )
                 num_job_batches = search_resources["num_search_batches"]
+                num_jobs_per_batch = (
+                    search_resources["num_evals_per_batch"]
+                    * search_resources["num_seeds_per_eval"]
+                )
             else:
                 num_total_jobs = (
                     search_resources["num_total_evals"]
                     * search_resources["num_seeds_per_eval"]
                 )
                 num_job_batches = 1
+                num_jobs_per_batch = search_resources["max_running_jobs"]
         except Exception:
             num_total_jobs = (
                 search_resources["num_search_batches"]
@@ -43,15 +48,21 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
                 * search_resources["num_seeds_per_eval"]
             )
             num_job_batches = search_resources["num_search_batches"]
+            num_jobs_per_batch = (
+                search_resources["num_evals_per_batch"]
+                * search_resources["num_seeds_per_eval"]
+            )
     elif job_config.meta_job_args["experiment_type"] == "multiple-experiments":
         num_total_jobs = (
             len(job_config.multi_config_args["config_fnames"])
             * job_config.multi_config_args["num_seeds"]
         )
         num_job_batches = 1
+        num_jobs_per_batch = num_total_jobs
     else:
         num_total_jobs = 1
         num_job_batches = 1
+        num_jobs_per_batch = 1
 
     # Get job duration, number of cores and gpus per job
     num_cpus = job_config.single_job_args["num_logical_cores"]
@@ -66,10 +77,12 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
         "project_name": job_config.meta_job_args["project_name"],
         "experiment_dir": experiment_dir,
         "experiment_type": job_config.meta_job_args["experiment_type"],
+        "base_fname": job_config.meta_job_args["base_train_fname"],
         "config_fname": job_config.meta_job_args["base_train_config"],
         "num_seeds": num_seeds,
         "num_total_jobs": num_total_jobs,
         "num_job_batches": num_job_batches,
+        "num_jobs_per_batch": num_jobs_per_batch,
         "time_per_job": job_config.single_job_args["time_per_job"],
         "num_cpus": num_cpus,
         "num_gpus": num_gpus,

@@ -10,6 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 from mle_launcher import MLEJob
+from mle_toolbox import mle_config
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import load_log
 
@@ -225,6 +226,9 @@ class PBT_Manager(object):
             self.job_arguments,
             self.experiment_dir,
             cmd_line_input,
+            use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
+            use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+            gcp_code_dir=mle_config.gcp.code_dir,
         )
 
         # 2. Launch a single job

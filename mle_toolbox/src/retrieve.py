@@ -2,8 +2,8 @@ from datetime import datetime
 from mle_toolbox.utils import print_framed
 from mle_toolbox.remote.ssh_manager import SSH_Manager
 from mle_toolbox.remote.gcloud_transfer import get_gcloud_zip
-from mle_toolbox.launch.prepare_experiment import ask_for_experiment_id
 from mle_toolbox import mle_config
+from mle_toolbox.launch import prepare_logger
 from mle_monitor import MLEProtocol
 
 
@@ -11,14 +11,13 @@ def retrieve(cmd_args):
     """Copy over experiment results folder from cluster."""
     experiment_id = cmd_args.experiment_id
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-
+    _ = prepare_logger()
     protocol_db = MLEProtocol(
         mle_config.general.local_protocol_fname,
         mle_config.general.use_gcloud_protocol_sync,
         mle_config.gcp.project_name,
         mle_config.gcp.bucket_name,
         mle_config.gcp.protocol_fname,
-        mle_config.general.local_protocol_fname,
         mle_config.gcp.credentials_path,
     )
 
@@ -28,7 +27,8 @@ def retrieve(cmd_args):
         while True:
             # If no id given show last experiments & ask for input
             if experiment_id == "no-id-given" and retrieval_counter == 0:
-                experiment_id = ask_for_experiment_id()
+                protocol_db.summary(tail=10, verbose=True)
+                experiment_id = protocol_db.ask_for_e_id("retrieve")
                 if cmd_args.retrieve_local:
                     retrieve_single_experiment(protocol_db, experiment_id)
                 else:
@@ -42,7 +42,7 @@ def retrieve(cmd_args):
                     get_gcloud_zip(protocol_db, experiment_id, local_dir_name)
                 retrieval_counter += 1
             else:
-                experiment_id, _, _ = ask_for_experiment_id(True)
+                experiment_id = protocol_db.ask_for_e_id("retrieve")
                 if experiment_id == "N":
                     break
                 if cmd_args.retrieve_local:
@@ -96,7 +96,7 @@ def retrieve_single_experiment(protocol_db: MLEProtocol, experiment_id: str):
     """Retrieve a single experiment from remote resource."""
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     # Get path to experiment results dir & get cluster to retrieve from
-    file_path = protocol_db.get(experiment_id, "exp_retrieval_path")
+    file_path = protocol_db.get(experiment_id, "experiment_dir")
 
     remote_resource = protocol_db.get(experiment_id, "exec_resource")
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")

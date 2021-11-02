@@ -45,8 +45,8 @@ class ReportGenerator:
         # Check whether the experiment dir exists - if not ask whether
         # to pull from remote storage or to use a different directory
         # Skip when auto-generation directly on resource that generated results
-        if os.path.isdir(self.report_data.exp_retrieval_path):
-            self.experiment_dir = self.report_data.exp_retrieval_path
+        if os.path.isdir(self.report_data.experiment_dir):
+            self.experiment_dir = self.report_data.experiment_dir
         else:
             time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
             pull_question = input(
@@ -93,17 +93,17 @@ class ReportGenerator:
     def generate_reports(self):
         """Generate reports + generate included figures: .md, .html, .pdf."""
         self.logger.info("Report - BASE REPORT DIRECTORY:")
+        # 1. Generate all 1D figures to show in report
+        self.fig_generator = FigureGenerator(self.experiment_dir)
+        _ = self.fig_generator.generate_all_1D_figures()
+
         self.logger.info(f"{self.experiment_dir}")
-        # 1. Write the relevant data to the markdown report file
+        # 2a. Write the relevant data to the markdown report file
         self.md_report_fname = os.path.join(self.reports_dir, self.e_id + ".md")
         self.markdown_text = generate_markdown(
             self.e_id, self.md_report_fname, self.report_data
         )
         self.logger.info(f'Report - GENERATED - .md: {self.e_id + ".md"}')
-
-        # 2a. Generate all 1D figures to show in report
-        self.fig_generator = FigureGenerator(self.experiment_dir)
-        _ = self.fig_generator.generate_all_1D_figures()
 
         # 2b. If search experiment generate all 2D figures to show in report
         search_vars, search_targets = self.get_hypersearch_data()

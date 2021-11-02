@@ -2,7 +2,7 @@
 
 <a href="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_overview.png"><img src="https://roberttlange.github.io/mle-toolbox/thumbnails/logo_overview.png" width="800" align="center" /></a>
 
-The MLE-Infrastructure provides a reproducible workflow for distributed running Machine Learning experiments (MLE) with minimal overhead. The core consists of 4 packages:
+The MLE-Infrastructure provides a reproducible workflow for distributed running Machine Learning experiments (MLE) with minimal overhead. The core consists of 5 packages:
 
 - [`mle-logging`](https://github.com/RobertTLange/mle-logging): Experiment logging with easy multi-seed and configuration aggregation.
 - [`mle-hyperopt`](https://github.com/RobertTLange/mle-hyperopt): Hyperparameter Optimization with config export, refinement & reloading.
@@ -10,9 +10,9 @@ The MLE-Infrastructure provides a reproducible workflow for distributed running 
 - [`mle-launcher`](https://github.com/RobertTLange/mle-launcher): Schedule & monitor jobs on Slurm, GridEngine clusters & GCP VMs.
 - [`mle-toolbox`](https://github.com/RobertTLange/mle-toolbox): Glue everything together to manage & post-process experiments.
 
-A template repository structure of an infrastructure-based project can be found [here](https://github.com/RobertTLange/mle-project-template).
+A template repository structure of an infrastructure-based project can be found in the [`mle-project`](https://github.com/RobertTLange/mle-project-template).
 
-**Note**: `mle-logging` and `mle-hyperopt` are standalone packages and can be used independently of the experiment scheduling utilities provided by the `mle-toolbox`.
+**Note**: `mle-logging`, `mle-hyperopt`, `mle-monitor` and `mle-launcher` are standalone packages and can be used independently of the experiment scheduling utilities provided by the `mle-toolbox`.
 
 
 | `mle-logging` | `mle-hyperopt` | `mle-monitor`  | `mle-launcher` |  `mle-toolbox` |

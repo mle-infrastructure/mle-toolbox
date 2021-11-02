@@ -1,6 +1,6 @@
 import os
 from mle_toolbox import load_result_logs
-from mle_toolbox.hypothesis import HypothesisTester
+from mle_toolbox.experimental.hypothesis import HypothesisTester
 
 
 def test_corrected_pairwise():

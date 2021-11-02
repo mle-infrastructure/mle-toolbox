@@ -96,19 +96,17 @@ def run(cmd_args):
     logger.info(f"Run on resource: {resource_to_run}")
 
     # 4. Check experiment config to comply/include necessary ingredients
-    check_experiment_config(job_config)
+    job_config = check_experiment_config(job_config)
 
     # 5. Protocol experiment if desired (can also only be locally)!
     if not cmd_args.no_protocol:
         # Meta-protocol experiment - Print last ones - Delete from input
         protocol_db = MLEProtocol(
             mle_config.general.local_protocol_fname,
-            None,
             mle_config.general.use_gcloud_protocol_sync,
             mle_config.gcp.project_name,
             mle_config.gcp.bucket_name,
             mle_config.gcp.protocol_fname,
-            mle_config.general.local_protocol_fname,
             mle_config.gcp.credentials_path,
         )
         protocol_db.summary(tail=10, verbose=True)

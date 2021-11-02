@@ -178,12 +178,9 @@ def get_gcloud_zip(
     """Download zipped experiment from GCS. Unpack & clean up."""
     # Ensure the right prefix
     while True:
-        if experiment_id[:5] != "e-id-":
-            experiment_id = "e-id-" + experiment_id
-
         if experiment_id not in protocol_db.experiment_ids:
             time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-            print(time_t, "The experiment you try to retrieve does not exist")
+            print(time_t, "The experiment you are trying to retrieve does not exist")
             experiment_id = input(time_t + " Which experiment do you want to retrieve?")
         else:
             break
