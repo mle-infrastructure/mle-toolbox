@@ -10,7 +10,7 @@ from typing import Union, List
 from .hyper_logger import HyperoptLogger
 from ..utils import print_framed
 
-from mle_toolbox import mle_config
+from mle_toolbox import mle_config, check_single_job_args
 from mle_launcher import MLEQueue
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import merge_config_logs, load_meta_log
@@ -55,7 +55,10 @@ class BaseHyperOptimisation(object):
             raise ValueError("Job config has to be .json or .yaml file.")
 
         self.job_fname = job_fname  # Python file to run job
-        self.job_arguments = job_arguments  # SGE job info
+        # 0. Check if all required args are given - otw. add default to copy
+        self.job_arguments = check_single_job_args(
+            resource_to_run, job_arguments.copy()
+        )
         self.experiment_dir = experiment_dir  # Where to store all logs
         if self.experiment_dir[-1] != "/":
             self.experiment_dir += "/"
@@ -184,7 +187,7 @@ class BaseHyperOptimisation(object):
             max_running_jobs=max_running_jobs,
             use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
             use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-            gcp_code_dir=mle_config.gcp.code_dir,
+            cloud_settings=mle_config.gcp,
             slack_message_id=self.message_id,
             slack_user_name=mle_config.slack.user_name,
             slack_auth_token=mle_config.slack.slack_token,
@@ -249,7 +252,7 @@ class BaseHyperOptimisation(object):
                 max_running_jobs=max_jobs,
                 use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
                 use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-                gcp_code_dir=mle_config.gcp.code_dir,
+                cloud_settings=mle_config.gcp,
                 slack_message_id=self.message_id,
                 slack_user_name=mle_config.slack.user_name,
                 slack_auth_token=mle_config.slack.slack_token,

@@ -1,7 +1,7 @@
 import logging
 from typing import Union, List
 from mle_launcher import MLEJob, MLEQueue
-from mle_toolbox import mle_config
+from mle_toolbox import mle_config, check_single_job_args
 
 
 def spawn_single_job(
@@ -13,6 +13,9 @@ def spawn_single_job(
     cmd_line_input: Union[None, dict] = None,
 ):
     """Spawn a single experiment locally/remote."""
+    # -1. Check if all required args are given - otw. add default to copy
+    job_arguments = check_single_job_args(resource_to_run, job_arguments.copy())
+
     # 0. Extract extra_cmd_line_input from job_arguments
     if job_arguments is not None:
         if "extra_cmd_line_input" in job_arguments.keys():
@@ -32,7 +35,7 @@ def spawn_single_job(
         extra_cmd_line_input,
         use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
         use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-        gcp_code_dir=mle_config.gcp.code_dir,
+        cloud_settings=mle_config.gcp,
     )
     # 2. Run the single experiment
     status_out = experiment.run()
@@ -50,6 +53,9 @@ def spawn_processing_job(
     Spawn a single experiment locally/remote to generate figures, or preprocess
     data, etc.. No .json configuration file required here!
     """
+    # 0. Check if all required args are given - otw. add default to copy
+    job_arguments = check_single_job_args(resource_to_run, job_arguments.copy())
+
     # 1. Instantiate the experiment class
     experiment = MLEJob(
         resource_to_run=resource_to_run,
@@ -61,7 +67,7 @@ def spawn_processing_job(
         extra_cmd_line_input=extra_cmd_line_input,
         use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
         use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-        gcp_code_dir=mle_config.gcp.code_dir,
+        cloud_settings=mle_config.gcp,
     )
     # 2. Run the single pre/post-processing job
     status_out = experiment.run()
@@ -80,6 +86,10 @@ def spawn_multiple_seeds(
     logger_level: int = logging.WARNING,
 ):
     """Spawn same experiment w. diff. seeds multiple times locally/remote."""
+    # 0. Check if all required args are given - otw. add default to copy
+    job_arguments = check_single_job_args(resource_to_run, job_arguments.copy())
+
+    # 1. Instantiate the experiment class
     multi_experiment = MLEQueue(
         resource_to_run,
         job_filename,
@@ -91,8 +101,10 @@ def spawn_multiple_seeds(
         max_running_jobs=num_seeds,
         use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
         use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-        gcp_code_dir=mle_config.gcp.code_dir,
+        cloud_settings=mle_config.gcp,
     )
+
+    # 2. Run the multi-seed job
     multi_experiment.run()
 
 
@@ -110,6 +122,9 @@ def spawn_multiple_configs(
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
+    # 0. Check if all required args are given - otw. add default to copy
+    job_arguments = check_single_job_args(resource_to_run, job_arguments.copy())
+
     if num_seeds is None:
         num_seeds = 1
 
@@ -140,7 +155,7 @@ def spawn_multiple_configs(
         num_seeds * num_configs,
         use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
         use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
-        gcp_code_dir=mle_config.gcp.code_dir,
+        cloud_settings=mle_config.gcp,
         slack_message_id=slack_message_id,
         slack_user_name=slack_user_name,
         slack_auth_token=slack_auth_token,
