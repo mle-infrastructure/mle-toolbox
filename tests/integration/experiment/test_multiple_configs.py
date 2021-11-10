@@ -3,15 +3,14 @@ import shutil
 import glob
 import datetime
 import subprocess as sp
-from mle_toolbox.job import JobQueue
 from mle_toolbox.launch.multi_config import run_multiple_configs
 
 
 resource_to_run = "local"
-job_filename = "examples/numpy_pde/run_pde_int.py"
+job_filename = "examples/toy_single_objective/train.py"
 config_filenames = [
-    "examples/numpy_pde/pde_int_config_1.json",
-    "examples/numpy_pde/pde_int_config_2.json",
+    "examples/toy_single_objective/base_config_1.yaml",
+    "examples/toy_single_objective/base_config_2.yaml",
 ]
 job_arguments = {}
 num_seeds = num_configs = 2
@@ -48,33 +47,6 @@ def check_correct_results(
         ), "Experiment .yaml missing"
 
 
-def test_job_queue() -> None:
-    """Test `ExperimentQueue` class for correct result generation."""
-    exp_dir = os.path.join(experiment_dir, "queue_test")
-    # Remove experiment dir at start of test
-    if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
-        shutil.rmtree(exp_dir)
-
-    # Run Experiment Jobs in Batch mode!
-    default_seed = 0
-    multi_experiment = JobQueue(
-        resource_to_run,
-        job_filename,
-        config_filenames,
-        job_arguments,
-        exp_dir,
-        num_seeds,
-        default_seed,
-        random_seeds,
-        num_seeds * num_configs,
-    )
-    multi_experiment.run()
-
-    # Check that all results for different configs were generated
-    for cfname in config_filenames:
-        check_correct_results(exp_dir, cfname)
-
-
 def test_run_multi() -> None:
     """Test multi config job launch wrapper - Run PDE experiment on local machine."""
     exp_dir = os.path.join(experiment_dir, "run_test")
@@ -108,7 +80,7 @@ def test_api_multi() -> None:
 
     # Execute the mle api command
     bashCommand = (
-        "mle run numpy_pde/pde_configs.yaml -nw -np -resource local"
+        "mle run toy_single_objective/mle_multi_config.yaml -nw -np -resource local"
         f" --experiment_dir {exp_dir}"
     )
 

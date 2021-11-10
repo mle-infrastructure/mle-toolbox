@@ -7,17 +7,17 @@ from mle_toolbox.launch.search_experiment import run_hyperparameter_search
 resource_to_run = "local"
 experiment_dir = "examples/experiments/grid"
 meta_job_args = {
-    "base_train_fname": "examples/numpy_pde/run_pde_int.py",
-    "base_train_config": "examples/numpy_pde/pde_int_config_1.json",
+    "base_train_fname": "examples/toy_single_objective/train.py",
+    "base_train_config": "examples/toy_single_objective/base_config_1.yaml",
 }
 
 search_logging = {
     "reload_log": False,
     "verbose_log": True,
-    "max_objective": True,
+    "max_objective": False,
     "aggregate_seeds": "p50",
     "problem_type": "final",
-    "eval_metrics": ["integral", "noise"],
+    "eval_metrics": "test_loss",
 }
 
 search_resources_sync = {
@@ -38,8 +38,7 @@ search_config = {
     "search_type": "grid",
     "search_schedule": "sync",
     "search_params": {
-        "real": {"x_0": {"begin": 1, "end": 10, "bins": 2}},
-        "integer": {"noise_mean": {"begin": 1, "end": 4, "bins": 4}},
+        "real": {"lrate": {"begin": 0.1, "end": 0.4, "bins": 4}},
     },
 }
 
@@ -53,7 +52,7 @@ def check_correct_results(experiment_dir: str, api_check: bool = False) -> None:
     # Check that json config, hyper and meta logs were created
     assert os.path.exists(os.path.join(experiment_dir, "hyper_log.pkl"))
     assert os.path.exists(os.path.join(experiment_dir, "meta_log.hdf5"))
-    assert os.path.exists(os.path.join(experiment_dir, "search_base_config.json"))
+    assert os.path.exists(os.path.join(experiment_dir, "search_base_config.yaml"))
 
     # Check that experiment config yaml was created (reproducibility)
     if api_check:
@@ -114,7 +113,7 @@ def test_api_grid_sync() -> None:
 
     # Execute the mle api command
     bashCommand = (
-        "mle run numpy_pde/pde_search_grid_sync.yaml -nw -np -resource local"
+        "mle run toy_single_objective/mle_search_grid.yaml -nw -np -resource local"
         f" --experiment_dir {exp_dir}"
     )
 

@@ -36,7 +36,7 @@ def test_report_generate() -> None:
 
     # Execute the mle api command
     bashCommand = (
-        "mle run numpy_pde/pde_search_grid_async.yaml -nw -resource local"
+        "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
         f" --experiment_dir {exp_dir}"
         f" --purpose Test report generation"
     )
@@ -61,7 +61,7 @@ def test_api_report() -> None:
 
     # Execute the mle api command
     bashCommand = (
-        "mle run numpy_pde/pde_search_grid_async.yaml -nw -resource local"
+        "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
         f" --experiment_dir {exp_dir}"
         f" --purpose Test report generation"
     )
@@ -88,7 +88,7 @@ def test_api_run_and_report() -> None:
 
     # Execute the mle api command
     bashCommand = (
-        "mle run numpy_pde/pde_search_grid_sync.yaml -nw -resource local"
+        "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
         f" --experiment_dir {exp_dir}"
         f" --purpose Test report generation"
     )

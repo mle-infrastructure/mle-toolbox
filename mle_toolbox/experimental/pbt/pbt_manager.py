@@ -220,7 +220,7 @@ class PBT_Manager(object):
         # 1. Instantiate the job class and start a single seed
         extra_cmd_line_input = {}
         if model_ckpt is not None:
-            cmd_line_input["model_ckpt"] = model_ckpt
+            extra_cmd_line_input["model_ckpt"] = model_ckpt
         job = MLEJob(
             self.resource_to_run,
             self.job_fname,
@@ -259,7 +259,7 @@ class PBT_Manager(object):
                 continue
         return worker_data
 
-    def monitor(self, job: Job, job_id: str) -> bool:
+    def monitor(self, job: MLEJob, job_id: str) -> bool:
         """Monitor job for one eval/worker configuration."""
         status = job.monitor(job_id, False)
         return status

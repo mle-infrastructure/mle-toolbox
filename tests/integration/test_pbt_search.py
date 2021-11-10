@@ -1,6 +1,5 @@
 import os
 import shutil
-import subprocess as sp
 from mle_toolbox.experimental.pbt_experiment import run_population_based_training
 
 
