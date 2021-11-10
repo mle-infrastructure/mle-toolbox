@@ -30,6 +30,7 @@ class SSH_Manager(object):
         """Set the credentials & resource details."""
         setup_proxy_server()
         self.remote_resource = remote_resource
+        self.pkey_path = mle_config.general.pkey_path
 
         # Set credentials depending on remote resource
         if self.remote_resource == "sge-cluster":
@@ -37,13 +38,11 @@ class SSH_Manager(object):
             self.jump_server = mle_config.sge.info.jump_server_name
             self.port = mle_config.sge.info.ssh_port
             self.user = mle_config.sge.credentials.user_name
-            self.password = mle_config.sge.credentials.password
         elif self.remote_resource == "slurm-cluster":
             self.main_server = mle_config.slurm.info.main_server_name
             self.jump_server = mle_config.slurm.info.jump_server_name
             self.port = mle_config.slurm.info.ssh_port
             self.user = mle_config.slurm.credentials.user_name
-            self.password = mle_config.slurm.credentials.password
 
         # We are always using tunnel even if not necessary!
         if self.jump_server == "":
@@ -54,7 +53,8 @@ class SSH_Manager(object):
         return SSHTunnelForwarder(
             (self.jump_server, self.port),
             ssh_username=self.user,
-            ssh_password=self.password,
+            ssh_password="",
+            ssh_pkey=self.pkey_path,
             remote_bind_address=(self.main_server, self.port),
         )
 
@@ -69,7 +69,7 @@ class SSH_Manager(object):
                     hostname=tunnel.local_bind_host,
                     port=tunnel.local_bind_port,
                     username=self.user,
-                    password=self.password,
+                    password="",
                     timeout=100,
                 )
                 break
@@ -95,7 +95,7 @@ class SSH_Manager(object):
                 for line in stderr:
                     print(line)
                 client.close()
-        return
+        return stdin, stdout, stderr
 
     def read_file(self, file_name: str):
         """Read a file from remote server and return it."""

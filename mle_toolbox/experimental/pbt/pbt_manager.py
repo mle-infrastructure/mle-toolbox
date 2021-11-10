@@ -9,10 +9,10 @@ from typing import Union, Dict
 import numpy as np
 from tqdm import tqdm
 
-from mle_launcher import MLEJob
-from mle_toolbox import mle_config, check_single_job_args
 from mle_logging.utils import load_json_config, load_yaml_config
 from mle_logging import load_log
+from mle_scheduler import MLEJob
+from mle_toolbox import mle_config, check_single_job_args
 
 from .pbt_logger import PBT_Logger
 from .explore import ExplorationStrategy
@@ -218,7 +218,7 @@ class PBT_Manager(object):
         """Launch jobs for one configuration and network checkpoint."""
         run_id = "worker_" + str(worker_id) + "_step_" + str(pbt_step_id)
         # 1. Instantiate the job class and start a single seed
-        cmd_line_input = {"seed_id": seed_id}
+        extra_cmd_line_input = {}
         if model_ckpt is not None:
             cmd_line_input["model_ckpt"] = model_ckpt
         job = MLEJob(
@@ -227,9 +227,8 @@ class PBT_Manager(object):
             config_fname,
             self.job_arguments,
             self.experiment_dir,
-            cmd_line_input,
-            use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-            use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+            seed_id,
+            extra_cmd_line_input,
             cloud_settings=mle_config.gcp,
         )
 

@@ -10,10 +10,9 @@ from typing import Union, List
 from .hyper_logger import HyperoptLogger
 from ..utils import print_framed
 
+from mle_logging import merge_config_logs, load_meta_log, load_config
+from mle_scheduler import MLEQueue
 from mle_toolbox import mle_config, check_single_job_args
-from mle_launcher import MLEQueue
-from mle_logging.utils import load_json_config, load_yaml_config
-from mle_logging import merge_config_logs, load_meta_log
 
 
 class BaseHyperOptimisation(object):
@@ -47,12 +46,7 @@ class BaseHyperOptimisation(object):
         self.config_fname = config_fname  # Fname base config file
         # Load base config of jobs to be manipulated by search
         fname, self.config_fext = os.path.splitext(config_fname)
-        if self.config_fext == ".json":
-            self.base_config = load_json_config(config_fname, return_dotmap=True)
-        elif self.config_fext == ".yaml":
-            self.base_config = load_yaml_config(config_fname, return_dotmap=True)
-        else:
-            raise ValueError("Job config has to be .json or .yaml file.")
+        self.base_config = load_config(config_fname, return_dotmap=True)
 
         self.job_fname = job_fname  # Python file to run job
         # 0. Check if all required args are given - otw. add default to copy
@@ -185,9 +179,8 @@ class BaseHyperOptimisation(object):
             num_seeds_per_eval,
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
-            use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-            use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
             cloud_settings=mle_config.gcp,
+            automerge_seeds=True,
             slack_message_id=self.message_id,
             slack_user_name=mle_config.slack.user_name,
             slack_auth_token=mle_config.slack.slack_token,
@@ -250,12 +243,11 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
-                use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-                use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
                 cloud_settings=mle_config.gcp,
                 slack_message_id=self.message_id,
                 slack_user_name=mle_config.slack.user_name,
                 slack_auth_token=mle_config.slack.slack_token,
+                automerge_seeds=True,
             )
             job_queue.run()
             time_elapsed = time.time() - start_t

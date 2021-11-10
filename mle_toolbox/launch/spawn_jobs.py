@@ -1,6 +1,6 @@
 import logging
 from typing import Union, List
-from mle_launcher import MLEJob, MLEQueue
+from mle_scheduler import MLEJob, MLEQueue
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -10,7 +10,6 @@ def spawn_single_job(
     config_filename: str,
     job_arguments: Union[None, dict],
     experiment_dir: str,
-    cmd_line_input: Union[None, dict] = None,
 ):
     """Spawn a single experiment locally/remote."""
     # -1. Check if all required args are given - otw. add default to copy
@@ -31,10 +30,7 @@ def spawn_single_job(
         config_filename,
         job_arguments,
         experiment_dir,
-        cmd_line_input,
         extra_cmd_line_input,
-        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
         cloud_settings=mle_config.gcp,
     )
     # 2. Run the single experiment
@@ -63,10 +59,7 @@ def spawn_processing_job(
         config_filename=None,
         job_arguments=job_arguments,
         experiment_dir=experiment_dir,
-        cmd_line_input={},
         extra_cmd_line_input=extra_cmd_line_input,
-        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
         cloud_settings=mle_config.gcp,
     )
     # 2. Run the single pre/post-processing job
@@ -99,8 +92,7 @@ def spawn_multiple_seeds(
         num_seeds,
         random_seeds=random_seeds,
         max_running_jobs=num_seeds,
-        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
+        automerge_seeds=True,
         cloud_settings=mle_config.gcp,
     )
 
@@ -153,12 +145,11 @@ def spawn_multiple_configs(
         default_seed,
         random_seeds,
         num_seeds * num_configs,
-        use_conda_virtual_env=mle_config.general.use_conda_virtual_env,
-        use_venv_virtual_env=mle_config.general.use_venv_virtual_env,
         cloud_settings=mle_config.gcp,
         slack_message_id=slack_message_id,
         slack_user_name=slack_user_name,
         slack_auth_token=slack_auth_token,
+        automerge_seeds=True,
     )
     multi_experiment.run()
 

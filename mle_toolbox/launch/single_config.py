@@ -1,4 +1,4 @@
-from mle_launcher import MLEJob
+from mle_scheduler import MLEJob
 from mle_toolbox import check_single_job_args
 
 

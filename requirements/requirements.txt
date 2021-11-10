@@ -19,5 +19,5 @@ pycrypto
 mle-logging
 mle-hyperopt
 mle-monitor
-mle-launcher
+mle-scheduler
 slack-clusterbot

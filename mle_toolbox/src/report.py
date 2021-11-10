@@ -25,7 +25,7 @@ def report(cmd_args):
     else:
         experiment_id = None
     # 2. Create 'reporter' instance and write reports
-    auto_generate_reports(experiment_id, protocol_db, pdf_gen=True)
+    auto_generate_reports(str(experiment_id), protocol_db, pdf_gen=True)
 
 
 def auto_generate_reports(
@@ -34,8 +34,8 @@ def auto_generate_reports(
     """Default auto-generation of reports for latest experiment."""
     # Create 'reporter' instance aka Karla Kolumna - and write
     if e_id is None:
-        e_id = "e-id-" + str(protocol_db.last_experiment_id)
-    protocol_data = protocol_db.get(e_id)
-    reporter = ReportGenerator(e_id, protocol_data, logger, pdf_gen)
+        e_id = str(protocol_db.last_experiment_id)
+    protocol_data = protocol_db.get(str(e_id))
+    reporter = ReportGenerator(str(e_id), protocol_data, logger, pdf_gen)
     reporter.generate_reports()
     return reporter
