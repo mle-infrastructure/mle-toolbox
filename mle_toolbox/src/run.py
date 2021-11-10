@@ -10,7 +10,6 @@ from mle_toolbox.utils import (
     load_experiment_config,
     determine_resource,
     ask_for_resource_to_run,
-    ask_for_binary_input,
     print_framed,
     set_random_seeds,
     compose_protocol_data,
@@ -140,40 +139,6 @@ def run(cmd_args):
     )
     if not os.path.exists(config_copy):
         shutil.copy(cmd_args.config_fname, config_copy)
-
-    # 7. Copy local code directory into GCP bucket if required
-    if resource_to_run == "gcp-cloud":
-        if "local_code_dir" in job_config.single_job_args.keys():
-            local_code_dir = job_config.single_job_args["local_code_dir"]
-        else:
-            local_code_dir = os.getcwd()
-        # Ask user if code dir should be uploaded + afterwards deleted
-        copy_code_dir = ask_for_binary_input(
-            "Do you want to copy local" + " directory to GCS bucket?"
-        )
-        delete_code_dir = ask_for_binary_input(
-            "Do you want to delete GCS code" + " directory at completion?"
-        )
-        if copy_code_dir:
-            logger.info(
-                f"Start uploading {local_code_dir} to GCP bucket:"
-                + f" {mle_config.gcp.code_dir}"
-            )
-            # Import utility to copy local code directory to GCS bucket
-            from mle_toolbox.remote.gcloud_transfer import upload_local_dir_to_gcs
-
-            upload_local_dir_to_gcs(
-                local_path=local_code_dir, gcs_path=mle_config.gcp.code_dir
-            )
-            logger.info(
-                f"Completed uploading {local_code_dir} to GCP "
-                + f"bucket: {mle_config.gcp.code_dir}"
-            )
-        else:
-            logger.info(
-                f"Continue with {local_code_dir} previously stored "
-                + f"in GCP bucket: {mle_config.gcp.code_dir}"
-            )
 
     # Setup cluster slack bot for status updates
     if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
@@ -375,14 +340,6 @@ def run(cmd_args):
         if mle_config.general.use_gcloud_protocol_sync:
             if protocol_db.accessed_gcs:
                 protocol_db.gcs_send()
-
-    # 13. If job ran on GCP: Clean up & delete local code dir form GCS bucket
-    if resource_to_run == "gcp-cloud":
-        if delete_code_dir:
-            # Import utility to delete directory in GCS bucket
-            from mle_toolbox.remote.gcloud_transfer import delete_gcs_dir
-
-            delete_gcs_dir(mle_config.gcp.code_dir)
 
     print_framed("EXPERIMENT FINISHED")
     # Update slack bot experiment message - pre-processing

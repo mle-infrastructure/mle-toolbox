@@ -2,16 +2,19 @@
 meta_job_args:
     project_name: "examples"
     experiment_type: "hyperparameter-search"
-    base_train_fname: "numpy_pde/run_pde_int.py"
-    base_train_config: "numpy_pde/pde_int_config_1.json"
-    experiment_dir: "experiments/pde/smbo/"
+    base_train_fname: "toy_single_objective/train.py"
+    base_train_config: "toy_single_objective/base_config_1.yaml"
+    experiment_dir: "experiments/toy_single/smbo"
 
 # Parameters specific to the hyperparameter search
 param_search_args:
     search_logging:
-        eval_metrics:
-            - "integral"
-            - "noise"
+        reload_log: False
+        verbose_log: True
+        max_objective: False
+        aggregate_seeds: "p50"
+        problem_type: "final"
+        eval_metrics: "test_loss"
     search_resources:
         num_search_batches: 3
         num_evals_per_batch: 3
@@ -20,20 +23,17 @@ param_search_args:
         search_type: "smbo"
         search_params:
             real:
-                x_0:
-                    begin: 1
-                    end: 10
+                lrate:
+                    begin: 0.1
+                    end: 0.5
                     prior: "log-uniform"    # "uniform", "log-uniform"
-                noise_mean:
-                    begin: 0
-                    end: 0.01
+            integer:
+                batch_size:
+                    begin: 1
+                    end: 5
                     prior: "uniform"
-            categorical:
-                r_var:
-                    - 0
-                    - 1
         search_config:
-            metric_to_model: "integral"     # Which of the eval metrics to model
+            metric_to_model: "test_loss"     # Which of the eval metrics to model
             base_estimator: "GP"            # "GP", "RF", "ET", "GBRT"
             acq_function: "gp_hedge"        # "LCB", "EI", "PI", "gp_hedge"
             # Number init points have to be larger than batch size!
@@ -41,6 +41,10 @@ param_search_args:
 
 # Parameters specific to an individual job
 single_job_args:
-    job_name: "pde"
-    num_logical_cores: 1
+    job_name: "toy"
+    num_logical_cores: 2
+    log_file: "l-ode"
+    err_file: "e-ode"
     env_name: "mle-toolbox"
+    use_conda_venv: true
+    time_per_job: "00:00:05"

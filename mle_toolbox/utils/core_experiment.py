@@ -9,7 +9,7 @@ import select
 from typing import Union, Tuple
 from dotmap import DotMap
 from datetime import datetime
-from mle_logging.utils import load_json_config, load_yaml_config
+from mle_logging import load_config
 from .core_files_load import load_mle_toolbox_config
 from .helpers import print_framed
 
@@ -46,7 +46,7 @@ mle_config = load_mle_toolbox_config()
 
 def load_experiment_config(cmd_args: dict) -> DotMap:
     """Load in YAML config file, overwrite based on cmd & wrap as DotMap."""
-    config = load_yaml_config(cmd_args.config_fname)
+    config = load_config(cmd_args.config_fname)
 
     # Check that meta_job_args and single_job_args given in yaml config
     for k in ["meta_job_args", "single_job_args"]:
@@ -186,13 +186,7 @@ def load_job_config(
     """Prepare job config files for experiment run (add seed id, etc.)."""
     # Load .json/.yaml job config + add config fname/experiment dir
     if os.path.exists(config_fname):
-        fname, fext = os.path.splitext(config_fname)
-        if fext == ".json":
-            config = load_json_config(config_fname, return_dotmap=True)
-        elif fext == ".yaml":
-            config = load_yaml_config(config_fname, return_dotmap=True)
-        else:
-            raise ValueError("Job config has to be .json or .yaml file.")
+        config = load_config(config_fname, return_dotmap=True)
         # Check that train and log config exist!
         assert "train_config" in config.keys(), "Provide train_config key."
         assert "log_config" in config.keys(), "Provide log_config key."

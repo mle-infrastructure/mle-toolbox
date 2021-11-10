@@ -3,9 +3,9 @@
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://roberttlange.github.io/mle-toolbox/)
 [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Status](https://github.com/RobertTLange/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/RobertTLange/mle-toolbox/actions?query=workflow%3A"Python+tests")
-[![codecov](https://codecov.io/gh/RobertTLange/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/RobertTLange/mle-toolbox)
-<a href="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="200" align="right" /></a>
+[![Status](https://github.com/mle-infrastructure/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/mle-infrastructure/mle-toolbox/actions?query=workflow%3A"Python+tests")
+[![codecov](https://codecov.io/gh/mle-infrastructure/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/mle-infrastructure/mle-toolbox)
+<a href="https://mle-infrastructure.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="200" align="right" /></a>
 
 > Coming up with the right hypothesis is hard - testing it should be easy.
 
@@ -27,10 +27,10 @@ ML researchers need to coordinate different types of experiments on separate rem
 
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
-1. Follow the [instructions below](https://github.com/RobertTLange/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configurations.
-2. Read the [docs](https://roberttlange.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples 📄](https://github.com/RobertTLange/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde), training [PyTorch MNIST-CNNs](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae).
-4. Run your own experiments using the [template files, project](https://github.com/RobertTLange/mle-project) and [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/).
+1. Follow the [instructions below](https://github.com/mle-infrastructure/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configurations.
+2. Read the [docs](https://mle-infrastructure.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
+3. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/numpy_pde), training [PyTorch MNIST-CNNs](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/jax_vae).
+4. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_run/).
 
 
 ## Installation ⏳
@@ -44,7 +44,7 @@ pip install mle-toolbox
 Alternatively, you can clone this repository and afterwards 'manually' install it:
 
 ```
-git clone https://github.com/RobertTLange/mle-toolbox.git
+git clone https://github.com/mle-infrastructure/mle-toolbox.git
 cd mle-toolbox
 pip install -e .
 ```
@@ -68,16 +68,16 @@ The configuration procedure consists of 3 optional steps, which depend on your n
 
 ## The Core Commands of the MLE-Toolbox 🌱
 
-You are now ready to dive deeper into the specifics of [job configuration](https://roberttlange.github.io/mle-toolbox) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
+You are now ready to dive deeper into the specifics of [job configuration](https://roberttlange.github.io/mle-infrastructure) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
 
 |   | Command              |        Description                                                        |
 |-----------| -------------------------- | -------------------------------------------------------------- |
-|⏳| [`mle init`](https://roberttlange.github.io/mle-toolbox/core_api/mle_init/)       | Setup of credentials & toolbox settings.              |
-|🚀| [`mle run`](https://roberttlange.github.io/mle-toolbox/core_api/mle_run/)       | Start up an experiment.              |
-|🖥️| [`mle monitor`](https://roberttlange.github.io/mle-toolbox/core_api/mle_monitor/)       | Monitor resource utilisation.              |
-|📥	| [`mle retrieve`](https://roberttlange.github.io/mle-toolbox/core_api/mle_retrieve/)       | Retrieve an experiment result.              |
-|💌| [`mle report`](https://roberttlange.github.io/mle-toolbox/core_api/mle_report/)       | Create an experiment report with figures.              |
-|🔄| [`mle sync-gcs`](https://roberttlange.github.io/mle-toolbox/core_api/mle_sync_gcs/)       | Extract all GCS-stored results to your local drive.              |
+|⏳| [`mle init`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_init/)       | Setup of credentials & toolbox settings.              |
+|🚀| [`mle run`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_run/)       | Start up an experiment.              |
+|🖥️| [`mle monitor`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_monitor/)       | Monitor resource utilisation.              |
+|📥	| [`mle retrieve`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_retrieve/)       | Retrieve an experiment result.              |
+|💌| [`mle report`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_report/)       | Create an experiment report with figures.              |
+|🔄| [`mle sync-gcs`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_sync_gcs/)       | Extract all GCS-stored results to your local drive.              |
 |🔄| `mle project`    | Initialize a new project by cloning [`mle-project`](https://github.com/mle-infrastructure/mle-project).   
 |📝| `mle protocol`    | List a summary of the most recent experiments.
 
@@ -85,28 +85,24 @@ You are now ready to dive deeper into the specifics of [job configuration](https
 
 |              | Job Types|        Description                                                        |
 | -------------------------- |-------------- | -------------------------------------------------------------- |
-| 📄 **[Euler PDE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/numpy_pde)** |  `multi-configs`, `hyperparameter-search`     | Integrate a PDE using forward Euler.              |
-| 📄 **[MNIST CNN](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/mnist)**      | `multi-configs`, `hyperparameter-search`     |Train PyTorch MNIST-CNNs.                             |
-| 📄 **[JAX VAE](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/jax_vae)**       | `hyperparameter-search`     | Train a JAX-based MNIST VAE. |
-| 📄 **[Multi-Objective](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/toy_multiobj)**       | `hyperparameter-search`     | Multi-objective tuning with `nevergrad`. |
-| 📄 **[Sklearn SVM](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/sklearn_svm)** | `single-config`     | Train a Sklearn SVM classifier.            |
-|  📄 **[Multi Bash](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/bash_configs)**      | `multi-configs`     | Bash based jobs.                        |
-| 📄 **[Quadratic PBT](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `population-based-training`    | PBT on toy quadratic surrogate.                          |
-| 📄 **[MNIST PBT](https://github.com/RobertTLange/mle-toolbox/tree/main/examples/pbt_mnist)**            | `population-based-training`     | PBT for a MNIST MLP network.                          |
-| 📓 **[Evaluation](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          | -     | Evaluation of gridsearch results. |
-| 📓 **[Testing](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | -     | Perform hypothesis tests on logs.        |
-| 📓 **[GIF Animations](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** | -     | Walk through a set of animation helpers.      |
-|📓 **[PBT Evaluation](https://github.com/RobertTLange/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | -     | Inspect the result from PBT.                                   |
+| 📄 **[Single-Objective](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective)** |  `multi-configs`, `hyperparameter-search`     | Core experiment types.              |
+| 📄 **[Multi-Objective](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective)**       | `hyperparameter-search`     | Multi-objective tuning. |
+|  📄 **[Multi Bash](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/bash_multi_config)**      | `multi-configs`     | Bash-based jobs.                        |
+| 📄 **[Quadratic PBT](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `population-based-training`    | PBT on toy quadratic surrogate.                          |
+| 📓 **[Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          | -     | Evaluation of gridsearch results. |
+| 📓 **[GIF Animations](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** | -     | Walk through a set of animation helpers.      |
+| 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | -     | Perform hypothesis tests on logs.        |
+|📓 **[PBT Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | -     | Inspect the result from PBT.                                   |
 
 ### Acknowledgements & Citing `mle-toolbox` ✏️
 
 To cite this repository:
 
 ```
-@software{mle_toolbox2021github,
+@software{mle_infrastructure2021github,
   author = {Robert Tjarko Lange},
-  title = {{MLE-Toolbox}: A Reproducible Workflow for Distributed Machine Learning Experiments},
-  url = {http://github.com/RobertTLange/mle-toolbox},
+  title = {{MLE-Infrastructure}: A Set of Lightweight Tools for Distributed Machine Learning Experimentation},
+  url = {http://github.com/mle-infrastructure},
   version = {0.3.0},
   year = {2021},
 }

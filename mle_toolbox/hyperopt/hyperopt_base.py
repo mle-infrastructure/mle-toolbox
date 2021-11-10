@@ -348,7 +348,6 @@ class BaseHyperOptimisation(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-
         self.strategy.tell(proposals, measures)
         self.strategy.save(self.search_log_path)
 

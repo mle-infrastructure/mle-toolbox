@@ -1,3 +1,4 @@
+import os
 import logging
 from typing import Union, List
 from mle_scheduler import MLEJob, MLEQueue
@@ -109,16 +110,18 @@ def spawn_multiple_configs(
     num_seeds: Union[None, int] = None,
     random_seeds: Union[None, List[int]] = None,
     slack_message_id: Union[str, None] = None,
-    slack_user_name: Union[str, None] = None,
-    slack_auth_token: Union[str, None] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
     # 0. Check if all required args are given - otw. add default to copy
     job_arguments = check_single_job_args(resource_to_run, job_arguments.copy())
 
+    # Check if all config files exist
+    for config_fname in config_filenames:
+        assert os.path.exists(config_fname)
+
     if num_seeds is None:
-        num_seeds = 1
+        num_seeds = len(random_seeds)
 
     # Ensure that config filenames is a list
     if type(config_filenames) is not list:
@@ -145,11 +148,11 @@ def spawn_multiple_configs(
         default_seed,
         random_seeds,
         num_seeds * num_configs,
+        automerge_seeds=True,
         cloud_settings=mle_config.gcp,
         slack_message_id=slack_message_id,
-        slack_user_name=slack_user_name,
-        slack_auth_token=slack_auth_token,
-        automerge_seeds=True,
+        slack_user_name=mle_config.slack.user_name,
+        slack_auth_token=mle_config.slack.slack_token,
     )
     multi_experiment.run()
 

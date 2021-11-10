@@ -11,6 +11,11 @@ def run_multiple_configs(
     message_id: Union[str, None] = None,
 ):
     """Run an experiment over different configurations (+random seeds)."""
+    if "num_seeds" not in multi_config_args.keys():
+        multi_config_args["num_seeds"] = len(multi_config_args["random_seeds"])
+    if "random_seeds" not in multi_config_args.keys():
+        multi_config_args["random_seeds"] = None
+
     # 1. Create multiple experiment instances and submit the jobs
     spawn_multiple_configs(
         resource_to_run,
@@ -20,6 +25,6 @@ def run_multiple_configs(
         meta_job_args["experiment_dir"],
         num_seeds=multi_config_args["num_seeds"],
         random_seeds=multi_config_args["random_seeds"],
-        message_id=message_id,
+        slack_message_id=message_id,
         logger_level=logging.INFO,
     )

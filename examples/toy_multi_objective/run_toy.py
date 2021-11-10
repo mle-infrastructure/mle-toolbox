@@ -27,6 +27,6 @@ def main(mle):
 
 
 if __name__ == "__main__":
-    # Run the simulation/Experiment
+    # Run the simulation/Experiment - explicit MLExperiment instead of decorator
     mle = MLExperiment(config_fname="toy_multiobj/toy_config.yaml")
     main(mle)
