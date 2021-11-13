@@ -173,8 +173,8 @@ class BaseHyperOptimisation(object):
         job_queue = MLEQueue(
             self.resource_to_run,
             self.job_fname,
-            batch_fnames,
             self.job_arguments,
+            batch_fnames,
             self.experiment_dir,
             num_seeds_per_eval,
             random_seeds=random_seeds,

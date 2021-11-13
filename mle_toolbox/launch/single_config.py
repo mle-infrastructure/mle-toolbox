@@ -23,8 +23,8 @@ def run_single_config(
     experiment = MLEJob(
         resource_to_run,
         meta_job_args["base_train_fname"],
-        meta_job_args["base_train_config"],
         single_job_args,
+        meta_job_args["base_train_config"],
         meta_job_args["experiment_dir"],
     )
     # 2. Run the single experiment

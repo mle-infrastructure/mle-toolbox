@@ -35,14 +35,6 @@ def sge_check_job_args(job_arguments: Union[dict, None]) -> dict:
         if k not in job_arguments.keys():
             job_arguments[k] = v
 
-    # Reformatting of time for SGE qsub - hh:mm:ss but in is dd:hh:mm
-    if "time_per_job" in job_arguments.keys():
-        days, hours, minutes = job_arguments["time_per_job"].split(":")
-        hours_sge = str(int(days) * 24 + int(hours))
-        if len(hours_sge) < 2:
-            hours_sge = "0" + hours_sge
-        sge_time = hours_sge + ":" + minutes + ":00"
-        job_arguments["time_per_job"] = sge_time
     return job_arguments
 
 
@@ -64,12 +56,6 @@ def slurm_check_job_args(job_arguments: Union[dict, None]) -> dict:
     for k, v in mle_config.slurm.default_job_arguments.items():
         if k not in job_arguments.keys():
             job_arguments[k] = v
-
-    # Reformatting of time for Slurm SBASH - d-hh:mm but in is dd:hh:mm
-    if "time_per_job" in job_arguments.keys():
-        days, hours, minutes = job_arguments["time_per_job"].split(":")
-        slurm_time = days[1] + "-" + hours + ":" + minutes
-        job_arguments["time_per_job"] = slurm_time
     return job_arguments
 
 
@@ -83,9 +69,6 @@ def gcp_check_job_args(job_arguments: Union[dict, None]) -> dict:
         if k not in job_arguments.keys():
             job_arguments[k] = v
 
-    # If no local code dir provided: Copy over the current working dir
-    if "local_code_dir" not in job_arguments.keys():
-        job_arguments["local_code_dir"] = os.getcwd()
     return DotMap(job_arguments)
 
 

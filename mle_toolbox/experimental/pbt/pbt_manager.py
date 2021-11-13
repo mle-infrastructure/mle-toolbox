@@ -224,8 +224,8 @@ class PBT_Manager(object):
         job = MLEJob(
             self.resource_to_run,
             self.job_fname,
-            config_fname,
             self.job_arguments,
+            config_fname,
             self.experiment_dir,
             seed_id,
             extra_cmd_line_input,

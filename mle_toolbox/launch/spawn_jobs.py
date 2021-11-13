@@ -28,8 +28,8 @@ def spawn_single_job(
     experiment = MLEJob(
         resource_to_run,
         job_filename,
-        config_filename,
         job_arguments,
+        config_filename,
         experiment_dir,
         extra_cmd_line_input,
         cloud_settings=mle_config.gcp,
@@ -57,8 +57,8 @@ def spawn_processing_job(
     experiment = MLEJob(
         resource_to_run=resource_to_run,
         job_filename=job_filename,
-        config_filename=None,
         job_arguments=job_arguments,
+        config_filename=None,
         experiment_dir=experiment_dir,
         extra_cmd_line_input=extra_cmd_line_input,
         cloud_settings=mle_config.gcp,
@@ -87,8 +87,8 @@ def spawn_multiple_seeds(
     multi_experiment = MLEQueue(
         resource_to_run,
         job_filename,
-        [config_filename],
         job_arguments,
+        [config_filename],
         experiment_dir,
         num_seeds,
         random_seeds=random_seeds,
@@ -141,8 +141,8 @@ def spawn_multiple_configs(
     multi_experiment = MLEQueue(
         resource_to_run,
         job_filename,
-        config_filenames,
         job_arguments,
+        config_filenames,
         experiment_dir,
         num_seeds,
         default_seed,
