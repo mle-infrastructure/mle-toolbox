@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Union
 
 from mle_toolbox import mle_config
-from ..protocol import load_local_protocol_db
+from mle_monitor import MLEProtocol
 from .ssh_manager import setup_proxy_server
 
 try:
@@ -23,73 +23,6 @@ except ModuleNotFoundError as err:
 
 # Set environment variable for gcloud credentials & proxy remote
 setup_proxy_server()
-
-
-def get_gcloud_db(number_of_connect_tries: int = 5) -> int:
-    """Pull latest experiment database from gcloud storage."""
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    for i in range(number_of_connect_tries):
-        try:
-            # Connect to project and bucket
-            client = storage.Client(mle_config.gcp.project_name)
-            bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-            # Download blob to db file
-            blob = bucket.blob(mle_config.gcp.protocol_fname)
-            with open(
-                expanduser(mle_config.general.local_protocol_fname), "wb"
-            ) as file_obj:
-                blob.download_to_file(file_obj)
-            logger.info(
-                f"Pulled from GCloud Storage - " f"{mle_config.gcp.protocol_fname}"
-            )
-            return 1
-        except Exception as ex:
-            # Remove empty file - causes error otherwise when trying to load
-            os.remove(expanduser(mle_config.general.local_protocol_fname))
-            if type(ex).__name__ == "NotFound":
-                logger.info(
-                    f"No DB found in GCloud Storage"
-                    f" - {mle_config.gcp.protocol_fname}"
-                )
-                logger.info(
-                    "New DB will be created - "
-                    f"{mle_config.gcp.project_name}/"
-                    f"{mle_config.gcp.bucket_name}"
-                )
-                return 1
-            else:
-                logger.info(
-                    f"Attempt {i+1}/{number_of_connect_tries}"
-                    f" - Failed pulling from GCloud Storage"
-                    f" - {type(ex).__name__}"
-                )
-    # If after 5 pulls no successful connection established - return failure
-    return 0
-
-
-def send_gcloud_db(number_of_connect_tries: int = 5):
-    """Send updated database back to gcloud storage."""
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    for i in range(number_of_connect_tries):
-        try:
-            # Connect to project and bucket
-            client = storage.Client(mle_config.gcp.project_name)
-            bucket = client.get_bucket(mle_config.gcp.bucket_name, timeout=20)
-            blob = bucket.blob(mle_config.gcp.protocol_fname)
-            blob.upload_from_filename(
-                filename=expanduser(mle_config.general.local_protocol_fname)
-            )
-            logger.info(f"Send to GCloud Storage - " f"{mle_config.gcp.protocol_fname}")
-            return 1
-        except Exception:
-            logger.info(
-                f"Attempt {i+1}/{number_of_connect_tries}"
-                f" - Failed sending to GCloud Storage"
-            )
-    # If after 5 pulls no successful connection established - return failure
-    return 0
 
 
 def delete_gcs_dir(gcs_path: str, number_of_connect_tries: int = 5):
@@ -213,59 +146,47 @@ def zipdir(path: str, zip_fname: str):
     ziph.close()
 
 
-def send_gcloud_zip_experiment(
-    experiment_dir: str, experiment_id: str, delete_after_upload: bool = False
+def send_gcloud_zip(
+    local_fname: str, local_zip_fname: str, delete_after_upload: bool = False
 ):
     """Zip & upload experiment dir to Gcloud storage."""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
     # 1. Get experiment hash from the protocol db
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    hash_to_store = db.dget(experiment_id, "e-hash")
-    local_hash_fname = hash_to_store + ".zip"
-    gcloud_hash_fname = "experiments/" + local_hash_fname
+    gcloud_hash_fname = "experiments/" + local_zip_fname
 
-    # 2. Zip the experiment
-    zipdir(experiment_dir, local_hash_fname)
+    # 2. Zip compress the experiment
+    zipdir(local_fname, local_zip_fname)
 
     # 3. Upload the zip file to the GCS bucket
-    upload_local_dir_to_gcs(local_path=local_hash_fname, gcs_path=gcloud_hash_fname)
-    logger.info(f"UPLOAD TO GCS BUCKET - {experiment_id}:")
-    logger.info(f"{gcloud_hash_fname}")
+    upload_local_dir_to_gcs(local_path=local_zip_fname, gcs_path=gcloud_hash_fname)
+    logger.info(f"UPLOAD GCS - {gcloud_hash_fname}")
 
-    # 4. Update protocol with info
-    db.dadd(experiment_id, ("stored_in_gcloud", True))
-    db.dump()
-
-    # 5. Delete the .zip file & the folder if desired
+    # 4. Delete the .zip file & the folder if desired
     if delete_after_upload:
-        os.remove(local_hash_fname)
-        shutil.rmtree(experiment_dir, ignore_errors=True)
-        logger.info(f"DELETED - {experiment_id}: experiment dir + .zip file")
+        os.remove(local_zip_fname)
+        shutil.rmtree(local_fname, ignore_errors=True)
+        logger.info(f"DELETED - experiment dir + .zip file")
 
 
-def get_gcloud_zip_experiment(
-    db,
+def get_gcloud_zip(
+    protocol_db: MLEProtocol,
     experiment_id: str,
-    all_experiment_ids: list,
     local_dir_name: Union[None, str] = None,
 ):
     """Download zipped experiment from GCS. Unpack & clean up."""
     # Ensure the right prefix
     while True:
-        if experiment_id[:5] != "e-id-":
-            experiment_id = "e-id-" + experiment_id
-
-        if experiment_id not in all_experiment_ids:
+        if experiment_id not in protocol_db.experiment_ids:
             time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-            print(time_t, "The experiment you try to retrieve does not exist")
+            print(time_t, "The experiment you are trying to retrieve does not exist")
             experiment_id = input(time_t + " Which experiment do you want to retrieve?")
         else:
             break
 
     # Get unique hash id & download the experiment results folder
-    hash_to_store = db.dget(experiment_id, "e-hash")
+    hash_to_store = protocol_db.get(experiment_id, "e-hash")
     local_hash_fname = hash_to_store + ".zip"
     gcloud_hash_fname = "experiments/" + local_hash_fname
     download_gcs_dir(gcloud_hash_fname)
@@ -290,6 +211,5 @@ def get_gcloud_zip_experiment(
     print(time_t, f"Remote Path: {gcloud_hash_fname}")
 
     # Update protocol retrieval status of the experiment
-    db.dadd(experiment_id, ("retrieved_results", True))
-    db.dump()
+    protocol_db.update(experiment_id, "retrieved_results", True)
     return gcloud_hash_fname

@@ -1,23 +1,29 @@
-from mle_toolbox.utils import print_framed
-from mle_toolbox.protocol import load_local_protocol_db
+from mle_toolbox import mle_config
 from mle_toolbox.remote.gcloud_transfer import (
-    get_gcloud_db,
-    send_gcloud_db,
-    get_gcloud_zip_experiment,
+    get_gcloud_zip,
     delete_gcs_dir,
 )
+from mle_toolbox.utils import print_framed
+from mle_monitor import MLEProtocol
 
 
 def sync_gcs():
     """Download experiments in GCS bucket onto drive + delete remote files."""
     # Download the current state of the protocol db and load it in
-    get_gcloud_db()
-    db, all_experiment_ids, last_experiment_id = load_local_protocol_db()
-    for i, e_id in enumerate(all_experiment_ids):
+    protocol_db = MLEProtocol(
+        mle_config.general.local_protocol_fname,
+        mle_config.general.use_gcloud_protocol_sync,
+        mle_config.gcp.project_name,
+        mle_config.gcp.bucket_name,
+        mle_config.gcp.protocol_fname,
+        mle_config.general.local_protocol_fname,
+        mle_config.gcp.credentials_path,
+    )
+    for i, e_id in enumerate(protocol_db.experiment_ids):
         # Download + delete all stored experiments
         try:
-            stored_in_gcloud = db.dget(e_id, "stored_in_gcloud")
-            not_retrieved_yet = not db.dget(e_id, "retrieve_results")
+            stored_in_gcloud = protocol_db.get(e_id, "stored_in_gcloud")
+            not_retrieved_yet = not protocol_db.get(e_id, "retrieve_results")
         except Exception:
             stored_in_gcloud = False
         # Pull either from remote machine or gcloud bucket
@@ -26,10 +32,12 @@ def sync_gcs():
             # TODO: Make this optional - ask user if want to retrieve again
             if not_retrieved_yet:
                 print_framed(f"RETRIEVE E-ID {e_id}")
-                gcloud_hash_fname = get_gcloud_zip_experiment(
-                    db, e_id, all_experiment_ids
-                )
+                gcloud_hash_fname = get_gcloud_zip(protocol_db, e_id)
                 print_framed(f"DELETE E-ID {e_id}")
                 delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f"COMPLETED E-ID {e_id}")
-    send_gcloud_db()
+
+    # Send most recent/up-to-date experiment DB to GCS
+    if mle_config.general.use_gcloud_protocol_sync:
+        if protocol_db.accessed_gcs:
+            protocol_db.gcs_send()

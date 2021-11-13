@@ -45,15 +45,7 @@ testing:
 	# pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/unit
 	# Run integration tests: Different experiment types [ignore report test]
 	# pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/integration/experiment
-	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml --ignore=tests/integration/test_pbt_api.py
-
-deploy-docs:
-	# Deploy documentation homepage: https://roberttlange.github.io/mle-toolbox/
-	python -m pip install --upgrade pip
-	pip install mkdocs-material
-	pip install mkdocs-jupyter
-	cp -R notebooks docs/notebooks/
-	mkdocs gh-deploy --force
+	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml --ignore=tests/integration/test_pbt_api.py --ignore=tests/integration/test_report.py
 
 pypi-publish:
 	# Publish package in PyPi repositories - triggered for new release

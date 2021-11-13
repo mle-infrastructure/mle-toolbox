@@ -18,6 +18,7 @@ def animate_2D_grid(
     vmin=None,
     vmax=None,
     title="Animated Grid",
+    time_pre_str="t=",
     interval=100,
     fps=60,
     fname="test_anim.gif",
@@ -31,6 +32,7 @@ def animate_2D_grid(
         var_name,
         dt,
         title,
+        time_pre_str,
         ylabel,
         xlabel,
         range_y,
@@ -57,6 +59,7 @@ class AnimatedGrid(object):
         var_name="A Variable",
         dt=1,
         title="Animated Grid",
+        time_pre_str="t=",
         ylabel="y-Axis",
         xlabel="Time",
         range_y=None,
@@ -74,6 +77,7 @@ class AnimatedGrid(object):
         self.t = 0
         self.dt = dt
         self.title = title
+        self.time_pre_str = time_pre_str
         self.range_x = range_x if range_x is not None else np.arange(data.shape[1])
         self.range_y = range_y if range_y is not None else np.arange(data.shape[2])
         self.var_name = var_name
@@ -179,10 +183,14 @@ class AnimatedGrid(object):
 
     def update(self, i):
         sub_data = self.data[i]
-        self.t += self.dt
         self.im.set_data(sub_data)
         if self.title is not None:
-            self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
+            self.ax.set_title(
+                # {:.1f}
+                self.title + r" {} ${}$".format(self.time_pre_str, self.t),
+                fontsize=25,
+            )
+        self.t += self.dt
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
         return (self.im,)

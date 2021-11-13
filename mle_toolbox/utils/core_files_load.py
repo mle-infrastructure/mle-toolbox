@@ -22,9 +22,8 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
         mle_config = DotMap(
             {
                 "general": {
-                    "use_conda_virtual_env": False,
+                    "use_conda_virtual_env": True,
                     "use_venv_virtual_env": False,
-                    "use_credential_encryption": False,
                     "use_slack_bot": False,
                     "random_seed": 42,
                     "use_gcloud_protocol_sync": False,
@@ -32,40 +31,6 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
                 }
             }
         )
-
-    # Decrypt ssh credentials for SGE & Slurm -> Only if local launch used!
-    if mle_config.general.use_credential_encryption:
-        # Import decrypt functionality - requires pycrypto!
-        try:
-            from mle_toolbox.initialize.crypto_credentials import (
-                decrypt_ssh_credentials,
-            )
-        except ModuleNotFoundError as err:
-            raise ModuleNotFoundError(
-                f"{err}. You need to"
-                "install `pycrypto` to use "
-                "`decrypt_ssh_credentials`."
-            )
-        # Decrypt for slurm and sge independently - if key provided!
-        assert (
-            "aes_key" in mle_config["slurm"].credentials.keys()
-            or "aes_key" in mle_config["sge"].credentials.keys()
-        ), (
-            "If you want to use encrypted credentials, please provide "
-            "the aes_key in your mle_config.toml file."
-        )
-        # TODO: Load aes_key from separate file in encrypted form
-        # Assert that the key has the right shape
-        for resource in ["slurm", "sge"]:
-            if "aes_key" in mle_config[resource].credentials.keys():
-                dec_user, dec_pass = decrypt_ssh_credentials(
-                    mle_config[resource].credentials.aes_key,
-                    mle_config[resource].credentials.user_name,
-                    mle_config[resource].credentials.password,
-                )
-                mle_config[resource].credentials.user_name = dec_user
-                mle_config[resource].credentials.password = dec_pass
-
     return mle_config
 
 

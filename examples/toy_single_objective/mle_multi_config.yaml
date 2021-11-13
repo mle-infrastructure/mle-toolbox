@@ -1,0 +1,23 @@
+# Meta Arguments: What job? What train .py file? Base config? Where to store?
+meta_job_args:
+    project_name: "examples"
+    experiment_type: "multiple-configs"
+    base_train_fname: "toy_single_objective/train.py"
+    base_train_config: "toy_single_objective/base_config_1.yaml"
+    experiment_dir: "experiments/toy_single/multi_config"
+
+multi_config_args:
+    config_fnames:
+        - "toy_single_objective/base_config_1.yaml"
+        - "toy_single_objective/base_config_2.yaml"
+    random_seeds: [0, 1]
+
+
+# Parameters specific to an individual job
+single_job_args:
+    job_name: "toy"
+    num_logical_cores: 2
+    log_file: "l-ode"
+    err_file: "e-ode"
+    env_name: "mle-toolbox"
+    use_conda_venv: true
