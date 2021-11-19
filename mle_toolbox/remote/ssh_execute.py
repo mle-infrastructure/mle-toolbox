@@ -5,7 +5,8 @@ from typing import Union
 import os
 import sys
 import select
-from .ssh_manager import SSH_Manager
+from mle_toolbox import mle_config
+from mle_scheduler.ssh import SSH_Manager
 from .ssh_session_sge import generate_remote_sge_cmd
 from .ssh_session_slurm import generate_remote_slurm_cmd
 
@@ -19,7 +20,17 @@ def run_remote_experiment(
     """Run the experiment on the remote resource."""
     # 0. Load the toolbox config, setup logger & ssh manager for local2remote
     logger = logging.getLogger(__name__)
-    ssh_manager = SSH_Manager(remote_resource)
+    if remote_resource == "slurm-cluster":
+        resource = "slurm"
+    elif remote_resource == "sge-cluster":
+        resource = "sge"
+    ssh_manager = SSH_Manager(
+        user_name=mle_config[resource].credentials.user_name,
+        pkey_path=mle_config.general.pkey_path,
+        main_server=mle_config[resource].info.main_server_name,
+        jump_server=mle_config[resource].info.jump_server_name,
+        ssh_port=mle_config[resource].info.ssh_port,
+    )
 
     # 1. Rsync over the current working dir into remote_exec_dir
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
