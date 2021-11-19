@@ -1,24 +1,13 @@
 from mle_toolbox import mle_config
-from mle_toolbox.remote.gcloud_transfer import (
-    get_gcloud_zip,
-    delete_gcs_dir,
-)
-from mle_toolbox.utils import print_framed
+from mle_toolbox.utils import print_framed, get_gcloud_zip
+from mle_scheduler.cloud.gcp import delete_gcs_dir
 from mle_monitor import MLEProtocol
 
 
 def sync_gcs():
     """Download experiments in GCS bucket onto drive + delete remote files."""
     # Download the current state of the protocol db and load it in
-    protocol_db = MLEProtocol(
-        mle_config.general.local_protocol_fname,
-        mle_config.general.use_gcloud_protocol_sync,
-        mle_config.gcp.project_name,
-        mle_config.gcp.bucket_name,
-        mle_config.gcp.protocol_fname,
-        mle_config.general.local_protocol_fname,
-        mle_config.gcp.credentials_path,
-    )
+    protocol_db = MLEProtocol(mle_config.general.local_protocol_fname, mle_config.gcp)
     for i, e_id in enumerate(protocol_db.experiment_ids):
         # Download + delete all stored experiments
         try:

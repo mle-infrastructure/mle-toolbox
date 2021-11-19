@@ -5,7 +5,7 @@ meta_job_args:
     base_train_fname: "toy_single_objective/train.py"
     base_train_config: "toy_single_objective/base_config_1.yaml"
     experiment_dir: "experiments/toy_single/search_grid"
-    report_generation: false
+    report_generation: true
 
 # Parameters specific to the hyperparameter search
 param_search_args:
@@ -19,10 +19,10 @@ param_search_args:
     search_resources:
         # num_search_batches: 4
         # num_evals_per_batch: 4
-        num_total_evals: 16
+        num_total_evals: 4
         max_running_jobs: 4
-        num_seeds_per_eval: 2
-        random_seeds: [2, 4]
+        num_seeds_per_eval: 1
+        random_seeds: [2]
     search_config:
         search_type: "grid"
         # search_schedule: "sync"
@@ -32,12 +32,12 @@ param_search_args:
                 lrate:
                     begin: 0.1
                     end: 0.5
-                    bins: 4
+                    bins: 2
             integer:
                 batch_size:
                     begin: 1
                     end: 5
-                    bins: 4
+                    bins: 2
 
 # Parameters specific to an individual job
 single_job_args:

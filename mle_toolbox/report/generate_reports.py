@@ -144,6 +144,8 @@ class ReportGenerator:
             search_targets = self.report_data["job_spec_args"]["search_logging"][
                 "eval_metrics"
             ]
+        if isinstance(search_targets, str):
+            search_targets = [search_targets]
         return search_vars, search_targets
 
 
@@ -200,7 +202,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
     """Generate MD report from experiment meta data."""
     # Special treatment of dict keys/individual vars in report_data
     job_keys = ["meta_job_args", "single_job_args", "job_spec_args"]
-    config_keys = ["train_config", "log_config", "model_config"]
+    config_keys = ["loaded_config"]
     single_keys = ["purpose", "project_name"]
 
     md_generator = MarkdownGenerator(filename=md_report_fname, enable_write=False)
@@ -244,18 +246,25 @@ def generate_markdown(e_id, md_report_fname, report_data):
         # Base Configuration Hyperparameters used in the Experiment
         doc.addHeader(2, "Base Config Hyperparameters.")
         doc.addHeader(3, "Train Configuration.")
-        train_table = construct_markdown_table(report_data["train_config"][0])
+
+        train_table = construct_markdown_table(
+            report_data["loaded_config"][0]["train_config"]
+        )
         doc.addTable(dictionary_list=train_table)
 
         doc.addHeader(3, "Model Configuration.")
         try:
-            model_table = construct_markdown_table(report_data["model_config"][0])
+            model_table = construct_markdown_table(
+                report_data["loaded_config"][0]["model_config"]
+            )
             doc.addTable(dictionary_list=model_table)
         except:
             pass
 
         doc.addHeader(3, "Logging Configuration.")
-        log_table = construct_markdown_table(report_data["log_config"][0])
+        log_table = construct_markdown_table(
+            report_data["loaded_config"][0]["log_config"]
+        )
         doc.addTable(dictionary_list=log_table)
 
         # Generated header for figures of the Experiment
@@ -270,10 +279,17 @@ def generate_html(html_report_fname, markdown_text, figure_fnames):
     with open(html_report_fname, "w") as output_file:
         html_text = markdown2.markdown(markdown_text, extras=["tables"])
         # Add figure inclusion to HTML text
+        html_text = (
+            '<a href="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="150" align="right" /></a>'
+            + html_text
+        )
         # By default: 2 Figures per row - 45% width
+        counter = 0
         for fig in figure_fnames:
-            html_text += f'<img src="{fig}" width="500"' + 'style="margin-right:20px">'
-            html_text += "<br>"
+            html_text += f'<img src="{fig}" width="350"' + 'style="margin-right:20px">'
+            counter += 1
+            if counter % 2 == 0:
+                html_text += "<br>"
         output_file.write(html_text)
     return html_text
 
@@ -299,7 +315,7 @@ def add_figures_to_markdown(md_report_fname, figure_fnames):
             path, file = os.path.split(f_name)
             file_object.write("\n")
             file_object.write(
-                f'<img src=../figures/{file} width="45%"'
+                f'<img src=../figures/{file} width="40%"'
                 + ' style="margin-right:20px">'
             )
 

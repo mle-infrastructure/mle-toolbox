@@ -1,10 +1,9 @@
 from datetime import datetime
-from mle_toolbox.utils import print_framed
-from mle_toolbox.remote.ssh_manager import SSH_Manager
-from mle_toolbox.remote.gcloud_transfer import get_gcloud_zip
+from mle_toolbox.utils import print_framed, get_gcloud_zip
 from mle_toolbox import mle_config
 from mle_toolbox.launch import prepare_logger
 from mle_monitor import MLEProtocol
+from mle_scheduler.ssh import SSH_Manager
 
 
 def retrieve(cmd_args):
@@ -12,14 +11,7 @@ def retrieve(cmd_args):
     experiment_id = cmd_args.experiment_id
     time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
     _ = prepare_logger()
-    protocol_db = MLEProtocol(
-        mle_config.general.local_protocol_fname,
-        mle_config.general.use_gcloud_protocol_sync,
-        mle_config.gcp.project_name,
-        mle_config.gcp.bucket_name,
-        mle_config.gcp.protocol_fname,
-        mle_config.gcp.credentials_path,
-    )
+    protocol_db = MLEProtocol(mle_config.general.local_protocol_fname, mle_config.gcp)
 
     # Retrieve results for a single experiment
     if not cmd_args.retrieve_all_new:
@@ -81,7 +73,7 @@ def retrieve(cmd_args):
             print_framed(f"COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}")
 
     # (d) Send most recent/up-to-date experiment DB to GCS
-    if mle_config.general.use_gcloud_protocol_sync:
+    if mle_config.gcp.use_protocol_sync:
         if protocol_db.accessed_gcs:
             protocol_db.gcs_send()
             time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
@@ -109,7 +101,19 @@ def retrieve_single_experiment(protocol_db: MLEProtocol, experiment_id: str):
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource in ["sge-cluster", "slurm-cluster"]:
-        ssh_manager = SSH_Manager(remote_resource)
+        # 0. Load the toolbox config, setup logger & ssh manager for local2remote
+        if remote_resource == "slurm-cluster":
+            resource = "slurm"
+        elif remote_resource == "sge-cluster":
+            resource = "sge"
+        ssh_manager = SSH_Manager(
+            user_name=mle_config[resource].credentials.user_name,
+            pkey_path=mle_config.general.pkey_path,
+            main_server=mle_config[resource].info.main_server_name,
+            jump_server=mle_config[resource].info.jump_server_name,
+            ssh_port=mle_config[resource].info.ssh_port,
+        )
+
         ssh_manager.get_file(file_path, experiment_id)
     else:
         raise ValueError(

@@ -8,14 +8,8 @@ title = "mle-toolbox-config"
 # Local filename to store protocol DB in
 local_protocol_fname = '~/local_mle_protocol.db'
 
-# Syncing of protocol with GCloud
-use_gcloud_protocol_sync = true
-
-# Storing of experiment results in bucket
-use_gcloud_results_storage = true
-
-# Storing of encrypted ssh credentials
-use_credential_encryption = true
+# Path to private key for passwordless SSH access
+pkey_path = '~/.ssh/id_rsa'
 
 # Whether to use conda or venv for experiment virtual environment
 use_conda_virtual_env = true
@@ -37,8 +31,6 @@ random_seed = 42
     # Slurm credentials - Only if you want to retrieve results from cluster
     [slurm.credentials]
     user_name = '<slurm-user-name>'
-    password = '<slurm-password>'
-    aes_key = '<aes-key>'
 
     # Slurm cluster information - Job scheduling, monitoring & retrieval
     [slurm.info]
@@ -72,8 +64,6 @@ random_seed = 42
     # SGE credentials - Needed only if you want to retrieve results from cluster
     [sge.credentials]
     user_name = '<sge-user-name>'
-    password = '<sge-password>'
-    aes_key = '<aes-key>'
 
     # SGE cluster information - Job scheduling, monitoring & retrieval
     [sge.info]
@@ -111,7 +101,7 @@ random_seed = 42
 #------------------------------------------------------------------------------#
 [gcp]
 # Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
-credentials_path = "~/<sge_path_to_gcloud_credentials>.json"
+credentials_path = "~/<path_to_gcloud_credentials>.json"
 
 # Set GCloud project and bucket name for storage/compute instances
 project_name = "<gcloud_project_name>"
@@ -120,6 +110,11 @@ bucket_name = "<gcloud_bucket_name>"
 # Filename to retrieve from gcloud bucket & where to store
 protocol_fname = "gcloud_mle_protocol.db"
 
+# Syncing of protocol with GCloud
+use_protocol_sync = true
+
+# Storing of experiment results in bucket
+use_results_storage = true
 
 #------------------------------------------------------------------------------#
 # 5. Slack Bot Config - OAuth Access Token & Config Path

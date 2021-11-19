@@ -103,7 +103,7 @@ def run_build_subparser(subparsers):
     )
     parser_run.add_argument(
         "-del",
-        "--delete_after_upload",
+        "--keep_after_upload",
         default=False,
         action="store_true",
         help="Delete results after upload to GCloud.",
