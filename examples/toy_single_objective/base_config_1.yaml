@@ -1,0 +1,12 @@
+train_config:
+  lrate: 0.2
+  batch_size: 4
+  arch: "cnn"
+
+log_config:
+  time_to_track: ["num_epochs"]
+  what_to_track: ["train_loss", "test_loss"]
+  verbose: true
+  print_every_k_updates: 1
+  log_every_j_steps: 1
+  overwrite: 1

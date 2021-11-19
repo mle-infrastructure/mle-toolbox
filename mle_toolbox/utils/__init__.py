@@ -12,10 +12,12 @@ from .core_files_load import (
     load_mle_toolbox_config,
     load_pkl_object,
     load_result_logs,
-    combine_experiments
+    combine_experiments,
 )
 from .load_hyper_log import load_hyper_log
 from .helpers import print_framed, get_jax_os_ready, save_pkl_object
+from .protocol_data import compose_protocol_data
+from .gcloud_transfer import send_gcloud_zip, get_gcloud_zip
 
 __all__ = [
     "parse_experiment_args",
@@ -34,4 +36,7 @@ __all__ = [
     "print_framed",
     "get_jax_os_ready",
     "save_pkl_object",
+    "compose_protocol_data",
+    "send_gcloud_zip",
+    "get_gcloud_zip",
 ]

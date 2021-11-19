@@ -36,3 +36,5 @@ pbt_args:
 single_job_args:
     job_name: "pbt"
     num_logical_cores: 1
+    env_name: "mle-toolbox"
+    use_conda_venv: true

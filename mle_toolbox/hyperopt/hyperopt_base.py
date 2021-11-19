@@ -8,10 +8,11 @@ import logging
 from typing import Union, List
 
 from .hyper_logger import HyperoptLogger
-from ..job import JobQueue
 from ..utils import print_framed
-from mle_logging.utils import load_json_config, load_yaml_config
-from mle_logging import merge_config_logs, load_meta_log
+
+from mle_logging import merge_config_logs, load_meta_log, load_config
+from mle_scheduler import MLEQueue
+from mle_toolbox import mle_config, check_single_job_args
 
 
 class BaseHyperOptimisation(object):
@@ -45,15 +46,13 @@ class BaseHyperOptimisation(object):
         self.config_fname = config_fname  # Fname base config file
         # Load base config of jobs to be manipulated by search
         fname, self.config_fext = os.path.splitext(config_fname)
-        if self.config_fext == ".json":
-            self.base_config = load_json_config(config_fname, return_dotmap=True)
-        elif self.config_fext == ".yaml":
-            self.base_config = load_yaml_config(config_fname, return_dotmap=True)
-        else:
-            raise ValueError("Job config has to be .json or .yaml file.")
+        self.base_config = load_config(config_fname, return_dotmap=True)
 
         self.job_fname = job_fname  # Python file to run job
-        self.job_arguments = job_arguments  # SGE job info
+        # 0. Check if all required args are given - otw. add default to copy
+        self.job_arguments = check_single_job_args(
+            resource_to_run, job_arguments.copy()
+        )
         self.experiment_dir = experiment_dir  # Where to store all logs
         if self.experiment_dir[-1] != "/":
             self.experiment_dir += "/"
@@ -171,16 +170,20 @@ class BaseHyperOptimisation(object):
             f" {num_seeds_per_eval} Seeds"
         )
         start_t = time.time()
-        job_queue = JobQueue(
+        job_queue = MLEQueue(
             self.resource_to_run,
             self.job_fname,
-            batch_fnames,
             self.job_arguments,
+            batch_fnames,
             self.experiment_dir,
             num_seeds_per_eval,
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
-            message_id=self.message_id,
+            cloud_settings=mle_config.gcp,
+            automerge_seeds=True,
+            slack_message_id=self.message_id,
+            slack_user_name=mle_config.slack.user_name,
+            slack_auth_token=mle_config.slack.slack_token,
         )
         job_queue.run()
         time_elapsed = time.time() - start_t
@@ -231,7 +234,7 @@ class BaseHyperOptimisation(object):
             # Training w. prev. specified hyperparams & eval, get time taken
             max_jobs = num_seeds_per_eval * num_evals_per_batch
             start_t = time.time()
-            job_queue = JobQueue(
+            job_queue = MLEQueue(
                 self.resource_to_run,
                 self.job_fname,
                 batch_fnames,
@@ -240,7 +243,11 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
-                message_id=self.message_id,
+                cloud_settings=mle_config.gcp,
+                slack_message_id=self.message_id,
+                slack_user_name=mle_config.slack.user_name,
+                slack_auth_token=mle_config.slack.slack_token,
+                automerge_seeds=True,
             )
             job_queue.run()
             time_elapsed = time.time() - start_t
@@ -332,14 +339,15 @@ class BaseHyperOptimisation(object):
                 if self.search_type == "smbo":
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
-                elif (self.search_type == "nevergrad" and
-                      "metric_to_model" in self.strategy.search_config.keys()):
+                elif (
+                    self.search_type == "nevergrad"
+                    and "metric_to_model" in self.strategy.search_config.keys()
+                ):
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-
         self.strategy.tell(proposals, measures)
         self.strategy.save(self.search_log_path)
 

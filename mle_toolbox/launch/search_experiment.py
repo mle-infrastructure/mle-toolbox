@@ -17,8 +17,9 @@ def run_hyperparameter_search(
     if type(meta_job_args["base_train_config"]) == list:
         experiment_dirs, config_files = [], []
         for config in meta_job_args["base_train_config"]:
-            experiment_dirs.append(os.path.join(meta_job_args["experiment_dir"],
-                                                Path(config).stem))
+            experiment_dirs.append(
+                os.path.join(meta_job_args["experiment_dir"], Path(config).stem)
+            )
             config_files.append(config)
     else:
         config_files = [meta_job_args["base_train_config"]]

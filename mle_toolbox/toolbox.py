@@ -10,6 +10,8 @@ def main():
     - `monitor`: Monitor a compute resource and view experiment protocol.
     - `sync-gcs`: Sync all new results from Google Cloud Storage.
     - `init`: Setup the toolbox .toml config with credentials/defaults.
+    - `project`: Clone project template repository and rename it.
+    - `protocol`: List protocol summary of recent experiments
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
@@ -23,6 +25,8 @@ def main():
     monitor_build_subparser(subparsers)
     sync_gcs_build_subparser(subparsers)
     init_build_subparser(subparsers)
+    project_build_subparser(subparsers)
+    protocol_build_subparser(subparsers)
 
     # Parse arguments and executed provided subcommand
     args = parser.parse_args()
@@ -50,6 +54,14 @@ def main():
         from .src.initialize import initialize
 
         initialize(args)
+    elif args.command == "project":
+        from .src.project import project
+
+        project(args)
+    elif args.command == "protocol":
+        from .src.protocol import protocol
+
+        protocol()
     else:
         parser.parse_args(["--help"])
     return
@@ -58,7 +70,7 @@ def main():
 def run_build_subparser(subparsers):
     """Build subparser arguments for `run` subcommand."""
     parser_run = subparsers.add_parser(
-        "run", help="Run a new experiment on " "a resource available to you."
+        "run", help="Run a new experiment on a resource available to you."
     )
     # Basic run-experiment options
     parser_run.add_argument(
@@ -91,7 +103,7 @@ def run_build_subparser(subparsers):
     )
     parser_run.add_argument(
         "-del",
-        "--delete_after_upload",
+        "--keep_after_upload",
         default=False,
         action="store_true",
         help="Delete results after upload to GCloud.",
@@ -143,7 +155,7 @@ def retrieve_build_subparser(subparsers):
     """Build subparser arguments for `retrieve` subcommand."""
     parser_retrieve = subparsers.add_parser(
         "retrieve",
-        help="Retrieve a " "completed experiment from" " a cluster/GCS bucket.",
+        help="Retrieve a completed experiment from a cluster/GCS bucket.",
     )
     parser_retrieve.add_argument(
         "-e_id",
@@ -180,7 +192,7 @@ def report_build_subparser(subparsers):
     """Build subparser arguments for `report` subcommand."""
     parser_report = subparsers.add_parser(
         "report",
-        help="Generate set of " "reports (.html/.md) from " "experiment results.",
+        help="Generate set of reports (.html/.md) from experiment results.",
     )
     parser_report.add_argument(
         "-e_id",
@@ -202,7 +214,7 @@ def report_build_subparser(subparsers):
 def monitor_build_subparser(subparsers):
     """Build subparser arguments for `init` subcommand."""
     parser_monitor = subparsers.add_parser(
-        "monitor", help="Monitor a compute " "resource and view experiment" " protocol."
+        "monitor", help="Monitor a compute resource and view experiment" " protocol."
     )
     return parser_monitor
 
@@ -210,7 +222,7 @@ def monitor_build_subparser(subparsers):
 def sync_gcs_build_subparser(subparsers):
     """Build subparser arguments for `init` subcommand."""
     parser_sync = subparsers.add_parser(
-        "sync-gcs", help="Sync all new results" " from Google Cloud Storage."
+        "sync-gcs", help="Sync all new results from Google Cloud Storage."
     )
     return parser_sync
 
@@ -219,7 +231,7 @@ def init_build_subparser(subparsers):
     """Build subparser arguments for `init` subcommand."""
     parser_init = subparsers.add_parser(
         "init",
-        help="Setup the toolbox .toml " "config with credentials/defaults.",
+        help="Setup the toolbox .toml config with credentials/defaults.",
     )
     parser_init.add_argument(
         "-no_cli",
@@ -229,3 +241,27 @@ def init_build_subparser(subparsers):
         help="Whether to go through settings in CLI.",
     )
     return parser_init
+
+
+def project_build_subparser(subparsers):
+    """Build subparser arguments for `project` subcommand."""
+    parser_project = subparsers.add_parser(
+        "project",
+        help="Clone the base project repository and rename the directory.",
+    )
+    parser_project.add_argument(
+        "-name",
+        "--project_name",
+        type=str,
+        default="mle-project",
+        help="New project name",
+    )
+    return parser_project
+
+
+def protocol_build_subparser(subparsers):
+    """Build subparser arguments for `protocol` subcommand."""
+    parser_protocol = subparsers.add_parser(
+        "protocol", help="List experiment protocol."
+    )
+    return parser_protocol

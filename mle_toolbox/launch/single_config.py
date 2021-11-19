@@ -1,4 +1,5 @@
-from ..job import Job
+from mle_scheduler import MLEJob
+from mle_toolbox import check_single_job_args
 
 
 def run_single_config(
@@ -16,12 +17,14 @@ def run_single_config(
         single_job_args (dict): Resources, environment and log file names.
 
     """
+    # 0. Check if all required args are given - otw. add default to copy
+    single_job_args = check_single_job_args(resource_to_run, single_job_args.copy())
     # 1. Instantiate the experiment class
-    experiment = Job(
+    experiment = MLEJob(
         resource_to_run,
         meta_job_args["base_train_fname"],
-        meta_job_args["base_train_config"],
         single_job_args,
+        meta_job_args["base_train_config"],
         meta_job_args["experiment_dir"],
     )
     # 2. Run the single experiment
