@@ -5,7 +5,7 @@ from typing import Union
 import os
 import sys
 import select
-from .ssh_manager import SSH_Manager
+from mle_scheduler.ssh import SSH_Manager
 from .ssh_session_sge import generate_remote_sge_cmd
 from .ssh_session_slurm import generate_remote_slurm_cmd
 

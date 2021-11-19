@@ -6,14 +6,7 @@ from mle_monitor import MLEProtocol
 
 def report(cmd_args):
     """Interface for user-defined generation of experiment report."""
-    protocol_db = MLEProtocol(
-        mle_config.general.local_protocol_fname,
-        mle_config.general.use_gcloud_protocol_sync,
-        mle_config.gcp.project_name,
-        mle_config.gcp.bucket_name,
-        mle_config.gcp.protocol_fname,
-        mle_config.gcp.credentials_path,
-    )
+    protocol_db = MLEProtocol(mle_config.general.local_protocol_fname, mle_config.gcp)
 
     if not cmd_args.use_last_id:
         # 0. Get command line input for experiment id
@@ -25,7 +18,7 @@ def report(cmd_args):
     else:
         experiment_id = None
     # 2. Create 'reporter' instance and write reports
-    auto_generate_reports(str(experiment_id), protocol_db, pdf_gen=True)
+    auto_generate_reports(experiment_id, protocol_db, pdf_gen=True)
 
 
 def auto_generate_reports(
@@ -35,6 +28,8 @@ def auto_generate_reports(
     # Create 'reporter' instance aka Karla Kolumna - and write
     if e_id is None:
         e_id = str(protocol_db.last_experiment_id)
+    else:
+        e_id = str(e_id)
     protocol_data = protocol_db.get(str(e_id))
     reporter = ReportGenerator(str(e_id), protocol_data, logger, pdf_gen)
     reporter.generate_reports()

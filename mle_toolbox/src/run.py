@@ -9,17 +9,9 @@ from mle_toolbox import mle_config
 from mle_toolbox.utils import (
     load_experiment_config,
     determine_resource,
-    ask_for_resource_to_run,
     print_framed,
     set_random_seeds,
     compose_protocol_data,
-)
-
-# Import of local-to-remote helpers (verify, rsync, exec)
-from mle_toolbox.remote.ssh_execute import (
-    SSH_Manager,
-    monitor_remote_session,
-    run_remote_experiment,
 )
 
 # Import different experiment executers & setup tools (log, config, etc.)
@@ -57,39 +49,6 @@ def run(cmd_args):
     logger = prepare_logger()
     logger.info(f"Loaded configuration: {cmd_args.config_fname}")
 
-    # 3. If local - check if experiment should be run on remote resource
-    if current_resource not in ["sge-cluster", "slurm-cluster"] or (
-        current_resource in ["sge-cluster", "slurm-cluster"]
-        and resource_to_run is not None
-    ):
-        # Ask user on which resource to run on [local/sge/slurm/gcp]
-        if cmd_args.resource_to_run is None:
-            resource_to_run = ask_for_resource_to_run()
-
-        # If locally launched & want to run on Slurm/SGE - execute on remote!
-        if resource_to_run in ["slurm-cluster", "sge-cluster"]:
-            if cmd_args.remote_reconnect:
-                print_framed("RECONNECT TO REMOTE")
-                ssh_manager = SSH_Manager(resource_to_run)
-                base, fname_and_ext = os.path.split(cmd_args.config_fname)
-                session_name, ext = os.path.splitext(fname_and_ext)
-                monitor_remote_session(ssh_manager, session_name)
-                return
-            else:
-                print_framed("TRANSFER TO REMOTE")
-                if cmd_args.purpose is not None:
-                    purpose = " ".join(cmd_args.purpose)
-                else:
-                    purpose = "Run on remote resource"
-                run_remote_experiment(
-                    resource_to_run,
-                    cmd_args.config_fname,
-                    job_config.meta_job_args.remote_exec_dir,
-                    purpose,
-                )
-                # After successful completion on remote resource - BREAK
-                return
-
     if resource_to_run is None:
         resource_to_run = current_resource
     logger.info(f"Run on resource: {resource_to_run}")
@@ -101,12 +60,7 @@ def run(cmd_args):
     if not cmd_args.no_protocol:
         # Meta-protocol experiment - Print last ones - Delete from input
         protocol_db = MLEProtocol(
-            mle_config.general.local_protocol_fname,
-            mle_config.general.use_gcloud_protocol_sync,
-            mle_config.gcp.project_name,
-            mle_config.gcp.bucket_name,
-            mle_config.gcp.protocol_fname,
-            mle_config.gcp.credentials_path,
+            mle_config.general.local_protocol_fname, mle_config.gcp
         )
         protocol_db.summary(tail=10, verbose=True)
 
@@ -124,7 +78,7 @@ def run(cmd_args):
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
 
         # 5d. Send recent/up-to-date experiment DB to Google Cloud Storage
-        if mle_config.general.use_gcloud_protocol_sync:
+        if mle_config.gcp.use_protocol_sync:
             if protocol_db.accessed_gcs:
                 protocol_db.gcs_send()
 
@@ -140,7 +94,7 @@ def run(cmd_args):
     if not os.path.exists(config_copy):
         shutil.copy(cmd_args.config_fname, config_copy)
 
-    # Setup cluster slack bot for status updates
+    # 7. Setup cluster slack bot for status updates
     if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
         try:
             from clusterbot import ClusterBot, activate_logger
@@ -309,10 +263,10 @@ def run(cmd_args):
         protocol_db.load()
 
         # (b) Store experiment directory in GCS bucket under hash
-        if mle_config.general.use_gcloud_results_storage:
+        if mle_config.gcp.use_results_storage:
             try:
                 # Import of helpers for GCloud storage of results/protocol
-                from ..remote.gcloud_transfer import send_gcloud_zip
+                from ..utils import send_gcloud_zip
             except ImportError:
                 raise ImportError(
                     "You need to install `google-cloud-storage` to synchronize"
@@ -323,7 +277,7 @@ def run(cmd_args):
             send_gcloud_zip(
                 job_config.meta_job_args["experiment_dir"],
                 zip_to_store,
-                cmd_args.delete_after_upload,
+                not cmd_args.keep_after_upload,
             )
             protocol_db.update(new_experiment_id, "stored_in_gcloud", True)
 
@@ -337,7 +291,7 @@ def run(cmd_args):
         )
 
         # (d) Send most recent/up-to-date experiment DB to GCS
-        if mle_config.general.use_gcloud_protocol_sync:
+        if mle_config.gcp.use_protocol_sync:
             if protocol_db.accessed_gcs:
                 protocol_db.gcs_send()
 

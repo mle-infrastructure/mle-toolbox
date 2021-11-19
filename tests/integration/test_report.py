@@ -11,8 +11,8 @@ def check_correct_results(experiment_dir: str) -> None:
     """Ensure that correct results and directories were generated."""
     assert os.path.exists(experiment_dir)
     # Check that figures and report files were correctly generated
-    assert os.path.exists(os.path.join(experiment_dir, "figures/integral_1d.png"))
-    assert os.path.exists(os.path.join(experiment_dir, "figures/noise_1d.png"))
+    assert os.path.exists(os.path.join(experiment_dir, "figures/train_loss_1d.png"))
+    assert os.path.exists(os.path.join(experiment_dir, "figures/test_loss_1d.png"))
 
     report_path = os.path.join(experiment_dir, "reports")
     assert os.path.exists(report_path)
@@ -70,29 +70,6 @@ def test_api_report() -> None:
 
     # Execute the mle api command
     bashCommand = "mle report --use_last_id"
-    process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
-    output, error = process.communicate()
-
-    # Check generated directories for correctness
-    check_correct_results(exp_dir)
-    os.chdir("..")
-
-
-def test_api_run_and_report() -> None:
-    """Execute `mle run pde_grid_sync.yaml` and check running pipeline."""
-    os.chdir("./examples")
-    exp_dir = "experiments/report/"
-    # Remove experiment dir at start of test
-    if os.path.exists(exp_dir) and os.path.isdir(exp_dir):
-        shutil.rmtree(exp_dir)
-
-    # Execute the mle api command
-    bashCommand = (
-        "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
-        f" --experiment_dir {exp_dir}"
-        f" --purpose Test report generation"
-    )
-
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
     output, error = process.communicate()
 
