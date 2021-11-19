@@ -73,8 +73,10 @@ def run(cmd_args):
         else:
             purpose = " ".join(cmd_args.purpose)
 
-        protocol_data = compose_protocol_data(job_config, resource_to_run, purpose)
-        new_experiment_id = protocol_db.add(protocol_data)
+        meta_data, extra_data = compose_protocol_data(
+            job_config, resource_to_run, purpose
+        )
+        new_experiment_id = protocol_db.add(meta_data, extra_data)
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
 
         # 5d. Send recent/up-to-date experiment DB to Google Cloud Storage

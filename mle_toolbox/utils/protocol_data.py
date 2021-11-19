@@ -87,4 +87,10 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
         "num_cpus": num_cpus,
         "num_gpus": num_gpus,
     }
-    return meta_data
+
+    extra_data = {}
+    extra_data["single_job_args"] = job_config.single_job_args.toDict()
+    extra_data["meta_job_args"] = job_config.meta_job_args.toDict()
+    if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
+        extra_data["job_spec_args"] = job_config.param_search_args.toDict()
+    return meta_data, extra_data

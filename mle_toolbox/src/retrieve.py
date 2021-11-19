@@ -101,7 +101,19 @@ def retrieve_single_experiment(protocol_db: MLEProtocol, experiment_id: str):
 
     # Create SSH & SCP client - Pull files into new dir by name of exp-id
     if remote_resource in ["sge-cluster", "slurm-cluster"]:
-        ssh_manager = SSH_Manager(remote_resource)
+        # 0. Load the toolbox config, setup logger & ssh manager for local2remote
+        if remote_resource == "slurm-cluster":
+            resource = "slurm"
+        elif remote_resource == "sge-cluster":
+            resource = "sge"
+        ssh_manager = SSH_Manager(
+            user_name=mle_config[resource].credentials.user_name,
+            pkey_path=mle_config.general.pkey_path,
+            main_server=mle_config[resource].info.main_server_name,
+            jump_server=mle_config[resource].info.jump_server_name,
+            ssh_port=mle_config[resource].info.ssh_port,
+        )
+
         ssh_manager.get_file(file_path, experiment_id)
     else:
         raise ValueError(

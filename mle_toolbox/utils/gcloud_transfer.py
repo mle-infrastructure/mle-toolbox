@@ -1,7 +1,6 @@
 import os
 import logging
 import zipfile
-import shutil
 from datetime import datetime
 from typing import Union
 
@@ -50,7 +49,7 @@ def send_gcloud_zip(
     # 4. Delete the .zip file & the folder if desired
     if delete_after_upload:
         os.remove(local_zip_fname)
-        shutil.rmtree(local_fname, ignore_errors=True)
+        # shutil.rmtree(local_fname, ignore_errors=True)
         logger.info(f"DELETED - experiment dir + .zip file")
 
 
