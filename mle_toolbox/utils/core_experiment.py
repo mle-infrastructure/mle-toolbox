@@ -333,6 +333,7 @@ def ask_for_binary_input(question: str, default_answer: str = "N"):
 
 def determine_resource() -> str:
     """Check if cluster (sge/slurm) is available."""
+    # TODO: Try running qstat or squeue commands - if one succeeds we know where we are
     hostname = platform.node()
     on_sge_cluster = any(
         re.match(line, hostname) for line in mle_config.sge.info.node_reg_exp
@@ -352,7 +353,7 @@ def determine_resource() -> str:
 
 def setup_proxy_server():
     """Set Gcloud creds & port to tunnel for internet connection."""
-    if mle_config.gcp.credentials_path != "":
+    if "credentials_path" in mle_config.gcp.keys():
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
             mle_config.gcp.credentials_path
         )

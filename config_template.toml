@@ -100,9 +100,6 @@ random_seed = 42
 # OPTIONAL: Only required if you want to sync protocol with GCS
 #------------------------------------------------------------------------------#
 [gcp]
-# Set absolute path to the GCloud .json credentials - on Slurm/SGE cluster
-credentials_path = "~/<path_to_gcloud_credentials>.json"
-
 # Set GCloud project and bucket name for storage/compute instances
 project_name = "<gcloud_project_name>"
 bucket_name = "<gcloud_bucket_name>"

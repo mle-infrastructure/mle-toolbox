@@ -7,6 +7,7 @@ from .core_experiment import (
     ask_for_binary_input,
     load_job_config,
     load_experiment_config,
+    setup_proxy_server,
 )
 from .core_files_load import (
     load_mle_toolbox_config,
@@ -28,6 +29,7 @@ __all__ = [
     "ask_for_binary_input",
     "load_job_config",
     "load_experiment_config",
+    "setup_proxy_server",
     "load_mle_toolbox_config",
     "load_pkl_object",
     "load_result_logs",
