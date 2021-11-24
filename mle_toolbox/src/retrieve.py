@@ -1,5 +1,5 @@
 from datetime import datetime
-from mle_toolbox.utils import print_framed, get_gcloud_zip
+from mle_toolbox.utils import print_framed
 from mle_toolbox import mle_config
 from mle_toolbox.launch import prepare_logger
 from mle_monitor import MLEProtocol
@@ -31,7 +31,7 @@ def retrieve(cmd_args):
                         )
                     else:
                         local_dir_name = cmd_args.local_dir_name
-                    get_gcloud_zip(protocol_db, experiment_id, local_dir_name)
+                    protocol_db.retrieve(experiment_id, local_dir_name)
                 retrieval_counter += 1
             else:
                 experiment_id = protocol_db.ask_for_e_id("retrieve")
@@ -47,7 +47,7 @@ def retrieve(cmd_args):
                         )
                     else:
                         local_dir_name = cmd_args.local_dir_name
-                    get_gcloud_zip(protocol_db, experiment_id, local_dir_name)
+                    protocol_db.retrieve(experiment_id, local_dir_name)
                 retrieval_counter += 1
     else:
         list_of_new_e_ids = []
@@ -69,17 +69,8 @@ def retrieve(cmd_args):
                     local_dir_name = input(time_t + " Local results directory name:  ")
                 else:
                     local_dir_name = cmd_args.local_dir_name
-                get_gcloud_zip(protocol_db, experiment_id, protocol_db.experiment_ids)
+                protocol_db.retrieve(experiment_id, protocol_db.experiment_ids)
             print_framed(f"COMPLETED E-ID {i+1}/{len(list_of_new_e_ids)}")
-
-    # (d) Send most recent/up-to-date experiment DB to GCS
-    if mle_config.gcp.use_protocol_sync:
-        if protocol_db.accessed_gcs:
-            protocol_db.gcs_send()
-            time_t = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
-            print(
-                time_t, "Updated retrieval protocol status & " "send to gcloud storage."
-            )
 
     return local_dir_name
 

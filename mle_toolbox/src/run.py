@@ -1,6 +1,5 @@
 import os
 import shutil
-from datetime import datetime
 
 # Import the MLE-Toolbox configuration
 from mle_toolbox import mle_config
@@ -12,6 +11,7 @@ from mle_toolbox.utils import (
     print_framed,
     set_random_seeds,
     compose_protocol_data,
+    setup_proxy_server,
 )
 
 # Import different experiment executers & setup tools (log, config, etc.)
@@ -30,6 +30,9 @@ from mle_monitor import MLEProtocol
 
 def run(cmd_args):
     """Main function of toolbox - Execute different types of experiments."""
+    # Set environment variable for gcloud credentials & proxy remote
+    setup_proxy_server()
+
     # 0. Set all random seeds for 'outer loop' toolbox experiment management
     set_random_seeds(mle_config.general.random_seed)
 
@@ -67,8 +70,8 @@ def run(cmd_args):
         # Only ask to delete if no purpose given!
         if cmd_args.purpose is None:
             if len(protocol_db) > 0:
-                protocol_db.ask_for_e_id(action_str="delete")
-                protocol_db.ask_for_e_id(action_str="abort")
+                protocol_db.ask_for_e_id(action="delete")
+                protocol_db.ask_for_e_id(action="abort")
             purpose = protocol_db.ask_for_purpose()
         else:
             purpose = " ".join(cmd_args.purpose)
@@ -79,17 +82,8 @@ def run(cmd_args):
         new_experiment_id = protocol_db.add(meta_data, extra_data)
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
 
-        # 5d. Send recent/up-to-date experiment DB to Google Cloud Storage
-        if mle_config.gcp.use_protocol_sync:
-            if protocol_db.accessed_gcs:
-                protocol_db.gcs_send()
-
     # 6. Copy over the experiment config .yaml file for easy re-running
-    if not os.path.exists(job_config.meta_job_args.experiment_dir):
-        try:
-            os.makedirs(job_config.meta_job_args.experiment_dir)
-        except Exception:
-            pass
+    os.makedirs(job_config.meta_job_args.experiment_dir, exist_ok=True)
     config_copy = os.path.join(
         job_config.meta_job_args.experiment_dir, "experiment_config.yaml"
     )
@@ -261,41 +255,9 @@ def run(cmd_args):
 
     # 12. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
-        # (a) Get most recent/up-to-date experiment DB to GCS
-        protocol_db.load()
-
-        # (b) Store experiment directory in GCS bucket under hash
-        if mle_config.gcp.use_results_storage:
-            try:
-                # Import of helpers for GCloud storage of results/protocol
-                from ..utils import send_gcloud_zip
-            except ImportError:
-                raise ImportError(
-                    "You need to install `google-cloud-storage` to synchronize"
-                    " protocols with GCloud. Or set `use_glcoud_protocol_sync"
-                    " = False` in your config file."
-                )
-            zip_to_store = protocol_db.get(new_experiment_id, "e-hash") + ".zip"
-            send_gcloud_zip(
-                job_config.meta_job_args["experiment_dir"],
-                zip_to_store,
-                not cmd_args.keep_after_upload,
-            )
-            protocol_db.update(new_experiment_id, "stored_in_gcloud", True)
-
         # (c) Update the experiment protocol status
         logger.info(f"Updated protocol - COMPLETED: {new_experiment_id}")
-        time_t = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-        protocol_db.update(
-            new_experiment_id,
-            var_name=["job_status", "stop_time", "report_generated"],
-            var_value=["completed", time_t, report_generated],
-        )
-
-        # (d) Send most recent/up-to-date experiment DB to GCS
-        if mle_config.gcp.use_protocol_sync:
-            if protocol_db.accessed_gcs:
-                protocol_db.gcs_send()
+        protocol_db.complete(new_experiment_id, report_generated)
 
     print_framed("EXPERIMENT FINISHED")
     # Update slack bot experiment message - pre-processing
