@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Union, List
 from mle_scheduler import MLEJob, MLEQueue
+from mle_monitor import MLEProtocol
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -110,6 +111,7 @@ def spawn_multiple_configs(
     num_seeds: Union[None, int] = None,
     random_seeds: Union[None, List[int]] = None,
     slack_message_id: Union[str, None] = None,
+    protocol_db: Union[MLEProtocol, None] = None,
     logger_level: int = logging.WARNING,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
@@ -153,6 +155,7 @@ def spawn_multiple_configs(
         slack_message_id=slack_message_id,
         slack_user_name=mle_config.slack.user_name,
         slack_auth_token=mle_config.slack.slack_token,
+        protocol_db=protocol_db,
     )
     multi_experiment.run()
 

@@ -2,6 +2,7 @@ import os
 from typing import Dict, Union
 from ..hyperopt import HyperoptLogger, MLE_Hyperoptimisation
 from pathlib import Path
+from mle_monitor import MLEProtocol
 
 
 def run_hyperparameter_search(
@@ -12,6 +13,7 @@ def run_hyperparameter_search(
         str, Dict[str, Union[str, bool, Dict[str, Union[str, bool]]]]
     ],
     message_id: Union[str, None] = None,
+    protocol_db: Union[MLEProtocol, None] = None,
 ) -> None:
     """Run a hyperparameter search experiment for multiple configurations."""
     if type(meta_job_args["base_train_config"]) == list:
@@ -34,6 +36,7 @@ def run_hyperparameter_search(
             single_job_args,
             param_search_args,
             message_id,
+            protocol_db,
         )
 
 
@@ -47,6 +50,7 @@ def run_single_config_search(
         str, Dict[str, Union[str, bool, Dict[str, Union[str, bool]]]]
     ],
     message_id: Union[str, None] = None,
+    protocol_db: Union[MLEProtocol, None] = None,
 ) -> None:
     """Run a hyperparameter search experiment for a single configuration."""
     # 1. Setup the hyperlogger for the experiment
@@ -101,6 +105,7 @@ def run_single_config_search(
         experiment_dir,
         **param_search_args["search_config"],
         message_id=message_id,
+        protocol_db=protocol_db
     )
 
     hyper_opt_instance.run_search(**param_search_args["search_resources"])

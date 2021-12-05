@@ -5,6 +5,7 @@ from .utils.core_experiment import (
     parse_experiment_args,
     get_extra_cmd_line_input,
     set_random_seeds,
+    setup_proxy_server,
 )
 from .utils.helpers import print_framed
 from mle_logging import MLELogger
@@ -24,6 +25,9 @@ class MLExperiment(object):
         model_config: Union[None, dict] = None,
     ):
         """Load job configuration for MLE experiment, setup logger & random seeds."""
+        setup_proxy_server()
+        self.config_fname = config_fname
+        self.experiment_dir = experiment_dir
         # Parse experiment command line arguments
         cmd_args, extra_args = parse_experiment_args(
             config_fname, seed_id, experiment_dir
@@ -48,6 +52,7 @@ class MLExperiment(object):
         self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng
         self.default_seed = seed_id
+        self.seed_id = seed_id
         self.model_ckpt = cmd_args.model_ckpt
 
         # Make initial setup optional so that configs can be modified ad-hoc
@@ -66,6 +71,7 @@ class MLExperiment(object):
                 f"{self.default_seed}."
             )
 
+        self.seed_id = self.train_config.seed_id
         # Set the random seeds for all random number generation
         if self.create_jax_prng:
             # Return JAX random number generating key

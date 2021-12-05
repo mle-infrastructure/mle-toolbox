@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import logging
-from typing import Union
+from typing import Union, List
 from pprint import pformat
 from ..utils import load_pkl_object, save_pkl_object, print_framed
 
@@ -22,8 +22,9 @@ class HyperoptLogger(object):
         self.hyperlog_fname = hyperlog_fname  # Where to save the log to
         self.max_objective = max_objective  # Max/min target (reward/loss)
         self.aggregate_seeds = aggregate_seeds  # [mean, 10/25/50/75/90p]
-        assert self.aggregate_seeds in ["mean", "p10", "p25", "p50", "p75", "p90"]
         self.problem_type = problem_type  # Time log ckpt (final/best)
+        assert self.aggregate_seeds in ["mean", "p10", "p25", "p50", "p75", "p90"]
+        assert self.problem_type in ["mean", "final", "best"]
         self.eval_metrics = eval_metrics  # Vars to compare across runs
         if type(self.eval_metrics) == str:
             self.eval_metrics = [self.eval_metrics]
@@ -72,6 +73,7 @@ class HyperoptLogger(object):
                 self.problem_type,
                 self.eval_metrics,
                 self.aggregate_seeds,
+                self.max_objective,
             )
         else:
             perf_measures = None
@@ -141,8 +143,8 @@ class HyperoptLogger(object):
             for i, m in enumerate(self.best_per_metric.keys()):
                 print_framed(m, frame_str="-")
                 self.logger.info(
-                    "METRIC: {} | ".format(m)
-                    + r"BEST SCORE: {:.4f} | ITER: {}/{} | PARAMS:".format(
+                    "METRIC: {}|".format(m)
+                    + r"BEST SCORE: {:.2f}|ITER: {}/{}|PARAMS:".format(
                         self.best_per_metric[m]["score"],
                         self.best_per_metric[m]["run_id"],
                         self.iter_id,
@@ -205,10 +207,11 @@ class HyperoptLogger(object):
 
 def evaluate_hyperparams(
     eval_logs: dict,
-    run_ids: list,
+    run_ids: List[str],
     problem_type: str,
-    eval_metrics: list,
+    eval_metrics: List[str],
     aggregate_seeds: str,
+    max_objective: bool,
 ):
     """Run the search for a number of iterations"""
     if problem_type == "final":
@@ -219,6 +222,11 @@ def evaluate_hyperparams(
     elif problem_type == "best":
         # Get final training loss as performance score
         perf_scores = evaluate_best_score(
+            eval_logs, eval_metrics, run_ids, aggregate_seeds, max_objective
+        )
+    elif problem_type == "mean":
+        # Get final training loss as performance score
+        perf_scores = evaluate_mean_score(
             eval_logs, eval_metrics, run_ids, aggregate_seeds
         )
     else:
@@ -226,8 +234,30 @@ def evaluate_hyperparams(
     return perf_scores
 
 
+def evaluate_mean_score(
+    eval_logs,
+    eval_metrics: List[str],
+    run_ids: List[str],
+    aggregate_seeds: str = "mean",
+):
+    """
+    IN: Evaluation df of evaluation, what key to use for evaluation
+    OUT: dict of final scores at end of training for all metrics
+    """
+    perf_per_metric = {}
+    for metric in eval_metrics:
+        int_out = {}
+        for run in run_ids:
+            int_out[run] = np.mean(eval_logs[run]["stats"][metric][aggregate_seeds])
+        perf_per_metric[metric] = int_out
+    return perf_per_metric
+
+
 def evaluate_final_score(
-    eval_logs, eval_metrics=["train_loss"], run_ids=None, aggregate_seeds="mean"
+    eval_logs,
+    eval_metrics: List[str],
+    run_ids: List[str],
+    aggregate_seeds: str = "mean",
 ):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation
@@ -244,10 +274,10 @@ def evaluate_final_score(
 
 def evaluate_best_score(
     eval_logs,
-    eval_metrics=["train_loss"],
-    run_ids=None,
-    max_objective=True,
-    aggregate_seeds="mean",
+    eval_metrics: List[str],
+    run_ids: List[str],
+    aggregate_seeds: str = "mean",
+    max_objective: bool = True,
 ):
     """
     IN: Evaluation df of evaluation, what key to use for evaluation

@@ -14,3 +14,4 @@ single_job_args:
     err_file: "e-ode"
     env_name: "mle-toolbox"
     use_conda_venv: true
+    time_per_job: "00:00:05"

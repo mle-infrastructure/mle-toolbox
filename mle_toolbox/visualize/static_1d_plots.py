@@ -22,7 +22,8 @@ def visualize_1D_bar(
     plot_title: str = "Temp Title",
     xy_labels: list = ["x", "y"],
     every_nth_tick: int = 1,
-    ylims: Union[None, tuple] = None,
+    ymin: Union[float, None] = None,
+    ymax: Union[float, None] = None,
     round_ticks: int = 1,
     fig=None,
     ax=None,
@@ -37,10 +38,16 @@ def visualize_1D_bar(
     # Select the data to plot - max. fix 2 other vars
     p_to_plot = [param_to_plot] + [target_to_plot]
 
-    sub_log = hyper_df.hyper_log.copy()
+    try:
+        sub_log = hyper_df.hyper_log.copy()
+    except Exception:
+        sub_log = hyper_df.copy()
     if fixed_params is not None:
         for k, v in fixed_params.items():
-            sub_log = sub_log[sub_log[k].astype(float) == v]
+            if type(v) == float or type(v) == int:
+                sub_log = sub_log[sub_log[k].astype(float) == v]
+            elif type(v) == str:
+                sub_log = sub_log[sub_log[k].astype(str) == v]
 
     # Subselect the desired params from the pd df
     temp_df = sub_log[p_to_plot]
@@ -56,7 +63,8 @@ def visualize_1D_bar(
         plot_title,
         xy_labels,
         every_nth_tick,
-        ylims,
+        ymin,
+        ymax,
         round_ticks,
         hline,
     )
@@ -75,7 +83,8 @@ def plot_1D_bar(
     plot_title: str = "Temp Title",
     xy_labels: list = ["x", "y"],
     every_nth_tick: int = 1,
-    ylims: Union[None, tuple] = None,
+    ymin: Union[float, None] = None,
+    ymax: Union[float, None] = None,
     round_ticks: int = 1,
     hline: Union[None, float] = None,
     figsize: tuple = (9, 6),
@@ -89,20 +98,30 @@ def plot_1D_bar(
     ax.bar(np.arange(xlen), target_array)
 
     # Handle xlabel ticks to set.
-    ax.set_xticks(np.arange(0, xlen, every_nth_tick))
-    xlabels = [
-        str(round(i, round_ticks))
-        for j, i in enumerate(param_array)
-        if j % every_nth_tick == 0
-    ]
-    ax.set_xticklabels(xlabels)
+    range_x = np.unique(param_array)
+    ax.set_xticks(np.arange(len(range_x)))
+    if len(range_x) != 0:
+        if type(range_x[-1]) is not str:
+            if round_ticks != 0:
+                xticklabels = [
+                    str(round(float(label), round_ticks)) for label in range_x
+                ]
+            else:
+                xticklabels = [str(int(label)) for label in range_x]
+        else:
+            xticklabels = [str(label) for label in range_x]
+    else:
+        xticklabels = []
+    ax.set_xticklabels(xticklabels, rotation=45, ha="right")
+
+    for n, label in enumerate(ax.xaxis.get_ticklabels()):
+        if n % every_nth_tick != 0:
+            label.set_visible(False)
 
     # Set axis labels, title and y limits
     ax.set_title(plot_title)
     ax.set_ylabel(xy_labels[1])
     ax.set_xlabel(xy_labels[0])
-    if ylims is not None:
-        ax.set_ylim(ylims)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -111,6 +130,7 @@ def plot_1D_bar(
     if hline is not None:
         ax.axhline(hline, ls="--", c="r", alpha=0.5)
 
+    ax.set_ylim([ymin, ymax])
     return fig, ax
 
 

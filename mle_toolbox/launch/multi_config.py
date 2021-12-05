@@ -1,6 +1,7 @@
 import logging
 from typing import Union
 from .spawn_jobs import spawn_multiple_configs
+from mle_monitor import MLEProtocol
 
 
 def run_multiple_configs(
@@ -9,6 +10,7 @@ def run_multiple_configs(
     single_job_args: dict,
     multi_config_args: dict,
     message_id: Union[str, None] = None,
+    protocol_db: Union[MLEProtocol, None] = None,
 ):
     """Run an experiment over different configurations (+random seeds)."""
     if "num_seeds" not in multi_config_args.keys():
@@ -26,5 +28,6 @@ def run_multiple_configs(
         num_seeds=multi_config_args["num_seeds"],
         random_seeds=multi_config_args["random_seeds"],
         slack_message_id=message_id,
+        protocol_db=protocol_db,
         logger_level=logging.INFO,
     )

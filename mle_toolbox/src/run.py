@@ -81,6 +81,8 @@ def run(cmd_args):
         )
         new_experiment_id = protocol_db.add(meta_data, extra_data)
         logger.info(f"Updated protocol - STARTING: {new_experiment_id}")
+    else:
+        protocol_db = None
 
     # 6. Copy over the experiment config .yaml file for easy re-running
     os.makedirs(job_config.meta_job_args.experiment_dir, exist_ok=True)
@@ -161,6 +163,7 @@ def run(cmd_args):
             job_config.single_job_args,
             job_config.multi_config_args,
             message_id,
+            protocol_db,
         )
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
@@ -179,6 +182,7 @@ def run(cmd_args):
             job_config.single_job_args,
             job_config.param_search_args,
             message_id,
+            protocol_db,
         )
     # (d) Experiment: Run population-based-training for NN training
     elif job_config.meta_job_args["experiment_type"] == "population-based-training":

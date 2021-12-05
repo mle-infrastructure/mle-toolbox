@@ -12,6 +12,7 @@ from ..utils import print_framed
 
 from mle_logging import merge_config_logs, load_meta_log, load_config
 from mle_scheduler import MLEQueue
+from mle_monitor import MLEProtocol
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -39,6 +40,7 @@ class BaseHyperOptimisation(object):
         search_type: str = "grid",
         search_schedule: str = "sync",
         message_id: Union[str, None] = None,
+        protocol_db: Union[MLEProtocol, None] = None,
     ):
         # Set up the hyperparameter search run
         self.hyper_log = hyper_log  # Hyperopt. Log Instance
@@ -75,8 +77,9 @@ class BaseHyperOptimisation(object):
         self.search_schedule = search_schedule  # sync vs async jobs
         self.current_iter = len(hyper_log)  # get previous number its
 
-        # Store message id for slack cluster bot
+        # Store message id for slack cluster bot & protocol db
         self.message_id = message_id
+        self.protocol_db = protocol_db
 
     def run_search(
         self,
@@ -184,6 +187,7 @@ class BaseHyperOptimisation(object):
             slack_message_id=self.message_id,
             slack_user_name=mle_config.slack.user_name,
             slack_auth_token=mle_config.slack.slack_token,
+            protocol_db=self.protocol_db,
         )
         job_queue.run()
         time_elapsed = time.time() - start_t
@@ -247,6 +251,7 @@ class BaseHyperOptimisation(object):
                 slack_message_id=self.message_id,
                 slack_user_name=mle_config.slack.user_name,
                 slack_auth_token=mle_config.slack.slack_token,
+                protocol_db=self.protocol_db,
                 automerge_seeds=True,
             )
             job_queue.run()

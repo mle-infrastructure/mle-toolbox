@@ -9,6 +9,7 @@ from mle_hyperopt import (
     CoordinateSearch,
 )
 from mle_toolbox import mle_config
+from mle_monitor import MLEProtocol
 
 
 class MLE_Hyperoptimisation(BaseHyperOptimisation):
@@ -25,6 +26,7 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
         search_schedule: str = "sync",
         search_config: Union[None, dict] = None,
         message_id: Union[str, None] = None,
+        protocol_db: Union[MLEProtocol, None] = None,
     ):
         """Simple wrapper around `mle-hyperopt` strategies."""
         BaseHyperOptimisation.__init__(
@@ -39,6 +41,7 @@ class MLE_Hyperoptimisation(BaseHyperOptimisation):
             search_type,
             search_schedule,
             message_id,
+            protocol_db,
         )
         if search_type == "grid":
             self.strategy = GridSearch(

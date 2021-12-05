@@ -60,6 +60,8 @@ class HyperLog(object):
         var_name: str,
         metric_name: str,
         fixed_params: Union[dict, None] = None,
+        ymin: Union[float, None] = None,
+        ymax: Union[float, None] = None,
         fig=None,
         ax=None,
     ):
@@ -75,6 +77,8 @@ class HyperLog(object):
             xy_labels=[var_name, metric_name],
             every_nth_tick=1,
             round_ticks=2,
+            ymin=ymin,
+            ymax=ymax,
             fig=fig,
             ax=ax,
         )
@@ -84,6 +88,8 @@ class HyperLog(object):
         var_names: List[str],
         metric_name: str,
         fixed_params: Union[dict, None] = None,
+        min_heat: Union[None, float] = None,
+        max_heat: Union[None, float] = None,
         fig=None,
         ax=None,
     ):
@@ -99,6 +105,8 @@ class HyperLog(object):
             plot_subtitle=fixed_params,
             xy_labels=var_names,
             variable_name=metric_name,
+            max_heat=max_heat,
+            min_heat=min_heat,
             round_ticks=2,
             text_in_cell=False,
             fig=fig,
