@@ -1,5 +1,4 @@
 run_pbt.py
-*.gif
 *.zip
 mle_config.toml
 .vim-arsync
