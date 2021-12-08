@@ -1,4 +1,4 @@
-## Lightweight Management of Distributed ML Experiments 🚜
+## Lightweight Management of Distributed ML Experiments 🛠️
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://roberttlange.github.io/mle-toolbox/)
 [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
@@ -9,9 +9,9 @@
 > Coming up with the right hypothesis is hard - testing it should be easy.
 <a href="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="200" align="right" /></a>
 
-ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported as `.md`/`.html` files.
+ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported.
 
-![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_toolbox_structure.png?raw=true)
+![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true)
 
 ## What Does The `mle-toolbox` Provide?
 
@@ -24,6 +24,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 4. Storage of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
+![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_toolbox_structure.png?raw=true)
 
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 

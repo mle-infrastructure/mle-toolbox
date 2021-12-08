@@ -2,13 +2,12 @@ import os
 import argparse
 import random
 import numpy as np
-import platform
-import re
 import sys
 import select
 from typing import Union, Tuple
 from dotmap import DotMap
 from datetime import datetime
+import subprocess as sp
 from mle_logging import load_config
 from .core_files_load import load_mle_toolbox_config
 from .helpers import print_framed
@@ -332,23 +331,18 @@ def ask_for_binary_input(question: str, default_answer: str = "N"):
 
 
 def determine_resource() -> str:
-    """Check if cluster (sge/slurm) is available."""
-    # TODO: Try running qstat or squeue commands - if one succeeds we know where we are
-    hostname = platform.node()
-    on_sge_cluster = any(
-        re.match(line, hostname) for line in mle_config.sge.info.node_reg_exp
-    )
-    on_slurm_cluster = any(
-        re.match(line, hostname) for line in mle_config.slurm.info.node_reg_exp
-    )
-    on_sge_head = hostname in mle_config.sge.info.head_names
-    on_slurm_head = hostname in mle_config.slurm.info.head_names
-    if on_sge_head or on_sge_cluster:
+    """Check if cluster (sge/slurm) is available - otherwise local."""
+    try:
+        sp.check_output(["qstat"])
         return "sge-cluster"
-    elif on_slurm_head or on_slurm_cluster:
+    except Exception:
+        pass
+
+    try:
+        sp.check_output(["squeue"])
         return "slurm-cluster"
-    else:
-        return hostname
+    except Exception:
+        return "local"
 
 
 def setup_proxy_server():
@@ -357,11 +351,12 @@ def setup_proxy_server():
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expanduser(
             mle_config.gcp.credentials_path
         )
-    if determine_resource() == "slurm-cluster":
+    resource_name = determine_resource()
+    if resource_name == "slurm-cluster":
         if mle_config.slurm.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.slurm.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.slurm.info.https_proxy
-    elif determine_resource() == "sge-cluster":
+    elif resource_name == "sge-cluster":
         if mle_config.sge.info.http_proxy != "":
             os.environ["HTTP_PROXY"] = mle_config.sge.info.http_proxy
             os.environ["HTTPS_PROXY"] = mle_config.sge.info.https_proxy

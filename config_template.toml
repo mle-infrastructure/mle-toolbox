@@ -34,9 +34,7 @@ random_seed = 42
 
     # Slurm cluster information - Job scheduling, monitoring & retrieval
     [slurm.info]
-    # Headnode name & partitions to monitor/run jobs on
-    head_names = ['<headnode1>']
-    node_reg_exp = ['<nodes-to-monitor1>']
+    # Partitions to monitor/run jobs on
     partitions = ['<partition1>']
 
     # Info for results retrieval & internet tunneling if local launch
@@ -67,14 +65,8 @@ random_seed = 42
 
     # SGE cluster information - Job scheduling, monitoring & retrieval
     [sge.info]
-    # Headnode name & queues to monitor/run jobs on
-    head_names = ['<headnode1>']
-    node_reg_exp = ['<nodes-to-monitor2>']
-    node_extension = '<ip-extension>'
-    node_ids = ['00']
-    queue = '<sge-queue-name>'
-    spare = '<sge-spare-name>'
-    queue_base = '<sge-base-queue>'
+    # Queues to monitor/run jobs on
+    queues = ['<sge-queue-name>']
 
     # Cluster-specific info for results retrieval & internet tunneling
     main_server_name = '<main-server-ip>'

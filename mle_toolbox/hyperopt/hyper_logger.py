@@ -80,7 +80,7 @@ class HyperoptLogger(object):
 
         # Need to account for batch case - log list of dictionaries!
         if not isinstance(params, list):
-            params = list(params)
+            params = [params]
 
         # Define list of vars from meta data to keep also in hyper df
         meta_keys_to_track = [

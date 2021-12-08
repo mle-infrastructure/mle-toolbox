@@ -10,13 +10,11 @@ def monitor():
     protocol = MLEProtocol(mle_config.general.local_protocol_fname, mle_config.gcp)
     resource_name = determine_resource()
     if resource_name == "sge-cluster":
-        monitor_config = {
-            "queue": mle_config.sge.info.queue,
-            "spare": mle_config.sge.info.spare,
-            "node_ids": mle_config.sge.info.node_ids,
-            "node_reg_exp": mle_config.sge.info.node_reg_exp[0],
-        }
-    elif resource_name in ["slurm-cluster", "gcp-cloud", "local"]:
+        monitor_config = {"queues": mle_config.sge.info.queues}
+    elif resource_name == "slurm-cluster":
+        monitor_config = {"partitions": mle_config.slurm.info.partitions}
+    else:
+        resource_name = "local"
         monitor_config = {}
     resource = MLEResource(resource_name, monitor_config)
     dashboard = MLEDashboard(protocol, resource)
