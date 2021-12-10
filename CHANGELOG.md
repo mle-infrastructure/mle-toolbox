@@ -2,6 +2,15 @@
 
 ##### Added
 
+##### Changed
+
+##### Fixed
+
+
+### v0.3.2 - 12/10/2021
+
+##### Added
+
 - Introduces experimental notebook-friendly `MLELauncher` which allows you to schedule experiments from within a local notebook.
 - Adds `mle protocol` subcommand to get a quick view of the last experiments and their status.
 - Adds `mle project` to initialize a new project based on cloning the [`mle-project`](https://github.com/mle-infrastructure/mle-project) repository.
@@ -12,8 +21,6 @@
 - Refactors out job launching and status monitoring to `mle-launcher` sub-package.
 - Moves population-based training and hypothesis testing into `experimental` submodule.
 - Moves documentation page to `mle-docs` sub-repository.
-
-##### Fixed
 
 
 ### v0.3.1 - 10/20/2021

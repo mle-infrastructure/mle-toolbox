@@ -12,9 +12,6 @@ paramiko
 sshtunnel
 pickle5
 rich
-
-pycrypto
-
 mle-logging
 mle-hyperopt
 mle-monitor

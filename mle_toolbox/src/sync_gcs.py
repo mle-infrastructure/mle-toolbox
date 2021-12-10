@@ -1,6 +1,6 @@
 from mle_toolbox import mle_config
-from mle_toolbox.utils import print_framed, get_gcloud_zip
-from mle_scheduler.cloud.gcp import delete_gcs_dir
+from mle_toolbox.utils import print_framed
+from mle_monitor.utils import get_gcloud_zip
 from mle_monitor import MLEProtocol
 
 
@@ -23,7 +23,7 @@ def sync_gcs():
                 print_framed(f"RETRIEVE E-ID {e_id}")
                 gcloud_hash_fname = get_gcloud_zip(protocol_db, e_id)
                 print_framed(f"DELETE E-ID {e_id}")
-                delete_gcs_dir(gcloud_hash_fname)
+                # delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f"COMPLETED E-ID {e_id}")
 
     # Send most recent/up-to-date experiment DB to GCS

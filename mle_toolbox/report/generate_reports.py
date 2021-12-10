@@ -5,7 +5,7 @@ from typing import Union
 from dotmap import DotMap
 from .generate_markdown import MarkdownGenerator
 from .generate_figures import FigureGenerator
-from ..launch.prepare_experiment import prepare_logger
+from ..launch import prepare_logger
 
 
 try:

@@ -31,35 +31,35 @@ def main():
     # Parse arguments and executed provided subcommand
     args = parser.parse_args()
     if args.command == "run":
-        from .src.run import run
+        from .src import run
 
         run(args)
     elif args.command == "retrieve":
-        from .src.retrieve import retrieve
+        from .src import retrieve
 
         retrieve(args)
     elif args.command == "report":
-        from .src.report import report
+        from .src import report
 
         report(args)
     elif args.command == "monitor":
-        from .src.monitor import monitor
+        from .src import monitor
 
         monitor()
     elif args.command == "sync-gcs":
-        from .src.sync_gcs import sync_gcs
+        from .src import sync_gcs
 
         sync_gcs()
     elif args.command == "init":
-        from .src.initialize import initialize
+        from .src import initialize
 
         initialize(args)
     elif args.command == "project":
-        from .src.project import project
+        from .src import project
 
         project(args)
     elif args.command == "protocol":
-        from .src.protocol import protocol
+        from .src import protocol
 
         protocol()
     else:
