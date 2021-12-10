@@ -1,3 +1,4 @@
+import time
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,6 +32,7 @@ def main(mle):
     # Generate a sample plot and store it
     fig = plot_loss(mle.log.stats_log.stats_to_track.train_loss)
     mle.log.save_plot(fig)
+    time.sleep(5)
     return
 
 

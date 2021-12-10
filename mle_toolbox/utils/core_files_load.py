@@ -16,19 +16,22 @@ def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
         mle_config = DotMap(toml.load(os.path.expanduser(config_fname)), _dynamic=False)
     except Exception:
         print(
-            f"Could not load mle-toolbox configuration .toml from {config_fname}"
+            f"Could not load mle-toolbox configuration .toml from {config_fname} \n"
             "Proceed with minimal config used for testing."
         )
         mle_config = DotMap(
             {
                 "general": {
-                    "use_conda_virtual_env": True,
+                    "use_conda_virtual_env": False,
                     "use_venv_virtual_env": False,
                     "use_slack_bot": False,
                     "random_seed": 42,
-                    "use_gcloud_protocol_sync": False,
                     "local_protocol_fname": "~/local_mle_protocol.db",
-                }
+                },
+                "slack": {
+                    "slack_user_name": None,
+                    "slack_token": None,
+                },
             }
         )
     return mle_config

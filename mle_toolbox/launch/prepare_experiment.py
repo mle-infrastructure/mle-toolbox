@@ -25,20 +25,24 @@ def welcome_to_mle_toolbox() -> None:
     )
     grid.add_row(
         welcome_ascii[1],
-        "  [link=https://tinyurl.com/srpy4nrp]You are awesome![/link] [not italic]:hugging_face:[/]",
+        # "  [link=https://tinyurl.com/srpy4nrp]You are awesome![/link] [not italic]:hugging_face:[/]",
+        "  You are awesome! [not italic]:hugging_face:[/]",
     )
 
     grid.add_row(
         welcome_ascii[2],
-        "  [link=https://twitter.com/RobertTLange]@RobertTLange[/link] :bird:",
+        # "  [link=https://twitter.com/RobertTLange]@RobertTLange[/link] :bird:",
+        "  @RobertTLange :bird:",
     )
     grid.add_row(
         welcome_ascii[3],
-        "  [link=https://roberttlange.github.io/mle-toolbox/]MLE-Toolbox Docs[/link] [not italic]:notebook:[/]",
+        # "  [link=https://roberttlange.github.io/mle-toolbox/]MLE-Toolbox Docs[/link] [not italic]:notebook:[/]",
+        "  MLE-Toolbox Docs [not italic]:notebook:[/]",
     )
     grid.add_row(
         welcome_ascii[4],
-        "  [link=https://github.com/RobertTLange/mle-toolbox/]MLE-Toolbox Repo[/link] [not italic]:pencil:[/]",
+        # "  [link=https://github.com/RobertTLange/mle-toolbox/]MLE-Toolbox Repo[/link] [not italic]:pencil:[/]",
+        "  MLE-Toolbox Repo [not italic]:pencil:[/]",
     )
     panel = Panel(grid, style="white on blue", expand=True)
     console = Console(width=87)
