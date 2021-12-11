@@ -1,3 +1,3 @@
-from .mle_nb_launcher import MLE_NBLaucnher
+from .mle_launcher import MLELaucnher
 
-__all__ = ["MLE_NBLaucnher"]
+__all__ = ["MLE_Laucnher"]

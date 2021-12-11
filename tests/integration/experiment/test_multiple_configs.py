@@ -1,7 +1,6 @@
 import os
 import shutil
 import glob
-import datetime
 import subprocess as sp
 from mle_toolbox.launch.multi_config import run_multiple_configs
 
@@ -22,19 +21,16 @@ def check_correct_results(
     experiment_dir: str, config_filename: str, api_check: bool = False
 ) -> None:
     """Ensure that correct results and directories were generated."""
-    timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
     base_str = os.path.split(config_filename)[1].split(".")[0]
-    dir_to_check = os.path.join(experiment_dir, timestr + base_str + "/")
+    dir_to_check = os.path.join(experiment_dir, base_str + "/")
 
     # Check that experiment directory with results exists
     assert os.path.exists(dir_to_check), "Directory missing"
     # Check that copied .json config exists
-    json_path = os.path.join(dir_to_check, timestr + os.path.split(config_filename)[1])
+    json_path = os.path.join(dir_to_check, os.path.split(config_filename)[1])
     assert os.path.exists(json_path), f".json missing: {json_path}"
     # Check that log file exists
-    assert os.path.exists(
-        os.path.join(dir_to_check, "logs", base_str + ".hdf5")
-    ), "Log missing"
+    assert os.path.exists(os.path.join(dir_to_check, "logs", "log.hdf5")), "Log missing"
     # Check that figure files exist
     png_counter = len(glob.glob1(os.path.join(dir_to_check, "figures/"), "*.png"))
 

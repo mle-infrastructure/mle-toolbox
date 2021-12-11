@@ -17,3 +17,5 @@ mle-hyperopt
 mle-monitor
 mle-scheduler
 slack-clusterbot
+xhtml2pdf
+markdown2

@@ -1,7 +1,6 @@
 import unittest
 import os
 import shutil
-import datetime
 import subprocess as sp
 from mle_toolbox.launch.single_config import run_single_config
 
@@ -14,16 +13,13 @@ experiment_dir = "examples/experiments/single"
 
 def check_correct_results(experiment_dir: str, api_check: bool = False) -> None:
     """Ensure that correct results and directories were generated."""
-    timestr = datetime.datetime.today().strftime("%Y-%m-%d")[2:] + "_"
     base_str = os.path.split(config_filename)[1].split(".")[0]
-    dir_to_check = os.path.join(experiment_dir, timestr + base_str + "/")
+    dir_to_check = os.path.join(experiment_dir, base_str + "/")
 
     # Check that experiment directory with results exists
     assert os.path.exists(dir_to_check)
     # Check that copied .json config exists
-    assert os.path.exists(
-        os.path.join(dir_to_check, timestr + os.path.split(config_filename)[1])
-    )
+    assert os.path.exists(os.path.join(dir_to_check, os.path.split(config_filename)[1]))
     # Check that log file exists
     assert os.path.exists(os.path.join(dir_to_check, "logs", "log_seed_0.hdf5"))
     # Check that figure file exists

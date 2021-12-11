@@ -16,9 +16,7 @@ from mle_toolbox.utils import (
 
 # Import different experiment executers & setup tools (log, config, etc.)
 from mle_toolbox.launch import (
-    run_single_config,
-    run_multiple_configs,
-    run_processing_job,
+    launch_experiment,
     welcome_to_mle_toolbox,
     prepare_logger,
     check_experiment_config,
@@ -122,118 +120,12 @@ def run(cmd_args):
     else:
         message_id = None
 
-    # 8. Perform pre-processing if arguments are provided
-    if "pre_processing_args" in job_config.keys():
-        print_framed("PRE-PROCESSING")
-        logger.info("Pre-processing job for experiment - STARTING")
-        run_processing_job(
-            resource_to_run,
-            job_config.pre_processing_args,
-            job_config.meta_job_args["experiment_dir"],
-        )
-        logger.info("Post-processing experiment results - COMPLETED")
+    # 8. Launch the main experiment - pre-/post-processing + jobs
+    launch_experiment(
+        resource_to_run, job_config, cmd_args.no_protocol, message_id, protocol_db
+    )
 
-        # Update slack bot experiment message - pre-processing
-        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-            bot.reply(
-                message_id,
-                ":white_check_mark:"
-                f" Finished pre-processing for `{new_experiment_id}`",
-                user_name=mle_config.slack.user_name,
-            )
-
-    # 9. Run the main experiment
-    print_framed("RUN EXPERIMENT")
-    # (a) Experiment: Run a single experiment
-    if job_config.meta_job_args["experiment_type"] == "single-config":
-        run_single_config(
-            resource_to_run, job_config.meta_job_args, job_config.single_job_args
-        )
-    # (b) Experiment: Run training over different config files/seeds
-    elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
-        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-            message = "Multi-Config Resources & No. of Jobs:\n"
-            for k, v in job_config.multi_config_args.items():
-                message += f"→ {k}: `{v}` \n"
-            bot.reply(message_id, message)
-
-        run_multiple_configs(
-            resource_to_run,
-            job_config.meta_job_args,
-            job_config.single_job_args,
-            job_config.multi_config_args,
-            message_id,
-            protocol_db,
-        )
-    # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
-    elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
-        # Import only if needed due to optional dependency on scikit-optimize
-        from ..launch import run_hyperparameter_search
-
-        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-            message = "Search Resources & No. of Jobs:\n"
-            for k, v in job_config.param_search_args["search_resources"].items():
-                message += f"→ {k}: `{v}` \n"
-            bot.reply(message_id, message)
-
-        run_hyperparameter_search(
-            resource_to_run,
-            job_config.meta_job_args,
-            job_config.single_job_args,
-            job_config.param_search_args,
-            message_id,
-            protocol_db,
-        )
-    # (d) Experiment: Run population-based-training for NN training
-    elif job_config.meta_job_args["experiment_type"] == "population-based-training":
-        from ..experimental.pbt_experiment import run_population_based_training
-
-        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-            message = "PBT Resources & No. of Jobs:\n"
-            for k, v in job_config.pbt_args["pbt_resources"].items():
-                message += f"→ {k}: `{v}` \n"
-            bot.reply(message_id, message)
-
-        run_population_based_training(
-            resource_to_run,
-            job_config.meta_job_args,
-            job_config.single_job_args,
-            job_config.pbt_args,
-        )
-
-    # Update slack bot experiment message - main experiment jobs
-    if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-        bot.reply(
-            message_id,
-            ":steam_locomotive: "
-            f"Finished main experiment for `{new_experiment_id}`: "
-            f"`{job_config.meta_job_args['experiment_type']}`"
-            " :steam_locomotive:",
-            user_name=mle_config.slack.user_name,
-        )
-
-    # 10. Perform post-processing of results if arguments are provided
-    if "post_processing_args" in job_config.keys():
-        print_framed("POST-PROCESSING")
-        logger.info("Post-processing experiment results - STARTING")
-        run_processing_job(
-            resource_to_run,
-            job_config.post_processing_args,
-            job_config.meta_job_args["experiment_dir"],
-        )
-        logger.info("Post-processing experiment results - COMPLETED")
-
-        # Update slack bot experiment message - pre-processing
-        if not cmd_args.no_protocol and mle_config.general.use_slack_bot:
-            bot.reply(
-                message_id,
-                ":white_check_mark:"
-                f" Finished post-processing for `{new_experiment_id}`"
-                " :white_check_mark:",
-                user_name=mle_config.slack.user_name,
-            )
-
-    # 11. Generate .md, and .html report w. figures for e_id - inherit logger
+    # 9. Generate .md, and .html report w. figures for e_id - inherit logger
     report_generated = False
     if not cmd_args.no_protocol:
         if "report_generation" in job_config.meta_job_args.keys():
@@ -257,7 +149,7 @@ def run(cmd_args):
                         user_name=mle_config.slack.user_name,
                     )
 
-    # 12. Update the experiment protocol & send back to GCS (if desired)
+    # 10. Update the experiment protocol & send back to GCS (if desired)
     if not cmd_args.no_protocol:
         # (c) Update the experiment protocol status
         logger.info(f"Updated protocol - COMPLETED: {new_experiment_id}")
