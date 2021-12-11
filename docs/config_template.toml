@@ -38,12 +38,12 @@ random_seed = 42
     partitions = ['<partition1>']
 
     # Info for results retrieval & internet tunneling if local launch
-    main_server_name = '<main-server-ip>'
-    jump_server_name = '<jump-host-ip>'
+    main_server_name = '<main-server-ip>'   # E.g. 'gateway.hpc.tu-berlin.de'
+    jump_server_name = '<jump-host-ip>'   # E.g. 'sshgate.tu-berlin.de'
     ssh_port = 22
     # Add proxy server for internet connection if needed!
-    http_proxy = "http://<slurm_headnode>:3128/"
-    https_proxy = "http://<slurm_headnode>:3128/"
+    http_proxy = "http://<slurm_headnode>:3128/"  # E.g. 'http://frontend01:3128/'
+    https_proxy = "http://<slurm_headnode>:3128/"  # E.g. 'http://frontend01:3128/'
 
     # Default Slurm job arguments (if not supplied in job .yaml config)
     [slurm.default_job_args]
@@ -100,10 +100,19 @@ bucket_name = "<gcloud_bucket_name>"
 protocol_fname = "gcloud_mle_protocol.db"
 
 # Syncing of protocol with GCloud
-use_protocol_sync = true
+use_protocol_sync = false
 
 # Storing of experiment results in bucket
-use_results_storage = true
+use_results_storage = false
+
+    # Default GCP job arguments (if not differently supplied)
+    [gcp.default_job_arguments]
+    num_logical_cores = 2
+    num_gpus = 0
+    use_tpus = false
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
 
 #------------------------------------------------------------------------------#
 # 5. Slack Bot Config - OAuth Access Token & Config Path

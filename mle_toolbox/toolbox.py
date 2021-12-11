@@ -233,13 +233,6 @@ def init_build_subparser(subparsers):
         "init",
         help="Setup the toolbox .toml config with credentials/defaults.",
     )
-    parser_init.add_argument(
-        "-no_cli",
-        "--no_command_line",
-        default=False,
-        action="store_true",
-        help="Whether to go through settings in CLI.",
-    )
     return parser_init
 
 

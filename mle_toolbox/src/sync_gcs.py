@@ -26,7 +26,4 @@ def sync_gcs():
                 # delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f"COMPLETED E-ID {e_id}")
 
-    # Send most recent/up-to-date experiment DB to GCS
-    if mle_config.general.use_gcloud_protocol_sync:
-        if protocol_db.accessed_gcs:
-            protocol_db.gcs_send()
+            # TODO: Update protocol 'retrieved' status
