@@ -47,6 +47,7 @@ def launch_experiment(
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
 ):
+    print(mle_config.general.use_slack_bot)
     if not no_protocol and mle_config.general.use_slack_bot:
         try:
             from clusterbot import ClusterBot, activate_logger

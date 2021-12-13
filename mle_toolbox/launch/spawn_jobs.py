@@ -152,6 +152,7 @@ def spawn_multiple_configs(
         num_seeds * num_configs,
         automerge_seeds=True,
         cloud_settings=mle_config.gcp,
+        use_slack_bot=mle_config.general.use_slack_bot,
         slack_message_id=slack_message_id,
         slack_user_name=mle_config.slack.user_name,
         slack_auth_token=mle_config.slack.slack_token,

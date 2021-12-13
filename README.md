@@ -5,13 +5,14 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Status](https://github.com/mle-infrastructure/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/mle-infrastructure/mle-toolbox/actions?query=workflow%3A"Python+tests")
 [![codecov](https://codecov.io/gh/mle-infrastructure/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/mle-infrastructure/mle-toolbox)
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
 
 > Coming up with the right hypothesis is hard - testing it should be easy.
 <a href="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="200" align="right" /></a>
 
 ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported.
 
-![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true)
+<a href="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true"><img src="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true" width="800" align="right" /></a>
 
 ## What Does The `mle-toolbox` Provide?
 
@@ -29,9 +30,9 @@ ML researchers need to coordinate different types of experiments on separate rem
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
 1. Follow the [instructions below](https://github.com/mle-infrastructure/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configurations.
-2. Read the [docs](https://mle-infrastructure.github.io/mle-toolbox) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-school_satchel) to get started: Toy [ODE integration](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/numpy_pde), training [PyTorch MNIST-CNNs](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/torch_mnist) or [VAEs in JAX](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/jax_vae).
-4. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_run/).
+2. Read the [docs](https://mle-infrastructure.github.io) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
+3. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-) to get started: [Single Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective), [Multi Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective).
+4. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
 
 
 ## Installation ⏳
@@ -73,13 +74,13 @@ You are now ready to dive deeper into the specifics of [job configuration](https
 
 |   | Command              |        Description                                                        |
 |-----------| -------------------------- | -------------------------------------------------------------- |
-|⏳| [`mle init`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_init/)       | Setup of credentials & toolbox settings.              |
-|🚀| [`mle run`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_run/)       | Start up an experiment.              |
-|🖥️| [`mle monitor`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_monitor/)       | Monitor resource utilisation.              |
-|📥	| [`mle retrieve`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_retrieve/)       | Retrieve an experiment result.              |
-|💌| [`mle report`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_report/)       | Create an experiment report with figures.              |
-|🔄| [`mle sync-gcs`](https://roberttlange.github.io/mle-infrastructure/core_api/mle_sync_gcs/)       | Extract all GCS-stored results to your local drive.              |
-|🔄| `mle project`    | Initialize a new project by cloning [`mle-project`](https://github.com/mle-infrastructure/mle-project).   
+|⏳| [`mle init`](https://mle-infrastructure.github.io/mle_toolbox/init/)       | Setup of credentials & toolbox settings.              |
+|🚀| [`mle run`](https://mle-infrastructure.github.io/mle_toolbox/run/)       | Start up an experiment.              |
+|🖥️| [`mle monitor`](https://mle-infrastructure.github.io/mle_toolbox/monitor/)       | Monitor resource utilisation.              |
+|📥	| [`mle retrieve`](https://mle-infrastructure.github.io/mle_toolbox/retrieve/)       | Retrieve an experiment result.              |
+|💌| [`mle report`](https://mle-infrastructure.github.io/mle_toolbox/report/)       | Create an experiment report with figures.              |
+|🔄| [`mle sync-gcs`](https://mle-infrastructure.github.io/mle_toolbox/sync_gcs/)       | Extract all GCS-stored results to your local drive.              |
+|🗂| `mle project`    | Initialize a new project by cloning [`mle-project`](https://github.com/mle-infrastructure/mle-project).   
 |📝| `mle protocol`    | List a summary of the most recent experiments.
 
 ## Examples 🎒
