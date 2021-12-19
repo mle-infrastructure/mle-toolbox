@@ -6,15 +6,15 @@
 [![Status](https://github.com/mle-infrastructure/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/mle-infrastructure/mle-toolbox/actions?query=workflow%3A"Python+tests")
 [![codecov](https://codecov.io/gh/mle-infrastructure/mle-toolbox/branch/main/graph/badge.svg?token=0B56UIWGX3)](https://codecov.io/gh/mle-infrastructure/mle-toolbox)
 [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
+<a href="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/logo_transparent.png?raw=true"><img src="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/logo_transparent.png?raw=true" width="200" align="right" /></a>
 
 > Coming up with the right hypothesis is hard - testing it should be easy.
-<a href="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png"><img src="https://roberttlange.github.io/mle-infrastructure/images/logos/toolbox.png" width="200" align="right" /></a>
 
 ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported.
 
 <a href="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true"><img src="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true" width="800" align="right" /></a>
 
-## What Does The `mle-toolbox` Provide?
+## What Does The `mle-toolbox` Provide? 🧑‍🔧
 
 1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
 2. Common machine learning research experiment setups:
@@ -22,17 +22,18 @@ ML researchers need to coordinate different types of experiments on separate rem
     - Hyperparameter searches: Random, Grid, SMBO, PBT and Nevergrad.
     - Pre- and post-processing pipelines for data preparation/result visualization.
 3. Automated report generation for hyperparameter search experiments.
-4. Storage of results and database in Google Cloud Storage Bucket.
+4. Storage/retrieval of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
 ![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_toolbox_structure.png?raw=true)
 
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
-1. Follow the [instructions below](https://github.com/mle-infrastructure/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configurations.
+1. Follow the [instructions below](https://github.com/mle-infrastructure/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configuration.
 2. Read the [docs](https://mle-infrastructure.github.io) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-) to get started: [Single Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective), [Multi Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective).
-4. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
+3. Learn more about the individual infrastructure subpackages with the [dedicated tutorial](https://github.com/mle-infrastructure/mle-tutorial).
+4. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-) to get started: [Single Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective), [Multi Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective).
+5. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
 
 
 ## Installation ⏳
@@ -51,39 +52,39 @@ cd mle-toolbox
 pip install -e .
 ```
 
-By default this will only install the minimal dependencies (not including specialized packages such as `scikit-optimize`, `statsmodels`, `nevergrad` etc.). To get all requirements for tests or examples you will need to install [additional requirements](requirements/).
+## Setting Up Your Toolbox Configuration 🧑‍🎨
 
-
-#### Setting Up Your Remote Credentials 🙈
-
-By default the toolbox will only run locally and without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:
+By default the toolbox will support local runs without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:
 
 1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
 2. Manually edit the [`config_template.toml`](config_template.toml) template. Move/rename the template to your home directory via `mv config_template.toml ~/mle_config.toml`.
 
-The configuration procedure consists of 3 optional steps, which depend on your needs:
+The configuration procedure consists of 4 optional steps, which depend on your needs:
 
 1. Set whether to store all results & your database locally or remote in a GCS bucket.
 2. Add SGE and/or Slurm credentials & cluster-specific details (headnode, partitions, proxy server, etc.).
 3. Add the GCP project, GCS bucket name and database filename to store your results.
+4. Add credentials for a [slack bot](https://github.com/sprekelerlab/slack-clusterbot/) integration that notifies you about the state of your experiments.
 
 
-## The Core Commands of the MLE-Toolbox 🌱
+## The Core Toolbox Subcommands 🌱
 
-You are now ready to dive deeper into the specifics of [job configuration](https://roberttlange.github.io/mle-infrastructure) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
+You are now ready to dive deeper into the specifics of [experiment configuration](https://mle-infrastructure.github.io/mle_toolbox/experiments/) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
 
 |   | Command              |        Description                                                        |
 |-----------| -------------------------- | -------------------------------------------------------------- |
-|⏳| [`mle init`](https://mle-infrastructure.github.io/mle_toolbox/init/)       | Setup of credentials & toolbox settings.              |
-|🚀| [`mle run`](https://mle-infrastructure.github.io/mle_toolbox/run/)       | Start up an experiment.              |
-|🖥️| [`mle monitor`](https://mle-infrastructure.github.io/mle_toolbox/monitor/)       | Monitor resource utilisation.              |
-|📥	| [`mle retrieve`](https://mle-infrastructure.github.io/mle_toolbox/retrieve/)       | Retrieve an experiment result.              |
-|💌| [`mle report`](https://mle-infrastructure.github.io/mle_toolbox/report/)       | Create an experiment report with figures.              |
-|🔄| [`mle sync-gcs`](https://mle-infrastructure.github.io/mle_toolbox/sync_gcs/)       | Extract all GCS-stored results to your local drive.              |
+|🚀| `mle run`      | Start up an experiment (multi-config/seeds, search).              |
+|🖥️| `mle monitor`       | Monitor resource utilisation ([`mle-monitor`](https://github.com/mle-infrastructure/mle-monitor) wrapper).              |
+|📥	| `mle retrieve`       | Retrieve experiment result from GCS/cluster.              |
+|💌| `mle report`       | Create an experiment report with figures.              |
+|⏳| `mle init`       | Setup of credentials & toolbox settings.              |
+|🔄| `mle sync`       | Extract all GCS-stored results to your local drive.              |
 |🗂| `mle project`    | Initialize a new project by cloning [`mle-project`](https://github.com/mle-infrastructure/mle-project).   
 |📝| `mle protocol`    | List a summary of the most recent experiments.
 
-## Examples 🎒
+You can find more documentation for each subcommand [here](https://mle-infrastructure.github.io/mle_toolbox/subcommands/).
+
+## Examples 📄 & Notebook Walkthroughs 📓
 
 |              | Job Types|        Description                                                        |
 | -------------------------- |-------------- | -------------------------------------------------------------- |
@@ -91,10 +92,15 @@ You are now ready to dive deeper into the specifics of [job configuration](https
 | 📄 **[Multi-Objective](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective)**       | `hyperparameter-search`     | Multi-objective tuning. |
 |  📄 **[Multi Bash](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/bash_multi_config)**      | `multi-configs`     | Bash-based jobs.                        |
 | 📄 **[Quadratic PBT](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `population-based-training`    | PBT on toy quadratic surrogate.                          |
-| 📓 **[Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          | -     | Evaluation of gridsearch results. |
-| 📓 **[GIF Animations](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** | -     | Walk through a set of animation helpers.      |
-| 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | -     | Perform hypothesis tests on logs.        |
-|📓 **[PBT Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | -     | Inspect the result from PBT.                                   |
+
+|              | Description|        Colab                                                        |
+| -------------------------- |-------------- | -------------------------------------------------------------- |
+| 📓 **[Getting Started](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/getting_started.ipynb)**          |  Get started with the toolbox. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
+| 📓 **[Subpackages](https://github.com/mle-infrastructure/mle-tutorial/tree/main/tutorial.ipynb)**          |  Get started with the toolbox subpackages. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
+| 📓 **[Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          |  Evaluation of gridsearch results. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/evaluate_results.ipynb)
+| 📓 **[GIF Animations](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** |  Walk through a set of animation helpers.      | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/animate_results.ipynb)
+| 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | Perform hypothesis tests on logs.        | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/hypothesis_testing.ipynb)
+|📓 **[PBT Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | Inspect the result from PBT.   | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/inspect_pbt.ipynb)
 
 ### Acknowledgements & Citing `mle-toolbox` ✏️
 
