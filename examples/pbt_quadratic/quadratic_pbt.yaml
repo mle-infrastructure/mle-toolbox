@@ -1,36 +1,38 @@
 # Meta Arguments: What job? .py file? Base config? Where to store?
 meta_job_args:
     project_name: "examples"
-    experiment_type: "population-based-training"
+    experiment_type: "iterative-search"
     base_train_fname: "pbt_quadratic/run_quadratic_steps.py"
     base_train_config: "pbt_quadratic/quadratic_config.json"
     experiment_dir: "experiments/pbt_quadratic"
 
 # Parameters specific to the population-based training
-pbt_args:
-    pbt_logging:
-        max_objective: False
+param_search_args:
+    search_logging:
+        max_objective: True
         eval_metric: "objective"
-    pbt_resources:
+    search_resources:
         num_population_members: 2
-        num_total_update_steps: 40
+        num_pbt_batches: 5
         num_steps_until_ready: 4
-        num_steps_until_eval: 4
-    pbt_config:
-        pbt_params:
+    search_config:
+        search_type: "pbt"
+        search_params:
             real:
                 h0:
                     begin: 0
                     end: 1
-                    init: [0.1, 0.9]
+                    prior: "uniform"
                 h1:
                     begin: 0
                     end: 1
-                    init: [0.9, 0.1]
+                    prior: "uniform"
         exploration:
             strategy: "additive-noise"
+            noise_scale: 0.35
         selection:
             strategy: "truncation"
+            truncation_percent: 0.2
 
 # Parameters specific to an individual job
 single_job_args:
