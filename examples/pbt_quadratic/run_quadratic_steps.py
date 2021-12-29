@@ -33,7 +33,7 @@ def main(mle):
     if mle.model_ckpt is not None:
         theta = mle.model_ckpt
     else:
-        theta = np.array(mle.train_config.theta_init[mle.train_config.worker_id])
+        theta = np.array(mle.train_config.theta_init)
 
     problem = QuadraticProblem()
 
@@ -42,7 +42,7 @@ def main(mle):
         # Update log with latest evaluation results
         time_tick = {"num_updates": update_counter + 1}
         stats_tick = {
-            "score": score,
+            "objective": score,
             "theta_0": theta[0],
             "theta_1": theta[1],
         }

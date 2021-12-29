@@ -18,7 +18,7 @@ param_search_args:
         num_evals_per_batch: 3
         num_seeds_per_eval: 1
     search_config:
-        search_type: "nevergrad"
+        search_type: "Nevergrad"
         search_params:
             real:
                 lrate:

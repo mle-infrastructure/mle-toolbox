@@ -5,12 +5,11 @@ import json
 import yaml
 import copy
 import logging
+import numpy as np
 from typing import Union, List
-
 from .hyper_logger import HyperoptLogger
 from ..utils import print_framed
-
-from mle_logging import merge_config_logs, load_meta_log, load_config
+from mle_logging import merge_config_logs, load_log, load_config
 from mle_scheduler import MLEQueue
 from mle_monitor import MLEProtocol
 from mle_toolbox import mle_config, check_single_job_args
@@ -62,7 +61,7 @@ class BaseHyperOptimisation(object):
         # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
-        self.search_log_path = os.path.join(self.experiment_dir, "search_log.json")
+        self.search_log_path = os.path.join(self.experiment_dir, "search_log.yaml")
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -118,8 +117,6 @@ class BaseHyperOptimisation(object):
             f"Hyperoptimisation ({self.search_schedule} - "
             + f"{self.search_type}) Run - Range of Parameters:"
         )
-        print()
-        self.strategy.print_hello()
 
         # Start Launching Jobs Depending on the Scheduling Setup
         if self.search_schedule == "sync":
@@ -200,13 +197,13 @@ class BaseHyperOptimisation(object):
         )
 
         # Update + save hyperlog after merging eval log .hdf5 files
-        perf_measures = self.update_hyper_log(
+        perf_measures, ckpts = self.update_hyper_log(
             batch_proposals, run_ids, time_elapsed, num_seeds_per_eval
         )
         self.hyper_log.save_log()
 
         # Clean up after search batch iteration
-        self.tell(run_ids, batch_proposals, perf_measures)
+        self.tell(run_ids, batch_proposals, perf_measures, ckpts)
         for f in batch_fnames:
             os.remove(f)
         print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
@@ -272,13 +269,13 @@ class BaseHyperOptimisation(object):
             random_seeds = job_queue.random_seeds
 
             # Update + save hyperlog after merging eval log .hdf5 files
-            perf_measures = self.update_hyper_log(
+            perf_measures, ckpts = self.update_hyper_log(
                 batch_proposals, run_ids, time_elapsed, num_seeds_per_eval
             )
             self.hyper_log.save_log()
 
             # Clean up after search batch iteration - delete redundant configs
-            self.tell(run_ids, batch_proposals, perf_measures)
+            self.tell(run_ids, batch_proposals, perf_measures, ckpts)
             for f in batch_fnames:
                 os.remove(f)
             print_framed(
@@ -298,7 +295,7 @@ class BaseHyperOptimisation(object):
                     )
                     # Load in meta-results log with values meaned over seeds
                     meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
-                    meta_eval_log = load_meta_log(meta_log_fname)
+                    meta_eval_log = load_log(meta_log_fname, aggregate_seeds=True)
                     break
                 except Exception:
                     time.sleep(1)
@@ -310,25 +307,31 @@ class BaseHyperOptimisation(object):
             )
 
             # Get performance score, update & save hypersearch log
-            perf_measures = self.hyper_log.update_log(
+            perf_measures, ckpts = self.hyper_log.update_log(
                 batch_proposals, meta_eval_log, time_elapsed, run_ids
             )
         else:
             # Log without collected results - perf_measures None output
-            perf_measures = self.hyper_log.update_log(
+            perf_measures, ckpts = self.hyper_log.update_log(
                 batch_proposals, None, time_elapsed, run_ids
             )
             self.logger.info(
                 f"UPDATE - {len(run_ids)} Eval Configs of "
                 f"Hyperparameters - {num_seeds_per_eval} Seeds"
             )
-        return perf_measures
+        return perf_measures, ckpts
 
     def ask(self, num_iter_batch: int):
         """Get proposals to eval - implemented by specific hyperopt algo"""
         return self.strategy.ask(num_iter_batch)
 
-    def tell(self, run_ids, batch_proposals, perf_measures):
+    def tell(
+        self,
+        run_ids: list,
+        batch_proposals: list,
+        perf_measures: dict,
+        ckpts: Union[list, None],
+    ):
         """Perform post-iteration clean-up. (E.g. update surrogate model)"""
         proposals, measures = [], []
         # Collect all performance data for strategy update
@@ -343,11 +346,11 @@ class BaseHyperOptimisation(object):
                     else perf_measures[k][id]
                 )
                 # If we use surrogate model - select variables to be modelled
-                if self.search_type == "smbo":
+                if self.search_type == "SMBO":
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
                 elif (
-                    self.search_type == "nevergrad"
+                    self.search_type == "Nevergrad"
                     and "metric_to_model" in self.strategy.search_config.keys()
                 ):
                     if k == self.strategy.search_config["metric_to_model"]:
@@ -355,7 +358,7 @@ class BaseHyperOptimisation(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-        self.strategy.tell(proposals, measures)
+        self.strategy.tell(proposals, np.array(measures).squeeze(), ckpts)
         self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):

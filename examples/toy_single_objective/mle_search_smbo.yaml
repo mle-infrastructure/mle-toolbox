@@ -10,7 +10,6 @@ meta_job_args:
 param_search_args:
     search_logging:
         reload_log: False
-        verbose_log: True
         max_objective: False
         aggregate_seeds: "p50"
         problem_type: "final"
@@ -20,7 +19,7 @@ param_search_args:
         num_evals_per_batch: 3
         num_seeds_per_eval: 1
     search_config:
-        search_type: "smbo"
+        search_type: "SMBO"
         search_params:
             real:
                 lrate:

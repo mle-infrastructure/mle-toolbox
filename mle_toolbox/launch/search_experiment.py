@@ -1,6 +1,6 @@
 import os
 from typing import Dict, Union
-from ..hyperopt import HyperoptLogger, MLE_Hyperoptimisation
+from ..hyperopt import HyperoptLogger, MLE_BatchSearch
 from pathlib import Path
 from mle_monitor import MLEProtocol
 
@@ -27,20 +27,21 @@ def run_hyperparameter_search(
         config_files = [meta_job_args["base_train_config"]]
         experiment_dirs = [meta_job_args["experiment_dir"]]
 
-    for i in range(len(config_files)):
-        run_single_config_search(
-            resource_to_run,
-            meta_job_args["base_train_fname"],
-            config_files[i],
-            experiment_dirs[i],
-            single_job_args,
-            param_search_args,
-            message_id,
-            protocol_db,
-        )
+    if meta_job_args["experiment_type"] == "hyperparameter-search":
+        for i in range(len(config_files)):
+            run_single_batch_search(
+                resource_to_run,
+                meta_job_args["base_train_fname"],
+                config_files[i],
+                experiment_dirs[i],
+                single_job_args,
+                param_search_args,
+                message_id,
+                protocol_db,
+            )
 
 
-def run_single_config_search(
+def run_single_batch_search(
     resource_to_run: str,
     train_fname: str,
     train_config: str,
@@ -61,11 +62,20 @@ def run_single_config_search(
     hyper_log = HyperoptLogger(hyperlog_fname, **param_search_args["search_logging"])
 
     # 2. Initialize the hyperparameter optimizer class
-    search_types = ["random", "grid", "smbo", "nevergrad", "coordinate"]
+    search_types = [
+        "Random",
+        "Grid",
+        "SMBO",
+        "Nevergrad",
+        "Coordinate",
+        "Halving",
+        "Hyperband",
+        "PBT",
+    ]
     assert param_search_args["search_config"]["search_type"] in search_types
 
-    # Add resource budget to nevergrad configuration
-    if param_search_args["search_config"]["search_type"] == "nevergrad":
+    # Add budgets to config (special cases: Nevergrad, PBT, Halving, Hyperband)
+    if param_search_args["search_config"]["search_type"] == "Nevergrad":
         param_search_args["search_config"]["search_config"][
             "num_workers"
         ] = param_search_args["search_resources"]["num_evals_per_batch"]
@@ -73,6 +83,11 @@ def run_single_config_search(
             param_search_args["search_resources"]["num_evals_per_batch"]
             * param_search_args["search_resources"]["num_search_batches"]
         )
+
+    elif param_search_args["search_config"]["search_type"] == "PBT":
+        param_search_args["search_config"]["search_resources"][
+            "num_evals_per_batch"
+        ] = param_search_args["search_config"]["search_config"]["num_workers"]
 
     # 4. Compute remaining jobs/batches for sync/async scheduling of jobs
     if "search_schedule" in param_search_args["search_config"].keys():
@@ -89,6 +104,7 @@ def run_single_config_search(
                 "num_search_batches"
             ] -= completed_batches
     else:
+        # Default to batch case - if no search_schedule provided!
         completed_batches = int(
             hyper_log.iter_id
             / param_search_args["search_resources"]["num_evals_per_batch"]
@@ -96,7 +112,7 @@ def run_single_config_search(
         param_search_args["search_resources"]["num_search_batches"] -= completed_batches
 
     # 5. Run the jobs (only remaining jobs if reloaded)
-    hyper_opt_instance = MLE_Hyperoptimisation(
+    hyper_opt_instance = MLE_BatchSearch(
         hyper_log,
         resource_to_run,
         single_job_args,
