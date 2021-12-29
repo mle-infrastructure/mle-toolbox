@@ -4,7 +4,7 @@ from mle_monitor.utils import get_gcloud_zip
 from mle_monitor import MLEProtocol
 
 
-def sync_gcs():
+def sync():
     """Download experiments in GCS bucket onto drive + delete remote files."""
     # Download the current state of the protocol db and load it in
     protocol_db = MLEProtocol(mle_config.general.local_protocol_fname, mle_config.gcp)
@@ -21,8 +21,8 @@ def sync_gcs():
             # TODO: Make this optional - ask user if want to retrieve again
             if not_retrieved_yet:
                 print_framed(f"RETRIEVE E-ID {e_id}")
-                gcloud_hash_fname = get_gcloud_zip(protocol_db, e_id)
-                print_framed(f"DELETE E-ID {e_id}")
+                _ = get_gcloud_zip(protocol_db, e_id)
+                # print_framed(f"DELETE E-ID {e_id}")
                 # delete_gcs_dir(gcloud_hash_fname)
                 print_framed(f"COMPLETED E-ID {e_id}")
 

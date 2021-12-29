@@ -5,7 +5,7 @@ from .protocol import protocol
 from .report import report
 from .retrieve import retrieve
 from .run import run
-from .sync_gcs import sync_gcs
+from .sync import sync
 
 __all__ = [
     "initialize",
@@ -15,5 +15,5 @@ __all__ = [
     "report",
     "retrieve",
     "run",
-    "sync_gcs",
+    "sync",
 ]

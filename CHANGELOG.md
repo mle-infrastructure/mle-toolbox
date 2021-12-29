@@ -1,13 +1,28 @@
-### v0.3.2 - TBD
+### [v0.3.4] - [Unreleased]
 
 ##### Added
 
+- Adds report support for non-search experiments.
+- Adds robust `local -> remote` experiment launching.
+
 ##### Changed
+
+- Restructures experiment wrapper `launch_experiment`
+- Moves PBT experiment utilities to `mle-hyperopt`.
+- Fix versions of subpackages so that dependencies are static.
 
 ##### Fixed
 
+- Updates `mle init` to work with vim editor.
+- Fixes all broken links in Readme.
 
-### v0.3.2 - 12/10/2021
+### [v0.3.3] - 12/10/2021
+
+- Small fixes before Sprekeler lab group presentation talk.
+- Restructuring imports and making it possible to launch `mle run` from notebook.
+
+
+### [v0.3.2] - 12/10/2021
 
 ##### Added
 
@@ -23,7 +38,7 @@
 - Moves documentation page to `mle-docs` sub-repository.
 
 
-### v0.3.1 - 10/20/2021
+### [v0.3.1] - 10/20/2021
 
 ##### Added
 
@@ -66,7 +81,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 - Grid engine monitoring now also tracks waiting/pending jobs.
 - Fixes a bug in the random seed setting for synchronous batch jobs. Previously a new set of seeds was sampled for each batch. This lead to problems when aggregating different logs by their seed id. Now the first set of seeds is stored and provided as an input to all subsequent `JobQueue` startups.
 
-### v0.3.0 - 08/21/2021
+### [v0.3.0] - 08/21/2021
 
 ##### Added
 - Adds general processing job, which generalizes the post-processing job and enables 'shared'/centralized data pre-processing before a (search) experiment and results post-processing/figure generation afterwards. Checkout the [MNIST example](https://github.com/RobertTLange/mle-toolbox/blob/main/examples/torch_mnist/mnist_single.yaml).
@@ -92,7 +107,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 - Fixed `mle report` to generate reports via `.html` file and the dependency `xhtml2pdf`.
 - Fixed unique hash for experiment results storage. Previously this only used the content of `base_config.json`, which did not result in a unique hash when running different searches via `job_config.yaml`. Now the hash is generated based on a merged dictionary of the time string, `base_config` and `job_config`
 
-### v0.2.9 - 06/23/2021
+### [v0.2.9] - 06/23/2021
 
 ##### Added
 
@@ -112,7 +127,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
     3. `search_config`: Options regarding the search type (random, grid, smbo) and the parameters to search over (spaces, resolution, etc.).
 
 
-### v0.2.8 - 05/06/2021
+### [v0.2.8] - 05/06/2021
 
 ##### Added
 
@@ -132,7 +147,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 
 - Fixes plotting with new `MetaLog` and `HyperLog` classes.
 
-### v0.2.7 - 04/24/2021
+### [v0.2.7] - 04/24/2021
 
 ##### Added
 - Allows multi-config + multi-seed bash experiments. The user needs to take care of the input arguments (`-exp_dir`, `-config_fname`, `-seed_id`) themselves and within the bash script. We provide a minimal example of how to do so in examples/bash_configs.
@@ -157,7 +172,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 - Fixed 2D plot with `fixed_params`. The naming as well as subtitle of the `.png` files/plots accounts for the fixed parameter.
 
 
-### v0.2.6 - 04/09/2021
+### [v0.2.6] - 04/09/2021
 - Adds `mle init` to configure template toml. The command first searches for an existing config to update. If none is found we go through the process of updating values in a default config.
 - Print configuration and protocol summary with rich. This gets rid of `tabulate` dependency.
 - Update `monitor_slurm_cluster` to work with new `mle monitor`. This gets rid of `colorclass`, `terminaltables` dependencies.
@@ -169,7 +184,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 - A lot of internal refactoring: E.g. getting rid of `multi_runner` sub directory.
 
 
-### v0.2.5 - 04/05/2021
+### [v0.2.5] - 04/05/2021
 - Raw github links for figures in readme so they are rendered in PyPi.
 - Introduce mle-config variable `use_conda_virtual_env` to allow user to choose between `conda` and `venv` virtual environment setup.
 - Introduce mle-config variable `remote_env_name` to allow user to set name for the remote experiment execution environment.
@@ -186,7 +201,7 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
     - `sync-gcs`: Sync all results from Google Cloud Storage
 
 
-### v0.2.4 -02/16/2021
+### [v0.2.4] -02/16/2021
 - Major reduction of dependencies. Now for all more optional/specialized features (e.g. SMBO, visualization, JAX/torch idiosyncracies) there will be an exception raised if the package isn't installed and you still want to use the toolbox feature.
 - Refactored `visualization` into its own subdirectory to clean up `utils`.
 - Change from own `DotDic` to `DotMap`, which appears more stable and better maintained. Be aware that now we can't rely on `None` outputs if key is not in dict. We shouldn't have done that in the first place due to being error prone.
@@ -196,5 +211,5 @@ meta, hyper = combine_experiments(experiment_dirs, aggregate_seeds=False)
 - Added an example notebook that shows how to load/analyze and report the results from the simple ODE integration example.
 
 
-### v0.2.3 - 02/16/2021
+### [v0.2.3] - 02/16/2021
 - Minor update to the credential `.toml` template file

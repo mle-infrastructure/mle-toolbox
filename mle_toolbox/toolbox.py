@@ -23,7 +23,7 @@ def main():
 
     # Following subcommands don't have any options - but are 'helpful' :)
     monitor_build_subparser(subparsers)
-    sync_gcs_build_subparser(subparsers)
+    sync_build_subparser(subparsers)
     init_build_subparser(subparsers)
     project_build_subparser(subparsers)
     protocol_build_subparser(subparsers)
@@ -46,10 +46,10 @@ def main():
         from .src import monitor
 
         monitor()
-    elif args.command == "sync-gcs":
-        from .src import sync_gcs
+    elif args.command == "sync":
+        from .src import sync
 
-        sync_gcs()
+        sync()
     elif args.command == "init":
         from .src import initialize
 
@@ -219,10 +219,10 @@ def monitor_build_subparser(subparsers):
     return parser_monitor
 
 
-def sync_gcs_build_subparser(subparsers):
+def sync_build_subparser(subparsers):
     """Build subparser arguments for `init` subcommand."""
     parser_sync = subparsers.add_parser(
-        "sync-gcs", help="Sync all new results from Google Cloud Storage."
+        "sync", help="Sync all new results from Google Cloud Storage."
     )
     return parser_sync
 

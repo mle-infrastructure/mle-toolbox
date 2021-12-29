@@ -1,4 +1,4 @@
-## Lightweight Management of Distributed ML Experiments 🛠️
+# Lightweight Distributed ML Experiments Management 🛠️
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)
 [![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://roberttlange.github.io/mle-toolbox/)
 [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
@@ -52,21 +52,6 @@ cd mle-toolbox
 pip install -e .
 ```
 
-## Setting Up Your Toolbox Configuration 🧑‍🎨
-
-By default the toolbox will support local runs without any GCS storage of your experiments. If you want to integrate the `mle-toolbox` with your SGE/Slurm clusters, you have to provide additional data. There 2 ways to do so:
-
-1. After installation type `mle init`. This will walk you through all configuration steps in your CLI and save your configuration in `~/mle_config.toml`.
-2. Manually edit the [`config_template.toml`](config_template.toml) template. Move/rename the template to your home directory via `mv config_template.toml ~/mle_config.toml`.
-
-The configuration procedure consists of 4 optional steps, which depend on your needs:
-
-1. Set whether to store all results & your database locally or remote in a GCS bucket.
-2. Add SGE and/or Slurm credentials & cluster-specific details (headnode, partitions, proxy server, etc.).
-3. Add the GCP project, GCS bucket name and database filename to store your results.
-4. Add credentials for a [slack bot](https://github.com/sprekelerlab/slack-clusterbot/) integration that notifies you about the state of your experiments.
-
-
 ## The Core Toolbox Subcommands 🌱
 
 You are now ready to dive deeper into the specifics of [experiment configuration](https://mle-infrastructure.github.io/mle_toolbox/experiments/) and can start running your first experiments from the cluster (or locally on your machine) with the following commands:
@@ -102,16 +87,15 @@ You can find more documentation for each subcommand [here](https://mle-infrastru
 | 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | Perform hypothesis tests on logs.        | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/hypothesis_testing.ipynb)
 |📓 **[PBT Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | Inspect the result from PBT.   | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/inspect_pbt.ipynb)
 
-### Acknowledgements & Citing `mle-toolbox` ✏️
+### Acknowledgements & Citing the MLE-Infrastructure ✏️
 
-To cite this repository:
+If you use parts the `mle-toolbox` in your research, please cite it as follows:
 
 ```
 @software{mle_infrastructure2021github,
   author = {Robert Tjarko Lange},
   title = {{MLE-Infrastructure}: A Set of Lightweight Tools for Distributed Machine Learning Experimentation},
   url = {http://github.com/mle-infrastructure},
-  version = {0.3.0},
   year = {2021},
 }
 ```
