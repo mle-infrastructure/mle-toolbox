@@ -1,11 +1,9 @@
 train_config:
-  lrate: 1e-06
-  num_gd_steps: 400
+  gd_steps_per_iter: 50
 
 log_config:
   time_to_track: ["num_steps"]
   what_to_track: ["loss"]
-  verbose: true
-  print_every_k_updates: 1
-  log_every_j_steps: 1
+  model_type: "torch"
+  verbose: True
   overwrite: 1

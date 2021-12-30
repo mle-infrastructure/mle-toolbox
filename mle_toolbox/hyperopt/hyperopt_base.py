@@ -100,7 +100,7 @@ class BaseHyperOptimisation(object):
         # Check that right inputs provided for sync vs async job scheduling
         if self.search_schedule == "sync":
             assert type(num_search_batches) == int, "Provide valid sync input"
-            assert type(num_evals_per_batch) == int, "Provide valid sync input"
+            assert type(num_evals_per_batch) in [int, list], "Provide valid sync input"
         elif self.search_schedule == "async":
             assert type(num_total_evals) == int, "Provide valid 'async' input"
             assert type(max_running_jobs) == int, "Provide valid 'async' input"
@@ -131,6 +131,7 @@ class BaseHyperOptimisation(object):
                 num_search_batches,
                 num_evals_per_batch,
                 num_seeds_per_eval,
+                max_running_jobs,
                 random_seeds,
             )
         else:
@@ -149,7 +150,7 @@ class BaseHyperOptimisation(object):
     def run_async_search(
         self,
         num_total_evals: int,
-        max_running_jobs: int,
+        max_running_jobs: Union[int, None] = None,
         num_seeds_per_eval: int = 1,
         random_seeds: Union[None, List[int]] = None,
     ):
@@ -158,6 +159,9 @@ class BaseHyperOptimisation(object):
         assert self.search_type != "smbo", "Async scheduling - No SMBO support"
         # Get all hyperparameters & plug them into config dicts, store jsons
         batch_proposals = self.ask(num_total_evals)
+        # Ensure that batch_proposals is a list for single config case
+        if type(batch_proposals) == dict:
+            batch_proposals = [batch_proposals]
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
         batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -210,19 +214,28 @@ class BaseHyperOptimisation(object):
     def run_sync_search(
         self,
         num_search_batches: int,
-        num_evals_per_batch: int,
+        num_evals_per_batch: Union[int, List[int]],
         num_seeds_per_eval: Union[None, int] = 1,
+        max_running_jobs: Union[None, int] = None,
         random_seeds: Union[None, List[int]] = None,
     ):
         """Run synchronous batches of jobs in a loop."""
         # Only run the batch loop for the remaining iterations
-        self.current_iter = int(self.current_iter / num_evals_per_batch)
+        if type(num_evals_per_batch) == int:
+            self.current_iter = int(self.current_iter / num_evals_per_batch)
+        else:
+            # TODO: Can't reload hyperband/halving at this moment!
+            self.current_iter = 0
         for search_iter in range(num_search_batches - self.current_iter):
             # Update the hyperopt iteration counter
             self.current_iter += 1
 
             # Get a set of hyperparameters & plug them into config dicts
+            # Note: num_evals_per_batch doesn't affect PBT/Halving/Hyperband
             batch_proposals = self.ask(num_evals_per_batch)
+            # Ensure that batch_proposals is a list for single config case
+            if type(batch_proposals) == dict:
+                batch_proposals = [batch_proposals]
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -233,7 +246,11 @@ class BaseHyperOptimisation(object):
             )
 
             # Training w. prev. specified hyperparams & eval, get time taken
-            max_jobs = num_seeds_per_eval * num_evals_per_batch
+            if type(num_evals_per_batch) == int and max_running_jobs is not None:
+                max_jobs = num_seeds_per_eval * num_evals_per_batch
+            else:
+                max_jobs = max_running_jobs
+
             start_t = time.time()
             job_queue = MLEQueue(
                 self.resource_to_run,
@@ -244,6 +261,7 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
+                debug_mode=True,
                 cloud_settings=mle_config.gcp,
                 use_slack_bot=mle_config.general.use_slack_bot,
                 slack_message_id=self.message_id,
@@ -353,7 +371,7 @@ class BaseHyperOptimisation(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-        self.strategy.tell(proposals, np.array(measures).squeeze(), ckpts)
+        self.strategy.tell(proposals, np.array(measures).squeeze().tolist(), ckpts)
         self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):
@@ -362,7 +380,6 @@ class BaseHyperOptimisation(object):
         # Sample a new configuration for each eval in the batch
         for s_id in range(len(proposals)):
             sample_config = copy.deepcopy(self.base_config)
-
             # Construct config dicts individually - set params in train config
             for param_name, param_value in proposals[s_id].items():
                 # Differentiate between model_config & train_config params

@@ -27,18 +27,17 @@ def run_hyperparameter_search(
         config_files = [meta_job_args["base_train_config"]]
         experiment_dirs = [meta_job_args["experiment_dir"]]
 
-    if meta_job_args["experiment_type"] == "hyperparameter-search":
-        for i in range(len(config_files)):
-            run_single_batch_search(
-                resource_to_run,
-                meta_job_args["base_train_fname"],
-                config_files[i],
-                experiment_dirs[i],
-                single_job_args,
-                param_search_args,
-                message_id,
-                protocol_db,
-            )
+    for i in range(len(config_files)):
+        run_single_batch_search(
+            resource_to_run,
+            meta_job_args["base_train_fname"],
+            config_files[i],
+            experiment_dirs[i],
+            single_job_args,
+            param_search_args,
+            message_id,
+            protocol_db,
+        )
 
 
 def run_single_batch_search(
@@ -74,7 +73,7 @@ def run_single_batch_search(
     ]
     assert param_search_args["search_config"]["search_type"] in search_types
 
-    # Add budgets to config (special cases: Nevergrad, PBT, Halving, Hyperband)
+    # Add budgets to config (special cases: Nevergrad & PBT)
     if param_search_args["search_config"]["search_type"] == "Nevergrad":
         param_search_args["search_config"]["search_config"][
             "num_workers"
@@ -105,14 +104,20 @@ def run_single_batch_search(
             ] -= completed_batches
     else:
         # Default to batch case - if no search_schedule provided!
-        completed_batches = int(
-            hyper_log.iter_id
-            / param_search_args["search_resources"]["num_evals_per_batch"]
-        )
-        param_search_args["search_resources"]["num_search_batches"] -= completed_batches
+        if param_search_args["search_config"]["search_type"] not in [
+            "Halving",
+            "Hyperband",
+        ]:
+            completed_batches = int(
+                hyper_log.iter_id
+                / param_search_args["search_resources"]["num_evals_per_batch"]
+            )
+            param_search_args["search_resources"][
+                "num_search_batches"
+            ] -= completed_batches
 
     # 5. Run the jobs (only remaining jobs if reloaded)
-    hyper_opt_instance = MLE_BatchSearch(
+    hyper_opt = MLE_BatchSearch(
         hyper_log,
         resource_to_run,
         single_job_args,
@@ -124,4 +129,21 @@ def run_single_batch_search(
         protocol_db=protocol_db
     )
 
-    hyper_opt_instance.run_search(**param_search_args["search_resources"])
+    # Special Case: Hyperband & Successive Halving -> Compute required
+    # resources post strategy instantiation -> No. of jobs changes w. batch id!
+    if param_search_args["search_config"]["search_type"] == "Halving":
+        param_search_args["search_resources"][
+            "num_evals_per_batch"
+        ] = hyper_opt.strategy.evals_per_batch
+        param_search_args["search_resources"][
+            "num_search_batches"
+        ] = hyper_opt.strategy.num_sh_batches
+    elif param_search_args["search_config"]["search_type"] == "Hyperband":
+        param_search_args["search_resources"][
+            "num_evals_per_batch"
+        ] = hyper_opt.strategy.evals_per_batch
+        param_search_args["search_resources"][
+            "num_search_batches"
+        ] = hyper_opt.strategy.num_hb_batches
+
+    hyper_opt.run_search(**param_search_args["search_resources"])

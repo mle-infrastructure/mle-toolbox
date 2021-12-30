@@ -4,7 +4,7 @@ meta_job_args:
     experiment_type: "hyperparameter-search"
     base_train_fname: "hyperband_mlp/train_mlp.py"
     base_train_config: "hyperband_mlp/mlp_config.yaml"
-    experiment_dir: "experiments/hyperband_mlp"
+    experiment_dir: "experiments/halving_mlp"
 
 # Parameters specific to the population-based training
 param_search_args:
@@ -15,7 +15,7 @@ param_search_args:
         max_running_jobs: 5
         num_seeds_per_eval: 1
     search_config:
-        search_type: "Hyperband"
+        search_type: "Halving"
         search_params:
             real:
                 lrate:
@@ -23,8 +23,9 @@ param_search_args:
                     end: 1e-02
                     prior: "uniform"
         search_config:
-            max_resource: 27
-            eta: 3
+            min_budget: 1
+            num_arms: 20
+            halving_coeff: 2
 
 # Parameters specific to an individual job
 single_job_args:
