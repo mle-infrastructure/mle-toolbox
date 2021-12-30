@@ -34,13 +34,18 @@ def main(mle):
         theta = mle.model_ckpt
     else:
         theta = np.array(mle.train_config.theta_init)
-
     problem = QuadraticProblem()
 
-    for update_counter in range(mle.train_config.num_steps_until_ready):
-        theta, score = problem(theta, mle.train_config)
+    for update_counter in range(mle.train_config.extra.pbt_num_add_iters):
+        theta, score = problem(theta, mle.train_config.params)
         # Update log with latest evaluation results
-        time_tick = {"num_updates": update_counter + 1}
+        time_tick = {
+            "num_updates": update_counter + 1,
+            "total_pbt_updates": mle.train_config.extra.pbt_num_total_iters
+            - mle.train_config.extra.pbt_num_add_iters
+            + update_counter
+            + 1,
+        }
         stats_tick = {
             "objective": score,
             "theta_0": theta[0],

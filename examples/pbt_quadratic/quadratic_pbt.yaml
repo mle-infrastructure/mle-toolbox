@@ -10,7 +10,7 @@ meta_job_args:
 param_search_args:
     search_logging:
         max_objective: True
-        eval_metric: "objective"
+        eval_metrics: "objective"
     search_resources:
         num_search_batches: 3
         num_seeds_per_eval: 1
@@ -28,12 +28,13 @@ param_search_args:
                     prior: "uniform"
         search_config:
             num_workers: 2
-            exploration:
+            explore:
                 strategy: "additive-noise"
                 noise_scale: 0.35
-            selection:
+            exploit:
                 strategy: "truncation"
-                truncation_percent: 0.2
+                selection_percent: 0.2
+            steps_until_ready: 4
 
 # Parameters specific to an individual job
 single_job_args:

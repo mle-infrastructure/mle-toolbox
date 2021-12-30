@@ -1,13 +1,14 @@
 {
-"log_config": {"time_to_track": ["num_updates"],
+"log_config": {"time_to_track": ["num_updates", "total_pbt_updates"],
                "what_to_track": ["objective",
                                  "theta_0",
                                  "theta_1"],
+               "verbose": true,
                "model_type": "numpy",
                "overwrite": 1},
 "train_config": {"lrate": 0.1,
-                 "h0": 0,
-                 "h1": 1,
-                 "theta_init": [0.9, 0.9],
-                 "num_steps_until_ready": 4}
+                 "params": {"h0": 0,
+                            "h1": 1},
+                 "theta_init": [0.9, 0.9]
+               }
 }

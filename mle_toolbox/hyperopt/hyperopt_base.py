@@ -1,8 +1,6 @@
 import time
 import os
 import shutil
-import json
-import yaml
 import copy
 import logging
 import numpy as np
@@ -12,6 +10,7 @@ from ..utils import print_framed
 from mle_logging import merge_config_logs, load_log, load_config
 from mle_scheduler import MLEQueue
 from mle_monitor import MLEProtocol
+from mle_hyperopt.utils import write_configs
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -340,11 +339,7 @@ class BaseHyperOptimisation(object):
             metrics = []
             for k in self.hyper_log.eval_metrics:
                 # Differentiate between max and min of evaluation metric
-                effective_perf = (
-                    -1 * perf_measures[k][id]
-                    if self.hyper_log.max_objective
-                    else perf_measures[k][id]
-                )
+                effective_perf = perf_measures[k][id]
                 # If we use surrogate model - select variables to be modelled
                 if self.search_type == "SMBO":
                     if k == self.strategy.search_config["metric_to_model"]:
@@ -389,25 +384,14 @@ class BaseHyperOptimisation(object):
     def write_configs_to_file(self, config_params_batch: list):
         """Take batch-list of configs & write to jsons. Return fnames."""
         # Init list of config filenames to exec & base string for postproc
-        config_fnames_batch = []
-        all_run_ids = []
-
+        params_batch, config_fnames_batch, all_run_ids = [], [], []
         for s_id in range(len(config_params_batch)):
             run_id = "b_" + str(self.current_iter) + "_eval_" + str(s_id)
             s_config_fname = os.path.join(
                 self.experiment_dir, run_id + self.config_fext
             )
-            if self.config_fext == ".json":
-                # Write config dictionary to json file
-                with open(s_config_fname, "w") as f:
-                    json.dump(config_params_batch[s_id].toDict(), f)
-            else:
-                with open(s_config_fname, "w") as f:
-                    yaml.dump(
-                        config_params_batch[s_id].toDict(), f, default_flow_style=False
-                    )
-            # Add config fnames to batch lists
+            params_batch.append(config_params_batch[s_id].toDict())
             config_fnames_batch.append(s_config_fname)
             all_run_ids.append(run_id)
-
+        write_configs(params_batch, config_fnames_batch)
         return config_fnames_batch, all_run_ids

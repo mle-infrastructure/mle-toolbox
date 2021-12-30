@@ -5,7 +5,7 @@ from dotmap import DotMap
 from typing import Tuple, Any, List, Union
 
 # Import helpers for loading meta-log and hyper-log files
-from .load_hyper_log import load_hyper_log
+from .hyper_log import load_hyper_log
 from mle_logging import load_log
 
 

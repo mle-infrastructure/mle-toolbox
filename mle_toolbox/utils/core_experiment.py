@@ -253,10 +253,10 @@ def parse_experiment_args(
     # Optional: Checkpoint path to potentially reload model
     parser.add_argument(
         "-model_ckpt",
-        "--model_ckpt",
+        "--model_ckpt_path",
         action="store",
         default=None,
-        help="Model checkpoint to reload.",
+        help="Model checkpoint path to reload.",
     )
     cmd_args, extra_args = parser.parse_known_args()
     return cmd_args, extra_args

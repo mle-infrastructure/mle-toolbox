@@ -37,10 +37,20 @@ class MLE_BatchSearch(BaseHyperOptimisation):
             message_id,
             protocol_db,
         )
-        assert search_type in ["Grid", "Random", "SMBO", "Coordinate", "Nevergrad"]
+        assert search_type in [
+            "Grid",
+            "Random",
+            "SMBO",
+            "Coordinate",
+            "Nevergrad",
+            "PBT",
+            "Halving",
+            "Hyperband",
+        ]
         self.strategy = Strategies[search_type](
             **search_params,
             search_config=search_config,
+            maximize_objective=hyper_log.max_objective,
             seed_id=mle_config.general.random_seed,
             verbose=True
         )

@@ -85,7 +85,7 @@ def run_single_batch_search(
         )
 
     elif param_search_args["search_config"]["search_type"] == "PBT":
-        param_search_args["search_config"]["search_resources"][
+        param_search_args["search_resources"][
             "num_evals_per_batch"
         ] = param_search_args["search_config"]["search_config"]["num_workers"]
 
