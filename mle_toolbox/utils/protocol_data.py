@@ -45,16 +45,19 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
                 num_job_batches = 1
                 num_jobs_per_batch = search_resources["max_running_jobs"]
         except Exception:
-            num_total_jobs = (
-                search_resources["num_search_batches"]
-                * search_resources["num_evals_per_batch"]
-                * search_resources["num_seeds_per_eval"]
-            )
-            num_job_batches = search_resources["num_search_batches"]
-            num_jobs_per_batch = (
-                search_resources["num_evals_per_batch"]
-                * search_resources["num_seeds_per_eval"]
-            )
+            try:
+                num_total_jobs = (
+                    search_resources["num_search_batches"]
+                    * search_resources["num_evals_per_batch"]
+                    * search_resources["num_seeds_per_eval"]
+                )
+                num_job_batches = search_resources["num_search_batches"]
+                num_jobs_per_batch = (
+                    search_resources["num_evals_per_batch"]
+                    * search_resources["num_seeds_per_eval"]
+                )
+            except:
+                num_total_jobs, num_job_batches, num_jobs_per_batch = 0, 0, 0
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         num_total_jobs = len(job_config.multi_config_args["config_fnames"]) * num_seeds
         num_job_batches = 1
@@ -71,6 +74,11 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
     except Exception:
         num_gpus = 0
 
+    try:
+        time_per_job = job_config.single_job_args["time_per_job"]
+    except Exception:
+        time_per_job = "01:00:00"
+
     meta_data = {
         "purpose": purpose,
         "exec_resource": resource_to_run,
@@ -83,7 +91,7 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
         "num_total_jobs": num_total_jobs,
         "num_job_batches": num_job_batches,
         "num_jobs_per_batch": num_jobs_per_batch,
-        "time_per_job": job_config.single_job_args["time_per_job"],
+        "time_per_job": time_per_job,
         "num_cpus": num_cpus,
         "num_gpus": num_gpus,
     }

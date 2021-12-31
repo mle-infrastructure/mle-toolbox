@@ -2,6 +2,7 @@
 
 ##### Added
 
+- Adds PBT, Successive Halving & Hyperband experiment support
 - Adds report support for non-search experiments.
 - Adds robust `local -> remote` experiment launching.
 

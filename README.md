@@ -30,10 +30,10 @@ ML researchers need to coordinate different types of experiments on separate rem
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
 1. Follow the [instructions below](https://github.com/mle-infrastructure/mle-toolbox#installation-) to install the `mle-toolbox` and set up your credentials/configuration.
-2. Read the [docs](https://mle-infrastructure.github.io) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
-3. Learn more about the individual infrastructure subpackages with the [dedicated tutorial](https://github.com/mle-infrastructure/mle-tutorial).
-4. Check out the [examples 📄](https://github.com/mle-infrastructure/mle-toolbox#examples-) to get started: [Single Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective), [Multi Objective Optimization](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective).
-5. Run your own experiments using the [template files, project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
+2. Learn more about the individual infrastructure subpackages with the [dedicated tutorial](https://github.com/mle-infrastructure/mle-tutorial).
+3. Read the [docs](https://mle-infrastructure.github.io) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
+4. Check out the [example workflows 📄](https://github.com/mle-infrastructure/mle-toolbox#examples---notebook-walkthroughs-) to get started.
+5. Run your own experiment using the [template files/project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
 
 
 ## Installation ⏳
@@ -76,16 +76,18 @@ You can find more documentation for each subcommand [here](https://mle-infrastru
 | 📄 **[Single-Objective](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_single_objective)** |  `multi-configs`, `hyperparameter-search`     | Core experiment types.              |
 | 📄 **[Multi-Objective](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/toy_multi_objective)**       | `hyperparameter-search`     | Multi-objective tuning. |
 |  📄 **[Multi Bash](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/bash_multi_config)**      | `multi-configs`     | Bash-based jobs.                        |
-| 📄 **[Quadratic PBT](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `population-based-training`    | PBT on toy quadratic surrogate.                          |
+| 📄 **[Quadratic PBT](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/pbt_quadratic)**            | `hyperparameter-search`    | PBT on toy quadratic surrogate.                          |
+| 📄 **[Hyperband](https://github.com/mle-infrastructure/mle-toolbox/tree/main/examples/hyperband_mlp)**            | `hyperparameter-search`    | Hyperband on toy polynomial problem.                          |
 
 |              | Description|        Colab                                                        |
 | -------------------------- |-------------- | -------------------------------------------------------------- |
 | 📓 **[Getting Started](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/getting_started.ipynb)**          |  Get started with the toolbox. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
 | 📓 **[Subpackages](https://github.com/mle-infrastructure/mle-tutorial/tree/main/tutorial.ipynb)**          |  Get started with the toolbox subpackages. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
+| 📓 **[`MLExperiment](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/mle_experiment.ipynb)**          |  Introduction to `MLExperiment` wrapper. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/mle_experiment.ipynb)
 | 📓 **[Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          |  Evaluation of gridsearch results. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/evaluate_results.ipynb)
 | 📓 **[GIF Animations](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** |  Walk through a set of animation helpers.      | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/animate_results.ipynb)
-| 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | Perform hypothesis tests on logs.        | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/hypothesis_testing.ipynb)
-|📓 **[PBT Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/inspect_pbt.ipynb)** | Inspect the result from PBT.   | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/experimental/inspect_pbt.ipynb)
+| 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | Perform hypothesis tests on logs.        | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/hypothesis_testing.ipynb)
+
 
 ### Acknowledgements & Citing the MLE-Infrastructure ✏️
 
@@ -99,8 +101,6 @@ If you use parts the `mle-toolbox` in your research, please cite it as follows:
   year = {2021},
 }
 ```
-
-Much of the `mle-toolbox` design has been inspired by discussions with [Jonathan Frankle](http://www.jfrankle.com/) and [Nandan Rao](https://twitter.com/nandanrao) about the quest for empirically sound and supported claims in Machine Learning. Finally, parts of the `mle <subcommands>` were inspired by Tudor Berariu's [Liftoff package](https://github.com/tudor-berariu/liftoff) and parts of the philosophy by wanting to provide a light-weight version of IDISA's [sacred package](https://github.com/IDSIA/sacred). Further credit goes to [Facebook's `submitit`](https://github.com/facebookincubator/submitit) and [Ray](https://github.com/ray-project/ray).
 
 ## Notes, Development & Questions ❓
 
