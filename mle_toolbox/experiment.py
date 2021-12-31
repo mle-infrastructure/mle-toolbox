@@ -37,7 +37,7 @@ class MLExperiment(object):
             cmd_args.config_fname,
             cmd_args.experiment_dir,
             cmd_args.seed_id,
-            cmd_args.model_ckpt,
+            cmd_args.model_ckpt_path,
             train_config,
             log_config,
             model_config,
@@ -53,7 +53,18 @@ class MLExperiment(object):
         self.create_jax_prng = create_jax_prng
         self.default_seed = seed_id
         self.seed_id = seed_id
-        self.model_ckpt = cmd_args.model_ckpt
+        # Get model ckpt path from command line argument or look in config!
+        self.model_ckpt_path = cmd_args.model_ckpt_path
+        if self.model_ckpt_path is None:  # Based on mle-hyperopt extra dict
+            base_ckpt_names = ["ckpt", "model_ckpt"]
+            extra_ckpt_names = ["sh_ckpt", "pbt_ckpt"]
+            for m in base_ckpt_names:
+                if m in self.train_config.keys():
+                    self.model_ckpt_path = self.train_config[m]
+            if "extra" in self.train_config.keys():
+                for m in extra_ckpt_names:
+                    if m in self.train_config.extra.keys():
+                        self.model_ckpt_path = self.train_config.extra[m]
 
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
@@ -83,8 +94,12 @@ class MLExperiment(object):
         self.log = MLELogger(**self.log_config)
 
         # Load model if checkpoint is provided
-        if self.model_ckpt is not None:
-            self.model_ckpt = load_model(self.model_ckpt, self.log_config.model_type)
+        if self.model_ckpt_path is not None:
+            self.model_ckpt = load_model(
+                self.model_ckpt_path, self.log_config.model_type
+            )
+        else:
+            self.model_ckpt = None
 
     def update_log(
         self,

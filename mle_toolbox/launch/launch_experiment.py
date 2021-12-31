@@ -47,7 +47,6 @@ def launch_experiment(
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
 ):
-    print(mle_config.general.use_slack_bot)
     if not no_protocol and mle_config.general.use_slack_bot:
         try:
             from clusterbot import ClusterBot, activate_logger
@@ -91,7 +90,10 @@ def launch_experiment(
             protocol_db,
         )
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
-    elif job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
+    elif job_config.meta_job_args["experiment_type"] in [
+        "hyperparameter-search",
+        "iterative-search",
+    ]:
         if not no_protocol and mle_config.general.use_slack_bot:
             message = "Search Resources & No. of Jobs:\n"
             for k, v in job_config.param_search_args["search_resources"].items():
@@ -105,22 +107,6 @@ def launch_experiment(
             job_config.param_search_args,
             message_id,
             protocol_db,
-        )
-    # (d) Experiment: Run population-based-training for NN training
-    elif job_config.meta_job_args["experiment_type"] == "population-based-training":
-        from ..experimental.pbt_experiment import run_population_based_training
-
-        if not no_protocol and mle_config.general.use_slack_bot:
-            message = "PBT Resources & No. of Jobs:\n"
-            for k, v in job_config.pbt_args["pbt_resources"].items():
-                message += f"→ {k}: `{v}` \n"
-            bot.reply(message_id, message)
-
-        run_population_based_training(
-            resource_to_run,
-            job_config.meta_job_args,
-            job_config.single_job_args,
-            job_config.pbt_args,
         )
 
     # Update slack bot experiment message - main experiment jobs

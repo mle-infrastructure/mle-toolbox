@@ -1,18 +1,16 @@
 import time
 import os
 import shutil
-import json
-import yaml
 import copy
 import logging
+import numpy as np
 from typing import Union, List
-
 from .hyper_logger import HyperoptLogger
 from ..utils import print_framed
-
-from mle_logging import merge_config_logs, load_meta_log, load_config
+from mle_logging import merge_config_logs, load_log, load_config
 from mle_scheduler import MLEQueue
 from mle_monitor import MLEProtocol
+from mle_hyperopt.utils import write_configs
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -62,7 +60,7 @@ class BaseHyperOptimisation(object):
         # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
-        self.search_log_path = os.path.join(self.experiment_dir, "search_log.json")
+        self.search_log_path = os.path.join(self.experiment_dir, "search_log.yaml")
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -102,7 +100,7 @@ class BaseHyperOptimisation(object):
         # Check that right inputs provided for sync vs async job scheduling
         if self.search_schedule == "sync":
             assert type(num_search_batches) == int, "Provide valid sync input"
-            assert type(num_evals_per_batch) == int, "Provide valid sync input"
+            assert type(num_evals_per_batch) in [int, list], "Provide valid sync input"
         elif self.search_schedule == "async":
             assert type(num_total_evals) == int, "Provide valid 'async' input"
             assert type(max_running_jobs) == int, "Provide valid 'async' input"
@@ -118,8 +116,6 @@ class BaseHyperOptimisation(object):
             f"Hyperoptimisation ({self.search_schedule} - "
             + f"{self.search_type}) Run - Range of Parameters:"
         )
-        print()
-        self.strategy.print_hello()
 
         # Start Launching Jobs Depending on the Scheduling Setup
         if self.search_schedule == "sync":
@@ -135,6 +131,7 @@ class BaseHyperOptimisation(object):
                 num_search_batches,
                 num_evals_per_batch,
                 num_seeds_per_eval,
+                max_running_jobs,
                 random_seeds,
             )
         else:
@@ -153,7 +150,7 @@ class BaseHyperOptimisation(object):
     def run_async_search(
         self,
         num_total_evals: int,
-        max_running_jobs: int,
+        max_running_jobs: Union[int, None] = None,
         num_seeds_per_eval: int = 1,
         random_seeds: Union[None, List[int]] = None,
     ):
@@ -162,6 +159,9 @@ class BaseHyperOptimisation(object):
         assert self.search_type != "smbo", "Async scheduling - No SMBO support"
         # Get all hyperparameters & plug them into config dicts, store jsons
         batch_proposals = self.ask(num_total_evals)
+        # Ensure that batch_proposals is a list for single config case
+        if type(batch_proposals) == dict:
+            batch_proposals = [batch_proposals]
         batch_configs = self.gen_hyperparam_configs(batch_proposals)
         batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -200,13 +200,13 @@ class BaseHyperOptimisation(object):
         )
 
         # Update + save hyperlog after merging eval log .hdf5 files
-        perf_measures = self.update_hyper_log(
+        perf_measures, ckpts = self.update_hyper_log(
             batch_proposals, run_ids, time_elapsed, num_seeds_per_eval
         )
         self.hyper_log.save_log()
 
         # Clean up after search batch iteration
-        self.tell(run_ids, batch_proposals, perf_measures)
+        self.tell(run_ids, batch_proposals, perf_measures, ckpts)
         for f in batch_fnames:
             os.remove(f)
         print_framed(f"COMPLETED QUEUE CLEAN-UP {num_total_evals} EVALS")
@@ -214,19 +214,28 @@ class BaseHyperOptimisation(object):
     def run_sync_search(
         self,
         num_search_batches: int,
-        num_evals_per_batch: int,
+        num_evals_per_batch: Union[int, List[int]],
         num_seeds_per_eval: Union[None, int] = 1,
+        max_running_jobs: Union[None, int] = None,
         random_seeds: Union[None, List[int]] = None,
     ):
         """Run synchronous batches of jobs in a loop."""
         # Only run the batch loop for the remaining iterations
-        self.current_iter = int(self.current_iter / num_evals_per_batch)
+        if type(num_evals_per_batch) == int:
+            self.current_iter = int(self.current_iter / num_evals_per_batch)
+        else:
+            # TODO: Can't reload hyperband/halving at this moment!
+            self.current_iter = 0
         for search_iter in range(num_search_batches - self.current_iter):
             # Update the hyperopt iteration counter
             self.current_iter += 1
 
             # Get a set of hyperparameters & plug them into config dicts
+            # Note: num_evals_per_batch doesn't affect PBT/Halving/Hyperband
             batch_proposals = self.ask(num_evals_per_batch)
+            # Ensure that batch_proposals is a list for single config case
+            if type(batch_proposals) == dict:
+                batch_proposals = [batch_proposals]
             batch_configs = self.gen_hyperparam_configs(batch_proposals)
             batch_fnames, run_ids = self.write_configs_to_file(batch_configs)
 
@@ -237,7 +246,11 @@ class BaseHyperOptimisation(object):
             )
 
             # Training w. prev. specified hyperparams & eval, get time taken
-            max_jobs = num_seeds_per_eval * num_evals_per_batch
+            if type(num_evals_per_batch) == int and max_running_jobs is not None:
+                max_jobs = num_seeds_per_eval * num_evals_per_batch
+            else:
+                max_jobs = max_running_jobs
+
             start_t = time.time()
             job_queue = MLEQueue(
                 self.resource_to_run,
@@ -248,6 +261,7 @@ class BaseHyperOptimisation(object):
                 num_seeds_per_eval,
                 random_seeds=random_seeds,
                 max_running_jobs=max_jobs,
+                debug_mode=True,
                 cloud_settings=mle_config.gcp,
                 use_slack_bot=mle_config.general.use_slack_bot,
                 slack_message_id=self.message_id,
@@ -272,13 +286,13 @@ class BaseHyperOptimisation(object):
             random_seeds = job_queue.random_seeds
 
             # Update + save hyperlog after merging eval log .hdf5 files
-            perf_measures = self.update_hyper_log(
+            perf_measures, ckpts = self.update_hyper_log(
                 batch_proposals, run_ids, time_elapsed, num_seeds_per_eval
             )
             self.hyper_log.save_log()
 
             # Clean up after search batch iteration - delete redundant configs
-            self.tell(run_ids, batch_proposals, perf_measures)
+            self.tell(run_ids, batch_proposals, perf_measures, ckpts)
             for f in batch_fnames:
                 os.remove(f)
             print_framed(
@@ -298,7 +312,7 @@ class BaseHyperOptimisation(object):
                     )
                     # Load in meta-results log with values meaned over seeds
                     meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
-                    meta_eval_log = load_meta_log(meta_log_fname)
+                    meta_eval_log = load_log(meta_log_fname, aggregate_seeds=True)
                     break
                 except Exception:
                     time.sleep(1)
@@ -310,25 +324,31 @@ class BaseHyperOptimisation(object):
             )
 
             # Get performance score, update & save hypersearch log
-            perf_measures = self.hyper_log.update_log(
+            perf_measures, ckpts = self.hyper_log.update_log(
                 batch_proposals, meta_eval_log, time_elapsed, run_ids
             )
         else:
             # Log without collected results - perf_measures None output
-            perf_measures = self.hyper_log.update_log(
+            perf_measures, ckpts = self.hyper_log.update_log(
                 batch_proposals, None, time_elapsed, run_ids
             )
             self.logger.info(
                 f"UPDATE - {len(run_ids)} Eval Configs of "
                 f"Hyperparameters - {num_seeds_per_eval} Seeds"
             )
-        return perf_measures
+        return perf_measures, ckpts
 
     def ask(self, num_iter_batch: int):
         """Get proposals to eval - implemented by specific hyperopt algo"""
         return self.strategy.ask(num_iter_batch)
 
-    def tell(self, run_ids, batch_proposals, perf_measures):
+    def tell(
+        self,
+        run_ids: list,
+        batch_proposals: list,
+        perf_measures: dict,
+        ckpts: Union[list, None],
+    ):
         """Perform post-iteration clean-up. (E.g. update surrogate model)"""
         proposals, measures = [], []
         # Collect all performance data for strategy update
@@ -337,17 +357,13 @@ class BaseHyperOptimisation(object):
             metrics = []
             for k in self.hyper_log.eval_metrics:
                 # Differentiate between max and min of evaluation metric
-                effective_perf = (
-                    -1 * perf_measures[k][id]
-                    if self.hyper_log.max_objective
-                    else perf_measures[k][id]
-                )
+                effective_perf = perf_measures[k][id]
                 # If we use surrogate model - select variables to be modelled
-                if self.search_type == "smbo":
+                if self.search_type == "SMBO":
                     if k == self.strategy.search_config["metric_to_model"]:
                         metrics = effective_perf
                 elif (
-                    self.search_type == "nevergrad"
+                    self.search_type == "Nevergrad"
                     and "metric_to_model" in self.strategy.search_config.keys()
                 ):
                     if k == self.strategy.search_config["metric_to_model"]:
@@ -355,7 +371,7 @@ class BaseHyperOptimisation(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-        self.strategy.tell(proposals, measures)
+        self.strategy.tell(proposals, np.array(measures).squeeze().tolist(), ckpts)
         self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):
@@ -364,7 +380,6 @@ class BaseHyperOptimisation(object):
         # Sample a new configuration for each eval in the batch
         for s_id in range(len(proposals)):
             sample_config = copy.deepcopy(self.base_config)
-
             # Construct config dicts individually - set params in train config
             for param_name, param_value in proposals[s_id].items():
                 # Differentiate between model_config & train_config params
@@ -386,25 +401,14 @@ class BaseHyperOptimisation(object):
     def write_configs_to_file(self, config_params_batch: list):
         """Take batch-list of configs & write to jsons. Return fnames."""
         # Init list of config filenames to exec & base string for postproc
-        config_fnames_batch = []
-        all_run_ids = []
-
+        params_batch, config_fnames_batch, all_run_ids = [], [], []
         for s_id in range(len(config_params_batch)):
             run_id = "b_" + str(self.current_iter) + "_eval_" + str(s_id)
             s_config_fname = os.path.join(
                 self.experiment_dir, run_id + self.config_fext
             )
-            if self.config_fext == ".json":
-                # Write config dictionary to json file
-                with open(s_config_fname, "w") as f:
-                    json.dump(config_params_batch[s_id].toDict(), f)
-            else:
-                with open(s_config_fname, "w") as f:
-                    yaml.dump(
-                        config_params_batch[s_id].toDict(), f, default_flow_style=False
-                    )
-            # Add config fnames to batch lists
+            params_batch.append(config_params_batch[s_id].toDict())
             config_fnames_batch.append(s_config_fname)
             all_run_ids.append(run_id)
-
+        write_configs(params_batch, config_fnames_batch)
         return config_fnames_batch, all_run_ids

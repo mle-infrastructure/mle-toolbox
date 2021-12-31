@@ -12,8 +12,8 @@ local_protocol_fname = '~/local_mle_protocol.db'
 pkey_path = '~/.ssh/id_rsa'
 
 # Whether to use conda or venv for experiment virtual environment
-use_conda_virtual_env = true
-use_venv_virtual_env = false
+use_conda_venv = true
+use_venv_venv = false
 
 # Whether to use slack bot notifications
 use_slack_bot = false

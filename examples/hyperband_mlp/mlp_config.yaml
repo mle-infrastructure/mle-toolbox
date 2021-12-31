@@ -1,0 +1,9 @@
+train_config:
+  gd_steps_per_iter: 50
+
+log_config:
+  time_to_track: ["num_steps"]
+  what_to_track: ["loss"]
+  model_type: "torch"
+  verbose: True
+  overwrite: 1

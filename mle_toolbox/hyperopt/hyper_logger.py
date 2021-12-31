@@ -2,7 +2,6 @@ import os
 import numpy as np
 import logging
 from typing import Union, List
-from pprint import pformat
 from ..utils import load_pkl_object, save_pkl_object, print_framed
 
 
@@ -14,10 +13,9 @@ class HyperoptLogger(object):
         aggregate_seeds: str = "mean",  # How to aggreg seeds
         problem_type: str = "final",  # "final"/"best" log
         eval_metrics: Union[str, list] = [],  # Metric names stored
-        verbose_log: bool = True,  # Print at new update
         reload_log: bool = False,  # Reload previous log
-        no_results_logging: bool = False,
-    ):  # .hdf5 run logging
+        no_results_logging: bool = False,  # .hdf5 run logging
+    ):
         """Mini-class to log the"""
         self.hyperlog_fname = hyperlog_fname  # Where to save the log to
         self.max_objective = max_objective  # Max/min target (reward/loss)
@@ -28,7 +26,6 @@ class HyperoptLogger(object):
         self.eval_metrics = eval_metrics  # Vars to compare across runs
         if type(self.eval_metrics) == str:
             self.eval_metrics = [self.eval_metrics]
-        self.verbose_log = verbose_log  # Print results whenever update
         # Want to not log metrics? - Don't need to rely on meta_log setup
         self.no_results_logging = no_results_logging
 
@@ -78,10 +75,6 @@ class HyperoptLogger(object):
         else:
             perf_measures = None
 
-        # Need to account for batch case - log list of dictionaries!
-        if not isinstance(params, list):
-            params = [params]
-
         # Define list of vars from meta data to keep also in hyper df
         meta_keys_to_track = [
             "log_paths",
@@ -93,6 +86,8 @@ class HyperoptLogger(object):
             "fig_storage_paths",
         ]
 
+        # Initiate placeholder ckpt list
+        ckpts = []
         # Loop over list entries and log them individually
         for iter in range(len(params)):
             self.iter_id += 1
@@ -119,6 +114,9 @@ class HyperoptLogger(object):
                     current_iter["run_id"] + ".hdf5",
                 )
 
+                if "model_ckpt" in meta_eval_log[run_ids[iter]].meta.keys():
+                    ckpts.append(meta_eval_log[run_ids[iter]].meta.model_ckpt)
+
             # Merge collected info from eval to the log
             self.opt_log[self.iter_id] = current_iter
 
@@ -128,30 +126,14 @@ class HyperoptLogger(object):
         # Keep track of all results/runs sofar!
         self.all_run_ids += run_ids
 
+        # Return None if no checkpoints where found in log
+        if len(ckpts) == 0:
+            ckpts = None
+
         if not self.no_results_logging:
             # Update best performance tracker
             self.best_per_metric = self.get_best_performances(perf_measures.keys())
-
-            # Print currently best evaluation
-            if self.verbose_log:
-                self.print_log_state()
-        return perf_measures
-
-    def print_log_state(self):
-        """Log currently best param config for each metric."""
-        if self.iter_id > 0 and not self.no_results_logging:
-            for i, m in enumerate(self.best_per_metric.keys()):
-                print_framed(m, frame_str="-")
-                self.logger.info(
-                    "METRIC: {}|".format(m)
-                    + r"BEST SCORE: {:.2f}|ITER: {}/{}|PARAMS:".format(
-                        self.best_per_metric[m]["score"],
-                        self.best_per_metric[m]["run_id"],
-                        self.iter_id,
-                    )
-                )
-                for line in pformat(self.best_per_metric[m]["params"]).split("\n"):
-                    self.logger.info(line)
+        return perf_measures, ckpts
 
     def save_log(self):
         """Save current state of hyperparameter optimization as .pkl file"""

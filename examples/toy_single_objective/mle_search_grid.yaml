@@ -10,7 +10,6 @@ meta_job_args:
 param_search_args:
     search_logging:
         reload_log: False
-        verbose_log: True
         max_objective: False
         aggregate_seeds: "p50"
         problem_type: "final"
@@ -23,7 +22,7 @@ param_search_args:
         num_seeds_per_eval: 1
         random_seeds: [2]
     search_config:
-        search_type: "grid"
+        search_type: "Grid"
         # search_schedule: "sync"
         search_schedule: "async"
         search_params:

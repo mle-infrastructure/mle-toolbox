@@ -5,8 +5,8 @@ from dotmap import DotMap
 from typing import Tuple, Any, List, Union
 
 # Import helpers for loading meta-log and hyper-log files
-from .load_hyper_log import load_hyper_log, HyperLog
-from mle_logging import load_meta_log, MetaLog
+from .hyper_log import load_hyper_log
+from mle_logging import load_log
 
 
 def load_mle_toolbox_config(config_fname: str = "~/mle_config.toml") -> DotMap:
@@ -49,11 +49,9 @@ def load_result_logs(
     meta_log_fname: str = "meta_log.hdf5",
     hyper_log_fname: str = "hyper_log.pkl",
     aggregate_seeds: bool = True,
-) -> Tuple[MetaLog, HyperLog]:
+):
     """Load both meta and hyper logs for an experiment."""
-    meta_log = load_meta_log(
-        os.path.join(experiment_dir, meta_log_fname), aggregate_seeds
-    )
+    meta_log = load_log(os.path.join(experiment_dir, meta_log_fname), aggregate_seeds)
     hyper_log = load_hyper_log(os.path.join(experiment_dir, hyper_log_fname))
     # Reconstruct search variables and evaluation metrics
     hyper_log.set_search_metrics(

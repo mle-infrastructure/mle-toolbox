@@ -1,6 +1,6 @@
 import os
 import shutil
-from mle_toolbox.experimental.pbt_experiment import run_population_based_training
+from mle_toolbox.launch.search_experiment import run_hyperparameter_search
 
 
 resource_to_run = "local"
