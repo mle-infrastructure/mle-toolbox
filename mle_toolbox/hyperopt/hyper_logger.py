@@ -47,7 +47,6 @@ class HyperoptLogger(object):
         if reload_log:
             self.reload_log()
             self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")
-            self.print_log_state()
             self.reloaded = True
         else:
             self.opt_log = {}  # List of dict of evals

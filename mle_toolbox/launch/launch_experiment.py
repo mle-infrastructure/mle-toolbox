@@ -16,6 +16,7 @@ def launch_processing(
     no_protocol: bool = False,
     message_id: Union[str, None] = None,
     bot=None,
+    debug_mode: bool = False,
 ):
     if preprocess:
         print_framed("PRE-PROCESSING")
@@ -28,6 +29,7 @@ def launch_processing(
         resource_to_run,
         job_config.pre_processing_args,
         job_config.meta_job_args["experiment_dir"],
+        debug_mode,
     )
     logger.info(f"{str_to_log} experiment results - COMPLETED")
 
@@ -46,6 +48,7 @@ def launch_experiment(
     no_protocol: bool = False,
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
+    debug_mode: bool = False,
 ):
     if not no_protocol and mle_config.general.use_slack_bot:
         try:
@@ -64,14 +67,17 @@ def launch_experiment(
         bot = None
     # Perform pre-processing if arguments are provided
     if "pre_processing_args" in job_config.keys():
-        launch_processing(True, job_config, no_protocol, message_id, bot)
+        launch_processing(True, job_config, no_protocol, message_id, bot, debug_mode)
 
     # Run the main experiment
     print_framed("RUN EXPERIMENT")
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["experiment_type"] == "single-config":
         run_single_config(
-            resource_to_run, job_config.meta_job_args, job_config.single_job_args
+            resource_to_run,
+            job_config.meta_job_args,
+            job_config.single_job_args,
+            debug_mode,
         )
     # (b) Experiment: Run training over different config files/seeds
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
@@ -88,6 +94,7 @@ def launch_experiment(
             job_config.multi_config_args,
             message_id,
             protocol_db,
+            debug_mode,
         )
     # (c) Experiment: Run hyperparameter search (Random, Grid, SMBO)
     elif job_config.meta_job_args["experiment_type"] in [
@@ -107,6 +114,7 @@ def launch_experiment(
             job_config.param_search_args,
             message_id,
             protocol_db,
+            debug_mode,
         )
 
     # Update slack bot experiment message - main experiment jobs
@@ -122,4 +130,4 @@ def launch_experiment(
 
     # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():
-        launch_processing(False, job_config, no_protocol, message_id, bot)
+        launch_processing(False, job_config, no_protocol, message_id, bot, debug_mode)

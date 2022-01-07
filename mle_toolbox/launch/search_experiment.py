@@ -14,6 +14,7 @@ def run_hyperparameter_search(
     ],
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
+    debug_mode: bool = False,
 ) -> None:
     """Run a hyperparameter search experiment for multiple configurations."""
     if type(meta_job_args["base_train_config"]) == list:
@@ -37,6 +38,7 @@ def run_hyperparameter_search(
             param_search_args,
             message_id,
             protocol_db,
+            debug_mode,
         )
 
 
@@ -51,6 +53,7 @@ def run_single_batch_search(
     ],
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
+    debug_mode: bool = False,
 ) -> None:
     """Run a hyperparameter search experiment for a single configuration."""
     # 1. Setup the hyperlogger for the experiment
@@ -126,7 +129,8 @@ def run_single_batch_search(
         experiment_dir,
         **param_search_args["search_config"],
         message_id=message_id,
-        protocol_db=protocol_db
+        protocol_db=protocol_db,
+        debug_mode=debug_mode
     )
 
     # Special Case: Hyperband & Successive Halving -> Compute required

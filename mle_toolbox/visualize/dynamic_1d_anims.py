@@ -60,9 +60,9 @@ class AnimatedLine(object):
         self.ax.set_xlabel(xlabel, fontsize=20)
 
         for tick in self.ax.xaxis.get_major_ticks():
-            tick.label.set_fontsize(20)
+            tick.label1.set_fontsize(20)
         for tick in self.ax.yaxis.get_major_ticks():
-            tick.label.set_fontsize(20)
+            tick.label1.set_fontsize(20)
         # Then setup FuncAnimation.
         self.ani = animation.FuncAnimation(
             self.fig,

@@ -13,7 +13,6 @@ meta_job_args = {
 
 search_logging = {
     "reload_log": False,
-    "verbose_log": True,
     "max_objective": False,
     "aggregate_seeds": "p50",
     "problem_type": "final",
@@ -35,7 +34,7 @@ search_resources_async = {
 }
 
 search_config = {
-    "search_type": "grid",
+    "search_type": "Grid",
     "search_schedule": "sync",
     "search_params": {
         "real": {"lrate": {"begin": 0.1, "end": 0.4, "bins": 4}},

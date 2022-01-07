@@ -11,6 +11,7 @@ def run_multiple_configs(
     multi_config_args: dict,
     message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
+    debug_mode: bool = False,
 ):
     """Run an experiment over different configurations (+random seeds)."""
     if "num_seeds" not in multi_config_args.keys():
@@ -30,4 +31,5 @@ def run_multiple_configs(
         slack_message_id=message_id,
         protocol_db=protocol_db,
         logger_level=logging.INFO,
+        debug_mode=debug_mode,
     )

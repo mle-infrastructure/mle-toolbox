@@ -21,6 +21,7 @@ class MLE_BatchSearch(BaseHyperOptimisation):
         search_config: Union[None, dict] = None,
         message_id: Union[str, None] = None,
         protocol_db: Union[MLEProtocol, None] = None,
+        debug_mode: bool = False,
     ):
         """Simple wrapper around `mle-hyperopt` strategies."""
         BaseHyperOptimisation.__init__(
@@ -36,6 +37,7 @@ class MLE_BatchSearch(BaseHyperOptimisation):
             search_schedule,
             message_id,
             protocol_db,
+            debug_mode,
         )
         assert search_type in [
             "Grid",

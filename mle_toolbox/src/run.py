@@ -122,7 +122,12 @@ def run(cmd_args):
 
     # 8. Launch the main experiment - pre-/post-processing + jobs
     launch_experiment(
-        resource_to_run, job_config, cmd_args.no_protocol, message_id, protocol_db
+        resource_to_run,
+        job_config,
+        cmd_args.no_protocol,
+        message_id,
+        protocol_db,
+        cmd_args.debug,
     )
 
     # 9. Generate .md, and .html report w. figures for e_id - inherit logger

@@ -2,7 +2,10 @@ from .spawn_jobs import spawn_processing_job
 
 
 def run_processing_job(
-    resource_to_run: str, processing_args: dict, experiment_dir: str
+    resource_to_run: str,
+    processing_args: dict,
+    experiment_dir: str,
+    debug_mode: bool = False,
 ):
     """Execute job for post processing of previously obtained results."""
     if "extra_cmd_line_input" in processing_args.keys():
@@ -16,5 +19,6 @@ def run_processing_job(
         job_arguments=processing_args["processing_job_args"],
         experiment_dir=experiment_dir,
         extra_cmd_line_input=extra_cmd_line_input,
+        debug_mode=debug_mode,
     )
     return status_out

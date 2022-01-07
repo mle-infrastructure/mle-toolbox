@@ -39,6 +39,7 @@ class BaseHyperOptimisation(object):
         search_schedule: str = "sync",
         message_id: Union[str, None] = None,
         protocol_db: Union[MLEProtocol, None] = None,
+        debug_mode: bool = False,
     ):
         # Set up the hyperparameter search run
         self.hyper_log = hyper_log  # Hyperopt. Log Instance
@@ -78,6 +79,9 @@ class BaseHyperOptimisation(object):
         # Store message id for slack cluster bot & protocol db
         self.message_id = message_id
         self.protocol_db = protocol_db
+
+        # Debug mode for queue - keep around log/err
+        self.debug_mode = debug_mode
 
     def run_search(
         self,
@@ -174,12 +178,12 @@ class BaseHyperOptimisation(object):
         )
         start_t = time.time()
         job_queue = MLEQueue(
-            self.resource_to_run,
-            self.job_fname,
-            self.job_arguments,
-            batch_fnames,
-            self.experiment_dir,
-            num_seeds_per_eval,
+            resource_to_run=self.resource_to_run,
+            job_filename=self.job_fname,
+            job_arguments=self.job_arguments,
+            config_filenames=batch_fnames,
+            experiment_dir=self.experiment_dir,
+            num_seeds=num_seeds_per_eval,
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
             cloud_settings=mle_config.gcp,
@@ -189,6 +193,7 @@ class BaseHyperOptimisation(object):
             slack_user_name=mle_config.slack.user_name,
             slack_auth_token=mle_config.slack.slack_token,
             protocol_db=self.protocol_db,
+            debug_mode=self.debug_mode,
         )
         job_queue.run()
         time_elapsed = time.time() - start_t

@@ -33,7 +33,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 2. Learn more about the individual infrastructure subpackages with the [dedicated tutorial](https://github.com/mle-infrastructure/mle-tutorial).
 3. Read the [docs](https://mle-infrastructure.github.io) explaining the pillars of the toolbox & the experiment meta-configuration job `.yaml` files .
 4. Check out the [example workflows 📄](https://github.com/mle-infrastructure/mle-toolbox#examples---notebook-walkthroughs-) to get started.
-5. Run your own experiment using the [template files/project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox).
+5. Run your own experiment using the [template files/project](https://github.com/mle-infrastructure/mle-project) and [`mle run`](https://mle-infrastructure.github.io/mle_toolbox/toolbox).
 
 
 ## Installation ⏳
@@ -82,8 +82,8 @@ You can find more documentation for each subcommand [here](https://mle-infrastru
 |              | Description|        Colab                                                        |
 | -------------------------- |-------------- | -------------------------------------------------------------- |
 | 📓 **[Getting Started](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/getting_started.ipynb)**          |  Get started with the toolbox. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
-| 📓 **[Subpackages](https://github.com/mle-infrastructure/mle-tutorial/tree/main/tutorial.ipynb)**          |  Get started with the toolbox subpackages. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/getting_started.ipynb)
-| 📓 **[`MLExperiment](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/mle_experiment.ipynb)**          |  Introduction to `MLExperiment` wrapper. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/mle_experiment.ipynb)
+| 📓 **[Subpackages](https://github.com/mle-infrastructure/mle-tutorial/tree/main/tutorial.ipynb)**          |  Get started with the toolbox subpackages. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-tutorial/blob/main/tutorial.ipynb)
+| 📓 **[`MLExperiment`](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/mle_experiment.ipynb)**          |  Introduction to `MLExperiment` wrapper. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/mle_experiment.ipynb)
 | 📓 **[Evaluation](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/evaluate_results.ipynb)**          |  Evaluation of gridsearch results. | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/evaluate_results.ipynb)
 | 📓 **[GIF Animations](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/animate_results.ipynb)** |  Walk through a set of animation helpers.      | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/animate_results.ipynb)
 | 📓 **[Testing](https://github.com/mle-infrastructure/mle-toolbox/tree/main/notebooks/hypothesis_testing.ipynb)**     | Perform hypothesis tests on logs.        | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mle-infrastructure/mle-toolbox/blob/main/notebooks/hypothesis_testing.ipynb)
@@ -96,14 +96,12 @@ If you use parts the `mle-toolbox` in your research, please cite it as follows:
 ```
 @software{mle_infrastructure2021github,
   author = {Robert Tjarko Lange},
-  title = {{MLE-Infrastructure}: A Set of Lightweight Tools for Distributed Machine Learning Experimentation},
+  title = {{MLE-Infrastructure}: A Set of Lightweight Tools  for Distributed Machine Learning Experimentation},
   url = {http://github.com/mle-infrastructure},
   year = {2021},
 }
 ```
 
-## Notes, Development & Questions ❓
+## Development 👷
 
-- If you find a bug or want a new feature, feel free to contact me [@RobertTLange](https://twitter.com/RobertTLange) or create an issue 🤗
-- You can check out the history of release modifications in [`CHANGELOG.md`](https://github.com/RobertTLange/mle-toolbox/blob/main/CHANGELOG.md) (*added, changed, fixed*).
-- You can find a set of open milestones in [`CONTRIBUTING.md`](https://github.com/RobertTLange/mle-toolbox/blob/main/CONTRIBUTING.md).
+You can run the test suite via `python -m pytest -vv tests/`. If you find a bug or are missing your favourite feature, feel free to create an issue and/or start [contributing](CONTRIBUTING.md) :hugs:.

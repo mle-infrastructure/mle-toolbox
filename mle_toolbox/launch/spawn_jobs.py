@@ -12,6 +12,7 @@ def spawn_single_job(
     config_filename: str,
     job_arguments: Union[None, dict],
     experiment_dir: str,
+    debug_mode: bool = False,
 ):
     """Spawn a single experiment locally/remote."""
     # -1. Check if all required args are given - otw. add default to copy
@@ -27,13 +28,14 @@ def spawn_single_job(
 
     # 1. Instantiate the experiment class
     experiment = MLEJob(
-        resource_to_run,
-        job_filename,
-        job_arguments,
-        config_filename,
-        experiment_dir,
-        extra_cmd_line_input,
+        resource_to_run=resource_to_run,
+        job_filename=job_filename,
+        job_arguments=job_arguments,
+        config_filename=config_filename,
+        experiment_dir=experiment_dir,
+        extra_cmd_line_input=extra_cmd_line_input,
         cloud_settings=mle_config.gcp,
+        debug_mode=debug_mode,
     )
     # 2. Run the single experiment
     status_out = experiment.run()
@@ -46,6 +48,7 @@ def spawn_processing_job(
     job_arguments: Union[None, dict],
     experiment_dir: str,
     extra_cmd_line_input: Union[None, dict],
+    debug_mode: bool = False,
 ):
     """
     Spawn a single experiment locally/remote to generate figures, or preprocess
@@ -62,6 +65,7 @@ def spawn_processing_job(
         config_filename=None,
         experiment_dir=experiment_dir,
         extra_cmd_line_input=extra_cmd_line_input,
+        debug_mode=debug_mode,
         cloud_settings=mle_config.gcp,
     )
     # 2. Run the single pre/post-processing job
@@ -79,6 +83,7 @@ def spawn_multiple_seeds(
     default_seed: int = 0,
     random_seeds: Union[None, List[int]] = None,
     logger_level: int = logging.WARNING,
+    debug_mode: bool = False,
 ):
     """Spawn same experiment w. diff. seeds multiple times locally/remote."""
     # 0. Check if all required args are given - otw. add default to copy
@@ -86,16 +91,17 @@ def spawn_multiple_seeds(
 
     # 1. Instantiate the experiment class
     multi_experiment = MLEQueue(
-        resource_to_run,
-        job_filename,
-        job_arguments,
-        [config_filename],
-        experiment_dir,
-        num_seeds,
+        resource_to_run=resource_to_run,
+        job_filename=job_filename,
+        job_arguments=job_arguments,
+        config_filenames=[config_filename],
+        experiment_dir=experiment_dir,
+        num_seeds=num_seeds,
         random_seeds=random_seeds,
         max_running_jobs=num_seeds,
         automerge_seeds=True,
         cloud_settings=mle_config.gcp,
+        debug_mode=debug_mode,
     )
 
     # 2. Run the multi-seed job
@@ -113,6 +119,7 @@ def spawn_multiple_configs(
     slack_message_id: Union[str, None] = None,
     protocol_db: Union[MLEProtocol, None] = None,
     logger_level: int = logging.WARNING,
+    debug_mode: bool = False,
 ):
     """Spawn processes to running diff. training configs over diff. seeds."""
     # 0. Check if all required args are given - otw. add default to copy
@@ -141,15 +148,15 @@ def spawn_multiple_configs(
     # Run Experiment Jobs in Batch mode!
     default_seed = 0
     multi_experiment = MLEQueue(
-        resource_to_run,
-        job_filename,
-        job_arguments,
-        config_filenames,
-        experiment_dir,
-        num_seeds,
-        default_seed,
-        random_seeds,
-        num_seeds * num_configs,
+        resource_to_run=resource_to_run,
+        job_filename=job_filename,
+        job_arguments=job_arguments,
+        config_filenames=config_filenames,
+        experiment_dir=experiment_dir,
+        num_seeds=num_seeds,
+        default_seed=default_seed,
+        random_seeds=random_seeds,
+        max_running_jobs=num_seeds * num_configs,
         automerge_seeds=True,
         cloud_settings=mle_config.gcp,
         use_slack_bot=mle_config.general.use_slack_bot,
@@ -157,6 +164,7 @@ def spawn_multiple_configs(
         slack_user_name=mle_config.slack.user_name,
         slack_auth_token=mle_config.slack.slack_token,
         protocol_db=protocol_db,
+        debug_mode=debug_mode,
     )
     multi_experiment.run()
 

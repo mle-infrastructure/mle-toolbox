@@ -85,7 +85,7 @@ def run_build_subparser(subparsers):
         "--debug",
         default=False,
         action="store_true",
-        help="Run simulation in debug mode",
+        help="Run experiment in debug mode",
     )
     parser_run.add_argument(
         "-p",
