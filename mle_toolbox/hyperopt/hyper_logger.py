@@ -21,7 +21,14 @@ class HyperoptLogger(object):
         self.max_objective = max_objective  # Max/min target (reward/loss)
         self.aggregate_seeds = aggregate_seeds  # [mean, 10/25/50/75/90p]
         self.problem_type = problem_type  # Time log ckpt (final/best)
-        assert self.aggregate_seeds in ["mean", "p10", "p25", "p50", "p75", "p90"]
+        assert self.aggregate_seeds in [
+            "mean",
+            "p10",
+            "p25",
+            "p50",
+            "p75",
+            "p90",
+        ]
         assert self.problem_type in ["mean", "final", "best"]
         self.eval_metrics = eval_metrics  # Vars to compare across runs
         if type(self.eval_metrics) == str:
@@ -47,7 +54,6 @@ class HyperoptLogger(object):
         if reload_log:
             self.reload_log()
             self.logger.info(f"Reloaded Log with {self.iter_id} Evaluations")
-            self.reloaded = True
         else:
             self.opt_log = {}  # List of dict of evals
             self.iter_id = 0  # How many iterations already eval
@@ -131,7 +137,9 @@ class HyperoptLogger(object):
 
         if not self.no_results_logging:
             # Update best performance tracker
-            self.best_per_metric = self.get_best_performances(perf_measures.keys())
+            self.best_per_metric = self.get_best_performances(
+                perf_measures.keys()
+            )
         return perf_measures, ckpts
 
     def save_log(self):
@@ -148,11 +156,13 @@ class HyperoptLogger(object):
                 self.all_evaluated_params.append(eval_iter["params"])
                 self.all_run_ids.append(eval_iter["run_id"])
             self.iter_id = len(self.opt_log)
+            self.reloaded = True
         except Exception:
             self.opt_log = {}
             self.iter_id = 0
             self.all_evaluated_params = []
             self.all_run_ids = []
+            self.reloaded = False
 
         # Get best performing params for each eval metric
         if not self.no_results_logging:
@@ -179,7 +189,11 @@ class HyperoptLogger(object):
                     "params": best_params,
                 }
             else:
-                best_performances[metric] = {"run_id": 0, "score": 0, "params": None}
+                best_performances[metric] = {
+                    "run_id": 0,
+                    "score": 0,
+                    "params": None,
+                }
         return best_performances
 
     def __len__(self):
@@ -229,7 +243,9 @@ def evaluate_mean_score(
     for metric in eval_metrics:
         int_out = {}
         for run in run_ids:
-            int_out[run] = np.mean(eval_logs[run]["stats"][metric][aggregate_seeds])
+            int_out[run] = np.mean(
+                eval_logs[run]["stats"][metric][aggregate_seeds]
+            )
         perf_per_metric[metric] = int_out
     return perf_per_metric
 
@@ -269,8 +285,12 @@ def evaluate_best_score(
         int_out = {}
         for run in run_ids:
             if max_objective:
-                int_out[run] = np.max(eval_logs[run]["stats"][metric][aggregate_seeds])
+                int_out[run] = np.max(
+                    eval_logs[run]["stats"][metric][aggregate_seeds]
+                )
             else:
-                int_out[run] = np.min(eval_logs[run]["stats"][metric][aggregate_seeds])
+                int_out[run] = np.min(
+                    eval_logs[run]["stats"][metric][aggregate_seeds]
+                )
         perf_per_metric[metric] = int_out
     return perf_per_metric

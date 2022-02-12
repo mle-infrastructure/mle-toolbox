@@ -40,7 +40,7 @@ def main(mle):
         theta, score = problem(theta, mle.train_config.params)
         # Update log with latest evaluation results
         time_tick = {
-            "num_updates": update_counter + 1,
+            "num_steps": update_counter + 1,
             "total_pbt_updates": mle.train_config.extra.pbt_num_total_iters
             - mle.train_config.extra.pbt_num_add_iters
             + update_counter

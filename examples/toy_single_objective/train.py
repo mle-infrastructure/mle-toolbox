@@ -30,10 +30,9 @@ def main(mle):
                 save=True,
             )
     # Generate a sample plot and store it
-    fig = plot_loss(mle.log.stats_log.stats_to_track.train_loss)
+    fig = plot_loss(mle.log.stats_log.stats_tracked["train_loss"])
     mle.log.save_plot(fig)
     time.sleep(5)
-    return
 
 
 def plot_loss(l_t):

@@ -104,4 +104,4 @@ If you use parts the `mle-toolbox` in your research, please cite it as follows:
 
 ## Development 👷
 
-You can run the test suite via `python -m pytest -vv tests/`. If you find a bug or are missing your favourite feature, feel free to create an issue and/or start [contributing](CONTRIBUTING.md) :hugs:.
+You can run the test suite via `python -m pytest -vv tests/`. If you find a bug or are missing your favourite feature, feel free to create an issue and/or start [contributing](CONTRIBUTING.md) 🤗.

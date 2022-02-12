@@ -53,6 +53,8 @@ def check_single_job_args(resource_to_run: str, job_arguments: dict):
         full_job_arguments = gcp_check_job_args(job_arguments)
     elif resource_to_run == "local":
         full_job_arguments = local_check_job_args(job_arguments)
+    else:
+        raise ValueError("Please a valid compute resource.")
     return full_job_arguments
 
 

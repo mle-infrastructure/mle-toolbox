@@ -39,7 +39,7 @@ def visualize_2D_grid(
     fig=None,
     ax=None,
     figsize: tuple = (10, 8),
-    cmap="magma",
+    cmap="magma_r",
     fname: Union[None, str] = None,
 ):
     """Fix certain params & visualize grid target value over other two."""

@@ -98,7 +98,8 @@ def run(cmd_args):
             activate_logger("WARNING")
         except ImportError:
             raise ImportError(
-                "You need to install `slack-clusterbot` to " "use status notifications."
+                "You need to install `slack-clusterbot` to "
+                "use status notifications."
             )
         bot = ClusterBot(
             user_name=mle_config.slack.user_name,
@@ -148,8 +149,10 @@ def run(cmd_args):
                     # Upload the report
                     bot.upload(
                         file_name=reporter.pdf_report_fname,
-                        message=":scroll: Finished report generation :scroll:\n"
-                        f" `{reporter.pdf_report_fname}`",
+                        message=(
+                            ":scroll: Finished report generation :scroll:\n"
+                            f" `{reporter.pdf_report_fname}`"
+                        ),
                         reply_to=message_id,
                         user_name=mle_config.slack.user_name,
                     )

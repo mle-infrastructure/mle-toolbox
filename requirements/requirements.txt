@@ -12,7 +12,7 @@ paramiko
 sshtunnel
 pickle5
 rich
-mle-logging==0.0.5
+mle-logging==0.0.4
 mle-hyperopt==0.0.5
 mle-monitor==0.0.1
 mle-scheduler==0.0.5
