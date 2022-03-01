@@ -11,12 +11,18 @@ def check_correct_results(experiment_dir: str) -> None:
     """Ensure that correct results and directories were generated."""
     assert os.path.exists(experiment_dir)
     # Check that figures and report files were correctly generated
-    assert os.path.exists(os.path.join(experiment_dir, "figures/train_loss_1d.png"))
-    assert os.path.exists(os.path.join(experiment_dir, "figures/test_loss_1d.png"))
+    assert os.path.exists(
+        os.path.join(experiment_dir, "figures/train_loss_1d.png")
+    )
+    assert os.path.exists(
+        os.path.join(experiment_dir, "figures/test_loss_1d.png")
+    )
 
     report_path = os.path.join(experiment_dir, "reports")
     assert os.path.exists(report_path)
-    onlyfiles = [f for f in listdir(report_path) if isfile(join(report_path, f))]
+    onlyfiles = [
+        f for f in listdir(report_path) if isfile(join(report_path, f))
+    ]
     assert len([f for f in onlyfiles if f.endswith(".md")]) == 1
     assert len([f for f in onlyfiles if f.endswith(".html")]) == 1
     assert len([f for f in onlyfiles if f.endswith(".pdf")]) == 1
@@ -27,7 +33,7 @@ class CMDargs(NamedTuple):
 
 
 def test_report_generate() -> None:
-    """Execute `mle run pde_grid_sync.yaml` and check running pipeline."""
+    """`mle run toy_single_objective/mle_search_grid.yaml` + check report pipeline."""
     os.chdir("./examples")
     exp_dir = "experiments/report/"
     # Remove experiment dir at start of test
@@ -38,7 +44,7 @@ def test_report_generate() -> None:
     bashCommand = (
         "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
         f" --experiment_dir {exp_dir}"
-        f" --purpose Test report generation"
+        " --purpose Test report generation"
     )
 
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
@@ -63,7 +69,7 @@ def test_api_report() -> None:
     bashCommand = (
         "mle run toy_single_objective/mle_search_grid.yaml -nw -resource local"
         f" --experiment_dir {exp_dir}"
-        f" --purpose Test report generation"
+        " --purpose Test report generation"
     )
     process = sp.Popen(bashCommand.split(), stdout=sp.PIPE)
     output, error = process.communicate()

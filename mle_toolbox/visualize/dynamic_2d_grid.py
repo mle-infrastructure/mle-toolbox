@@ -1,8 +1,15 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import seaborn as sns
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    import seaborn as sns
+except ImportError:
+    raise ImportError(
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
+    )
 
 
 def animate_2D_grid(
@@ -78,8 +85,12 @@ class AnimatedGrid(object):
         self.dt = dt
         self.title = title
         self.time_pre_str = time_pre_str
-        self.range_x = range_x if range_x is not None else np.arange(data.shape[1])
-        self.range_y = range_y if range_y is not None else np.arange(data.shape[2])
+        self.range_x = (
+            range_x if range_x is not None else np.arange(data.shape[1])
+        )
+        self.range_y = (
+            range_y if range_y is not None else np.arange(data.shape[2])
+        )
         self.var_name = var_name
         self.every_nth = every_nth
         self.round_ticks = round_ticks
@@ -135,7 +146,9 @@ class AnimatedGrid(object):
                             for label in self.range_y[::-1]
                         ]
                     else:
-                        yticklabels = [str(int(label)) for label in self.range_y[::-1]]
+                        yticklabels = [
+                            str(int(label)) for label in self.range_y[::-1]
+                        ]
                 else:
                     yticklabels = [str(label) for label in self.range_y[::-1]]
             else:
@@ -155,7 +168,9 @@ class AnimatedGrid(object):
                             for label in self.range_x
                         ]
                     else:
-                        xticklabels = [str(int(label)) for label in self.range_x]
+                        xticklabels = [
+                            str(int(label)) for label in self.range_x
+                        ]
                 else:
                     xticklabels = [str(label) for label in self.range_x]
             else:

@@ -3,12 +3,12 @@ from typing import Union
 
 try:
     from statsmodels.stats.weightstats import ztest
+    from statsmodels.stats.multitest import multipletests
 except ModuleNotFoundError as err:
     raise ModuleNotFoundError(
         f"{err}. You need to install `statsmodels` "
         "to use the `mle_toolbox.hypothesis` module."
     )
-from statsmodels.stats.multitest import multipletests
 
 
 class HypothesisTester(object):

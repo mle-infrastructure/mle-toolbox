@@ -1,7 +1,15 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import seaborn as sns
+
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+    import seaborn as sns
+except ImportError:
+    raise ImportError(
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
+    )
 
 
 def animate_1D_lines(
@@ -85,7 +93,9 @@ class AnimatedLine(object):
                 label = self.base_label + " " + str(l_id + 1)
             self.line.append(
                 self.ax.plot(
-                    np.arange(0, self.dt * y.shape[0], self.dt), y[0, l_id], label=label
+                    np.arange(0, self.dt * y.shape[0], self.dt),
+                    y[0, l_id],
+                    label=label,
                 )[0]
             )
 
@@ -98,7 +108,9 @@ class AnimatedLine(object):
                 np.max(self.data) + 0.5,
             ]
         )
-        self.ax.set_title(self.title + r": $t={}$".format(self.t + 1), fontsize=15)
+        self.ax.set_title(
+            self.title + r": $t={}$".format(self.t + 1), fontsize=15
+        )
         # For FuncAnimation's sake, we need to return the artist we'll be using
         # Note that it expects a sequence of artists, thus the trailing comma.
         return (self.line,)
@@ -107,10 +119,13 @@ class AnimatedLine(object):
         sub_data = self.data[: (i + 1), :]
         for l_id, l in enumerate(self.line):
             l.set_data(
-                np.arange(0, self.dt * sub_data.shape[0], self.dt), sub_data[:, l_id]
+                np.arange(0, self.dt * sub_data.shape[0], self.dt),
+                sub_data[:, l_id],
             )
         self.t = self.t + self.dt
-        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
+        self.ax.set_title(
+            self.title + r" $t={:.1f}$".format(self.t), fontsize=25
+        )
         self.fig.tight_layout()
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.

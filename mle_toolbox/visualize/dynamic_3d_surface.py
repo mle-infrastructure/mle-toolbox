@@ -1,6 +1,14 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+except ImportError:
+    raise ImportError(
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
+    )
 
 
 def animate_3D_surface(
@@ -80,7 +88,12 @@ class Animated3DSurface(object):
         # Plot the initial image
         self.surface = [
             self.ax.plot_surface(
-                self.x, self.y, self.data[0, :, :], color="0.75", rstride=1, cstride=1
+                self.x,
+                self.y,
+                self.data[0, :, :],
+                color="0.75",
+                rstride=1,
+                cstride=1,
             )
         ]
 

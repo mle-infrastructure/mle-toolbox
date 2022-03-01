@@ -1,6 +1,13 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
+except ImportError:
+    raise ImportError(
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
+    )
 
 
 def animate_3D_scatter(
@@ -76,7 +83,9 @@ class Animated3DScatter(object):
 
     def setup_plot(self):
         """Initial drawing of the heatmap plot."""
-        self.ax.set_title(self.title + "Time: {}".format(self.dt), fontsize=40, pad=-25)
+        self.ax.set_title(
+            self.title + "Time: {}".format(self.dt), fontsize=40, pad=-25
+        )
         # print(x_coord, y_coord, z_coord)
         self.ax.axis(
             [

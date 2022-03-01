@@ -1,21 +1,16 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import List, Union
 
-import seaborn as sns
 
-# Set overall plots appearance sns style
-sns.set(
-    context="poster",
-    style="white",
-    palette="Paired",
-    font="sans-serif",
-    font_scale=1.05,
-    color_codes=True,
-    rc=None,
-)
+try:
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+except ImportError:
+    raise ImportError(
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
+    )
 
 
 def visualize_2D_grid(
@@ -149,7 +144,10 @@ def plot_2D_heatmap(
         fig, ax = plt.subplots(figsize=figsize)
     if max_heat is None and min_heat is None:
         im = ax.imshow(
-            heat_array, cmap=cmap, vmax=np.max(heat_array), vmin=np.min(heat_array)
+            heat_array,
+            cmap=cmap,
+            vmax=np.max(heat_array),
+            vmin=np.min(heat_array),
         )
     elif max_heat is not None and min_heat is None:
         im = ax.imshow(heat_array, cmap=cmap, vmax=max_heat)
@@ -163,7 +161,8 @@ def plot_2D_heatmap(
         if type(range_y[-1]) is not str:
             if round_ticks != 0:
                 yticklabels = [
-                    str(round(float(label), round_ticks)) for label in range_y[::-1]
+                    str(round(float(label), round_ticks))
+                    for label in range_y[::-1]
                 ]
             else:
                 yticklabels = [str(int(label)) for label in range_y[::-1]]
@@ -197,7 +196,9 @@ def plot_2D_heatmap(
             label.set_visible(False)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    plt.setp(
+        ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
+    )
 
     if title is not None:
         if subtitle is None:

@@ -4,7 +4,7 @@ try:
     # Suppress all axis/future warnings from mpl
     import warnings
 
-    warnings.filterwarnings("ignore", module="matplotlib\..*")
+    warnings.filterwarnings("ignore", module="matplotlib*")
 except ModuleNotFoundError as err:
     raise ModuleNotFoundError(
         f"{err}. You need to install `matplotlib` "

@@ -44,12 +44,10 @@ If you want to use the toolbox on your local machine follow the instructions loc
 pip install mle-toolbox
 ```
 
-Alternatively, you can clone this repository and afterwards 'manually' install it:
+If you want to get the most recent commit, please install directly from the repository:
 
 ```
-git clone https://github.com/mle-infrastructure/mle-toolbox.git
-cd mle-toolbox
-pip install -e .
+pip install git+https://github.com/mle-infrastructure/mle-toolbox.git@main
 ```
 
 ## The Core Toolbox Subcommands 🌱
@@ -96,7 +94,7 @@ If you use parts the `mle-toolbox` in your research, please cite it as follows:
 ```
 @software{mle_infrastructure2021github,
   author = {Robert Tjarko Lange},
-  title = {{MLE-Infrastructure}: A Set of Lightweight Tools  for Distributed Machine Learning Experimentation},
+  title = {{MLE-Infrastructure}: A Set of Lightweight Tools for Distributed Machine Learning Experimentation},
   url = {http://github.com/mle-infrastructure},
   year = {2021},
 }
