@@ -19,7 +19,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 1. API for launching jobs on cluster/cloud computing platforms (Slurm, GridEngine, GCP).
 2. Common machine learning research experiment setups:
     - Launching and collecting multiple random seeds in parallel/batches or async.
-    - Hyperparameter searches: Random, Grid, SMBO, PBT and Nevergrad.
+    - Hyperparameter searches: Random, Grid, SMBO, PBT, Nevergrad, etc.
     - Pre- and post-processing pipelines for data preparation/result visualization.
 3. Automated report generation for hyperparameter search experiments.
 4. Storage/retrieval of results and database in Google Cloud Storage Bucket.

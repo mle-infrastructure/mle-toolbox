@@ -75,6 +75,9 @@ setup(
             "seaborn",
             "statsmodels",
             "slack-clusterbot",
+            "mle-monitor[full]",
+            "mle-hyperopt[full]",
+            "mle-scheduler[full]",
         ],
     },
     entry_points={

@@ -6,7 +6,7 @@ toml
 pyyaml
 pickle5
 rich
-mle-logging>=0.0.4
-mle-hyperopt>=0.0.5
-mle-monitor>=0.0.1
-mle-scheduler>=0.0.5
+git+https://github.com/mle-infrastructure/mle-logging.git@main
+git+https://github.com/mle-infrastructure/mle-hyperopt.git@main
+git+https://github.com/mle-infrastructure/mle-monitor.git@main
+git+https://github.com/mle-infrastructure/mle-scheduler.git@main
