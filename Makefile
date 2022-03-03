@@ -9,6 +9,10 @@ install-dev:
 	python -m pip install --upgrade pip
 	pip install -r requirements/requirements.txt
 	pip install -r requirements/requirements-test.txt
+	pip install git+https://github.com/mle-infrastructure/mle-logging.git@main
+	pip install git+https://github.com/mle-infrastructure/mle-hyperopt.git@main
+	pip install git+https://github.com/mle-infrastructure/mle-launcher.git@main
+	pip install git+https://github.com/mle-infrastructure/mle-monitor.git@main
 	pip install pytest pytest-timeout pytest-cov
 	pip install flake8 black pydocstyle
 	pip install -e .

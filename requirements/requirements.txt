@@ -6,7 +6,7 @@ toml
 pyyaml
 pickle5
 rich
-git+https://github.com/mle-infrastructure/mle-logging.git@main
-git+https://github.com/mle-infrastructure/mle-hyperopt.git@main
-git+https://github.com/mle-infrastructure/mle-monitor.git@main
-git+https://github.com/mle-infrastructure/mle-scheduler.git@main
+mle-logging
+mle-hyperopt
+mle-scheduler
+mle-monitor
