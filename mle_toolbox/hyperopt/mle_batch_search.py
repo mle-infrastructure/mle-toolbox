@@ -62,9 +62,7 @@ class MLE_BatchSearch(object):
         # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
-        self.search_log_path = os.path.join(
-            self.experiment_dir, "search_log.yaml"
-        )
+        self.search_log_path = os.path.join(self.experiment_dir, "search_log.yaml")
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -287,10 +285,7 @@ class MLE_BatchSearch(object):
             )
 
             # Training w. prev. specified hyperparams & eval, get time taken
-            if (
-                type(num_evals_per_batch) == int
-                and max_running_jobs is not None
-            ):
+            if type(num_evals_per_batch) == int and max_running_jobs is not None:
                 max_jobs = num_seeds_per_eval * num_evals_per_batch
             else:
                 max_jobs = max_running_jobs
@@ -357,12 +352,8 @@ class MLE_BatchSearch(object):
                         self.hyper_log.all_run_ids + run_ids,
                     )
                     # Load in meta-results log with values meaned over seeds
-                    meta_log_fname = os.path.join(
-                        self.experiment_dir, "meta_log.hdf5"
-                    )
-                    meta_eval_log = load_log(
-                        meta_log_fname, aggregate_seeds=True
-                    )
+                    meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
+                    meta_eval_log = load_log(meta_log_fname, aggregate_seeds=True)
                     break
                 except Exception:
                     time.sleep(1)
@@ -421,9 +412,7 @@ class MLE_BatchSearch(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-        self.strategy.tell(
-            proposals, np.array(measures).squeeze().tolist(), ckpts
-        )
+        self.strategy.tell(proposals, np.array(measures).squeeze().tolist(), ckpts)
         self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):

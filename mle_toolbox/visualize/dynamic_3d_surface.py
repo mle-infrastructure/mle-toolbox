@@ -6,8 +6,7 @@ try:
     import matplotlib.animation as animation
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting"
-        " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
     )
 
 

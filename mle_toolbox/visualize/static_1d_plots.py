@@ -8,8 +8,7 @@ try:
     import seaborn as sns
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting"
-        " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
     )
 
 
@@ -231,9 +230,7 @@ def plot_1D_line(
         if j % every_nth_tick == 0
     ]
     xticks = [
-        param_array[j]
-        for j, i in enumerate(param_array)
-        if j % every_nth_tick == 0
+        param_array[j] for j, i in enumerate(param_array) if j % every_nth_tick == 0
     ]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
@@ -263,8 +260,7 @@ def tokenize(filename):
     return tuple(
         int(token) if match else token
         for token, match in (
-            (fragment, digits.search(fragment))
-            for fragment in digits.split(filename)
+            (fragment, digits.search(fragment)) for fragment in digits.split(filename)
         )
     )
 

@@ -64,15 +64,11 @@ class FigureGenerator:
         # Loop over stats variables and generate figures
         figure_fnames = []
         for stats in self.meta_log.stats_vars:
-            stats_fname = self.generate_1D_figure(
-                self.meta_log.time_vars[0], stats
-            )
+            stats_fname = self.generate_1D_figure(self.meta_log.time_vars[0], stats)
             figure_fnames.append(stats_fname)
         return figure_fnames
 
-    def generate_all_2D_figures(
-        self, search_variables: list, target_variables: list
-    ):
+    def generate_all_2D_figures(self, search_variables: list, target_variables: list):
         """Generate heatmap for search experiment with 2 or more vars."""
         # Loop over stats variable combinations and generate figures
         figure_fnames = []
@@ -93,13 +89,9 @@ class FigureGenerator:
                     for k in to_fix:
                         fix_values[k] = self.hyper_log[k].unique().tolist()
                     # Create a mesh of all fix combinations of unique vals
-                    all_fix_combos = list(
-                        itertools.product(*fix_values.values())
-                    )
+                    all_fix_combos = list(itertools.product(*fix_values.values()))
                     for combo in all_fix_combos:
-                        fixed_params = {
-                            k: combo[i] for i, k in enumerate(fix_values)
-                        }
+                        fixed_params = {k: combo[i] for i, k in enumerate(fix_values)}
                         stats_fname = self.generate_2D_figure(
                             list(pair), target, fixed_params
                         )
@@ -109,9 +101,7 @@ class FigureGenerator:
                 pass
         return figure_fnames
 
-    def generate_2D_figure(
-        self, params_to_plot, target_to_plot, fixed_params=None
-    ):
+    def generate_2D_figure(self, params_to_plot, target_to_plot, fixed_params=None):
         """Generate and save 2D heatmap figure."""
         if fixed_params is not None:
             plot_subtitle = "Fixed: " + str(fixed_params)

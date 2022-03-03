@@ -98,8 +98,7 @@ def run(cmd_args):
             activate_logger("WARNING")
         except ImportError:
             raise ImportError(
-                "You need to install `slack-clusterbot` to "
-                "use status notifications."
+                "You need to install `slack-clusterbot` to " "use status notifications."
             )
         bot = ClusterBot(
             user_name=mle_config.slack.user_name,

@@ -45,11 +45,8 @@ type-check:
 	# mypy mle_toolbox/.
 
 testing:
-	# Run unit tests: File loading, job template generation
-	# pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/unit
-	# Run integration tests: Different experiment types [ignore report test]
-	# pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml tests/integration/experiment
-	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml --ignore=tests/integration/test_pbt_api.py
+	# Run all tests: Different experiment types
+	pytest -vv --durations=0 --cov=./ --cov-report=term-missing --cov-report=xml
 
 pypi-publish:
 	# Publish package in PyPi repositories - triggered for new release

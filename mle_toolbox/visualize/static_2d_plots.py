@@ -8,8 +8,7 @@ try:
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting"
-        " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
     )
 
 
@@ -161,8 +160,7 @@ def plot_2D_heatmap(
         if type(range_y[-1]) is not str:
             if round_ticks != 0:
                 yticklabels = [
-                    str(round(float(label), round_ticks))
-                    for label in range_y[::-1]
+                    str(round(float(label), round_ticks)) for label in range_y[::-1]
                 ]
             else:
                 yticklabels = [str(int(label)) for label in range_y[::-1]]
@@ -196,9 +194,7 @@ def plot_2D_heatmap(
             label.set_visible(False)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(
-        ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
-    )
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
     if title is not None:
         if subtitle is None:

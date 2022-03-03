@@ -10,7 +10,9 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
 
     # Extract the number of seeds over which experiment is run
     if job_config.meta_job_args["experiment_type"] == "hyperparameter-search":
-        num_seeds = job_config.param_search_args.search_resources["num_seeds_per_eval"]
+        num_seeds = job_config.param_search_args.search_resources[
+            "num_seeds_per_eval"
+        ]
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
         if "num_seeds" in job_config.multi_config_args.keys():
             num_seeds = job_config.multi_config_args["num_seeds"]
@@ -56,10 +58,12 @@ def compose_protocol_data(job_config: dict, resource_to_run: str, purpose: str):
                     search_resources["num_evals_per_batch"]
                     * search_resources["num_seeds_per_eval"]
                 )
-            except:
+            except Exception:
                 num_total_jobs, num_job_batches, num_jobs_per_batch = 0, 0, 0
     elif job_config.meta_job_args["experiment_type"] == "multiple-configs":
-        num_total_jobs = len(job_config.multi_config_args["config_fnames"]) * num_seeds
+        num_total_jobs = (
+            len(job_config.multi_config_args["config_fnames"]) * num_seeds
+        )
         num_job_batches = 1
         num_jobs_per_batch = num_total_jobs
     else:

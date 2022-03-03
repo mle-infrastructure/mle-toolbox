@@ -268,7 +268,7 @@ def generate_markdown(e_id, md_report_fname, report_data):
                 report_data["loaded_config"][0]["model_config"]
             )
             doc.addTable(dictionary_list=model_table)
-        except:
+        except Exception:
             pass
 
         doc.addHeader(3, "Logging Configuration.")

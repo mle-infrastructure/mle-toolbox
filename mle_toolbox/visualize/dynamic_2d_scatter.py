@@ -3,8 +3,7 @@ try:
     import matplotlib.animation as animation
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting"
-        " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
     )
 
 
@@ -21,9 +20,7 @@ def animate_2D_scatter(
     direct_save=True,
 ):
     """Generate a gif animation of a set of 1d curves."""
-    animator = Animated2DScatter(
-        data, dt, title, ylabel, xlabel, no_axis, interval
-    )
+    animator = Animated2DScatter(data, dt, title, ylabel, xlabel, no_axis, interval)
     if direct_save:
         animator.ani.save(fname, fps=fps, writer="imagemagick")
     return animator
@@ -92,9 +89,7 @@ class Animated2DScatter(object):
 
     def update(self, i):
         self.t += self.dt
-        self.ax.set_title(
-            self.title + r" $t={:.1f}$".format(self.t), fontsize=25
-        )
+        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
 
         coord = self.data[i, :, :2]
         # theta = self.data[i, :, 2]

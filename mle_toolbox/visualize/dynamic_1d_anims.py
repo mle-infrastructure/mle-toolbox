@@ -7,8 +7,7 @@ try:
     import seaborn as sns
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting"
-        " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
     )
 
 
@@ -108,9 +107,7 @@ class AnimatedLine(object):
                 np.max(self.data) + 0.5,
             ]
         )
-        self.ax.set_title(
-            self.title + r": $t={}$".format(self.t + 1), fontsize=15
-        )
+        self.ax.set_title(self.title + r": $t={}$".format(self.t + 1), fontsize=15)
         # For FuncAnimation's sake, we need to return the artist we'll be using
         # Note that it expects a sequence of artists, thus the trailing comma.
         return (self.line,)
@@ -123,9 +120,7 @@ class AnimatedLine(object):
                 sub_data[:, l_id],
             )
         self.t = self.t + self.dt
-        self.ax.set_title(
-            self.title + r" $t={:.1f}$".format(self.t), fontsize=25
-        )
+        self.ax.set_title(self.title + r" $t={:.1f}$".format(self.t), fontsize=25)
         self.fig.tight_layout()
         # We need to return the updated artist for FuncAnimation to draw..
         # Note that it expects a sequence of artists, thus the trailing comma.
