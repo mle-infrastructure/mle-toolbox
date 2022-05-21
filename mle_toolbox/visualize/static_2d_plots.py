@@ -8,7 +8,8 @@ try:
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
     )
 
 
@@ -35,6 +36,7 @@ def visualize_2D_grid(
     figsize: tuple = (10, 8),
     cmap="magma_r",
     fname: Union[None, str] = None,
+    interpolation: str = None,
 ):
     """Fix certain params & visualize grid target value over other two."""
     assert len(params_to_plot) == 2, "You can only plot 2 variables!"
@@ -84,6 +86,7 @@ def visualize_2D_grid(
             fig=fig,
             ax=ax,
             cmap=cmap,
+            interpolation=interpolation,
         )
 
         # Save the figure if a filename was provided
@@ -137,6 +140,7 @@ def plot_2D_heatmap(
     ax=None,
     figsize: tuple = (10, 8),
     cmap="magma",
+    interpolation=None,
 ):
     """Plot the 2D heatmap."""
     if fig is None or ax is None:
@@ -147,20 +151,38 @@ def plot_2D_heatmap(
             cmap=cmap,
             vmax=np.max(heat_array),
             vmin=np.min(heat_array),
+            interpolation=interpolation,
         )
     elif max_heat is not None and min_heat is None:
-        im = ax.imshow(heat_array, cmap=cmap, vmax=max_heat)
+        im = ax.imshow(
+            heat_array,
+            cmap=cmap,
+            vmax=max_heat,
+            interpolation=interpolation,
+        )
     elif max_heat is None and min_heat is not None:
-        im = ax.imshow(heat_array, cmap=cmap, vmin=min_heat)
+        im = ax.imshow(
+            heat_array,
+            cmap=cmap,
+            vmin=min_heat,
+            interpolation=interpolation,
+        )
     else:
-        im = ax.imshow(heat_array, cmap=cmap, vmin=min_heat, vmax=max_heat)
+        im = ax.imshow(
+            heat_array,
+            cmap=cmap,
+            vmin=min_heat,
+            vmax=max_heat,
+            interpolation=interpolation,
+        )
 
     ax.set_yticks(np.arange(len(range_y)))
     if len(range_y) != 0:
         if type(range_y[-1]) is not str:
             if round_ticks != 0:
                 yticklabels = [
-                    str(round(float(label), round_ticks)) for label in range_y[::-1]
+                    str(round(float(label), round_ticks))
+                    for label in range_y[::-1]
                 ]
             else:
                 yticklabels = [str(int(label)) for label in range_y[::-1]]
@@ -194,7 +216,9 @@ def plot_2D_heatmap(
             label.set_visible(False)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    plt.setp(
+        ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
+    )
 
     if title is not None:
         if subtitle is None:

@@ -11,7 +11,7 @@ from mle_logging import merge_config_logs, load_log, load_config
 from mle_scheduler import MLEQueue
 from mle_monitor import MLEProtocol
 from mle_hyperopt import Strategies
-from mle_hyperopt.utils import write_configs
+from mle_hyperopt.utils import write_configs, merge_config_dicts
 from mle_toolbox import mle_config, check_single_job_args
 
 
@@ -62,7 +62,9 @@ class MLE_BatchSearch(object):
         # Create the directory if it doesn't exist yet & set log json name
         if not os.path.exists(self.experiment_dir):
             os.makedirs(self.experiment_dir)
-        self.search_log_path = os.path.join(self.experiment_dir, "search_log.yaml")
+        self.search_log_path = os.path.join(
+            self.experiment_dir, "search_log.yaml"
+        )
 
         # Copy over base config .json file -  to be copied + modified in search
         config_copy = os.path.join(
@@ -218,7 +220,7 @@ class MLE_BatchSearch(object):
             random_seeds=random_seeds,
             max_running_jobs=max_running_jobs,
             cloud_settings=mle_config.gcp,
-            automerge_seeds=True,
+            automerge_configs=True,
             use_slack_bot=(self.message_id is not None),
             slack_message_id=self.message_id,
             slack_user_name=mle_config.slack.user_name,
@@ -285,7 +287,10 @@ class MLE_BatchSearch(object):
             )
 
             # Training w. prev. specified hyperparams & eval, get time taken
-            if type(num_evals_per_batch) == int and max_running_jobs is not None:
+            if (
+                type(num_evals_per_batch) == int
+                and max_running_jobs is not None
+            ):
                 max_jobs = num_seeds_per_eval * num_evals_per_batch
             else:
                 max_jobs = max_running_jobs
@@ -307,7 +312,7 @@ class MLE_BatchSearch(object):
                 slack_user_name=mle_config.slack.user_name,
                 slack_auth_token=mle_config.slack.slack_token,
                 protocol_db=self.protocol_db,
-                automerge_seeds=True,
+                automerge_configs=True,
             )
             job_queue.run()
             time_elapsed = time.time() - start_t
@@ -352,8 +357,12 @@ class MLE_BatchSearch(object):
                         self.hyper_log.all_run_ids + run_ids,
                     )
                     # Load in meta-results log with values meaned over seeds
-                    meta_log_fname = os.path.join(self.experiment_dir, "meta_log.hdf5")
-                    meta_eval_log = load_log(meta_log_fname, aggregate_seeds=True)
+                    meta_log_fname = os.path.join(
+                        self.experiment_dir, "meta_log.hdf5"
+                    )
+                    meta_eval_log = load_log(
+                        meta_log_fname, aggregate_seeds=True
+                    )
                     break
                 except Exception:
                     time.sleep(1)
@@ -412,7 +421,9 @@ class MLE_BatchSearch(object):
                 else:
                     metrics.append(effective_perf)
             measures.append(metrics)
-        self.strategy.tell(proposals, np.array(measures).squeeze().tolist(), ckpts)
+        self.strategy.tell(
+            proposals, np.array(measures).squeeze().tolist(), ckpts
+        )
         self.strategy.save(self.search_log_path)
 
     def gen_hyperparam_configs(self, proposals: list):
@@ -432,7 +443,16 @@ class MLE_BatchSearch(object):
                         elif config_id == "model":
                             sample_config.model_config[param] = param_value
                     except Exception:
-                        sample_config.train_config[param_name] = param_value
+                        # Merge nested config dictionaries
+                        if type(param_value) == dict:
+                            sample_config.train_config[param_name] = dict(
+                                merge_config_dicts(
+                                    sample_config.train_config[param_name],
+                                    param_value,
+                                )
+                            )
+                        else:
+                            sample_config.train_config[param_name] = param_value
                 else:
                     sample_config[param_name] = param_value
             # Add param configs to batch lists

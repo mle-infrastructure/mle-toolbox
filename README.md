@@ -1,6 +1,6 @@
 # Lightweight Distributed ML Experiments Management 🛠️
 [![Pyversions](https://img.shields.io/pypi/pyversions/mle-toolbox.svg?style=flat-square)](https://pypi.python.org/pypi/mle-toolbox)
-[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://roberttlange.github.io/mle-toolbox/)
+[![Docs Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://mle-infrastructure.github.io/)
 [![PyPI version](https://badge.fury.io/py/mle-toolbox.svg)](https://badge.fury.io/py/mle-toolbox)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Status](https://github.com/mle-infrastructure/mle-toolbox/workflows/Python%20tests/badge.svg)](https://github.com/mle-infrastructure/mle-toolbox/actions?query=workflow%3A"Python+tests")

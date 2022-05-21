@@ -78,7 +78,7 @@ class MLExperiment(object):
             self.train_config.seed_id = self.default_seed
             self.log_config.seed_id = self.default_seed
             print_framed(
-                f"!!!WARNING!!!: No seed provided - set to default "
+                "!!!WARNING!!!: No seed provided - set to default "
                 f"{self.default_seed}."
             )
 
@@ -86,7 +86,9 @@ class MLExperiment(object):
         # Set the random seeds for all random number generation
         if self.create_jax_prng:
             # Return JAX random number generating key
-            self.rng = set_random_seeds(self.train_config.seed_id, return_key=True)
+            self.rng = set_random_seeds(
+                self.train_config.seed_id, return_key=True
+            )
         else:
             set_random_seeds(self.train_config.seed_id)
 
@@ -111,7 +113,9 @@ class MLExperiment(object):
         save=False,
     ) -> None:
         """Update the MLE_Logger instance with stats, model params & save."""
-        self.log.update(clock_tick, stats_tick, model, plot_fig, extra_obj, save)
+        self.log.update(
+            clock_tick, stats_tick, model, plot_fig, extra_obj, save
+        )
 
     def ready_to_log(self, update_counter: int) -> bool:
         """Check whether update_counter is modulo of log_every_k_steps in logger."""

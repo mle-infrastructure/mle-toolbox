@@ -152,7 +152,7 @@ def load_experiment_config(cmd_args: dict) -> DotMap:
     ]
     assert (
         experiment_type in all_experiment_types
-    ), "Job type has to be in {all_experiment_types}."
+    ), f"Job type has to be in {all_experiment_types}."
 
     if experiment_type == "single-config":
         assert "single_job_args" in config.keys()

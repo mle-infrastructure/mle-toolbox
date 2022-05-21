@@ -2,6 +2,7 @@ import pickle5 as pickle
 import pandas as pd
 import numpy as np
 from typing import Union, List
+from mle_hyperopt.utils.helpers import flatten_config
 
 
 # Set pandas printing option (print more columns!)
@@ -18,7 +19,9 @@ class HyperLog(object):
         for col in hyper_df.columns:
             setattr(self, col, hyper_df[col])
 
-    def set_search_metrics(self, meta_vars: list, stats_vars: list, time_vars: list):
+    def set_search_metrics(
+        self, meta_vars: list, stats_vars: list, time_vars: list
+    ):
         """Reconstruct search & metric variable names from meta log data."""
         self.search_vars = list(
             set(self.columns)
@@ -40,7 +43,9 @@ class HyperLog(object):
         # Filter df: All runs with fixed params closest to param_value
         if param_dict is not None:
             df = sub_variable_hyper_log(
-                self.hyper_log, list(param_dict.keys()), list(param_dict.values())
+                self.hyper_log,
+                list(param_dict.keys()),
+                list(param_dict.values()),
             )
         # Filter df: Top-k performing runs for metric
         if metric_name is not None:
@@ -176,10 +181,6 @@ def load_pkl_hyper_log(hyper_log_fpath: str):
     """Load stored .pkl serach log file as list of iteration dicts."""
     with open(hyper_log_fpath, "rb") as input:
         opt_log = pickle.load(input)
-    all_evaluated_params = []
-    # Loop over individual jobs stored in the hyper log
-    for key, eval_iter in opt_log.items():
-        all_evaluated_params.append(eval_iter["params"])
     return opt_log
 
 
@@ -197,9 +198,9 @@ def unravel_param_subdicts(hyper_log: list):
 
     # Unpack the individual params dictionaries for better indexing
     for i in range(len(list_of_run_dicts)):
-        unravel_params = merge_two_dicts(
-            list_of_run_dicts[i]["params"], list_of_run_dicts[i]
-        )
+        params_dict = list_of_run_dicts[i]["params"]
+        flat_params_dict = flatten_config(params_dict)
+        unravel_params = merge_two_dicts(flat_params_dict, list_of_run_dicts[i])
         del unravel_params["params"]
         hyper_list.append(unravel_params)
     return hyper_list

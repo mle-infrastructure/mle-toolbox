@@ -142,7 +142,9 @@ def spawn_multiple_configs(
     logger.setLevel(logger_level)
 
     logger.info(
-        "START - {} configurations " "& {} random seeds".format(num_configs, num_seeds)
+        "START - {} configurations & {} random seeds".format(
+            num_configs, num_seeds
+        )
     )
 
     # Run Experiment Jobs in Batch mode!
@@ -157,7 +159,7 @@ def spawn_multiple_configs(
         default_seed=default_seed,
         random_seeds=random_seeds,
         max_running_jobs=num_seeds * num_configs,
-        automerge_seeds=True,
+        automerge_configs=True,
         cloud_settings=mle_config.gcp,
         use_slack_bot=mle_config.general.use_slack_bot,
         slack_message_id=slack_message_id,
@@ -169,6 +171,7 @@ def spawn_multiple_configs(
     multi_experiment.run()
 
     logger.info(
-        "DONE  - different {} configurations "
-        "& {} random seeds".format(num_configs, num_seeds)
+        "DONE  - different {} configurations & {} random seeds".format(
+            num_configs, num_seeds
+        )
     )
