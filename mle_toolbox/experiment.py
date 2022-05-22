@@ -6,6 +6,7 @@ from .utils.core_experiment import (
     get_extra_cmd_line_input,
     set_random_seeds,
     setup_proxy_server,
+    mle_config,
 )
 from .utils.helpers import print_framed
 from mle_logging import MLELogger
@@ -53,6 +54,7 @@ class MLExperiment(object):
         self.create_jax_prng = create_jax_prng
         self.default_seed = seed_id
         self.seed_id = seed_id
+
         # Get model ckpt path from command line argument or look in config!
         self.model_ckpt_path = cmd_args.model_ckpt_path
         if self.model_ckpt_path is None:  # Based on mle-hyperopt extra dict
@@ -65,6 +67,10 @@ class MLExperiment(object):
                 for m in extra_ckpt_names:
                     if m in self.train_config.extra.keys():
                         self.model_ckpt_path = self.train_config.extra[m]
+
+        # Get data for W&B from commandline (project, group/sweep)
+        self.wb_project = cmd_args.wb_project
+        self.wb_group = cmd_args.wb_group
 
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
@@ -93,6 +99,31 @@ class MLExperiment(object):
             set_random_seeds(self.train_config.seed_id)
 
         # Initialize the logger for the experiment
+        if "use_wandb" in self.log_config.keys():
+            if self.log_config.use_wandb:
+                # Init empty wandb config dict - if no info provided in config
+                if "wandb_config" not in self.log_config.keys():
+                    self.log_config["wandb_config"] = {}
+
+                # Add data from mle_config if not otherwise provided
+                for k in ["key", "entity"]:
+                    if k not in self.log_config.wandb_config.keys():
+                        self.log_config.wandb_config[k] = mle_config.wandb[k]
+
+                # Add project/group for W&B logging (if provided)
+                if "project" not in self.log_config.wandb_config.keys():
+                    if self.wb_project is not None:
+                        self.log_config.wandb_config[
+                            "project"
+                        ] = self.wb_project
+                    else:
+                        self.log_config.wandb_config["project"] = "prototyping"
+                if "group" not in self.log_config.wandb_config.keys():
+                    if self.wb_group is not None:
+                        self.log_config.wandb_config["group"] = self.wb_group
+                    else:
+                        self.log_config.wandb_config["group"] = None
+
         self.log = MLELogger(**self.log_config)
 
         # Load model if checkpoint is provided

@@ -260,6 +260,24 @@ def parse_experiment_args(
         default=None,
         help="Model checkpoint path to reload.",
     )
+
+    # Optional: W&B project name & group (experiment purpose)
+    parser.add_argument(
+        "-wb_project",
+        "--wb_project",
+        action="store",
+        default=None,
+        help="W&B project name to log to.",
+    )
+
+    parser.add_argument(
+        "-wb_group",
+        "--wb_group",
+        action="store",
+        default=None,
+        help="W&B group name to log to - short purpose of experiment.",
+    )
+
     cmd_args, extra_args = parser.parse_known_args()
     return cmd_args, extra_args
 

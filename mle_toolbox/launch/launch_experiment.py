@@ -7,6 +7,7 @@ from ..utils import print_framed
 from mle_toolbox import mle_config
 from mle_monitor import MLEProtocol
 from typing import Union
+import os
 
 
 def launch_processing(
@@ -37,7 +38,7 @@ def launch_processing(
     if not no_protocol and mle_config.general.use_slack_bot:
         bot.reply(
             message_id,
-            ":white_check_mark:" f" Finished {str_to_log}.",
+            f":white_check_mark: Finished {str_to_log}.",
             user_name=mle_config.slack.user_name,
         )
 
@@ -57,7 +58,8 @@ def launch_experiment(
             activate_logger("WARNING")
         except ImportError:
             raise ImportError(
-                "You need to install `slack-clusterbot` to " "use status notifications."
+                "You need to install `slack-clusterbot` to "
+                "use status notifications."
             )
         bot = ClusterBot(
             user_name=mle_config.slack.user_name,
@@ -67,10 +69,24 @@ def launch_experiment(
         bot = None
     # Perform pre-processing if arguments are provided
     if "pre_processing_args" in job_config.keys():
-        launch_processing(True, job_config, no_protocol, message_id, bot, debug_mode)
+        launch_processing(
+            True, job_config, no_protocol, message_id, bot, debug_mode
+        )
 
     # Run the main experiment
     print_framed("RUN EXPERIMENT")
+
+    # W&B - update single_job_args with project_name and experiment_dir ending
+    if "extra_cmd_line_input" not in job_config.single_job_args.keys():
+        job_config.single_job_args["extra_cmd_line_input"] = {}
+    job_config.single_job_args["extra_cmd_line_input"][
+        "wb_project"
+    ] = job_config.meta_job_args.project_name
+    # Adds final part of experiment dir as group! Should be a good identifier
+    path = os.path.normpath(job_config.meta_job_args.experiment_dir)
+    job_config.single_job_args["extra_cmd_line_input"]["wb_group"] = "-".join(
+        path.split(os.sep)[1:]
+    )
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["experiment_type"] == "single-config":
         run_single_config(
@@ -103,7 +119,9 @@ def launch_experiment(
     ]:
         if not no_protocol and mle_config.general.use_slack_bot:
             message = "Search Resources & No. of Jobs:\n"
-            for k, v in job_config.param_search_args["search_resources"].items():
+            for k, v in job_config.param_search_args[
+                "search_resources"
+            ].items():
                 message += f"→ {k}: `{v}` \n"
             bot.reply(message_id, message)
 
@@ -122,7 +140,7 @@ def launch_experiment(
         bot.reply(
             message_id,
             ":steam_locomotive: "
-            f"Finished main experiment: "
+            "Finished main experiment: "
             f"`{job_config.meta_job_args['experiment_type']}`"
             " :steam_locomotive:",
             user_name=mle_config.slack.user_name,
@@ -130,4 +148,6 @@ def launch_experiment(
 
     # 10. Perform post-processing of results if arguments are provided
     if "post_processing_args" in job_config.keys():
-        launch_processing(False, job_config, no_protocol, message_id, bot, debug_mode)
+        launch_processing(
+            False, job_config, no_protocol, message_id, bot, debug_mode
+        )
