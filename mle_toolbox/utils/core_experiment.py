@@ -290,7 +290,7 @@ def load_job_config(
     train_config_ext: Union[None, dict] = None,
     log_config_ext: Union[None, dict] = None,
     model_config_ext: Union[None, dict] = None,
-) -> Tuple[DotMap, DotMap, DotMap]:
+) -> Tuple[DotMap, DotMap, DotMap, DotMap]:
     """Prepare job config files for experiment run (add seed id, etc.)."""
     # Load .json/.yaml job config + add config fname/experiment dir
     if os.path.exists(config_fname):
@@ -331,6 +331,13 @@ def load_job_config(
         model_config = None
     train_config = DotMap(config["train_config"], _dynamic=False)
     log_config = DotMap(config["log_config"], _dynamic=False)
+
+    # Add device config to the standard configurations
+    # In experiment setup this will be passed to get_os_env_ready
+    if "device_config" in config.keys():
+        device_config = DotMap(config["device_config"], _dynamic=False)
+    else:
+        device_config = None
 
     # Add device to train on if not already set in the config file
     if "device_name" in train_config.keys():
@@ -375,7 +382,7 @@ def load_job_config(
             model_config = DotMap({})
         for k, v in model_config_ext.items():
             model_config[k] = v
-    return train_config, model_config, log_config
+    return train_config, model_config, log_config, device_config
 
 
 def get_extra_cmd_line_input(extra_cmd_args: Union[list, None] = None):

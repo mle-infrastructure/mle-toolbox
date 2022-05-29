@@ -18,7 +18,10 @@ from .core_files_load import (
     combine_experiments,
 )
 from .hyper_log import load_hyper_log
-from .helpers import print_framed, get_jax_os_ready, save_pkl_object
+from .helpers import print_framed, get_os_env_ready, save_pkl_object
+
+# Backward compatibility of get_os_env_ready
+from .helpers import get_os_env_ready as get_jax_os_ready
 from .protocol_data import compose_protocol_data
 
 
@@ -40,6 +43,7 @@ __all__ = [
     "combine_experiments",
     "load_hyper_log",
     "print_framed",
+    "get_os_env_ready",
     "get_jax_os_ready",
     "save_pkl_object",
     "compose_protocol_data",

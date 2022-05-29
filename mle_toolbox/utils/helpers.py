@@ -17,13 +17,13 @@ def save_pkl_object(obj, filename: str):
         pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
 
 
-def get_jax_os_ready(
+def get_os_env_ready(
     num_devices: int = 1,
     mem_prealloc_bool: bool = False,
     mem_prealloc_frac: float = 0.9,
     device_type: str = "cpu",
 ) -> None:
-    """Helper to set up os variables for JAX/XLA experiment."""
+    """Helper to set up os variables e.g. for Cuda/JAX/XLA experiment."""
     # Set environment variables for usage of CPU cores
     if device_type == "cpu":
         # Set number of devices (CPU cores/GPUs/TPUs) - helps with pmap testing

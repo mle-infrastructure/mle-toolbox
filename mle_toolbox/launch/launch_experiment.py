@@ -8,6 +8,7 @@ from mle_toolbox import mle_config
 from mle_monitor import MLEProtocol
 from typing import Union
 import os
+from datetime import datetime
 
 
 def launch_processing(
@@ -84,9 +85,10 @@ def launch_experiment(
     ] = job_config.meta_job_args.project_name
     # Adds final part of experiment dir as group! Should be a good identifier
     path = os.path.normpath(job_config.meta_job_args.experiment_dir)
-    job_config.single_job_args["extra_cmd_line_input"]["wb_group"] = "-".join(
-        path.split(os.sep)[1:]
+    group_name = "-".join(
+        [datetime.today().strftime("%m-%d-%H-%M")] + path.split(os.sep)[1:]
     )
+    job_config.single_job_args["extra_cmd_line_input"]["wb_group"] = group_name
     # (a) Experiment: Run a single experiment
     if job_config.meta_job_args["experiment_type"] == "single-config":
         run_single_config(

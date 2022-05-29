@@ -8,7 +8,7 @@ from .utils.core_experiment import (
     setup_proxy_server,
     mle_config,
 )
-from .utils.helpers import print_framed
+from .utils.helpers import print_framed, get_os_env_ready
 from mle_logging import MLELogger
 from mle_logging.load import load_model
 
@@ -50,6 +50,7 @@ class MLExperiment(object):
         self.train_config = loaded_configs[0]
         self.model_config = loaded_configs[1]
         self.log_config = loaded_configs[2]
+        self.device_config = loaded_configs[3]
         self.extra_config = extra_config
         self.create_jax_prng = create_jax_prng
         self.default_seed = seed_id
@@ -97,6 +98,10 @@ class MLExperiment(object):
             )
         else:
             set_random_seeds(self.train_config.seed_id)
+
+        # Setup the device configuration (cuda visibility, jax, etc)
+        if self.device_config is not None:
+            get_os_env_ready(**self.device_config)
 
         # Initialize the logger for the experiment
         if "use_wandb" in self.log_config.keys():
