@@ -37,6 +37,9 @@ def visualize_2D_grid(
     cmap="magma_r",
     fname: Union[None, str] = None,
     interpolation: str = None,
+    plot_xlabel: bool = True,
+    plot_ylabel: bool = True,
+    shared_colorbar: bool = False,
 ):
     """Fix certain params & visualize grid target value over other two."""
     assert len(params_to_plot) == 2, "You can only plot 2 variables!"
@@ -87,6 +90,9 @@ def visualize_2D_grid(
             ax=ax,
             cmap=cmap,
             interpolation=interpolation,
+            plot_xlabel=plot_xlabel,
+            plot_ylabel=plot_ylabel,
+            shared_colorbar=shared_colorbar,
         )
 
         # Save the figure if a filename was provided
@@ -141,6 +147,9 @@ def plot_2D_heatmap(
     figsize: tuple = (10, 8),
     cmap="magma",
     interpolation=None,
+    plot_xlabel: bool = True,
+    plot_ylabel: bool = True,
+    shared_colorbar: bool = False,
 ):
     """Plot the 2D heatmap."""
     if fig is None or ax is None:
@@ -176,67 +185,83 @@ def plot_2D_heatmap(
             interpolation=interpolation,
         )
 
-    ax.set_yticks(np.arange(len(range_y)))
-    if len(range_y) != 0:
-        if type(range_y[-1]) is not str:
-            if round_ticks != 0:
-                yticklabels = [
-                    str(round(float(label), round_ticks))
-                    for label in range_y[::-1]
-                ]
+    if plot_ylabel:
+        ax.set_yticks(np.arange(len(range_y)))
+        if len(range_y) != 0:
+            if type(range_y[-1]) is not str:
+                if round_ticks != 0:
+                    yticklabels = [
+                        str(round(float(label), round_ticks))
+                        for label in range_y[::-1]
+                    ]
+                else:
+                    yticklabels = [str(int(label)) for label in range_y[::-1]]
             else:
-                yticklabels = [str(int(label)) for label in range_y[::-1]]
+                yticklabels = [str(label) for label in range_y[::-1]]
         else:
-            yticklabels = [str(label) for label in range_y[::-1]]
+            yticklabels = []
+        ax.set_yticklabels(yticklabels)
+
+        for n, label in enumerate(ax.yaxis.get_ticklabels()):
+            if n % every_nth_tick != 0:
+                label.set_visible(False)
     else:
-        yticklabels = []
-    ax.set_yticklabels(yticklabels)
+        ax.set_yticks([])
 
-    for n, label in enumerate(ax.yaxis.get_ticklabels()):
-        if n % every_nth_tick != 0:
-            label.set_visible(False)
-
-    ax.set_xticks(np.arange(len(range_x)))
-    if len(range_x) != 0:
-        if type(range_x[-1]) is not str:
-            if round_ticks != 0:
-                xticklabels = [
-                    str(round(float(label), round_ticks)) for label in range_x
-                ]
+    if plot_xlabel:
+        ax.set_xticks(np.arange(len(range_x)))
+        if len(range_x) != 0:
+            if type(range_x[-1]) is not str:
+                if round_ticks != 0:
+                    xticklabels = [
+                        str(round(float(label), round_ticks))
+                        for label in range_x
+                    ]
+                else:
+                    xticklabels = [str(int(label)) for label in range_x]
             else:
-                xticklabels = [str(int(label)) for label in range_x]
+                xticklabels = [str(label) for label in range_x]
         else:
-            xticklabels = [str(label) for label in range_x]
+            xticklabels = []
+        ax.set_xticklabels(xticklabels)
+
+        for n, label in enumerate(ax.xaxis.get_ticklabels()):
+            if n % every_nth_tick != 0:
+                label.set_visible(False)
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(
+            ax.get_xticklabels(),
+            rotation=45,
+            ha="right",
+            rotation_mode="anchor",
+        )
     else:
-        xticklabels = []
-    ax.set_xticklabels(xticklabels)
-
-    for n, label in enumerate(ax.xaxis.get_ticklabels()):
-        if n % every_nth_tick != 0:
-            label.set_visible(False)
-
-    # Rotate the tick labels and set their alignment.
-    plt.setp(
-        ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
-    )
+        ax.set_xticks([])
 
     if title is not None:
         if subtitle is None:
             ax.set_title(title)
         else:
             ax.set_title(title + "\n" + str(subtitle))
-    if len(range_x) != 0:
+    if len(range_x) != 0 and plot_xlabel:
         ax.set_xlabel(xy_labels[0])
-    if len(range_y) != 0:
+    if len(range_y) != 0 and plot_ylabel:
         ax.set_ylabel(xy_labels[1])
 
     if plot_colorbar:
         # fig.subplots_adjust(right=0.8)
         # cbar_ax = fig.add_axes([0.85, 0.25, 0.05, 0.5])
         # cbar = fig.colorbar(im, cax=cbar_ax)
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="7%", pad=0.15)
-        cbar = fig.colorbar(im, cax=cax)
+        if shared_colorbar:
+            fig.subplots_adjust(right=1.5)
+            # l-r, u-d, width, length
+            cbar_ax = fig.add_axes([0.85, 0.25, 0.05, 0.5])
+            cbar = fig.colorbar(im, cax=cbar_ax)
+        else:
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="7%", pad=0.15)
+            cbar = fig.colorbar(im, cax=cax)
         if variable_name is not None:
             cbar.set_label(variable_name, rotation=270, labelpad=30)
         fig.tight_layout()
@@ -250,5 +275,6 @@ def plot_2D_heatmap(
                     "%.2f" % heat_array[y, x],
                     horizontalalignment="center",
                     verticalalignment="center",
+                    fontsize=13,
                 )
     return fig, ax

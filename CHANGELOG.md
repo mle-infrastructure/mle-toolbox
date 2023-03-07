@@ -11,6 +11,7 @@
 - Restructures experiment wrapper `launch_experiment`
 - Moves PBT experiment utilities to `mle-hyperopt`.
 - Fix versions of subpackages so that dependencies are static.
+- Rename `get_jax_os_ready` to `get_os_env_ready` and include `device_config` in auto-setup of `MLExperiment`.
 
 ##### Fixed
 

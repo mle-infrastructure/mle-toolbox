@@ -261,7 +261,7 @@ def parse_experiment_args(
         help="Model checkpoint path to reload.",
     )
 
-    # Optional: W&B project name & group (experiment purpose)
+    # Optional: W&B project name & group, name (experiment purpose)
     parser.add_argument(
         "-wb_project",
         "--wb_project",
@@ -278,6 +278,14 @@ def parse_experiment_args(
         help="W&B group name to log to - short purpose of experiment.",
     )
 
+    parser.add_argument(
+        "-wb_name",
+        "--wb_name",
+        action="store",
+        default=None,
+        help="W&B run name to log to - short purpose of experiment.",
+    )
+
     cmd_args, extra_args = parser.parse_known_args()
     return cmd_args, extra_args
 
@@ -285,11 +293,12 @@ def parse_experiment_args(
 def load_job_config(
     config_fname: str,
     experiment_dir: str,
-    seed_id: Union[None, int],
-    model_ckpt: Union[None, str],
+    seed_id: Union[None, int] = 0,
+    model_ckpt: Union[None, str] = None,
     train_config_ext: Union[None, dict] = None,
     log_config_ext: Union[None, dict] = None,
     model_config_ext: Union[None, dict] = None,
+    device_config_ext: Union[None, dict] = None,
 ) -> Tuple[DotMap, DotMap, DotMap, DotMap]:
     """Prepare job config files for experiment run (add seed id, etc.)."""
     # Load .json/.yaml job config + add config fname/experiment dir
@@ -369,7 +378,7 @@ def load_job_config(
     if model_ckpt is not None:
         train_config.model_ckpt = model_ckpt
 
-    # If train_config_ext, log_config_ext and model_config_ext
+    # If train_config_ext, log_config_ext, model_config_ext, device_config_ext
     # manually provided copy over all key, value pairs
     if train_config_ext is not None:
         for k, v in train_config_ext.items():
@@ -382,6 +391,11 @@ def load_job_config(
             model_config = DotMap({})
         for k, v in model_config_ext.items():
             model_config[k] = v
+    if device_config_ext is not None:
+        if device_config is None:
+            device_config = DotMap({})
+        for k, v in device_config_ext.items():
+            device_config[k] = v
     return train_config, model_config, log_config, device_config
 
 

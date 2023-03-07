@@ -8,7 +8,8 @@ try:
     import seaborn as sns
 except ImportError:
     raise ImportError(
-        "You need to install `matplotlib` & `seaborn` to use plotting" " utilities."
+        "You need to install `matplotlib` & `seaborn` to use plotting"
+        " utilities."
     )
 
 
@@ -230,7 +231,9 @@ def plot_1D_line(
         if j % every_nth_tick == 0
     ]
     xticks = [
-        param_array[j] for j, i in enumerate(param_array) if j % every_nth_tick == 0
+        param_array[j]
+        for j, i in enumerate(param_array)
+        if j % every_nth_tick == 0
     ]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xlabels)
@@ -260,7 +263,8 @@ def tokenize(filename):
     return tuple(
         int(token) if match else token
         for token, match in (
-            (fragment, digits.search(fragment)) for fragment in digits.split(filename)
+            (fragment, digits.search(fragment))
+            for fragment in digits.split(filename)
         )
     )
 
@@ -283,6 +287,11 @@ def visualize_1D_lcurves(
     ax=None,
     figsize: tuple = (9, 6),
     fname: Union[None, str] = None,
+    plot_legend: bool = True,
+    plot_xlabel: bool = True,
+    plot_ylabel: bool = True,
+    plot_ste_bar: bool = False,
+
 ):
     """Plot learning curves from meta_log. Select data and customize plot."""
     if fig is None or ax is None:
@@ -329,6 +338,16 @@ def visualize_1D_lcurves(
                 color=color_by[i],
                 alpha=0.25,
             )
+        
+        if plot_ste_bar:
+            num_seeds = len(main_log[run_id].meta.seeds)
+            ax.fill_between(
+                main_log[run_id].time[iter_to_plot],
+                smooth_mean - 1.96 * smooth_std / np.sqrt(num_seeds),
+                smooth_mean + 1.96 * smooth_std / np.sqrt(num_seeds),
+                color=color_by[i],
+                alpha=0.25,
+            )
 
     full_range_x = main_log[run_id].time[iter_to_plot]
     # Either plot every nth time tic or 5 equally spaced ones
@@ -344,14 +363,16 @@ def visualize_1D_lcurves(
         ax.set_xticks(range_x)
         ax.set_xticklabels([str(int(label)) for label in range_x])
 
-    if len(run_ids) < 20:
+    if len(run_ids) < 20 and plot_legend:
         ax.legend(fontsize=15, ncol=num_legend_cols)
     # ax.set_ylim(0, 0.35)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.set_title(plot_title)
-    ax.set_xlabel(xy_labels[0])
-    ax.set_ylabel(xy_labels[1])
+    if plot_xlabel:
+        ax.set_xlabel(xy_labels[0])
+    if plot_ylabel:
+        ax.set_ylabel(xy_labels[1])
     fig.tight_layout()
 
     # Save the figure if a filename was provided

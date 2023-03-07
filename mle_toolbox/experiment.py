@@ -24,6 +24,7 @@ class MLExperiment(object):
         train_config: Union[None, dict] = None,
         log_config: Union[None, dict] = None,
         model_config: Union[None, dict] = None,
+        device_config: Union[None, dict] = None,
     ):
         """Load job configuration for MLE experiment, setup logger & random seeds."""
         setup_proxy_server()
@@ -42,6 +43,7 @@ class MLExperiment(object):
             train_config,
             log_config,
             model_config,
+            device_config,
         )
         # Optional addition of more command line inputs
         extra_config = get_extra_cmd_line_input(extra_args)
@@ -72,6 +74,7 @@ class MLExperiment(object):
         # Get data for W&B from commandline (project, group/sweep)
         self.wb_project = cmd_args.wb_project
         self.wb_group = cmd_args.wb_group
+        self.wb_name = cmd_args.wb_name
 
         # Make initial setup optional so that configs can be modified ad-hoc
         if auto_setup:
@@ -89,6 +92,10 @@ class MLExperiment(object):
                 f"{self.default_seed}."
             )
 
+        # Setup the device configuration (cuda visibility, jax, etc)
+        if self.device_config is not None:
+            get_os_env_ready(**self.device_config)
+
         self.seed_id = self.train_config.seed_id
         # Set the random seeds for all random number generation
         if self.create_jax_prng:
@@ -98,10 +105,6 @@ class MLExperiment(object):
             )
         else:
             set_random_seeds(self.train_config.seed_id)
-
-        # Setup the device configuration (cuda visibility, jax, etc)
-        if self.device_config is not None:
-            get_os_env_ready(**self.device_config)
 
         # Initialize the logger for the experiment
         if "use_wandb" in self.log_config.keys():
@@ -126,6 +129,11 @@ class MLExperiment(object):
                 if "group" not in self.log_config.wandb_config.keys():
                     if self.wb_group is not None:
                         self.log_config.wandb_config["group"] = self.wb_group
+                    else:
+                        self.log_config.wandb_config["group"] = None
+                if "name" not in self.log_config.wandb_config.keys():
+                    if self.wb_name is not None:
+                        self.log_config.wandb_config["name"] = self.wb_name
                     else:
                         self.log_config.wandb_config["group"] = None
 
