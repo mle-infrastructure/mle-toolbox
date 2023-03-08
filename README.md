@@ -12,7 +12,7 @@
 
 ML researchers need to coordinate different types of experiments on separate remote resources. The *Machine Learning Experiment (MLE)-Toolbox* is designed to facilitate the workflow by providing a simple interface, standardized logging, many common ML experiment types (multi-seed/configurations, grid-searches and hyperparameter optimization pipelines). You can run experiments on your local machine, high-performance compute clusters ([Slurm](https://slurm.schedmd.com/overview.html) and [Sun Grid Engine](http://bioinformatics.mdc-berlin.de/intro2UnixandSGE/sun_grid_engine_for_beginners/README.html)) as well as on cloud VMs ([GCP](https://cloud.google.com/gcp/)). The results are archived (locally/[GCS bucket](https://cloud.google.com/products/storage/)) and can easily be retrieved or automatically summarized/reported.
 
-<a href="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true"><img src="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true" width="800" align="right" /></a>
+<a href="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true"><img src="https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_run.gif?raw=true" width="850" align="right" /></a><br>
 
 
 ## What Does The `mle-toolbox` Provide? 🧑‍🔧
@@ -26,7 +26,7 @@ ML researchers need to coordinate different types of experiments on separate rem
 4. Storage/retrieval of results and database in Google Cloud Storage Bucket.
 5. Resource monitoring with dashboard visualization.
 
-![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_toolbox_structure.png?raw=true)
+![](https://github.com/mle-infrastructure/mle-toolbox/blob/main/docs/mle_toolbox_structure.png?raw=true)<br>
 
 ## The 4 Step `mle-toolbox` Cooking Recipe 🍲
 
