@@ -1,0 +1,125 @@
+# MLE-Toolbox Configuration File - Credentials & Cluster Info
+# Modify this file depending on your cluster configuration
+title = "mle-toolbox-config"
+#------------------------------------------------------------------------------#
+# 1. General Toolbox Configuration - Verbosity + Whether to use GCS Storage
+#------------------------------------------------------------------------------#
+[general]
+# Local filename to store protocol DB in
+local_protocol_fname = '~/local_mle_protocol.db'
+
+# Path to private key for passwordless SSH access
+pkey_path = '~/.ssh/id_rsa'
+
+# Whether to use conda or venv for experiment virtual environment
+use_conda_venv = true
+use_venv_venv = false
+
+# Whether to use slack bot notifications
+use_slack_bot = false
+
+# Set remote experiment submission environment name
+remote_env_name = 'mle-toolbox'
+
+# Set the random seed for the toolbox/full experiment reproducibility
+random_seed = 42
+
+#------------------------------------------------------------------------------#
+# 2. Configuration for Slurm Cluster
+#------------------------------------------------------------------------------#
+[slurm]
+    # Slurm credentials - Only if you want to retrieve results from cluster
+    [slurm.credentials]
+    user_name = '<slurm-user-name>'
+
+    # Slurm cluster information - Job scheduling, monitoring & retrieval
+    [slurm.info]
+    # Partitions to monitor/run jobs on
+    partitions = ['<partition1>']
+
+    # Info for results retrieval & internet tunneling if local launch
+    main_server_name = '<main-server-ip>'   # E.g. 'gateway.hpc.tu-berlin.de'
+    jump_server_name = '<jump-host-ip>'   # E.g. 'sshgate.tu-berlin.de'
+    ssh_port = 22
+    # Add proxy server for internet connection if needed!
+    http_proxy = "http://<slurm_headnode>:3128/"  # E.g. 'http://frontend01:3128/'
+    https_proxy = "http://<slurm_headnode>:3128/"  # E.g. 'http://frontend01:3128/'
+
+    # Default Slurm job arguments (if not supplied in job .yaml config)
+    [slurm.default_job_args]
+    num_logical_cores = 2
+    gpu_tpye = "tesla"
+    partition = '<partition1>'
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+    env_name = '<mle-default-env>'
+
+#------------------------------------------------------------------------------#
+# 3. Configuration for SunGridEngine Cluster
+#------------------------------------------------------------------------------#
+[sge]
+    # SGE credentials - Needed only if you want to retrieve results from cluster
+    [sge.credentials]
+    user_name = '<sge-user-name>'
+
+    # SGE cluster information - Job scheduling, monitoring & retrieval
+    [sge.info]
+    # Queues to monitor/run jobs on
+    queues = ['<sge-queue-name>']
+
+    # Cluster-specific info for results retrieval & internet tunneling
+    main_server_name = '<main-server-ip>'
+    jump_server_name = '<jump-host-ip>'
+    ssh_port = 22
+    # Add proxy server for internet connection if needed!
+    http_proxy = "http://<sge_headnode>:3128/"
+    https_proxy = "http://<sge_headnode>:3128/"
+
+    # Default SGE job arguments (if not differently supplied)
+    [sge.default_job_arguments]
+    num_logical_cores = 2
+    gpu_tpye = "RTX2080"
+    queue = '<sge-queue-name>'
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+    env_name = '<mle-default-env>'
+
+
+#------------------------------------------------------------------------------#
+# 4. GCP Config - Credentials, Project + Buffer for Meta-Experiment Protocol
+# OPTIONAL: Only required if you want to sync protocol with GCS
+#------------------------------------------------------------------------------#
+[gcp]
+# Set GCloud project and bucket name for storage/compute instances
+project_name = "<gcloud_project_name>"
+bucket_name = "<gcloud_bucket_name>"
+
+# Filename to retrieve from gcloud bucket & where to store
+protocol_fname = "gcloud_mle_protocol.db"
+
+# Syncing of protocol with GCloud
+use_protocol_sync = false
+
+# Storing of experiment results in bucket
+use_results_storage = false
+
+    # Default GCP job arguments (if not differently supplied)
+    [gcp.default_job_arguments]
+    num_logical_cores = 2
+    num_gpus = 0
+    use_tpus = false
+    job_name = 'temp'
+    log_file = 'log'
+    err_file = 'err'
+
+#------------------------------------------------------------------------------#
+# 5. Slack Bot Config - OAuth Access Token & Config Path
+# https://github.com/sprekelerlab/slack-clusterbot/wiki/Installation
+# OPTIONAL: Only required if you want to slack notifications/updates
+#------------------------------------------------------------------------------#
+[slack]
+# Set authentication token and default username messages are sent to
+slack_token = "xoxb-..."
+user_name = "<slack_user_name>"

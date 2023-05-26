@@ -1,0 +1,12 @@
+numpy
+pandas
+dotmap
+h5py
+toml
+pyyaml
+pickle5
+rich
+mle-logging
+mle-hyperopt
+mle-scheduler
+mle-monitor

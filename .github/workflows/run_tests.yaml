@@ -1,0 +1,45 @@
+
+name: Python tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run tests on ${{ matrix.os }} with Python ${{ matrix.python }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python: ['3.9']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install testing and linting dependencies
+      run: |
+        make install-dev
+    - name: Format with black style
+      run: |
+        make format
+    - name: Lint with flake8
+      run: |
+        make lint
+    - name: Type-check with MyPy
+      run: |
+        make type-check
+    - name: Run unit/integration tests
+      run: |
+        make testing
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        fail_ci_if_error: true # optional (default = false)
+        verbose: true # optional (default = false)

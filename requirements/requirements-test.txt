@@ -1,0 +1,7 @@
+markdown2
+xhtml2pdf
+reportlab==3.6.6
+matplotlib
+seaborn
+statsmodels
+torch
