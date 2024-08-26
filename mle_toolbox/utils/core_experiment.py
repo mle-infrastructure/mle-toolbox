@@ -463,14 +463,14 @@ def ask_for_binary_input(question: str, default_answer: str = "N"):
 def determine_resource() -> str:
     """Check if cluster (sge/slurm) is available - otherwise local."""
     try:
-        sp.check_output(["qstat"])
-        return "sge-cluster"
+        sp.check_output(["squeue"])
+        return "slurm-cluster"
     except Exception:
         pass
 
     try:
-        sp.check_output(["squeue"])
-        return "slurm-cluster"
+        sp.check_output(["qstat"])
+        return "sge-cluster"
     except Exception:
         return "local"
 

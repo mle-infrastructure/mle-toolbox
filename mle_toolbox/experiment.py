@@ -54,6 +54,11 @@ class MLExperiment(object):
         self.log_config = loaded_configs[2]
         self.device_config = loaded_configs[3]
         self.extra_config = extra_config
+        # Set extra config keys into the train_config
+        for k, v in self.extra_config.items():
+            print(f"Setting train config key: {k} to value: {v}")
+            self.train_config[k] = v
+
         self.create_jax_prng = create_jax_prng
         self.default_seed = seed_id
         self.seed_id = seed_id
@@ -100,9 +105,7 @@ class MLExperiment(object):
         # Set the random seeds for all random number generation
         if self.create_jax_prng:
             # Return JAX random number generating key
-            self.rng = set_random_seeds(
-                self.train_config.seed_id, return_key=True
-            )
+            self.rng = set_random_seeds(self.train_config.seed_id, return_key=True)
         else:
             set_random_seeds(self.train_config.seed_id)
 
@@ -121,9 +124,7 @@ class MLExperiment(object):
                 # Add project/group for W&B logging (if provided)
                 if "project" not in self.log_config.wandb_config.keys():
                     if self.wb_project is not None:
-                        self.log_config.wandb_config[
-                            "project"
-                        ] = self.wb_project
+                        self.log_config.wandb_config["project"] = self.wb_project
                     else:
                         self.log_config.wandb_config["project"] = "prototyping"
                 if "group" not in self.log_config.wandb_config.keys():
@@ -157,9 +158,7 @@ class MLExperiment(object):
         save=False,
     ) -> None:
         """Update the MLE_Logger instance with stats, model params & save."""
-        self.log.update(
-            clock_tick, stats_tick, model, plot_fig, extra_obj, save
-        )
+        self.log.update(clock_tick, stats_tick, model, plot_fig, extra_obj, save)
 
     def ready_to_log(self, update_counter: int) -> bool:
         """Check whether update_counter is modulo of log_every_k_steps in logger."""

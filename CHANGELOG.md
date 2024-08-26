@@ -1,4 +1,4 @@
-### [v0.3.5] - [TBC]
+### [v0.3.5] - [08/2024]
 
 - Adds tfcuda behavior deterministic flag
 

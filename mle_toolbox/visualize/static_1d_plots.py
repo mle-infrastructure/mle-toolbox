@@ -291,7 +291,6 @@ def visualize_1D_lcurves(
     plot_xlabel: bool = True,
     plot_ylabel: bool = True,
     plot_ste_bar: bool = False,
-
 ):
     """Plot learning curves from meta_log. Select data and customize plot."""
     if fig is None or ax is None:
@@ -323,26 +322,26 @@ def visualize_1D_lcurves(
             main_log[run_id].stats[target_to_plot]["std"], smooth_window
         )
         ax.plot(
-            main_log[run_id].time[iter_to_plot][:smooth_mean.shape[0]],
+            main_log[run_id].time[iter_to_plot][: smooth_mean.shape[0]],
             smooth_mean,
             color=color_by[i],
             label=base_label.format(label),
-            alpha=0.5,
+            alpha=1.0,
         )
 
         if plot_std_bar:
             ax.fill_between(
-                main_log[run_id].time[iter_to_plot][:smooth_mean.shape[0]],
+                main_log[run_id].time[iter_to_plot][: smooth_mean.shape[0]],
                 smooth_mean - smooth_std,
                 smooth_mean + smooth_std,
                 color=color_by[i],
                 alpha=0.25,
             )
-        
+
         if plot_ste_bar:
             num_seeds = len(main_log[run_id].meta.seeds)
             ax.fill_between(
-                main_log[run_id].time[iter_to_plot][:smooth_mean.shape[0]],
+                main_log[run_id].time[iter_to_plot][: smooth_mean.shape[0]],
                 smooth_mean - 1.96 * smooth_std / np.sqrt(num_seeds),
                 smooth_mean + 1.96 * smooth_std / np.sqrt(num_seeds),
                 color=color_by[i],
